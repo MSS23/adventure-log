@@ -34,7 +34,7 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
       {/* Results Summary - Simplified */}
       {results.length > 0 && (
         <div className="text-center">
-          <p className="text-sm text-stone-600">
+          <p className="text-sm text-stone-600 dark:text-stone-400">
             {results.length} result{results.length !== 1 ? 's' : ''} found
           </p>
         </div>
@@ -45,12 +45,12 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
         {/* Results Heading */}
         {!isSearching && results.length > 0 && !filters.query && (
           <div className="mb-6 text-center">
-            <h2 className="text-3xl font-bold text-stone-900 mb-2">
+            <h2 className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">
               {filters.contentType === 'travelers' ? 'Discover Travelers' :
                filters.contentType === 'albums' ? 'Discover Albums' :
                'Discover Adventures'}
             </h2>
-            <p className="text-stone-600">
+            <p className="text-stone-600 dark:text-stone-400">
               {filters.contentType === 'travelers' ? 'Connect with top travelers from around the world' :
                filters.contentType === 'albums' ? 'Explore popular travel albums' :
                'Explore popular albums and connect with top travelers'}
@@ -62,13 +62,13 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-4"></div>
-              <p className="text-stone-600">{filters.query ? 'Searching...' : 'Loading travelers...'}</p>
+              <p className="text-stone-600 dark:text-stone-400">{filters.query ? 'Searching...' : 'Loading travelers...'}</p>
             </div>
           </div>
         ) : results.length === 0 ? (
           <Card>
             <CardContent className="py-16">
-              <div className="text-center text-stone-500">
+              <div className="text-center text-stone-500 dark:text-stone-400">
                 <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">
                   {filters.query ? 'No results found' : 'No travelers found'}
@@ -89,7 +89,7 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
                 {/* Popular Albums Section - Only show if not filtering for travelers only */}
                 {(filters.contentType === 'all' || filters.contentType === 'albums') && results.filter(r => r.type === 'album').length > 0 && (
                   <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-stone-900 mb-3 sm:mb-4 px-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-3 sm:mb-4 px-2">
                       🌍 Popular Albums
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
@@ -107,7 +107,7 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
                 {/* Top Travelers Section - Only show if not filtering for albums only */}
                 {(filters.contentType === 'all' || filters.contentType === 'travelers') && results.filter(r => r.type === 'user').length > 0 && (
                   <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-stone-900 mb-3 sm:mb-4 px-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-3 sm:mb-4 px-2">
                       👥 Top Travelers
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
@@ -179,13 +179,13 @@ function SearchResultCard({ result }: SearchResultCardProps) {
     const level = result.type === 'user' ? result.privacyLevel : result.visibility
     switch (level) {
       case 'public':
-        return 'bg-green-100 text-green-700'
+        return 'bg-green-100 dark:bg-green-950/30 text-green-700'
       case 'private':
-        return 'bg-stone-100 text-stone-700'
+        return 'bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300'
       case 'friends':
-        return 'bg-olive-100 text-olive-700'
+        return 'bg-olive-100 dark:bg-olive-950/30 text-olive-700'
       default:
-        return 'bg-green-100 text-green-700'
+        return 'bg-green-100 dark:bg-green-950/30 text-green-700'
     }
   }
 
@@ -205,10 +205,10 @@ function SearchResultCard({ result }: SearchResultCardProps) {
       whileHover={{ scale: 1.02 }}
       className="group"
     >
-      <Card className="overflow-hidden border-2 border-stone-100 hover:border-olive-300 hover:shadow-xl transition-all duration-300">
+      <Card className="overflow-hidden border-2 border-stone-100 dark:border-white/[0.08] hover:border-olive-300 hover:shadow-xl transition-all duration-300">
         <Link href={linkHref} className="block">
           {/* Cover Image */}
-          <div className="relative aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 overflow-hidden cursor-pointer">
+          <div className="relative aspect-[4/3] bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-200 dark:to-white/[0.08] overflow-hidden cursor-pointer">
             {result.imageUrl && result.visibility === 'public' ? (
               <Image
                 src={getPhotoUrl(result.imageUrl) || ''}
@@ -219,7 +219,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
-                <Camera className="h-16 w-16 text-stone-300" />
+                <Camera className="h-16 w-16 text-stone-300 dark:text-stone-600" />
               </div>
             )}
 
@@ -230,7 +230,7 @@ function SearchResultCard({ result }: SearchResultCardProps) {
                 <span className="capitalize text-xs">{getVisibilityLabel()}</span>
               </Badge>
               {result.type === 'user' && (
-                <Badge className="bg-olive-100 text-olive-700">
+                <Badge className="bg-olive-100 dark:bg-olive-950/30 text-olive-700">
                   <Users className="h-3 w-3 mr-1" />
                   User
                 </Badge>
@@ -254,17 +254,17 @@ function SearchResultCard({ result }: SearchResultCardProps) {
           {/* Content */}
           <CardContent className="p-4 space-y-2">
             <div>
-              <h3 className="font-semibold text-stone-900 line-clamp-1 text-lg group-hover:text-olive-600 transition-colors">
+              <h3 className="font-semibold text-stone-900 dark:text-stone-100 line-clamp-1 text-lg group-hover:text-olive-600 transition-colors">
                 {result.title}
               </h3>
               {result.description && (
-                <p className="text-sm text-stone-600 line-clamp-2 mt-1">
+                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2 mt-1">
                   {result.description}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center justify-between text-xs text-stone-500">
+            <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
               <div className="flex items-center gap-1">
                 {result.type === 'user' ? (
                   <span className="font-medium">@{result.username}</span>

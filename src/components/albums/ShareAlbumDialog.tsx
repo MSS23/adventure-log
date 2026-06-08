@@ -173,13 +173,13 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
   const getPermissionColor = (level: SharePermissionLevel) => {
     switch (level) {
       case 'view':
-        return 'bg-stone-100 text-stone-800';
+        return 'bg-stone-100 dark:bg-white/[0.06] text-stone-800 dark:text-stone-200';
       case 'contribute':
-        return 'bg-olive-100 text-olive-800';
+        return 'bg-olive-100 dark:bg-olive-950/30 text-olive-800 dark:text-stone-200';
       case 'edit':
-        return 'bg-olive-100 text-olive-800';
+        return 'bg-olive-100 dark:bg-olive-950/30 text-olive-800 dark:text-stone-200';
       default:
-        return 'bg-stone-100 text-stone-800';
+        return 'bg-stone-100 dark:bg-white/[0.06] text-stone-800 dark:text-stone-200';
     }
   };
 
@@ -203,7 +203,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
 
         <div className="space-y-6">
           {/* Create new share */}
-          <div className="space-y-4 p-4 border border-stone-200 rounded-lg bg-stone-50">
+          <div className="space-y-4 p-4 border border-stone-200 dark:border-white/[0.10] rounded-lg bg-stone-50 dark:bg-white/[0.04]">
             <h3 className="font-semibold text-sm">Invite someone</h3>
 
             <div className="space-y-2">
@@ -231,19 +231,19 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                     <SelectItem value="view">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Can view</span>
-                        <span className="text-xs text-stone-500">View photos only</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">View photos only</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="contribute">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Can contribute</span>
-                        <span className="text-xs text-stone-500">Add photos and comments</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Add photos and comments</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="edit">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Can edit</span>
-                        <span className="text-xs text-stone-500">Full access (add, delete, edit)</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Full access (add, delete, edit)</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -296,7 +296,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                 {shares.map((share) => (
                   <div
                     key={share.id}
-                    className="flex items-center justify-between p-3 border border-stone-200 rounded-lg hover:bg-stone-50"
+                    className="flex items-center justify-between p-3 border border-stone-200 dark:border-white/[0.10] rounded-lg hover:bg-stone-50 dark:hover:bg-white/[0.06]"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
@@ -337,7 +337,7 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteShare(share.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

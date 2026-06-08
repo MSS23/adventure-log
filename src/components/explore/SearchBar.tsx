@@ -142,19 +142,19 @@ export function SearchBar({
   return (
     <div ref={searchRef} className={cn("relative w-full max-w-3xl mx-auto", className)}>
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 dark:text-stone-500" />
         <Input
           type="text"
           value={query}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className="pl-12 pr-10 h-14 text-base rounded-xl border-stone-300 bg-stone-50 hover:bg-white shadow-sm focus:border-olive-500 focus:ring-2 focus:ring-olive-200 focus:bg-white transition-colors"
+          className="pl-12 pr-10 h-14 text-base rounded-xl border-stone-300 dark:border-white/[0.14] bg-stone-50 dark:bg-white/[0.04] hover:bg-white dark:hover:bg-white/[0.08] shadow-sm focus:border-olive-500 focus:ring-2 focus:ring-olive-200 focus:bg-white dark:focus:bg-[#1B170E] transition-colors"
           onFocus={() => query && setShowResults(true)}
         />
         {query && (
           <button
             onClick={clearSearch}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 hover:text-stone-600 transition-colors"
             aria-label="Clear search"
           >
             <X className="h-5 w-5" />
@@ -164,13 +164,13 @@ export function SearchBar({
 
       {/* Search Results Dropdown */}
       {showResults && (query || results.length > 0) && (
-        <div className="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full mt-2 w-full bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl border border-stone-200 dark:border-white/[0.10] overflow-hidden z-50 max-h-96 overflow-y-auto">
           {isSearching ? (
-            <div className="p-6 text-center text-stone-500">
+            <div className="p-6 text-center text-stone-500 dark:text-stone-400">
               Searching...
             </div>
           ) : results.length === 0 ? (
-            <div className="p-6 text-center text-stone-500">
+            <div className="p-6 text-center text-stone-500 dark:text-stone-400">
               No results found for &quot;{query}&quot;
             </div>
           ) : (
@@ -188,9 +188,9 @@ export function SearchBar({
                       key={`album-${album.id}`}
                       href={`/albums/${album.id}`}
                       onClick={handleResultClick}
-                      className="flex items-center gap-4 px-4 py-3 hover:bg-stone-50 transition-colors"
+                      className="flex items-center gap-4 px-4 py-3 hover:bg-stone-50 dark:hover:bg-white/[0.06] transition-colors"
                     >
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-stone-200 flex-shrink-0 relative">
+                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-stone-200 dark:bg-white/[0.08] flex-shrink-0 relative">
                         {coverUrl ? (
                           <Image
                             src={coverUrl}
@@ -200,25 +200,25 @@ export function SearchBar({
                             sizes="64px"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-stone-400">
+                          <div className="w-full h-full flex items-center justify-center text-stone-400 dark:text-stone-500">
                             <Search className="h-6 w-6" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-stone-900 truncate">
+                        <p className="font-semibold text-stone-900 dark:text-stone-100 truncate">
                           {album.title}
                         </p>
-                        <p className="text-sm text-stone-600 truncate">
+                        <p className="text-sm text-stone-600 dark:text-stone-400 truncate">
                           {album.location_name || 'Unknown location'}
                         </p>
                         {user && (
-                          <p className="text-xs text-stone-500 truncate">
+                          <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
                             by {user.display_name || user.username}
                           </p>
                         )}
                       </div>
-                      <div className="px-2 py-1 text-xs font-medium text-olive-600 bg-olive-50 rounded">
+                      <div className="px-2 py-1 text-xs font-medium text-olive-600 bg-olive-50 dark:bg-olive-950/20 rounded">
                         Album
                       </div>
                     </Link>
@@ -233,7 +233,7 @@ export function SearchBar({
                       key={`user-${user.id}`}
                       href={`/profile/${user.username}`}
                       onClick={handleResultClick}
-                      className="flex items-center gap-4 px-4 py-3 hover:bg-stone-50 transition-colors"
+                      className="flex items-center gap-4 px-4 py-3 hover:bg-stone-50 dark:hover:bg-white/[0.06] transition-colors"
                     >
                       <Avatar className="h-12 w-12 flex-shrink-0">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
@@ -242,19 +242,19 @@ export function SearchBar({
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-stone-900 truncate">
+                        <p className="font-semibold text-stone-900 dark:text-stone-100 truncate">
                           {user.display_name || user.username}
                         </p>
-                        <p className="text-sm text-stone-600 truncate">
+                        <p className="text-sm text-stone-600 dark:text-stone-400 truncate">
                           @{user.username}
                         </p>
                         {user.bio && (
-                          <p className="text-xs text-stone-500 truncate mt-0.5">
+                          <p className="text-xs text-stone-500 dark:text-stone-400 truncate mt-0.5">
                             {user.bio}
                           </p>
                         )}
                       </div>
-                      <div className="px-2 py-1 text-xs font-medium text-olive-600 bg-olive-50 rounded">
+                      <div className="px-2 py-1 text-xs font-medium text-olive-600 bg-olive-50 dark:bg-olive-950/20 rounded">
                         User
                       </div>
                     </Link>

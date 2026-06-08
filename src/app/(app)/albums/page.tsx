@@ -360,7 +360,7 @@ function AlbumsPageContent() {
       {albums.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
             <Input
               placeholder="Search albums..."
               value={searchQuery}
@@ -430,7 +430,7 @@ function AlbumsPageContent() {
                     {selectedAlbums.has(draft.id) ? (
                       <CheckSquare className="h-6 w-6 text-olive-500" />
                     ) : (
-                      <Square className="h-6 w-6 text-stone-400" />
+                      <Square className="h-6 w-6 text-stone-400 dark:text-stone-500" />
                     )}
                   </div>
                 )}
@@ -439,7 +439,7 @@ function AlbumsPageContent() {
                     <Link href={`/albums/${draft.id}/edit`} className="block cursor-pointer">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
-                          <Camera className="h-6 w-6 text-stone-400" />
+                          <Camera className="h-6 w-6 text-stone-400 dark:text-stone-500" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
@@ -469,7 +469,7 @@ function AlbumsPageContent() {
                           e.stopPropagation()
                           setQuickDeleteAlbum(draft)
                         }}
-                        className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
+                        className="p-2 text-stone-400 dark:text-stone-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                         title="Delete draft"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -480,7 +480,7 @@ function AlbumsPageContent() {
                   <>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-stone-400" />
+                        <Camera className="h-6 w-6 text-stone-400 dark:text-stone-500" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
@@ -635,7 +635,7 @@ function AlbumsPageContent() {
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
-                          <Camera className="h-8 w-8 text-stone-400" />
+                          <Camera className="h-8 w-8 text-stone-400 dark:text-stone-500" />
                         </div>
                       )}
 
@@ -665,7 +665,7 @@ function AlbumsPageContent() {
                                 <CheckSquare className="h-4 w-4 text-white" />
                               </motion.div>
                             ) : (
-                              <Square className="h-4 w-4 text-stone-600" />
+                              <Square className="h-4 w-4 text-stone-600 dark:text-stone-400" />
                             )}
                           </motion.div>
                         </motion.div>
@@ -701,7 +701,7 @@ function AlbumsPageContent() {
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
-                              <Camera className="h-8 w-8 text-stone-400" />
+                              <Camera className="h-8 w-8 text-stone-400 dark:text-stone-500" />
                             </div>
                           )}
 

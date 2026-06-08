@@ -183,7 +183,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]',
                     viewMode === 'grid'
                       ? 'bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300 shadow-sm'
-                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/30'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/30'
                   )}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -195,7 +195,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]',
                     viewMode === 'collections'
                       ? 'bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300 shadow-sm'
-                      : 'text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/30'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/30'
                   )}
                 >
                   <FolderOpen className="h-4 w-4" />
@@ -298,7 +298,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                               </div>
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
-                                <MapPin className="h-4 w-4 text-stone-500" />
+                                <MapPin className="h-4 w-4 text-stone-500 dark:text-stone-400" />
                               </div>
                             )}
                             <div className="text-left">
@@ -311,9 +311,9 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                             </div>
                           </div>
                           {isCollapsed ? (
-                            <ChevronRight className="h-5 w-5 text-stone-400" />
+                            <ChevronRight className="h-5 w-5 text-stone-400 dark:text-stone-500" />
                           ) : (
-                            <ChevronDown className="h-5 w-5 text-stone-400" />
+                            <ChevronDown className="h-5 w-5 text-stone-400 dark:text-stone-500" />
                           )}
                         </button>
 

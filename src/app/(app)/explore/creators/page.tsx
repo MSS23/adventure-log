@@ -109,10 +109,10 @@ export default function CreatorsPage() {
             {[...Array(12)].map((_, i) => (
               <div key={i} className="bg-white dark:bg-[#111] border border-stone-200 dark:border-stone-800 rounded-xl p-6">
                 <div className="flex flex-col items-center space-y-3">
-                  <div className="h-24 w-24 bg-stone-200 rounded-full animate-pulse" />
-                  <div className="h-4 w-32 bg-stone-200 rounded animate-pulse" />
-                  <div className="h-3 w-24 bg-stone-200 rounded animate-pulse" />
-                  <div className="h-9 w-full bg-stone-200 rounded-lg animate-pulse" />
+                  <div className="h-24 w-24 bg-stone-200 dark:bg-white/[0.08] rounded-full animate-pulse" />
+                  <div className="h-4 w-32 bg-stone-200 dark:bg-white/[0.08] rounded animate-pulse" />
+                  <div className="h-3 w-24 bg-stone-200 dark:bg-white/[0.08] rounded animate-pulse" />
+                  <div className="h-9 w-full bg-stone-200 dark:bg-white/[0.08] rounded-lg animate-pulse" />
                 </div>
               </div>
             ))}
@@ -130,7 +130,7 @@ export default function CreatorsPage() {
         ) : (
           <>
             <div className="mb-6">
-              <p className="text-stone-600">
+              <p className="text-stone-600 dark:text-stone-400">
                 Discover {creators.length} amazing travelers and their adventures
               </p>
             </div>

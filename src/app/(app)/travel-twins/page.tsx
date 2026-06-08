@@ -192,7 +192,7 @@ export default function TravelTwinsPage() {
                 <Loader2 className="h-5 w-5 animate-spin text-olive-600" />
               </div>
             ) : recommendations.length === 0 ? (
-              <p className="text-sm text-olive-500 py-6">No new places to suggest right now.</p>
+              <p className="text-sm text-olive-500 dark:text-olive-400 py-6">No new places to suggest right now.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {recommendations.map((rec) => (

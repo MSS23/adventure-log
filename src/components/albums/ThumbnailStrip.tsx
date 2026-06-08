@@ -59,7 +59,7 @@ export function ThumbnailStrip({
           )
         })}
         {photos.length > 4 && (
-          <div className="flex-1 min-w-[60px] aspect-square rounded-lg bg-stone-100 flex items-center justify-center text-stone-500">
+          <div className="flex-1 min-w-[60px] aspect-square rounded-lg bg-stone-100 dark:bg-white/[0.06] flex items-center justify-center text-stone-500 dark:text-stone-400">
             <span className="text-xs sm:text-sm font-medium">+{photos.length - 4} more</span>
           </div>
         )}

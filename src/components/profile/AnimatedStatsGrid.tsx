@@ -16,32 +16,32 @@ interface StatCardProps {
 
 const gradientStyles = {
   teal: {
-    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
-    border: 'border-olive-200/50 hover:border-olive-300',
+    bg: 'bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-100 dark:to-olive-950/30',
+    border: 'border-olive-200/50 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]',
     shadow: 'hover:shadow-olive-500/20',
-    icon: 'bg-olive-100 text-olive-600',
-    value: 'text-olive-700'
+    icon: 'bg-olive-100 dark:bg-olive-950/30 text-olive-600',
+    value: 'text-olive-700 dark:text-olive-400'
   },
   blue: {
-    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
-    border: 'border-olive-200/50 hover:border-olive-300',
+    bg: 'bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-100 dark:to-olive-950/30',
+    border: 'border-olive-200/50 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]',
     shadow: 'hover:shadow-olive-500/20',
-    icon: 'bg-olive-100 text-olive-600',
-    value: 'text-olive-700'
+    icon: 'bg-olive-100 dark:bg-olive-950/30 text-olive-600',
+    value: 'text-olive-700 dark:text-olive-400'
   },
   purple: {
-    bg: 'bg-gradient-to-br from-olive-50 to-pink-100',
-    border: 'border-olive-200/50 hover:border-olive-300',
+    bg: 'bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-pink-100 dark:to-pink-950/30',
+    border: 'border-olive-200/50 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]',
     shadow: 'hover:shadow-olive-500/20',
-    icon: 'bg-olive-100 text-olive-600',
-    value: 'text-olive-700'
+    icon: 'bg-olive-100 dark:bg-olive-950/30 text-olive-600',
+    value: 'text-olive-700 dark:text-olive-400'
   },
   orange: {
-    bg: 'bg-gradient-to-br from-olive-50 to-olive-100',
-    border: 'border-olive-200/50 hover:border-olive-300',
+    bg: 'bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-100 dark:to-olive-950/30',
+    border: 'border-olive-200/50 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]',
     shadow: 'hover:shadow-olive-500/20',
-    icon: 'bg-olive-100 text-olive-600',
-    value: 'text-olive-700'
+    icon: 'bg-olive-100 dark:bg-olive-950/30 text-olive-600',
+    value: 'text-olive-700 dark:text-olive-400'
   }
 }
 
@@ -123,7 +123,7 @@ function StatCard({ value, label, icon: Icon, gradient, delay = 0, onClick }: St
       </div>
 
       {/* Label */}
-      <div className="text-sm font-medium text-stone-600">
+      <div className="text-sm font-medium text-stone-600 dark:text-stone-400">
         {label}
       </div>
 

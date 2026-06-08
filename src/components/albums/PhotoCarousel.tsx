@@ -62,11 +62,11 @@ export function PhotoCarousel({
   if (!photoUrl) return null
 
   return (
-    <div className={cn("relative w-full rounded-lg overflow-hidden bg-stone-100", className)}>
+    <div className={cn("relative w-full rounded-lg overflow-hidden bg-stone-100 dark:bg-white/[0.06]", className)}>
       {/* Main Photo Display */}
       <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] md:aspect-[4/3]">
         {imageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-stone-100">
+          <div className="absolute inset-0 flex items-center justify-center bg-stone-100 dark:bg-white/[0.06]">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600" />
           </div>
         )}
@@ -106,27 +106,27 @@ export function PhotoCarousel({
           {/* Previous Button */}
           <button
             className={cn(
-              "absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all",
+              "absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 md:w-10 md:h-10 rounded-full bg-white/90 dark:bg-white/[0.12] hover:bg-white dark:hover:bg-white/[0.20] flex items-center justify-center shadow-lg transition-all",
               !canGoPrevious && "opacity-50 cursor-not-allowed"
             )}
             onClick={handlePrevious}
             disabled={!canGoPrevious}
             aria-label="Previous photo"
           >
-            <ChevronLeft className="h-5 w-5 text-stone-700" />
+            <ChevronLeft className="h-5 w-5 text-stone-700 dark:text-stone-300" />
           </button>
 
           {/* Next Button */}
           <button
             className={cn(
-              "absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all",
+              "absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 md:w-10 md:h-10 rounded-full bg-white/90 dark:bg-white/[0.12] hover:bg-white dark:hover:bg-white/[0.20] flex items-center justify-center shadow-lg transition-all",
               !canGoNext && "opacity-50 cursor-not-allowed"
             )}
             onClick={handleNext}
             disabled={!canGoNext}
             aria-label="Next photo"
           >
-            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-5 md:w-5 text-stone-700" />
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-5 md:w-5 text-stone-700 dark:text-stone-300" />
           </button>
         </>
       )}

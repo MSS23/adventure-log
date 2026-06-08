@@ -158,7 +158,7 @@ export function AlbumDetailsForm({
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     onClick={() => setValue('title', suggestedTitle)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-olive-50 hover:bg-olive-100 border border-olive-200 rounded-full text-sm text-olive-700 transition-all duration-200 cursor-pointer active:scale-[0.97]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-olive-50 dark:bg-olive-950/20 hover:bg-olive-100 dark:hover:bg-olive-950/30 border border-olive-200 dark:border-olive-900/40 rounded-full text-sm text-olive-700 dark:text-olive-400 transition-all duration-200 cursor-pointer active:scale-[0.97]"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
                     Use &ldquo;{suggestedTitle}&rdquo;
@@ -185,7 +185,7 @@ export function AlbumDetailsForm({
 
                 {/* Visibility */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-stone-700">Who can see this?</label>
+                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">Who can see this?</label>
                   <div className="flex flex-wrap gap-2">
                     {visibilityOptions.map((option) => {
                       const isSelected = watch('visibility') === option.value
@@ -197,8 +197,8 @@ export function AlbumDetailsForm({
                           className={cn(
                             'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
                             isSelected
-                              ? 'bg-olive-50 border-olive-500 text-olive-700'
-                              : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
+                              ? 'bg-olive-50 dark:bg-olive-950/20 border-olive-500 text-olive-700 dark:text-olive-400'
+                              : 'bg-white dark:bg-[#1B170E] border-stone-200 dark:border-white/[0.10] text-stone-600 dark:text-stone-400 hover:border-stone-300 dark:hover:border-white/[0.12]'
                           )}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
@@ -231,7 +231,7 @@ export function AlbumDetailsForm({
 
                 {/* Location */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-stone-700">Location</label>
+                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">Location</label>
                   <LocationSearchInput
                     value={albumLocation}
                     onChange={(loc) => {

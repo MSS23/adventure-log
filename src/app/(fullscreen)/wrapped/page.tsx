@@ -234,7 +234,7 @@ export default function WrappedPage() {
             className={cn(
               'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
               mode === 'year'
-                ? 'bg-white text-stone-900'
+                ? 'bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100'
                 : 'text-white/60 hover:text-white'
             )}
           >
@@ -246,7 +246,7 @@ export default function WrappedPage() {
             className={cn(
               'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
               mode === 'all'
-                ? 'bg-white text-stone-900'
+                ? 'bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100'
                 : 'text-white/60 hover:text-white'
             )}
           >

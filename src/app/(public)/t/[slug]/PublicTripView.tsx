@@ -10,7 +10,7 @@ import type { Trip, TripMember, TripPin } from '@/types/trips'
 const TripMap = dynamic(() => import('@/components/trips/TripMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-full w-full flex items-center justify-center bg-olive-50 rounded-xl">
+    <div className="h-full w-full flex items-center justify-center bg-olive-50 dark:bg-olive-950/20 rounded-xl">
       <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
     </div>
   ),

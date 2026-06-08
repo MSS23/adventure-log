@@ -38,7 +38,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Backpacker',
     icon: Backpack,
     color: 'text-olive-600',
-    bgColor: 'bg-olive-50 border-olive-200',
+    bgColor: 'bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-900/40',
     description: 'Budget-friendly adventures',
   },
   {
@@ -46,7 +46,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Luxury',
     icon: Gem,
     color: 'text-olive-600',
-    bgColor: 'bg-olive-50 border-olive-200',
+    bgColor: 'bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-900/40',
     description: 'Five-star experiences',
   },
   {
@@ -54,7 +54,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Adventure',
     icon: Mountain,
     color: 'text-green-600',
-    bgColor: 'bg-green-50 border-green-200',
+    bgColor: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900/40',
     description: 'Thrilling experiences',
   },
   {
@@ -62,7 +62,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Beach Lover',
     icon: Palmtree,
     color: 'text-olive-600',
-    bgColor: 'bg-olive-50 border-olive-200',
+    bgColor: 'bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-900/40',
     description: 'Sun, sand, and sea',
   },
   {
@@ -70,7 +70,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Photographer',
     icon: Camera,
     color: 'text-pink-600',
-    bgColor: 'bg-pink-50 border-pink-200',
+    bgColor: 'bg-pink-50 dark:bg-pink-950/30 border-pink-200 dark:border-pink-900/40',
     description: 'Capturing moments',
   },
   {
@@ -78,7 +78,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Foodie',
     icon: Utensils,
     color: 'text-olive-600',
-    bgColor: 'bg-olive-50 border-olive-200',
+    bgColor: 'bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-900/40',
     description: 'Culinary explorer',
   },
   {
@@ -86,7 +86,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Camping',
     icon: Tent,
     color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50 border-emerald-200',
+    bgColor: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/40',
     description: 'Outdoor enthusiast',
   },
   {
@@ -94,7 +94,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Jetsetter',
     icon: Plane,
     color: 'text-olive-600',
-    bgColor: 'bg-olive-50 border-olive-200',
+    bgColor: 'bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-900/40',
     description: 'Frequent flyer',
   },
   {
@@ -102,7 +102,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Cruiser',
     icon: Ship,
     color: 'text-olive-600',
-    bgColor: 'bg-olive-50 border-olive-200',
+    bgColor: 'bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-900/40',
     description: 'Sea voyages',
   },
   {
@@ -110,7 +110,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Cyclist',
     icon: Bike,
     color: 'text-lime-600',
-    bgColor: 'bg-lime-50 border-lime-200',
+    bgColor: 'bg-lime-50 dark:bg-lime-950/30 border-lime-200 dark:border-lime-900/40',
     description: 'Two-wheeled adventures',
   },
   {
@@ -118,15 +118,15 @@ export const travelStyles: TravelStyle[] = [
     label: 'Road Tripper',
     icon: Car,
     color: 'text-red-600',
-    bgColor: 'bg-red-50 border-red-200',
+    bgColor: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/40',
     description: 'Open road explorer',
   },
   {
     id: 'train',
     label: 'Train Travel',
     icon: Train,
-    color: 'text-stone-600',
-    bgColor: 'bg-stone-50 border-stone-200',
+    color: 'text-stone-600 dark:text-stone-400',
+    bgColor: 'bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/[0.10]',
     description: 'Rail journeys',
   },
   {
@@ -134,7 +134,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Explorer',
     icon: Compass,
     color: 'text-olive-600',
-    bgColor: 'bg-olive-50 border-olive-200',
+    bgColor: 'bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-900/40',
     description: 'Off the beaten path',
   },
   {
@@ -142,7 +142,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Planner',
     icon: Map,
     color: 'text-olive-600',
-    bgColor: 'bg-olive-50 border-olive-200',
+    bgColor: 'bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-900/40',
     description: 'Detailed itineraries',
   },
   {
@@ -150,7 +150,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Romantic',
     icon: Heart,
     color: 'text-rose-600',
-    bgColor: 'bg-rose-50 border-rose-200',
+    bgColor: 'bg-rose-50 dark:bg-red-950/30 border-rose-200 dark:border-red-900/40',
     description: 'Couple getaways',
   },
   {
@@ -158,7 +158,7 @@ export const travelStyles: TravelStyle[] = [
     label: 'Spontaneous',
     icon: Sparkles,
     color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50 border-yellow-200',
+    bgColor: 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-900/40',
     description: 'Last-minute trips',
   },
 ]
@@ -248,13 +248,13 @@ export function TravelStyleBadges({
   return (
     <div className={cn('space-y-3', className)}>
       <div className="flex items-center justify-between text-sm">
-        <span className="text-stone-600">
+        <span className="text-stone-600 dark:text-stone-400">
           Select your travel styles ({selectedStyles.length}/{maxSelect})
         </span>
         {selectedStyles.length > 0 && (
           <button
             onClick={() => onChange?.([])}
-            className="text-stone-400 hover:text-stone-600 text-xs"
+            className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400 text-xs"
           >
             Clear all
           </button>
@@ -279,8 +279,8 @@ export function TravelStyleBadges({
                   isSelected
                     ? cn(style.bgColor, style.color, 'shadow-sm')
                     : canSelect
-                    ? 'bg-white border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700'
-                    : 'bg-stone-50 border-stone-100 text-stone-300 cursor-not-allowed'
+                    ? 'bg-white dark:bg-[#1B170E] border-stone-200 dark:border-white/[0.10] text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-white/[0.12] hover:text-stone-700 dark:hover:text-stone-300'
+                    : 'bg-stone-50 dark:bg-white/[0.04] border-stone-100 dark:border-white/[0.08] text-stone-300 dark:text-stone-600 cursor-not-allowed'
                 )}
                 whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                 whileHover={
@@ -349,7 +349,7 @@ export function TravelStyleBadgesCompact({
         )
       })}
       {remaining > 0 && (
-        <span className="text-xs text-stone-400 ml-1">+{remaining}</span>
+        <span className="text-xs text-stone-400 dark:text-stone-500 ml-1">+{remaining}</span>
       )}
     </div>
   )

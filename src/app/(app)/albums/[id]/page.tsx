@@ -336,10 +336,10 @@ export default function AlbumDetailPage() {
       <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <BackButton fallbackRoute="/feed" />
-          <Card className="border-olive-200 bg-olive-50 mt-6">
+          <Card className="border-olive-200 dark:border-white/[0.08] bg-olive-50 dark:bg-olive-950/20 mt-6">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
-                <div className="mx-auto w-12 h-12 bg-olive-100 rounded-full flex items-center justify-center">
+                <div className="mx-auto w-12 h-12 bg-olive-100 dark:bg-olive-950/30 rounded-full flex items-center justify-center">
                   <Trash2 className="h-6 w-6 text-olive-600" />
                 </div>
                 <div>
@@ -349,7 +349,7 @@ export default function AlbumDetailPage() {
                   </p>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <p className="text-sm text-stone-600">
+                  <p className="text-sm text-stone-600 dark:text-stone-400">
                     Redirecting to feed in {redirectTimer} seconds...
                   </p>
                   <Link href="/feed">
@@ -411,7 +411,7 @@ export default function AlbumDetailPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 text-stone-600 hover:text-stone-900"
+              className="gap-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100"
               onClick={() => router.back()}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -421,7 +421,7 @@ export default function AlbumDetailPage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="max-w-2xl mx-auto">
-            <Card className="border-red-200 bg-red-50">
+            <Card className="border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
@@ -453,7 +453,7 @@ export default function AlbumDetailPage() {
           <Card className="mt-6">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-stone-800">Album not found</p>
+                <p className="text-stone-800 dark:text-stone-200">Album not found</p>
                 <Link href="/albums" className="mt-4 inline-block">
                   <Button variant="outline">Back to Albums</Button>
                 </Link>
@@ -472,7 +472,7 @@ export default function AlbumDetailPage() {
         <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
-            <Card className="border-olive-200 bg-olive-50 mt-6">
+            <Card className="border-olive-200 dark:border-white/[0.08] bg-olive-50 dark:bg-olive-950/20 mt-6">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
@@ -789,7 +789,7 @@ export default function AlbumDetailPage() {
                 {/* Owner actions */}
                 {isOwner && (
                   <Link href={`/albums/${album.id}/edit`} className="cursor-pointer">
-                    <Button variant="ghost" size="sm" className="text-xs text-stone-500 hover:text-stone-700 dark:text-stone-400 cursor-pointer active:scale-[0.97] transition-all duration-200">
+                    <Button variant="ghost" size="sm" className="text-xs text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 dark:text-stone-400 cursor-pointer active:scale-[0.97] transition-all duration-200">
                       Edit
                     </Button>
                   </Link>

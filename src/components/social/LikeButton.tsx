@@ -72,7 +72,7 @@ export function LikeButton({
           onClick={handleClick}
           className={cn(
             "min-w-[44px] min-h-[44px] p-2.5 sm:p-2 -m-2 rounded-full transition-colors touch-manipulation flex items-center justify-center",
-            isLiked ? "hover:bg-red-100 active:bg-red-200" : "hover:bg-stone-100 active:bg-stone-200",
+            isLiked ? "hover:bg-red-100 active:bg-red-200" : "hover:bg-stone-100 dark:hover:bg-white/[0.06] active:bg-stone-200",
             className
           )}
           whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}

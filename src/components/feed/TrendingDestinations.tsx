@@ -223,7 +223,7 @@ export function TrendingDestinations() {
     return (
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-stone-900">Trending Destinations</h2>
+          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Trending Destinations</h2>
           <Link href="/search" className="text-sm text-olive-600 hover:text-olive-700 font-medium">
             See All
           </Link>
@@ -231,8 +231,8 @@ export function TrendingDestinations() {
         <div className="flex gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex-shrink-0 w-[140px]">
-              <div className="w-full h-[140px] bg-stone-200 rounded-xl animate-pulse" />
-              <div className="mt-2 h-4 bg-stone-200 rounded animate-pulse w-3/4" />
+              <div className="w-full h-[140px] bg-stone-200 dark:bg-white/[0.08] rounded-xl animate-pulse" />
+              <div className="mt-2 h-4 bg-stone-200 dark:bg-white/[0.08] rounded animate-pulse w-3/4" />
             </div>
           ))}
         </div>
@@ -247,7 +247,7 @@ export function TrendingDestinations() {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-stone-900">Trending Destinations</h2>
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Trending Destinations</h2>
         <Link href="/search" className="text-sm text-olive-600 hover:text-olive-700 font-medium">
           See All
         </Link>
@@ -258,10 +258,10 @@ export function TrendingDestinations() {
         {scrollPosition > 0 && (
           <button
             onClick={() => handleScroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 dark:bg-white/[0.08] backdrop-blur-sm rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white dark:hover:bg-white/[0.08]"
             aria-label="Scroll left"
           >
-            <ChevronLeft className="h-5 w-5 text-stone-700" />
+            <ChevronLeft className="h-5 w-5 text-stone-700 dark:text-stone-300" />
           </button>
         )}
 
@@ -284,7 +284,7 @@ export function TrendingDestinations() {
                 href={href}
                 className="flex-shrink-0 group/card"
               >
-                <div className="relative w-[140px] h-[140px] rounded-xl overflow-hidden bg-stone-100">
+                <div className="relative w-[140px] h-[140px] rounded-xl overflow-hidden bg-stone-100 dark:bg-white/[0.06]">
                   {imageUrl ? (
                     <Image
                       src={imageUrl}
@@ -331,10 +331,10 @@ export function TrendingDestinations() {
         {/* Right Arrow */}
         <button
           onClick={() => handleScroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 dark:bg-white/[0.08] backdrop-blur-sm rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white dark:hover:bg-white/[0.08]"
           aria-label="Scroll right"
         >
-          <ChevronRight className="h-5 w-5 text-stone-700" />
+          <ChevronRight className="h-5 w-5 text-stone-700 dark:text-stone-300" />
         </button>
       </div>
     </div>

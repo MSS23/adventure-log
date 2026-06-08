@@ -200,7 +200,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
               {activity.user?.display_name?.[0] || activity.user?.username?.[0] || 'U'}
             </AvatarFallback>
           </Avatar>
-          <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
+          <div className="absolute -bottom-1 -right-1 bg-white dark:bg-[#1B170E] rounded-full p-1 shadow-sm">
             {getActivityIcon()}
           </div>
         </div>
@@ -217,7 +217,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
 
         {/* Show comment preview if available */}
         {activity.activity_type === 'album_commented' && activity.target_comment?.content && (
-          <p className="text-sm text-stone-600 mt-2 italic line-clamp-2">
+          <p className="text-sm text-stone-600 dark:text-stone-400 mt-2 italic line-clamp-2">
             &quot;{activity.target_comment.content}&quot;
           </p>
         )}

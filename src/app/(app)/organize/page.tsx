@@ -257,7 +257,7 @@ export default function OrganizePage() {
           {/* Search and filters */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
               <Input
                 type="text"
                 placeholder="Search by caption or location..."
@@ -415,13 +415,13 @@ export default function OrganizePage() {
                         {photo.caption || 'Untitled'}
                       </p>
                       {photo.location_name && (
-                        <p className="text-xs text-stone-500 flex items-center gap-1">
+                        <p className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {photo.location_name}
                         </p>
                       )}
                       {photo.taken_at && (
-                        <p className="text-xs text-stone-400 flex items-center gap-1">
+                        <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {new Date(photo.taken_at).toLocaleDateString()}
                         </p>

@@ -170,10 +170,10 @@ export default function FollowingPage() {
             >
               <Users className="h-8 w-8 text-olive-600" />
             </motion.div>
-            <div className="text-4xl font-bold text-stone-900">
+            <div className="text-4xl font-bold text-stone-900 dark:text-stone-100">
               <AnimatedCounter value={stats.followingCount} />
             </div>
-            <div className="text-sm text-stone-600 font-medium mt-1">Following</div>
+            <div className="text-sm text-stone-600 dark:text-stone-400 font-medium mt-1">Following</div>
           </div>
         </motion.div>
 
@@ -189,11 +189,11 @@ export default function FollowingPage() {
             "shadow-xl shadow-black/5"
           )}
         >
-          <div className="px-6 py-4 border-b border-stone-100">
-            <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+          <div className="px-6 py-4 border-b border-stone-100 dark:border-white/[0.08]">
+            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
               <Heart className="h-5 w-5 text-pink-500" />
               People You Follow
-              <span className="text-sm font-normal text-stone-500">({following.length})</span>
+              <span className="text-sm font-normal text-stone-500 dark:text-stone-400">({following.length})</span>
             </h2>
           </div>
           <div className="p-4">
@@ -222,8 +222,8 @@ export default function FollowingPage() {
                     </motion.div>
                   )}
                 </motion.div>
-                <p className="text-stone-700 font-medium">Not following anyone yet</p>
-                <p className="text-sm text-stone-500 mt-2">
+                <p className="text-stone-700 dark:text-stone-300 font-medium">Not following anyone yet</p>
+                <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">
                   Discover and follow travelers to see their adventures!
                 </p>
                 <motion.div
@@ -272,7 +272,7 @@ export default function FollowingPage() {
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
-                            <Avatar className="h-12 w-12 ring-2 ring-stone-100 group-hover:ring-olive-200 transition-all">
+                            <Avatar className="h-12 w-12 ring-2 ring-stone-100 dark:ring-white/[0.08] group-hover:ring-olive-200 transition-all">
                               <AvatarImage src={followingUser.avatar_url || ''} />
                               <AvatarFallback className="bg-gradient-to-br from-olive-500 to-pink-500 text-white font-semibold">
                                 {(followingUser.display_name || followingUser.username || 'U').charAt(0).toUpperCase()}
@@ -280,14 +280,14 @@ export default function FollowingPage() {
                             </Avatar>
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-stone-900 truncate group-hover:text-olive-600 transition-colors">
+                            <p className="font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-olive-600 transition-colors">
                               {followingUser.display_name || followingUser.username}
                             </p>
-                            <p className="text-sm text-stone-500 truncate">
+                            <p className="text-sm text-stone-500 dark:text-stone-400 truncate">
                               @{followingUser.username}
                             </p>
                             {followingUser.bio && (
-                              <p className="text-sm text-stone-400 truncate mt-0.5">
+                              <p className="text-sm text-stone-400 dark:text-stone-500 truncate mt-0.5">
                                 {followingUser.bio}
                               </p>
                             )}

@@ -97,13 +97,13 @@ export function TimelineControls({
 
   return (
     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-7xl px-4 sm:px-6">
-      <Card className="bg-white/95 backdrop-blur-md border-0 shadow-2xl w-full">
+      <Card className="bg-white/95 dark:bg-[#1B170E]/95 backdrop-blur-md border-0 shadow-2xl w-full">
         <CardContent className="p-4 sm:p-6">
           {/* Year Selection */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6">
             <div className="flex items-center gap-2 flex-shrink-0">
-              <Calendar className="h-4 w-4 text-stone-700" />
-              <span className="text-base font-medium text-stone-800">Travel Year:</span>
+              <Calendar className="h-4 w-4 text-stone-700 dark:text-stone-300" />
+              <span className="text-base font-medium text-stone-800 dark:text-stone-200">Travel Year:</span>
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               {availableYears.map((year) => (
@@ -116,7 +116,7 @@ export function TimelineControls({
                     "transition-all duration-200 min-w-[60px]",
                     selectedYear === year
                       ? "bg-olive-600 hover:bg-olive-700 text-white shadow-md"
-                      : "hover:bg-olive-50 hover:border-olive-300"
+                      : "hover:bg-olive-50 dark:hover:bg-white/[0.06] hover:border-olive-300"
                   )}
                 >
                   {year}
@@ -134,7 +134,7 @@ export function TimelineControls({
                     variant="outline"
                     size="sm"
                     onClick={onReset}
-                    className="hover:bg-stone-50 flex-shrink-0"
+                    className="hover:bg-stone-50 dark:hover:bg-white/[0.06] flex-shrink-0"
                   >
                     <RotateCcw className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Reset</span>
@@ -157,8 +157,8 @@ export function TimelineControls({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <FastForward className="h-4 w-4 text-stone-700 flex-shrink-0" />
-                  <span className="text-base text-stone-800 hidden sm:inline">Speed:</span>
+                  <FastForward className="h-4 w-4 text-stone-700 dark:text-stone-300 flex-shrink-0" />
+                  <span className="text-base text-stone-800 dark:text-stone-200 hidden sm:inline">Speed:</span>
                   <Select value={speed.toString()} onValueChange={(value) => onSpeedChange(parseFloat(value))}>
                     <SelectTrigger className="w-16 sm:w-20">
                       <SelectValue />
@@ -175,10 +175,10 @@ export function TimelineControls({
               </div>
 
               {/* Progress Bar */}
-              <div className="mb-6 bg-stone-50 rounded-xl p-4">
-                <div className="flex items-center justify-between text-sm text-stone-800 mb-3">
+              <div className="mb-6 bg-stone-50 dark:bg-white/[0.04] rounded-xl p-4">
+                <div className="flex items-center justify-between text-sm text-stone-800 dark:text-stone-200 mb-3">
                   <span className="font-medium">Journey Progress</span>
-                  <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-full">
+                  <div className="flex items-center gap-2 bg-white dark:bg-[#1B170E] px-2 py-1 rounded-full">
                     <Clock className="h-3 w-3" />
                     <span className="font-mono">{formatDuration(totalDuration / speed)}</span>
                   </div>
@@ -193,12 +193,12 @@ export function TimelineControls({
                   step={1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-sm text-stone-700 mt-2">
+                <div className="flex justify-between text-sm text-stone-700 dark:text-stone-300 mt-2">
                   <span className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     Start
                   </span>
-                  <span className="bg-white px-2 py-1 rounded-full font-medium">
+                  <span className="bg-white dark:bg-[#1B170E] px-2 py-1 rounded-full font-medium">
                     {Math.round(progress.percentage)}%
                   </span>
                   <span className="flex items-center gap-1">
@@ -210,23 +210,23 @@ export function TimelineControls({
 
               {/* Current Location Info */}
               {currentSegment && (
-                <div className="bg-gradient-to-r from-olive-50 to-olive-50 rounded-lg p-4 mb-4">
+                <div className="bg-gradient-to-r from-olive-50 to-olive-50 dark:from-olive-950/30 dark:to-olive-950/30 rounded-lg p-4 mb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="p-2 bg-olive-100 rounded-lg flex-shrink-0">
+                      <div className="p-2 bg-olive-100 dark:bg-olive-950/30 rounded-lg flex-shrink-0">
                         <MapPin className="h-4 w-4 text-olive-600" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-medium text-stone-900 truncate">
+                        <h4 className="font-medium text-stone-900 dark:text-stone-100 truncate">
                           {currentSegment.locationName || `Location ${currentSegment.sequenceOrder}`}
                         </h4>
-                        <p className="text-sm text-stone-800">
+                        <p className="text-sm text-stone-800 dark:text-stone-200">
                           {formatDate(currentSegment.visitDate)} • {selectedYear}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-                      <div className="flex items-center gap-1 text-sm text-stone-800">
+                      <div className="flex items-center gap-1 text-sm text-stone-800 dark:text-stone-200">
                         <Camera className="h-3 w-3" />
                         <span className="hidden sm:inline">{currentSegment.albumCount} albums</span>
                         <span className="sm:hidden">{currentSegment.albumCount}a</span>
@@ -246,7 +246,7 @@ export function TimelineControls({
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-stone-800 hover:text-stone-900 hover:bg-stone-100 rounded-full px-4 py-2 transition-all duration-200"
+                  className="text-stone-800 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-white/[0.06] rounded-full px-4 py-2 transition-all duration-200"
                 >
                   <MapPin className="h-4 w-4 mr-2" />
                   {isExpanded ? 'Hide' : 'Show'} Timeline Overview
@@ -256,7 +256,7 @@ export function TimelineControls({
 
               {/* Expanded Timeline View */}
               {isExpanded && (
-                <div className="mt-4 pt-4 border-t border-stone-200">
+                <div className="mt-4 pt-4 border-t border-stone-200 dark:border-white/[0.10]">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-56 sm:max-h-48 overflow-y-auto">
                     {timeline.map((entry, index) => (
                       <button
@@ -265,12 +265,12 @@ export function TimelineControls({
                         className={cn(
                           "p-3 rounded-lg text-left transition-all duration-200 hover:shadow-md min-h-[80px]",
                           progress.segment === index
-                            ? "bg-olive-100 border-2 border-olive-300 shadow-md"
-                            : "bg-stone-50 hover:bg-stone-100 border border-stone-200"
+                            ? "bg-olive-100 dark:bg-olive-950/30 border-2 border-olive-300 shadow-md"
+                            : "bg-stone-50 dark:bg-white/[0.04] hover:bg-stone-100 dark:hover:bg-white/[0.06] border border-stone-200 dark:border-white/[0.10]"
                         )}
                       >
                         <div className="flex items-start justify-between mb-2">
-                          <span className="font-medium text-sm text-stone-900 line-clamp-1 pr-2 flex-1">
+                          <span className="font-medium text-sm text-stone-900 dark:text-stone-100 line-clamp-1 pr-2 flex-1">
                             {entry.locationName || `Stop ${entry.sequenceOrder}`}
                           </span>
                           <Badge
@@ -280,10 +280,10 @@ export function TimelineControls({
                             {index + 1}
                           </Badge>
                         </div>
-                        <div className="text-sm text-stone-800 mb-1">
+                        <div className="text-sm text-stone-800 dark:text-stone-200 mb-1">
                           {formatDate(entry.visitDate)}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-stone-700">
+                        <div className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
                           <span className="hidden sm:inline">{entry.albumCount} albums</span>
                           <span className="sm:hidden">{entry.albumCount}a</span>
                           <span>•</span>
@@ -297,26 +297,26 @@ export function TimelineControls({
               )}
 
               {/* Stats Summary */}
-              <div className="mt-4 pt-4 border-t border-stone-200">
+              <div className="mt-4 pt-4 border-t border-stone-200 dark:border-white/[0.10]">
                 <div className="grid grid-cols-3 gap-3 sm:gap-4 text-center">
-                  <div className="p-2 sm:p-3 bg-olive-50 rounded-lg">
+                  <div className="p-2 sm:p-3 bg-olive-50 dark:bg-olive-950/30 rounded-lg">
                     <div className="text-xl sm:text-2xl font-bold text-olive-600">{timeline.length}</div>
-                    <div className="text-sm text-stone-800">
+                    <div className="text-sm text-stone-800 dark:text-stone-200">
                       <span className="hidden sm:inline">Destinations</span>
                       <span className="sm:hidden">Stops</span>
                     </div>
                   </div>
-                  <div className="p-2 sm:p-3 bg-green-50 rounded-lg">
+                  <div className="p-2 sm:p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
                     <div className="text-xl sm:text-2xl font-bold text-green-600">
                       {timeline.reduce((sum, entry) => sum + entry.albumCount, 0)}
                     </div>
-                    <div className="text-sm text-stone-800">Albums</div>
+                    <div className="text-sm text-stone-800 dark:text-stone-200">Albums</div>
                   </div>
-                  <div className="p-2 sm:p-3 bg-olive-50 rounded-lg">
+                  <div className="p-2 sm:p-3 bg-olive-50 dark:bg-olive-950/30 rounded-lg">
                     <div className="text-xl sm:text-2xl font-bold text-olive-600">
                       {timeline.reduce((sum, entry) => sum + entry.photoCount, 0)}
                     </div>
-                    <div className="text-sm text-stone-800">Photos</div>
+                    <div className="text-sm text-stone-800 dark:text-stone-200">Photos</div>
                   </div>
                 </div>
               </div>
@@ -326,14 +326,14 @@ export function TimelineControls({
 
           {!selectedYear && (
             <div className="text-center py-12 px-6">
-              <div className="bg-gradient-to-br from-olive-50 to-olive-50 rounded-2xl p-8 max-w-md mx-auto">
-                <div className="p-4 bg-olive-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+              <div className="bg-gradient-to-br from-olive-50 to-olive-50 dark:from-olive-950/30 dark:to-olive-950/30 rounded-2xl p-8 max-w-md mx-auto">
+                <div className="p-4 bg-olive-100 dark:bg-olive-950/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                   <Calendar className="h-10 w-10 text-olive-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-stone-900 mb-3">
+                <h3 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-3">
                   Choose Your Adventure Year
                 </h3>
-                <p className="text-stone-800 mb-6 leading-relaxed">
+                <p className="text-stone-800 dark:text-stone-200 mb-6 leading-relaxed">
                   Select a year from above to explore your travel timeline and watch your journey unfold with interactive flight animations.
                 </p>
                 <div className="space-y-3">

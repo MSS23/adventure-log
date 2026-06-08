@@ -116,7 +116,7 @@ export default function FollowersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 dark:from-[#1B170E] via-white dark:via-[#1B170E] to-olive-50/30 dark:to-olive-950/10">
       <div className="max-w-4xl mx-auto space-y-6 p-4">
         {/* Header */}
         <motion.div
@@ -169,8 +169,8 @@ export default function FollowersPage() {
           <motion.div variants={itemVariants}>
             <div className={cn(
               "rounded-2xl p-6 text-center",
-              "bg-gradient-to-br from-white/95 to-white/80",
-              "backdrop-blur-xl border border-white/50",
+              "bg-gradient-to-br from-white/95 dark:from-white/[0.06] to-white/80 dark:to-white/[0.04]",
+              "backdrop-blur-xl border border-white/50 dark:border-white/[0.08]",
               "shadow-lg shadow-olive-500/5",
               "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
             )}>
@@ -181,17 +181,17 @@ export default function FollowersPage() {
               >
                 <Users className="h-7 w-7 text-olive-600" />
               </motion.div>
-              <div className="text-3xl font-bold text-stone-900">
+              <div className="text-3xl font-bold text-stone-900 dark:text-stone-100">
                 <AnimatedCounter value={stats.followersCount} />
               </div>
-              <div className="text-sm text-stone-600 font-medium">Followers</div>
+              <div className="text-sm text-stone-600 dark:text-stone-400 font-medium">Followers</div>
             </div>
           </motion.div>
           <motion.div variants={itemVariants}>
             <div className={cn(
               "rounded-2xl p-6 text-center relative overflow-hidden",
-              "bg-gradient-to-br from-white/95 to-white/80",
-              "backdrop-blur-xl border border-white/50",
+              "bg-gradient-to-br from-white/95 dark:from-white/[0.06] to-white/80 dark:to-white/[0.04]",
+              "backdrop-blur-xl border border-white/50 dark:border-white/[0.08]",
               "shadow-lg shadow-olive-500/5",
               "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
             )}>
@@ -214,10 +214,10 @@ export default function FollowersPage() {
               >
                 <UserPlus className="h-7 w-7 text-olive-600" />
               </motion.div>
-              <div className="text-3xl font-bold text-stone-900">
+              <div className="text-3xl font-bold text-stone-900 dark:text-stone-100">
                 <AnimatedCounter value={stats.pendingRequestsCount} />
               </div>
-              <div className="text-sm text-stone-600 font-medium">Pending Requests</div>
+              <div className="text-sm text-stone-600 dark:text-stone-400 font-medium">Pending Requests</div>
             </div>
           </motion.div>
         </motion.div>
@@ -232,12 +232,12 @@ export default function FollowersPage() {
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               className={cn(
                 "rounded-2xl overflow-hidden",
-                "bg-gradient-to-br from-olive-50/90 to-olive-50/70",
-                "backdrop-blur-xl border border-olive-200/50",
+                "bg-gradient-to-br from-olive-50/90 dark:from-olive-950/20 to-olive-50/70 dark:to-olive-950/10",
+                "backdrop-blur-xl border border-olive-200/50 dark:border-white/[0.08]",
                 "shadow-lg shadow-olive-500/10"
               )}
             >
-              <div className="px-6 py-4 border-b border-olive-200/50">
+              <div className="px-6 py-4 border-b border-olive-200/50 dark:border-white/[0.08]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <motion.div
@@ -246,7 +246,7 @@ export default function FollowersPage() {
                     >
                       <UserPlus className="h-5 w-5 text-olive-600" />
                     </motion.div>
-                    <span className="font-semibold text-stone-900">Follow Requests</span>
+                    <span className="font-semibold text-stone-900 dark:text-stone-100">Follow Requests</span>
                     <motion.span
                       className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-gradient-to-r from-olive-500 to-olive-500 rounded-full"
                       initial={prefersReducedMotion ? {} : { scale: 0 }}
@@ -256,7 +256,7 @@ export default function FollowersPage() {
                       {pendingRequests.length}
                     </motion.span>
                   </div>
-                  <p className="text-sm text-stone-600">
+                  <p className="text-sm text-stone-600 dark:text-stone-400">
                     Approve or decline follow requests
                   </p>
                 </div>
@@ -297,10 +297,10 @@ export default function FollowersPage() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-stone-900 truncate group-hover:text-olive-600 transition-colors">
+                              <p className="font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-olive-600 transition-colors">
                                 {requester.display_name || requester.username}
                               </p>
-                              <p className="text-xs text-stone-500 truncate">
+                              <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
                                 @{requester.username}
                               </p>
                             </div>
@@ -372,16 +372,16 @@ export default function FollowersPage() {
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
           className={cn(
             "rounded-2xl overflow-hidden",
-            "bg-gradient-to-br from-white/95 to-white/80",
-            "backdrop-blur-xl border border-white/50",
+            "bg-gradient-to-br from-white/95 dark:from-white/[0.06] to-white/80 dark:to-white/[0.04]",
+            "backdrop-blur-xl border border-white/50 dark:border-white/[0.08]",
             "shadow-xl shadow-black/5"
           )}
         >
-          <div className="px-6 py-4 border-b border-stone-100">
-            <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+          <div className="px-6 py-4 border-b border-stone-100 dark:border-white/[0.08]">
+            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
               <Users className="h-5 w-5 text-olive-500" />
               Your Followers
-              <span className="text-sm font-normal text-stone-500">({followers.length})</span>
+              <span className="text-sm font-normal text-stone-500 dark:text-stone-400">({followers.length})</span>
             </h2>
           </div>
           <div className="p-4">
@@ -401,8 +401,8 @@ export default function FollowersPage() {
                     <Users className="h-10 w-10 text-olive-400" />
                   </div>
                 </motion.div>
-                <p className="text-stone-700 font-medium">No followers yet</p>
-                <p className="text-sm text-stone-500 mt-2">
+                <p className="text-stone-700 dark:text-stone-300 font-medium">No followers yet</p>
+                <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">
                   Share your profile to gain followers!
                 </p>
                 <Link href="/explore">
@@ -458,10 +458,10 @@ export default function FollowersPage() {
                             </Avatar>
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-stone-900 truncate group-hover:text-olive-600 transition-colors">
+                            <p className="font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-olive-600 transition-colors">
                               {followerUser.display_name || followerUser.username}
                             </p>
-                            <p className="text-xs text-stone-500 truncate">
+                            <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
                               @{followerUser.username}
                             </p>
                           </div>

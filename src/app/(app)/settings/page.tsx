@@ -393,7 +393,7 @@ export default function SettingsPage() {
                         : "border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-900 hover:shadow-sm"
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-olive-600 dark:text-olive-400" : "text-stone-400")} />
+                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-olive-600 dark:text-olive-400" : "text-stone-400 dark:text-stone-500")} />
                     <div>
                       <p className={cn("text-sm font-medium", active ? "text-olive-800 dark:text-olive-200" : "text-stone-700 dark:text-stone-300")}>{opt.label}</p>
                       <p className="text-xs text-stone-500 dark:text-stone-400">{opt.desc}</p>
@@ -424,7 +424,7 @@ export default function SettingsPage() {
               <div className="relative">
                 <Input type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
                 <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword}>
-                  {showCurrentPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400" /> : <Eye className="h-3.5 w-3.5 text-stone-400" />}
+                  {showCurrentPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" /> : <Eye className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />}
                 </button>
               </div>
             </div>
@@ -433,7 +433,7 @@ export default function SettingsPage() {
               <div className="relative">
                 <Input type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
                 <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword}>
-                  {showNewPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400" /> : <Eye className="h-3.5 w-3.5 text-stone-400" />}
+                  {showNewPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" /> : <Eye className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />}
                 </button>
               </div>
             </div>

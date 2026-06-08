@@ -170,7 +170,7 @@ export function PhotoGrid({ photos, columns = 4, showCaptions = false, className
 
   if (photos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-stone-800">
+      <div className="flex flex-col items-center justify-center py-12 text-stone-800 dark:text-stone-200">
         <Camera className="h-12 w-12 mb-4 opacity-50" />
         <p className="text-lg font-medium mb-2">No photos yet</p>
         <p className="text-sm">Photos will appear here once uploaded</p>
@@ -329,7 +329,7 @@ function PhotoGridItem({
   return (
     <div
       className={cn(
-        "group relative aspect-square bg-stone-100 rounded-lg overflow-hidden transition-all duration-300",
+        "group relative aspect-square bg-stone-100 dark:bg-white/[0.06] rounded-lg overflow-hidden transition-all duration-300",
         allowReordering && isOwner ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
         isDraggedOver && "ring-2 ring-olive-500 ring-offset-2",
         isReordering && "pointer-events-none opacity-75",
@@ -358,8 +358,8 @@ function PhotoGridItem({
       {/* Image or Error State */}
       {imageError ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-          <Camera className="h-8 w-8 text-stone-700 mb-2" />
-          <p className="text-sm text-stone-800 mb-2">Failed to load</p>
+          <Camera className="h-8 w-8 text-stone-700 dark:text-stone-300 mb-2" />
+          <p className="text-sm text-stone-800 dark:text-stone-200 mb-2">Failed to load</p>
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -385,8 +385,8 @@ function PhotoGridItem({
         />
       ) : (
         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-          <Camera className="h-8 w-8 text-stone-700 mb-2" />
-          <p className="text-sm text-stone-800">No image</p>
+          <Camera className="h-8 w-8 text-stone-700 dark:text-stone-300 mb-2" />
+          <p className="text-sm text-stone-800 dark:text-stone-200">No image</p>
         </div>
       )}
 

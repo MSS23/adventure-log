@@ -187,11 +187,11 @@ export function TravelInsights() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-stone-100 p-4 animate-pulse">
-        <div className="h-5 bg-stone-200 rounded w-36 mb-4" />
+      <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] p-4 animate-pulse">
+        <div className="h-5 bg-stone-200 dark:bg-white/[0.08] rounded w-36 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-16 bg-stone-100 rounded-lg" />
+            <div key={i} className="h-16 bg-stone-100 dark:bg-white/[0.06] rounded-lg" />
           ))}
         </div>
       </div>
@@ -233,11 +233,11 @@ export function TravelInsights() {
   ]
 
   return (
-    <div className="bg-white rounded-xl border border-stone-100 shadow-sm p-4">
+    <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] shadow-sm p-4">
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-base font-semibold text-stone-900">Your Travel Insights</h3>
-        <p className="text-xs text-stone-600 mt-0.5">See how you compare</p>
+        <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100">Your Travel Insights</h3>
+        <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">See how you compare</p>
       </div>
 
       {/* Stats Grid - 2 columns */}
@@ -259,7 +259,7 @@ export function TravelInsights() {
               >
                 <insight.icon className={cn("h-4 w-4", insight.color)} />
               </motion.div>
-              <span className="text-sm font-medium text-stone-700">{insight.label}</span>
+              <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{insight.label}</span>
             </div>
             <span className={cn("text-lg font-bold tabular-nums", insight.color)}>
               {typeof insight.value === 'number' ? (
@@ -274,12 +274,12 @@ export function TravelInsights() {
 
       {/* Travel Profile Summary */}
       {stats.mostVisitedContinent !== 'N/A' && (
-        <div className="mt-4 p-3 bg-gradient-to-br from-stone-50 to-stone-100 rounded-lg border border-stone-200">
+        <div className="mt-4 p-3 bg-gradient-to-br from-stone-50 dark:from-white/[0.04] to-stone-100 dark:to-white/[0.06] rounded-lg border border-stone-200 dark:border-white/[0.10]">
           <div className="flex items-start gap-2">
             <Globe className="h-4 w-4 text-olive-600 mt-0.5" />
             <div>
-              <p className="text-xs font-semibold text-stone-900">Travel Profile</p>
-              <p className="text-xs text-stone-700 mt-1">
+              <p className="text-xs font-semibold text-stone-900 dark:text-stone-100">Travel Profile</p>
+              <p className="text-xs text-stone-700 dark:text-stone-300 mt-1">
                 Most visited: <span className="font-medium">{stats.mostVisitedContinent}</span>
               </p>
             </div>

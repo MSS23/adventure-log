@@ -10,7 +10,7 @@ const Globe = dynamic(() => import('react-globe.gl'), {
     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-100 to-olive-100">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-3"></div>
-        <p className="text-sm text-stone-600">Loading globe...</p>
+        <p className="text-sm text-stone-600 dark:text-stone-400">Loading globe...</p>
       </div>
     </div>
   )
@@ -78,7 +78,7 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-100 to-olive-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-3"></div>
-          <p className="text-sm text-stone-600">Loading globe...</p>
+          <p className="text-sm text-stone-600 dark:text-stone-400">Loading globe...</p>
         </div>
       </div>
     )
@@ -169,10 +169,10 @@ export function AlbumMiniGlobe({ latitude, longitude, locationName, albumTitle }
       />
 
       {/* Location indicator overlay */}
-      <div className="absolute top-4 left-4 bg-white px-3 py-2 rounded-lg shadow-lg border-2 border-red-500">
+      <div className="absolute top-4 left-4 bg-white dark:bg-[#1B170E] px-3 py-2 rounded-lg shadow-lg border-2 border-red-500">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-          <div className="text-sm font-semibold text-stone-900">{locationName}</div>
+          <div className="text-sm font-semibold text-stone-900 dark:text-stone-100">{locationName}</div>
         </div>
       </div>
     </div>

@@ -44,8 +44,8 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
     return (
       <div className={className}>
         <div className="animate-pulse space-y-2">
-          <div className="h-10 bg-stone-100 rounded-lg"></div>
-          <div className="h-10 bg-stone-100 rounded-lg"></div>
+          <div className="h-10 bg-stone-100 dark:bg-white/[0.06] rounded-lg"></div>
+          <div className="h-10 bg-stone-100 dark:bg-white/[0.06] rounded-lg"></div>
         </div>
       </div>
     )
@@ -59,7 +59,7 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
     <div className={className}>
       <div className="flex items-center gap-2 mb-3">
         <TrendingUp className="h-4 w-4 text-olive-600" />
-        <p className="text-sm font-semibold text-stone-700">Frequently Visited</p>
+        <p className="text-sm font-semibold text-stone-700 dark:text-stone-300">Frequently Visited</p>
       </div>
 
       <div className="space-y-2">
@@ -72,17 +72,17 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
               longitude: suggestion.longitude,
               countryCode: suggestion.countryCode
             })}
-            className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-olive-50 to-olive-50 hover:from-olive-100 hover:to-olive-100 rounded-lg transition-all duration-200 group border border-olive-100 hover:border-olive-300"
+            className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-olive-50 to-olive-50 dark:from-olive-950/20 dark:to-olive-950/20 hover:from-olive-100 hover:to-olive-100 dark:hover:from-olive-950/30 dark:hover:to-olive-950/30 rounded-lg transition-all duration-200 group border border-olive-100 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="p-2 bg-olive-100 rounded-lg group-hover:bg-olive-200 transition-colors">
+              <div className="p-2 bg-olive-100 dark:bg-olive-950/30 rounded-lg group-hover:bg-olive-200 dark:group-hover:bg-olive-950/40 transition-colors">
                 <MapPin className="h-4 w-4 text-olive-600" />
               </div>
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-semibold text-stone-900 truncate">
+                <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
                   {suggestion.name}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-stone-600 mt-0.5">
+                <div className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 mt-0.5">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {suggestion.frequency}x visited
@@ -102,7 +102,7 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
       </div>
 
       {suggestions.length > 5 && (
-        <p className="text-xs text-stone-500 mt-2 text-center">
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 text-center">
           +{suggestions.length - 5} more locations in your history
         </p>
       )}

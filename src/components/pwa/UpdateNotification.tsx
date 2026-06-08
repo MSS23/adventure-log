@@ -74,7 +74,7 @@ export function UpdateNotification() {
                     size="sm"
                     variant="ghost"
                     onClick={handleDismiss}
-                    className="text-xs px-3 py-1 h-7 text-stone-500"
+                    className="text-xs px-3 py-1 h-7 text-stone-500 dark:text-stone-400"
                   >
                     Later
                   </Button>
@@ -86,7 +86,7 @@ export function UpdateNotification() {
                 className="p-1 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors flex-shrink-0"
                 aria-label="Dismiss"
               >
-                <X className="h-4 w-4 text-stone-400" />
+                <X className="h-4 w-4 text-stone-400 dark:text-stone-500" />
               </button>
             </div>
           </div>

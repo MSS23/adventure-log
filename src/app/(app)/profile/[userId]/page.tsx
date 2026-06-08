@@ -31,7 +31,7 @@ import { AnimatedCounter } from '@/components/ui/animated-count'
 
 const EnhancedGlobe = dynamic(
   () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
-  { ssr: false, loading: () => <div className="h-[600px] bg-stone-100 animate-pulse rounded-lg" /> }
+  { ssr: false, loading: () => <div className="h-[600px] bg-stone-100 dark:bg-white/[0.06] animate-pulse rounded-lg" /> }
 )
 
 type TabType = 'albums' | 'map'
@@ -317,11 +317,11 @@ export default function UserProfilePage() {
         <div className="max-w-2xl mx-auto p-6 pt-20">
           <Card className="border-stone-200 dark:border-stone-800 dark:bg-[#1A1A1A]">
             <CardContent className="pt-8 pb-8 text-center">
-              <div className="mx-auto w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mb-4">
+              <div className="mx-auto w-16 h-16 bg-stone-100 dark:bg-white/[0.06] rounded-full flex items-center justify-center mb-4">
                 <MapPin className="h-8 w-8 text-stone-400" />
               </div>
               <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
-              <p className="text-stone-600 mb-6">{error}</p>
+              <p className="text-stone-600 dark:text-stone-400 mb-6">{error}</p>
               <div className="flex gap-3 justify-center">
                 <Button onClick={() => router.push('/feed')} className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
                   Go to Feed
@@ -360,12 +360,12 @@ export default function UserProfilePage() {
                   <div>
                     <h1 className="text-2xl font-bold">{profile.display_name || profile.username || 'Anonymous User'}</h1>
                     {profile.username && profile.username !== profile.display_name && (
-                      <p className="text-stone-600 text-sm mt-1">@{profile.username}</p>
+                      <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">@{profile.username}</p>
                     )}
                   </div>
 
                   {profile.bio && (
-                    <p className="text-stone-700">{profile.bio}</p>
+                    <p className="text-stone-700 dark:text-stone-300">{profile.bio}</p>
                   )}
 
                   {currentUser && (
@@ -376,7 +376,7 @@ export default function UserProfilePage() {
                         variant={followStatus === 'following' ? 'outline' : 'default'}
                         className={`cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 ${
                           followStatus === 'following'
-                            ? "bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
+                            ? "bg-white dark:bg-white/[0.08] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-900 dark:text-stone-100 border border-stone-300 dark:border-white/[0.14]"
                             : "bg-olive-500 hover:bg-olive-600 text-white"
                         }`}
                       >
@@ -406,13 +406,13 @@ export default function UserProfilePage() {
                     )}
                   </Badge>
 
-                  <Card className="bg-olive-50 border-olive-200">
+                  <Card className="bg-olive-50 dark:bg-olive-950/30 border-olive-200 dark:border-olive-900/40">
                     <CardContent className="pt-4 text-center">
                       {profile.privacy_level === 'friends' ? (
                         <>
                           <Users className="h-12 w-12 mx-auto text-olive-600 mb-3" />
                           <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
-                          <p className="text-sm text-stone-700">
+                          <p className="text-sm text-stone-700 dark:text-stone-300">
                             Follow this account and wait for approval to see their albums and travel map.
                           </p>
                         </>
@@ -420,7 +420,7 @@ export default function UserProfilePage() {
                         <>
                           <Lock className="h-12 w-12 mx-auto text-olive-600 mb-3" />
                           <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
-                          <p className="text-sm text-stone-700">
+                          <p className="text-sm text-stone-700 dark:text-stone-300">
                             Follow this account and wait for approval to see their albums and travel map.
                           </p>
                         </>
@@ -454,7 +454,7 @@ export default function UserProfilePage() {
             <GlassCard variant="frost" padding="none" hover="lift" className="overflow-hidden">
               {/* Avatar */}
               <div className="flex justify-center pt-6 pb-4">
-                <Avatar className="h-24 w-24 ring-4 ring-stone-100">
+                <Avatar className="h-24 w-24 ring-4 ring-stone-100 dark:ring-white/[0.08]">
                   <AvatarImage
                     src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
                     alt={profile.display_name || profile.username || 'User'}
@@ -467,17 +467,17 @@ export default function UserProfilePage() {
 
               {/* Name & Username */}
               <div className="text-center px-4 pb-4">
-                <h1 className="text-lg font-bold text-stone-900">
+                <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">
                   {profile.display_name || profile.username || 'Anonymous User'}
                 </h1>
-                <p className="text-sm text-stone-500 mt-0.5">
+                <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
                   @{profile.username || 'anonymous'}
                 </p>
               </div>
 
               {/* Bio */}
               {profile.bio && (
-                <p className="text-sm text-stone-600 text-center px-4 pb-4 leading-relaxed">
+                <p className="text-sm text-stone-600 dark:text-stone-400 text-center px-4 pb-4 leading-relaxed">
                   {profile.bio}
                 </p>
               )}
@@ -490,7 +490,7 @@ export default function UserProfilePage() {
                     disabled={followLoading}
                     className={`cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 ${
                       followStatus === 'following'
-                        ? "w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
+                        ? "w-full bg-white dark:bg-white/[0.08] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-900 dark:text-stone-100 border border-stone-300 dark:border-white/[0.14]"
                         : "w-full bg-olive-500 hover:bg-olive-600 text-white"
                     }`}
                   >
@@ -525,12 +525,12 @@ export default function UserProfilePage() {
               {/* Stats Cards */}
               <div className="p-4 space-y-2">
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-sm text-stone-600">Albums</span>
-                  <AnimatedCounter value={albums.length} className="text-lg font-bold text-stone-900" formatNumber={false} />
+                  <span className="text-sm text-stone-600 dark:text-stone-400">Albums</span>
+                  <AnimatedCounter value={albums.length} className="text-lg font-bold text-stone-900 dark:text-stone-100" formatNumber={false} />
                 </div>
-                <div className="flex justify-between items-center py-2 border-t border-stone-100">
-                  <span className="text-sm text-stone-600">Countries</span>
-                  <AnimatedCounter value={countriesCount} className="text-lg font-bold text-stone-900" formatNumber={false} />
+                <div className="flex justify-between items-center py-2 border-t border-stone-100 dark:border-white/[0.08]">
+                  <span className="text-sm text-stone-600 dark:text-stone-400">Countries</span>
+                  <AnimatedCounter value={countriesCount} className="text-lg font-bold text-stone-900 dark:text-stone-100" formatNumber={false} />
                 </div>
               </div>
             </GlassCard>
@@ -608,7 +608,7 @@ export default function UserProfilePage() {
                         >
                           <Link
                             href={`/albums/${album.id}`}
-                            className="group relative aspect-square overflow-hidden rounded-xl bg-stone-100 block shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
+                            className="group relative aspect-square overflow-hidden rounded-xl bg-stone-100 dark:bg-white/[0.06] block shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
                           >
                             <motion.div
                               className="w-full h-full"
@@ -641,7 +641,7 @@ export default function UserProfilePage() {
                       ))
                     ) : (
                       <motion.div
-                        className="col-span-full bg-white rounded-xl border border-stone-200 text-center py-16"
+                        className="col-span-full bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] text-center py-16"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
@@ -661,7 +661,7 @@ export default function UserProfilePage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden"
+                  className="bg-white dark:bg-[#1B170E] rounded-xl shadow-sm border border-stone-200 dark:border-white/[0.10] overflow-hidden"
                 >
                   <div className="w-full aspect-square max-h-[calc(100vh-220px)] bg-gradient-to-br from-stone-900 to-stone-800 relative">
                     <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />

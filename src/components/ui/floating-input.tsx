@@ -50,7 +50,8 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
               'absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 transition-colors',
               isFocused && 'text-olive-500',
               error && 'text-red-500',
-              success && 'text-green-500'
+              success && 'text-green-500',
+              'dark:text-stone-500'
             )}>
               {icon}
             </div>
@@ -63,11 +64,11 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
               icon ? 'left-10' : 'left-3',
               isFloating
                 ? 'text-xs font-medium'
-                : 'text-base text-stone-500',
+                : 'text-base text-stone-500 dark:text-stone-400',
               isFocused && !error && !success && 'text-olive-600',
               error && 'text-red-500',
               success && 'text-green-600',
-              disabled && 'text-stone-400'
+              disabled && 'text-stone-400 dark:text-stone-500'
             )}
             initial={false}
             animate={{
@@ -86,18 +87,18 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
             type={actualType}
             disabled={disabled}
             className={cn(
-              'w-full h-12 px-3 pt-2 pb-2 text-base bg-white border rounded-lg outline-none transition-all duration-200',
+              'w-full h-12 px-3 pt-2 pb-2 text-base bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100 border rounded-lg outline-none transition-all duration-200',
               'placeholder:text-transparent',
               icon && 'pl-10',
               (showPasswordToggle || error || success) && 'pr-10',
               // Default state
-              'border-stone-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20',
+              'border-stone-300 dark:border-white/[0.14] focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20',
               // Error state
               error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
               // Success state
               success && 'border-green-500 focus:border-green-500 focus:ring-green-500/20',
               // Disabled state
-              disabled && 'bg-stone-50 cursor-not-allowed opacity-60',
+              disabled && 'bg-stone-50 dark:bg-white/[0.04] cursor-not-allowed opacity-60',
             )}
             onFocus={() => setIsFocused(true)}
             onBlur={(e) => {
@@ -118,7 +119,7 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="p-1 text-stone-400 hover:text-stone-600 transition-colors"
+                className="p-1 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? (
@@ -176,7 +177,7 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
               key={error ? 'error' : 'helper'}
               className={cn(
                 'mt-1.5 text-xs',
-                error ? 'text-red-500' : 'text-stone-500'
+                error ? 'text-red-500' : 'text-stone-500 dark:text-stone-400'
               )}
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
@@ -235,14 +236,14 @@ export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTe
         {/* Floating label */}
         <motion.label
           className={cn(
-            'absolute left-3 pointer-events-none transition-colors duration-200 bg-white px-1',
+            'absolute left-3 pointer-events-none transition-colors duration-200 bg-white dark:bg-[#1B170E] px-1',
             isFloating
               ? 'text-xs font-medium -top-2'
-              : 'text-base text-stone-500 top-3',
+              : 'text-base text-stone-500 dark:text-stone-400 top-3',
             isFocused && !error && !success && 'text-olive-600',
             error && 'text-red-500',
             success && 'text-green-600',
-            disabled && 'text-stone-400'
+            disabled && 'text-stone-400 dark:text-stone-500'
           )}
           initial={false}
           animate={{
@@ -260,16 +261,16 @@ export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTe
           disabled={disabled}
           maxLength={maxLength}
           className={cn(
-            'w-full min-h-[120px] px-3 pt-4 pb-2 text-base bg-white border rounded-lg outline-none transition-all duration-200 resize-y',
+            'w-full min-h-[120px] px-3 pt-4 pb-2 text-base bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100 border rounded-lg outline-none transition-all duration-200 resize-y',
             'placeholder:text-transparent',
             // Default state
-            'border-stone-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20',
+            'border-stone-300 dark:border-white/[0.14] focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20',
             // Error state
             error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
             // Success state
             success && 'border-green-500 focus:border-green-500 focus:ring-green-500/20',
             // Disabled state
-            disabled && 'bg-stone-50 cursor-not-allowed opacity-60',
+            disabled && 'bg-stone-50 dark:bg-white/[0.04] cursor-not-allowed opacity-60',
           )}
           onFocus={() => setIsFocused(true)}
           onBlur={(e) => {
@@ -292,7 +293,7 @@ export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTe
                 key={error ? 'error' : 'helper'}
                 className={cn(
                   'text-xs',
-                  error ? 'text-red-500' : 'text-stone-500'
+                  error ? 'text-red-500' : 'text-stone-500 dark:text-stone-400'
                 )}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -307,7 +308,7 @@ export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTe
             <motion.span
               className={cn(
                 'text-xs ml-auto',
-                charCount > maxLength * 0.9 ? 'text-olive-500' : 'text-stone-400',
+                charCount > maxLength * 0.9 ? 'text-olive-500' : 'text-stone-400 dark:text-stone-500',
                 charCount >= maxLength && 'text-red-500'
               )}
               animate={{
@@ -346,13 +347,13 @@ export const FloatingSelect = React.forwardRef<HTMLSelectElement, FloatingSelect
       <div className={cn('relative', className)}>
         <motion.label
           className={cn(
-            'absolute left-3 pointer-events-none transition-colors duration-200 bg-white px-1',
+            'absolute left-3 pointer-events-none transition-colors duration-200 bg-white dark:bg-[#1B170E] px-1',
             isFloating
               ? 'text-xs font-medium -top-2 z-10'
-              : 'text-base text-stone-500 top-3',
+              : 'text-base text-stone-500 dark:text-stone-400 top-3',
             isFocused && !error && 'text-olive-600',
             error && 'text-red-500',
-            disabled && 'text-stone-400'
+            disabled && 'text-stone-400 dark:text-stone-500'
           )}
         >
           {label}
@@ -362,10 +363,10 @@ export const FloatingSelect = React.forwardRef<HTMLSelectElement, FloatingSelect
           ref={ref}
           disabled={disabled}
           className={cn(
-            'w-full h-12 px-3 pt-2 pb-2 text-base bg-white border rounded-lg outline-none transition-all duration-200 appearance-none cursor-pointer',
-            'border-stone-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20',
+            'w-full h-12 px-3 pt-2 pb-2 text-base bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100 border rounded-lg outline-none transition-all duration-200 appearance-none cursor-pointer',
+            'border-stone-300 dark:border-white/[0.14] focus:border-olive-500 focus:ring-2 focus:ring-olive-500/20',
             error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
-            disabled && 'bg-stone-50 cursor-not-allowed opacity-60',
+            disabled && 'bg-stone-50 dark:bg-white/[0.04] cursor-not-allowed opacity-60',
           )}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -387,7 +388,7 @@ export const FloatingSelect = React.forwardRef<HTMLSelectElement, FloatingSelect
         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
           <svg
             className={cn(
-              'h-4 w-4 text-stone-400 transition-transform',
+              'h-4 w-4 text-stone-400 dark:text-stone-500 transition-transform',
               isFocused && 'rotate-180 text-olive-500'
             )}
             fill="none"

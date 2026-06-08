@@ -157,14 +157,14 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
         {Array.from({ length: limit }).map((_, i) => (
           <div key={i} className="flex flex-col items-center text-center space-y-4 w-full max-w-[200px]">
             <div className="relative">
-              <div className="h-28 w-28 md:h-32 md:w-32 rounded-full bg-gradient-to-br from-stone-100 to-stone-200 animate-pulse" />
-              <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-stone-200 border-4 border-white animate-pulse" />
+              <div className="h-28 w-28 md:h-32 md:w-32 rounded-full bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-200 dark:to-white/[0.08] animate-pulse" />
+              <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-stone-200 dark:bg-white/[0.08] border-4 border-white dark:border-[#1B170E] animate-pulse" />
             </div>
             <div className="space-y-2 w-full">
-              <div className="h-5 bg-stone-200 rounded-md animate-pulse mx-auto w-3/4" />
-              <div className="h-4 bg-stone-100 rounded-md animate-pulse mx-auto w-2/3" />
+              <div className="h-5 bg-stone-200 dark:bg-white/[0.08] rounded-md animate-pulse mx-auto w-3/4" />
+              <div className="h-4 bg-stone-100 dark:bg-white/[0.06] rounded-md animate-pulse mx-auto w-2/3" />
             </div>
-            <div className="h-10 w-32 bg-gradient-to-r from-stone-200 to-stone-100 rounded-lg animate-pulse mx-auto" />
+            <div className="h-10 w-32 bg-gradient-to-r from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06] rounded-lg animate-pulse mx-auto" />
           </div>
         ))}
       </div>
@@ -174,11 +174,11 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="p-4 bg-red-50 rounded-full mb-4">
+        <div className="p-4 bg-red-50 dark:bg-red-950/30 rounded-full mb-4">
           <UserPlus className="h-8 w-8 text-red-400" />
         </div>
-        <p className="text-stone-700 font-medium mb-2">Unable to load creators</p>
-        <p className="text-stone-500 text-sm">{error}</p>
+        <p className="text-stone-700 dark:text-stone-300 font-medium mb-2">Unable to load creators</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm">{error}</p>
       </div>
     )
   }
@@ -186,11 +186,11 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
   if (creators.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="p-4 bg-stone-50 rounded-full mb-4">
-          <Users className="h-8 w-8 text-stone-400" />
+        <div className="p-4 bg-stone-50 dark:bg-white/[0.04] rounded-full mb-4">
+          <Users className="h-8 w-8 text-stone-400 dark:text-stone-500" />
         </div>
-        <p className="text-stone-700 font-medium mb-2">No creators yet</p>
-        <p className="text-stone-500 text-sm">Join the community and start sharing!</p>
+        <p className="text-stone-700 dark:text-stone-300 font-medium mb-2">No creators yet</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm">Join the community and start sharing!</p>
       </div>
     )
   }
@@ -207,11 +207,11 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
             className="group flex flex-col items-center text-center w-full max-w-[200px] mx-auto"
           >
             {/* Card Container */}
-            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full border border-stone-100 hover:border-olive-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 space-y-3 sm:space-y-4">
+            <div className="bg-white dark:bg-[#1B170E] rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full border border-stone-100 dark:border-white/[0.08] hover:border-olive-200 dark:hover:border-white/[0.12] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 space-y-3 sm:space-y-4">
               {/* Avatar with hover effect */}
               <Link href={`/profile/${creator.username}`} className="block relative mx-auto">
                 <div className="relative">
-                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 ring-4 ring-stone-50 group-hover:ring-olive-100 group-hover:scale-105 transition-all duration-300">
+                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 ring-4 ring-stone-50 dark:ring-white/[0.08] group-hover:ring-olive-100 group-hover:scale-105 transition-all duration-300">
                     <AvatarImage
                       src={getAvatarUrl(creator.avatar_url, creator.username)}
                       alt={creator.display_name || creator.username}
@@ -222,7 +222,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                     </AvatarFallback>
                   </Avatar>
                   {/* Optional: Status indicator */}
-                  <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-green-500 rounded-full border-3 sm:border-4 border-white" />
+                  <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-green-500 rounded-full border-3 sm:border-4 border-white dark:border-[#1B170E]" />
                 </div>
               </Link>
 
@@ -232,12 +232,12 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                   href={`/profile/${creator.username}`}
                   className="block"
                 >
-                  <h3 className="font-semibold text-stone-900 hover:text-olive-600 transition-colors text-base line-clamp-1">
+                  <h3 className="font-semibold text-stone-900 dark:text-stone-100 hover:text-olive-600 dark:hover:text-stone-100 transition-colors text-base line-clamp-1">
                     {creator.display_name || creator.username}
                   </h3>
-                  <p className="text-xs text-stone-500 mt-0.5">@{creator.username}</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">@{creator.username}</p>
                 </Link>
-                <p className="text-sm text-stone-600 line-clamp-2 h-10">
+                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2 h-10">
                   {creator.bio || 'Exploring the world, one adventure at a time'}
                 </p>
               </div>
@@ -249,7 +249,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                 className={cn(
                   "w-full font-semibold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md",
                   isFollowing
-                    ? "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200"
+                    ? "bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.06] border border-stone-200 dark:border-white/[0.10]"
                     : "bg-olive-500 text-white hover:bg-olive-600 active:bg-olive-700"
                 )}
                 size="default"

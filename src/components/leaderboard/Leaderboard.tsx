@@ -25,9 +25,9 @@ interface LeaderboardProps {
 }
 
 const RANK_ICONS = {
-  1: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200', ringColor: 'ring-yellow-200' },
-  2: { icon: Medal, color: 'text-stone-400', bgColor: 'bg-stone-50', borderColor: 'border-stone-200', ringColor: 'ring-stone-200' },
-  3: { icon: Award, color: 'text-olive-500', bgColor: 'bg-olive-50', borderColor: 'border-olive-200', ringColor: 'ring-olive-200' }
+  1: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50 dark:bg-yellow-950/30', borderColor: 'border-yellow-200 dark:border-yellow-900/40', ringColor: 'ring-yellow-200 dark:ring-white/[0.08]' },
+  2: { icon: Medal, color: 'text-stone-400 dark:text-stone-500', bgColor: 'bg-stone-50 dark:bg-white/[0.04]', borderColor: 'border-stone-200 dark:border-white/[0.10]', ringColor: 'ring-stone-200 dark:ring-white/[0.08]' },
+  3: { icon: Award, color: 'text-olive-500', bgColor: 'bg-olive-50 dark:bg-olive-950/20', borderColor: 'border-olive-200 dark:border-white/[0.08]', ringColor: 'ring-olive-200 dark:ring-white/[0.08]' }
 }
 
 export function Leaderboard({ className, limit = 10, metric = 'score' }: LeaderboardProps) {
@@ -200,14 +200,14 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
     return (
       <div className={cn("space-y-3", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 bg-white rounded-lg border border-stone-100 p-4 animate-pulse">
-            <div className="w-8 h-8 bg-stone-200 rounded-full" />
-            <div className="h-12 w-12 bg-stone-200 rounded-full" />
+          <div key={i} className="flex items-center gap-4 bg-white dark:bg-[#1B170E] rounded-lg border border-stone-100 dark:border-white/[0.08] p-4 animate-pulse">
+            <div className="w-8 h-8 bg-stone-200 dark:bg-white/[0.08] rounded-full" />
+            <div className="h-12 w-12 bg-stone-200 dark:bg-white/[0.08] rounded-full" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-stone-200 rounded w-1/3" />
-              <div className="h-3 bg-stone-100 rounded w-1/4" />
+              <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-1/3" />
+              <div className="h-3 bg-stone-100 dark:bg-white/[0.06] rounded w-1/4" />
             </div>
-            <div className="h-6 w-16 bg-stone-200 rounded-full" />
+            <div className="h-6 w-16 bg-stone-200 dark:bg-white/[0.08] rounded-full" />
           </div>
         ))}
       </div>
@@ -217,20 +217,20 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-8 px-4">
-        <TrendingUp className="h-8 w-8 text-stone-400 mb-2" />
-        <p className="text-sm text-stone-500">{error}</p>
+        <TrendingUp className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-2" />
+        <p className="text-sm text-stone-500 dark:text-stone-400">{error}</p>
       </div>
     )
   }
 
   if (leaders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 bg-stone-50 rounded-xl border border-stone-100">
-        <div className="p-4 bg-stone-100 rounded-full mb-4">
-          <Trophy className="h-8 w-8 text-stone-400" />
+      <div className="flex flex-col items-center justify-center py-12 px-4 bg-stone-50 dark:bg-white/[0.04] rounded-xl border border-stone-100 dark:border-white/[0.08]">
+        <div className="p-4 bg-stone-100 dark:bg-white/[0.06] rounded-full mb-4">
+          <Trophy className="h-8 w-8 text-stone-400 dark:text-stone-500" />
         </div>
-        <p className="text-stone-700 font-medium mb-1">No rankings yet</p>
-        <p className="text-sm text-stone-500">Be the first to climb the leaderboard!</p>
+        <p className="text-stone-700 dark:text-stone-300 font-medium mb-1">No rankings yet</p>
+        <p className="text-sm text-stone-500 dark:text-stone-400">Be the first to climb the leaderboard!</p>
       </div>
     )
   }
@@ -247,12 +247,12 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
           <Link
             key={leader.id}
             href={`/profile/${leader.username}`}
-            className="group flex items-center gap-4 bg-white rounded-lg border border-stone-100 hover:border-stone-200 hover:shadow-md transition-all duration-200 p-4"
+            className="group flex items-center gap-4 bg-white dark:bg-[#1B170E] rounded-lg border border-stone-100 dark:border-white/[0.08] hover:border-stone-200 dark:hover:border-white/[0.12] hover:shadow-md transition-all duration-200 p-4"
           >
             {/* Rank */}
             <div className={cn(
               "flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm",
-              rankIcon ? rankIcon.bgColor : "bg-stone-50 text-stone-600"
+              rankIcon ? rankIcon.bgColor : "bg-stone-50 dark:bg-white/[0.04] text-stone-600 dark:text-stone-400"
             )}>
               {RankIcon ? (
                 <RankIcon className={cn("h-5 w-5", rankIcon.color)} />
@@ -264,7 +264,7 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             {/* Avatar */}
             <Avatar className={cn(
               "h-12 w-12 ring-2 group-hover:ring-4 transition-all duration-200",
-              rankIcon ? rankIcon.ringColor : "ring-stone-100 group-hover:ring-olive-200"
+              rankIcon ? rankIcon.ringColor : "ring-stone-100 dark:ring-white/[0.08] group-hover:ring-olive-200"
             )}>
               <AvatarImage
                 src={getAvatarUrl(leader.avatar_url, leader.username)}
@@ -277,10 +277,10 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-stone-900 group-hover:text-olive-600 transition-colors truncate">
+              <h3 className="font-semibold text-stone-900 dark:text-stone-100 group-hover:text-olive-600 transition-colors truncate">
                 {leader.display_name || leader.username}
               </h3>
-              <p className="text-sm text-stone-500 truncate">
+              <p className="text-sm text-stone-500 dark:text-stone-400 truncate">
                 @{leader.username}
               </p>
             </div>
@@ -289,11 +289,11 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             <div className="flex flex-col items-end">
               <span className={cn(
                 "text-lg font-bold",
-                rankIcon ? rankIcon.color : "text-stone-900"
+                rankIcon ? rankIcon.color : "text-stone-900 dark:text-stone-100"
               )}>
                 {metricValue.toLocaleString()}
               </span>
-              <span className="text-xs text-stone-500">{getMetricLabel()}</span>
+              <span className="text-xs text-stone-500 dark:text-stone-400">{getMetricLabel()}</span>
             </div>
           </Link>
         )

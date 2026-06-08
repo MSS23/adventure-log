@@ -55,7 +55,7 @@ export function PhotoGroupList({
             <p className="text-2xl font-bold text-olive-600 dark:text-olive-400">
               {processedPhotos.length}
             </p>
-            <p className="text-xs text-stone-500">Photos</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400">Photos</p>
           </CardContent>
         </Card>
         <Card className="bg-white dark:bg-[#111111] border-stone-200/50 dark:border-stone-800/50">
@@ -63,7 +63,7 @@ export function PhotoGroupList({
             <p className="text-2xl font-bold text-olive-600 dark:text-olive-400">
               {groups.length}
             </p>
-            <p className="text-xs text-stone-500">Albums</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400">Albums</p>
           </CardContent>
         </Card>
         <Card className="bg-white dark:bg-[#111111] border-stone-200/50 dark:border-stone-800/50">
@@ -71,7 +71,7 @@ export function PhotoGroupList({
             <p className="text-2xl font-bold text-olive-600 dark:text-olive-400">
               {photosWithLocation}
             </p>
-            <p className="text-xs text-stone-500">With GPS</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400">With GPS</p>
           </CardContent>
         </Card>
         <Card className="bg-white dark:bg-[#111111] border-stone-200/50 dark:border-stone-800/50">
@@ -79,7 +79,7 @@ export function PhotoGroupList({
             <p className="text-2xl font-bold text-olive-600 dark:text-olive-400">
               {formatFileSize(totalFileSize)}
             </p>
-            <p className="text-xs text-stone-500">Total Size</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400">Total Size</p>
           </CardContent>
         </Card>
       </div>

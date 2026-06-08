@@ -136,9 +136,9 @@ export function PhotoGridEditor({
 
   if (photos.length === 0) {
     return (
-      <div className="text-center py-12 bg-stone-50 rounded-xl border-2 border-dashed border-stone-200">
-        <Camera className="h-12 w-12 text-stone-400 mx-auto mb-4" />
-        <p className="text-stone-600 mb-4">No photos in this album yet</p>
+      <div className="text-center py-12 bg-stone-50 dark:bg-white/[0.04] rounded-xl border-2 border-dashed border-stone-200 dark:border-white/[0.10]">
+        <Camera className="h-12 w-12 text-stone-400 dark:text-stone-500 mx-auto mb-4" />
+        <p className="text-stone-600 dark:text-stone-400 mb-4">No photos in this album yet</p>
         <Link href={`/albums/${albumId}/upload`}>
           <Button variant="outline" className="gap-2">
             <ImagePlus className="h-4 w-4" />
@@ -153,8 +153,8 @@ export function PhotoGridEditor({
     <>
       <div className={cn('space-y-4', className)}>
         {/* Instructions */}
-        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-olive-50 to-olive-50 border border-olive-200 rounded-xl text-sm">
-          <div className="flex-shrink-0 p-2 bg-olive-100 rounded-lg">
+        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded-xl text-sm">
+          <div className="flex-shrink-0 p-2 bg-olive-100 dark:bg-olive-950/30 rounded-lg">
             <GripVertical className="h-4 w-4 text-olive-600" />
           </div>
           <div>
@@ -315,7 +315,7 @@ function PhotoCard({
   return (
     <motion.div
       className={cn(
-        'group relative aspect-square rounded-xl overflow-hidden bg-stone-100',
+        'group relative aspect-square rounded-xl overflow-hidden bg-stone-100 dark:bg-white/[0.06]',
         'border-2 transition-all duration-200',
         isCover ? 'border-yellow-400 ring-2 ring-yellow-200' : 'border-transparent',
         isDragging && 'shadow-2xl scale-105',
@@ -329,14 +329,14 @@ function PhotoCard({
       {/* Image */}
       {imageLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-2 border-stone-300 border-t-olive-500" />
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-stone-300 dark:border-white/[0.14] border-t-olive-500" />
         </div>
       )}
 
       {imageError ? (
         <div className="flex flex-col items-center justify-center h-full">
-          <Camera className="h-8 w-8 text-stone-400 mb-2" />
-          <p className="text-xs text-stone-500">Failed to load</p>
+          <Camera className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-2" />
+          <p className="text-xs text-stone-500 dark:text-stone-400">Failed to load</p>
         </div>
       ) : photoUrl ? (
         <Image

@@ -98,14 +98,14 @@ export function FeedFilters({
                 'border shadow-sm',
                 isActive
                   ? 'bg-olive-500 text-white border-olive-500 shadow-olive-500/25'
-                  : 'bg-white text-stone-700 border-stone-200 hover:border-olive-300 hover:bg-olive-50'
+                  : 'bg-white dark:bg-[#1B170E] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-white/[0.10] hover:border-olive-300 dark:hover:border-white/[0.12] hover:bg-olive-50 dark:hover:bg-white/[0.06]'
               )}
               whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               aria-pressed={isActive}
               title={option.description}
             >
-              <Icon className={cn('h-4 w-4', isActive ? 'text-white' : 'text-stone-500')} />
+              <Icon className={cn('h-4 w-4', isActive ? 'text-white' : 'text-stone-500 dark:text-stone-400')} />
               <span>{option.label}</span>
             </motion.button>
           )
@@ -118,8 +118,8 @@ export function FeedFilters({
               onClick={() => setShowSortMenu(!showSortMenu)}
               className={cn(
                 'flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium',
-                'border border-stone-200 bg-white hover:bg-stone-50 text-stone-600',
-                showSortMenu && 'bg-stone-100'
+                'border border-stone-200 dark:border-white/[0.10] bg-white dark:bg-[#1B170E] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-600 dark:text-stone-400',
+                showSortMenu && 'bg-stone-100 dark:bg-white/[0.06]'
               )}
               whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
             >
@@ -135,7 +135,7 @@ export function FeedFilters({
                   onClick={() => setShowSortMenu(false)}
                 />
                 <motion.div
-                  className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-stone-200 py-2 z-20 min-w-[160px]"
+                  className="absolute right-0 top-full mt-2 bg-white dark:bg-[#1B170E] rounded-xl shadow-lg border border-stone-200 dark:border-white/[0.10] py-2 z-20 min-w-[160px]"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.15 }}
@@ -147,8 +147,8 @@ export function FeedFilters({
                       className={cn(
                         'w-full px-4 py-2 text-left text-sm transition-colors',
                         activeSort === option.id
-                          ? 'bg-olive-50 text-olive-700 font-medium'
-                          : 'text-stone-700 hover:bg-stone-50'
+                          ? 'bg-olive-50 dark:bg-olive-950/30 text-olive-700 font-medium'
+                          : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/[0.06]'
                       )}
                     >
                       {option.label}
@@ -166,14 +166,14 @@ export function FeedFilters({
         <motion.div
           initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-3 py-2 bg-olive-50 rounded-lg border border-olive-100"
+          className="flex items-center justify-between px-3 py-2 bg-olive-50 dark:bg-olive-950/20 rounded-lg border border-olive-100 dark:border-white/[0.08]"
         >
           <span className="text-sm text-olive-700">
             {filterOptions.find((f) => f.id === activeFilter)?.description}
           </span>
           <button
             onClick={() => onFilterChange('all')}
-            className="p-1 hover:bg-olive-100 rounded-full transition-colors"
+            className="p-1 hover:bg-olive-100 dark:hover:bg-white/[0.06] rounded-full transition-colors"
             aria-label="Clear filter"
           >
             <X className="h-4 w-4 text-olive-600" />
@@ -214,7 +214,7 @@ export function FeedFiltersMobile({
               'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap',
               isActive
                 ? 'bg-olive-500 text-white'
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                : 'bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-white/[0.08]'
             )}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
           >

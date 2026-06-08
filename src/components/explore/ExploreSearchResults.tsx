@@ -127,11 +127,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
           <MapPin className="h-10 w-10 text-red-400" />
         </div>
-        <h3 className="text-lg font-semibold text-stone-900 mb-2">Search failed</h3>
-        <p className="text-stone-600">{error}</p>
+        <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">Search failed</h3>
+        <p className="text-stone-600 dark:text-stone-400">{error}</p>
       </div>
     )
   }
@@ -141,11 +141,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   if (!hasResults) {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-100 flex items-center justify-center">
-          <MapPin className="h-10 w-10 text-stone-400" />
+        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-100 dark:bg-white/[0.06] flex items-center justify-center">
+          <MapPin className="h-10 w-10 text-stone-400 dark:text-stone-500" />
         </div>
-        <h3 className="text-lg font-semibold text-stone-900 mb-2">No results found</h3>
-        <p className="text-stone-600">
+        <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">No results found</h3>
+        <p className="text-stone-600 dark:text-stone-400">
           Try searching for different keywords, locations, or usernames
         </p>
       </div>
@@ -157,7 +157,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
       {/* Users Results */}
       {users.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold text-stone-900 mb-4">
+          <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-4">
             People ({users.length})
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
@@ -165,7 +165,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
               <Link
                 key={user.id}
                 href={`/profile/${user.username}`}
-                className="flex flex-col items-center p-4 bg-white rounded-xl border border-stone-200 hover:border-olive-500 hover:shadow-md transition-all"
+                className="flex flex-col items-center p-4 bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] hover:border-olive-500 hover:shadow-md transition-all"
               >
                 <Avatar className="h-16 w-16 mb-3">
                   <AvatarImage src={user.avatar_url} />
@@ -173,10 +173,10 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                     {user.display_name?.[0] || user.username?.[0] || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <p className="font-semibold text-stone-900 text-sm text-center truncate w-full">
+                <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm text-center truncate w-full">
                   {user.display_name}
                 </p>
-                <p className="text-xs text-stone-500 truncate w-full text-center">
+                <p className="text-xs text-stone-500 dark:text-stone-400 truncate w-full text-center">
                   @{user.username}
                 </p>
               </Link>
@@ -188,7 +188,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
       {/* Albums Results */}
       {albums.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold text-stone-900 mb-4">
+          <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-4">
             Albums ({albums.length})
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
@@ -197,10 +197,10 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
               return (
                 <div
                   key={album.id}
-                  className="group bg-white rounded-xl overflow-hidden border border-stone-200 hover:border-olive-500 hover:shadow-lg transition-all"
+                  className="group bg-white dark:bg-[#1B170E] rounded-xl overflow-hidden border border-stone-200 dark:border-white/[0.10] hover:border-olive-500 hover:shadow-lg transition-all"
                 >
                   <Link href={`/albums/${album.id}`} className="block">
-                    <div className="relative aspect-[4/3] bg-stone-100">
+                    <div className="relative aspect-[4/3] bg-stone-100 dark:bg-white/[0.06]">
                       {album.cover_photo_url ? (
                         <Image
                           src={album.cover_photo_url.startsWith('http') ? album.cover_photo_url : (getPhotoUrl(album.cover_photo_url) || '')}
@@ -211,19 +211,19 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <MapPin className="h-12 w-12 text-stone-300" />
+                          <MapPin className="h-12 w-12 text-stone-300 dark:text-stone-600" />
                         </div>
                       )}
                     </div>
                   </Link>
                   <div className="p-4">
                     <Link href={`/albums/${album.id}`}>
-                      <h3 className="font-semibold text-stone-900 mb-1 group-hover:text-olive-600 transition-colors">
+                      <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-1 group-hover:text-olive-600 transition-colors">
                         {album.title}
                       </h3>
                     </Link>
                     {album.location_name && (
-                      <p className="text-sm text-stone-600 mb-3 flex items-center gap-1">
+                      <p className="text-sm text-stone-600 dark:text-stone-400 mb-3 flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         {album.location_name}
                       </p>
@@ -233,11 +233,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={albumUser.avatar_url} />
-                            <AvatarFallback className="bg-stone-200 text-stone-700 text-xs">
+                            <AvatarFallback className="bg-stone-200 dark:bg-white/[0.08] text-stone-700 dark:text-stone-300 text-xs">
                               {albumUser.display_name?.[0] || 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-xs text-stone-600">
+                          <span className="text-xs text-stone-600 dark:text-stone-400">
                             by {albumUser.display_name}
                           </span>
                         </div>

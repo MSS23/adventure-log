@@ -100,7 +100,7 @@ export function LoadingMessage({
 
   if (prefersReducedMotion || !animate) {
     return (
-      <div className={cn('flex items-center gap-2 text-stone-600', sizeClasses[size], className)}>
+      <div className={cn('flex items-center gap-2 text-stone-600 dark:text-stone-400', sizeClasses[size], className)}>
         {showIcon && <CurrentIcon className={cn(iconSizes[size], 'text-olive-500')} />}
         <span>{currentMessage}</span>
       </div>
@@ -126,7 +126,7 @@ export function LoadingMessage({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="text-stone-600"
+          className="text-stone-600 dark:text-stone-400"
         >
           {currentMessage}
         </motion.span>
@@ -228,7 +228,7 @@ export function TravelLoadingOverlay({
     <AnimatePresence>
       {isLoading && (
         <motion.div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 dark:bg-[#1B170E]/90 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -262,7 +262,7 @@ export function TravelLoadingOverlay({
             )}
 
             {message ? (
-              <p className="text-lg text-stone-600">{message}</p>
+              <p className="text-lg text-stone-600 dark:text-stone-400">{message}</p>
             ) : (
               <LoadingMessage context={context} size="lg" />
             )}

@@ -61,7 +61,7 @@ export function PhotoGroupCard({
               type="text"
               value={group.name}
               onChange={(e) => onRename(group.id, e.target.value)}
-              className="text-lg font-semibold text-stone-900 dark:text-stone-100 bg-transparent border-none outline-none w-full focus:ring-0 p-0 placeholder:text-stone-400"
+              className="text-lg font-semibold text-stone-900 dark:text-stone-100 bg-transparent border-none outline-none w-full focus:ring-0 p-0 placeholder:text-stone-400 dark:placeholder:text-stone-500"
               placeholder="Album name..."
             />
             <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-stone-500 dark:text-stone-400">

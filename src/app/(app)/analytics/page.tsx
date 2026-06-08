@@ -631,13 +631,13 @@ export default function AnalyticsPage() {
                 <p className="text-2xl font-bold text-stone-900 dark:text-white">
                   <AnimatedCounter value={stats.followerCount} />
                 </p>
-                <p className="text-xs text-stone-500">Followers</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Followers</p>
               </div>
               <div className="bg-stone-50 dark:bg-stone-700/40 rounded-xl p-3 text-center transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-700/60">
                 <p className="text-2xl font-bold text-stone-900 dark:text-white">
                   <AnimatedCounter value={stats.followingCount} />
                 </p>
-                <p className="text-xs text-stone-500">Following</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Following</p>
               </div>
             </div>
             <div className="space-y-3">

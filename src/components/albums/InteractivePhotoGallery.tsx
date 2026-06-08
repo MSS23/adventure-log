@@ -103,12 +103,12 @@ export function InteractivePhotoGallery({
   if (!photos || photos.length === 0) {
     return (
       <div className={cn(
-        "flex items-center justify-center h-64 bg-gradient-to-br from-stone-100 to-stone-50 rounded-2xl border border-stone-200",
+        "flex items-center justify-center h-64 bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-50 dark:to-white/[0.04] rounded-2xl border border-stone-200 dark:border-white/[0.10]",
         className
       )}>
         <div className="text-center">
-          <Camera className="h-10 w-10 text-stone-300 mx-auto mb-2" />
-          <p className="text-stone-500">No photos available</p>
+          <Camera className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto mb-2" />
+          <p className="text-stone-500 dark:text-stone-400">No photos available</p>
         </div>
       </div>
     )
@@ -181,12 +181,12 @@ export function InteractivePhotoGallery({
               {/* Zoom hint on hover */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                 <motion.div
-                  className="bg-white/95 backdrop-blur-md rounded-full p-4 shadow-xl"
+                  className="bg-white/95 dark:bg-white/[0.08] backdrop-blur-md rounded-full p-4 shadow-xl"
                   initial={{ scale: 0.8, opacity: 0 }}
                   whileHover={{ scale: 1.1 }}
                   animate={{ scale: 1, opacity: 1 }}
                 >
-                  <ZoomIn className="h-6 w-6 text-stone-700" />
+                  <ZoomIn className="h-6 w-6 text-stone-700 dark:text-stone-300" />
                 </motion.div>
               </div>
 
@@ -261,10 +261,10 @@ export function InteractivePhotoGallery({
                   {/* Zoom hint on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <motion.div
-                      className="bg-white/95 backdrop-blur-md rounded-full p-4 shadow-xl"
+                      className="bg-white/95 dark:bg-white/[0.08] backdrop-blur-md rounded-full p-4 shadow-xl"
                       whileHover={{ scale: 1.1 }}
                     >
-                      <ZoomIn className="h-6 w-6 text-stone-700" />
+                      <ZoomIn className="h-6 w-6 text-stone-700 dark:text-stone-300" />
                     </motion.div>
                   </div>
 
@@ -308,9 +308,9 @@ export function InteractivePhotoGallery({
             className={cn(
               "absolute left-3 top-1/2 -translate-y-1/2 z-10",
               "w-12 h-12 rounded-full",
-              "bg-white/95 backdrop-blur-md shadow-xl",
+              "bg-white/95 dark:bg-white/[0.08] backdrop-blur-md shadow-xl",
               "flex items-center justify-center",
-              "text-stone-700 hover:text-olive-600",
+              "text-stone-700 dark:text-stone-300 hover:text-olive-600",
               "border border-white/50",
               "opacity-0 group-hover:opacity-100",
               "transition-all duration-300"
@@ -325,9 +325,9 @@ export function InteractivePhotoGallery({
             className={cn(
               "absolute right-3 top-1/2 -translate-y-1/2 z-10",
               "w-12 h-12 rounded-full",
-              "bg-white/95 backdrop-blur-md shadow-xl",
+              "bg-white/95 dark:bg-white/[0.08] backdrop-blur-md shadow-xl",
               "flex items-center justify-center",
-              "text-stone-700 hover:text-olive-600",
+              "text-stone-700 dark:text-stone-300 hover:text-olive-600",
               "border border-white/50",
               "opacity-0 group-hover:opacity-100",
               "transition-all duration-300"

@@ -36,7 +36,7 @@ export function AnimatedInput({
     <div className="relative w-full">
       {label && (
         <motion.label
-          className="block text-sm font-medium text-stone-700 mb-1.5"
+          className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5"
           initial={{ y: 0 }}
           animate={{ y: isFocused ? -2 : 0 }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
@@ -65,15 +65,15 @@ export function AnimatedInput({
           <input
             type={type}
             className={cn(
-              "relative w-full h-10 px-3 py-2 text-base rounded-lg border bg-white",
-              "placeholder:text-stone-400 text-stone-900",
+              "relative w-full h-10 px-3 py-2 text-base rounded-lg border bg-white dark:bg-[#1B170E]",
+              "placeholder:text-stone-400 dark:placeholder:text-stone-500 text-stone-900 dark:text-stone-100",
               "transition-all duration-200 outline-none",
               "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
               error
                 ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                 : success
                 ? "border-green-300 focus:border-green-500 focus:ring-2 focus:ring-green-200"
-                : "border-stone-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-200",
+                : "border-stone-300 dark:border-white/[0.14] focus:border-olive-500 focus:ring-2 focus:ring-olive-200",
               className
             )}
             onFocus={handleFocus}
@@ -156,7 +156,7 @@ export function AnimatedTextarea({
     <div className="relative w-full">
       {label && (
         <motion.label
-          className="block text-sm font-medium text-stone-700 mb-1.5"
+          className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5"
           initial={{ y: 0 }}
           animate={{ y: isFocused ? -2 : 0 }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
@@ -184,13 +184,13 @@ export function AnimatedTextarea({
         >
           <textarea
             className={cn(
-              "relative w-full px-3 py-2 text-base rounded-lg border bg-white resize-none",
-              "placeholder:text-stone-400 text-stone-900",
+              "relative w-full px-3 py-2 text-base rounded-lg border bg-white dark:bg-[#1B170E] resize-none",
+              "placeholder:text-stone-400 dark:placeholder:text-stone-500 text-stone-900 dark:text-stone-100",
               "transition-all duration-200 outline-none",
               "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
               error
                 ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                : "border-stone-300 focus:border-olive-500 focus:ring-2 focus:ring-olive-200",
+                : "border-stone-300 dark:border-white/[0.14] focus:border-olive-500 focus:ring-2 focus:ring-olive-200",
               className
             )}
             onFocus={handleFocus}

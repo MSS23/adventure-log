@@ -68,7 +68,7 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-stone-50">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-stone-50 dark:bg-white/[0.04]">
           <Card className="max-w-lg w-full">
             <CardHeader>
               <div className="flex items-center gap-3">
@@ -83,11 +83,11 @@ export class ErrorBoundary extends Component<Props, State> {
             </CardHeader>
             <CardContent className="space-y-4">
               {this.state.error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm font-medium text-red-900 mb-1">
+                <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 rounded-lg">
+                  <p className="text-sm font-medium text-red-900 dark:text-red-400 mb-1">
                     Error Details:
                   </p>
-                  <p className="text-xs text-red-800 font-mono">
+                  <p className="text-xs text-red-800 dark:text-red-400 font-mono">
                     {this.state.error.message}
                   </p>
                 </div>
@@ -114,10 +114,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
               {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
                 <details className="mt-4">
-                  <summary className="text-sm font-medium text-stone-700 cursor-pointer">
+                  <summary className="text-sm font-medium text-stone-700 dark:text-stone-300 cursor-pointer">
                     Developer Information
                   </summary>
-                  <pre className="mt-2 p-3 bg-stone-100 rounded text-xs overflow-auto max-h-64">
+                  <pre className="mt-2 p-3 bg-stone-100 dark:bg-white/[0.06] rounded text-xs overflow-auto max-h-64">
                     {this.state.errorInfo.componentStack}
                   </pre>
                 </details>
@@ -145,10 +145,10 @@ export function ErrorFallback({
   return (
     <div className="p-6 text-center">
       <AlertTriangle className="h-12 w-12 mx-auto text-red-600 mb-3" />
-      <h3 className="text-lg font-semibold text-stone-900 mb-2">
+      <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">
         Oops! Something went wrong
       </h3>
-      <p className="text-sm text-stone-600 mb-4">{error.message}</p>
+      <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">{error.message}</p>
       {resetError && (
         <Button onClick={resetError} size="sm">
           <RefreshCcw className="h-4 w-4 mr-2" />

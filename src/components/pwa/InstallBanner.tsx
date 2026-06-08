@@ -169,13 +169,13 @@ export function InstallBanner() {
 
             {/* Success message */}
             <motion.div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-16 bg-white rounded-xl shadow-xl px-6 py-3"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-16 bg-white dark:bg-[#1B170E] rounded-xl shadow-xl px-6 py-3"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <p className="text-lg font-semibold text-stone-900">App Installed!</p>
-              <p className="text-sm text-stone-500">Find it on your home screen</p>
+              <p className="text-lg font-semibold text-stone-900 dark:text-stone-100">App Installed!</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Find it on your home screen</p>
             </motion.div>
           </motion.div>
         )}

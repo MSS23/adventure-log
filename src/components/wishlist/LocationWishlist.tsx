@@ -96,11 +96,11 @@ export function LocationWishlist() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800 border-red-300'
-      case 'high': return 'bg-olive-100 text-olive-800 border-olive-300'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-300'
-      case 'low': return 'bg-stone-100 text-stone-800 border-stone-300'
-      default: return 'bg-stone-100 text-stone-800 border-stone-300'
+      case 'urgent': return 'bg-red-100 dark:bg-red-950/30 text-red-800 dark:text-red-400 border-red-300 dark:border-red-900/40'
+      case 'high': return 'bg-olive-100 dark:bg-olive-950/30 text-olive-800 border-olive-300 dark:border-white/[0.08]'
+      case 'medium': return 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-400 border-yellow-300 dark:border-yellow-900/40'
+      case 'low': return 'bg-stone-100 dark:bg-white/[0.06] text-stone-800 dark:text-stone-200 border-stone-300 dark:border-white/[0.14]'
+      default: return 'bg-stone-100 dark:bg-white/[0.06] text-stone-800 dark:text-stone-200 border-stone-300 dark:border-white/[0.14]'
     }
   }
 
@@ -126,11 +126,11 @@ export function LocationWishlist() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-stone-900 flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-3">
             <Star className="h-7 w-7 text-yellow-600" />
             Travel Wishlist
           </h2>
-          <p className="text-stone-800 mt-1">
+          <p className="text-stone-800 dark:text-stone-200 mt-1">
             Plan your future adventures and dream destinations
           </p>
         </div>
@@ -148,8 +148,8 @@ export function LocationWishlist() {
                 <DialogTitle>Add New Destination</DialogTitle>
               </DialogHeader>
               <div className="p-4">
-                <p className="text-stone-800">Feature coming soon!</p>
-                <p className="text-sm text-stone-800 mt-2">
+                <p className="text-stone-800 dark:text-stone-200">Feature coming soon!</p>
+                <p className="text-sm text-stone-800 dark:text-stone-200 mt-2">
                   You&apos;ll be able to add destinations, set priorities, plan dates, and track costs.
                 </p>
               </div>
@@ -174,7 +174,7 @@ export function LocationWishlist() {
               <div className="text-2xl font-bold text-olive-600">
                 {wishlistLocations.length}
               </div>
-              <div className="text-sm text-stone-800">Total Destinations</div>
+              <div className="text-sm text-stone-800 dark:text-stone-200">Total Destinations</div>
             </div>
           </CardContent>
         </Card>
@@ -185,7 +185,7 @@ export function LocationWishlist() {
               <div className="text-2xl font-bold text-green-600">
                 {wishlistLocations.filter(l => l.visited).length}
               </div>
-              <div className="text-sm text-stone-800">Visited</div>
+              <div className="text-sm text-stone-800 dark:text-stone-200">Visited</div>
             </div>
           </CardContent>
         </Card>
@@ -196,7 +196,7 @@ export function LocationWishlist() {
               <div className="text-2xl font-bold text-olive-600">
                 {wishlistLocations.filter(l => l.priority === 'urgent' || l.priority === 'high').length}
               </div>
-              <div className="text-sm text-stone-800">High Priority</div>
+              <div className="text-sm text-stone-800 dark:text-stone-200">High Priority</div>
             </div>
           </CardContent>
         </Card>
@@ -207,7 +207,7 @@ export function LocationWishlist() {
               <div className="text-2xl font-bold text-olive-600">
                 {formatCurrency(wishlistLocations.reduce((sum, l) => sum + (l.estimatedCost || 0), 0))}
               </div>
-              <div className="text-sm text-stone-800">Total Budget</div>
+              <div className="text-sm text-stone-800 dark:text-stone-200">Total Budget</div>
             </div>
           </CardContent>
         </Card>
@@ -216,7 +216,7 @@ export function LocationWishlist() {
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-700" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-700 dark:text-stone-300" />
           <Input
             placeholder="Search destinations..."
             value={searchQuery}
@@ -229,7 +229,7 @@ export function LocationWishlist() {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value as FilterPriority)}
-            className="px-3 py-2 border border-stone-300 rounded-md text-sm"
+            className="px-3 py-2 border border-stone-300 dark:border-white/[0.14] rounded-md text-sm dark:bg-[#1B170E] dark:text-stone-100"
           >
             <option value="all">All Priority</option>
             <option value="urgent">Urgent</option>
@@ -241,7 +241,7 @@ export function LocationWishlist() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="px-3 py-2 border border-stone-300 rounded-md text-sm"
+            className="px-3 py-2 border border-stone-300 dark:border-white/[0.14] rounded-md text-sm dark:bg-[#1B170E] dark:text-stone-100"
           >
             <option value="priority">Sort by Priority</option>
             <option value="dateAdded">Date Added</option>
@@ -254,7 +254,7 @@ export function LocationWishlist() {
             variant="outline"
             size="sm"
             onClick={() => setShowVisited(!showVisited)}
-            className={showVisited ? 'bg-green-50 border-green-300' : ''}
+            className={showVisited ? 'bg-green-50 dark:bg-green-950/30 border-green-300' : ''}
           >
             {showVisited ? 'Hide Visited' : 'Show Visited'}
           </Button>
@@ -284,7 +284,7 @@ export function LocationWishlist() {
                 {/* Image */}
                 {location.imageUrl && (
                   <div className={cn(
-                    'relative overflow-hidden bg-stone-100',
+                    'relative overflow-hidden bg-stone-100 dark:bg-white/[0.06]',
                     viewMode === 'grid' ? 'aspect-video' : 'w-32 h-32 flex-shrink-0'
                   )}>
                     <Image
@@ -321,10 +321,10 @@ export function LocationWishlist() {
                     {/* Header */}
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-stone-900 truncate">
+                        <h3 className="font-semibold text-stone-900 dark:text-stone-100 truncate">
                           {location.name}
                         </h3>
-                        <p className="text-sm text-stone-800 flex items-center gap-1">
+                        <p className="text-sm text-stone-800 dark:text-stone-200 flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {location.country}
                         </p>
@@ -338,7 +338,7 @@ export function LocationWishlist() {
 
                     {/* Description */}
                     {location.description && (
-                      <p className="text-sm text-stone-800 line-clamp-2">
+                      <p className="text-sm text-stone-800 dark:text-stone-200 line-clamp-2">
                         {location.description}
                       </p>
                     )}
@@ -346,14 +346,14 @@ export function LocationWishlist() {
                     {/* Details */}
                     <div className="space-y-2">
                       {location.plannedDate && (
-                        <div className="flex items-center gap-2 text-sm text-stone-800">
+                        <div className="flex items-center gap-2 text-sm text-stone-800 dark:text-stone-200">
                           <Calendar className="h-3 w-3" />
                           <span>Planned: {formatDate(location.plannedDate)}</span>
                         </div>
                       )}
 
                       {location.estimatedCost && (
-                        <div className="flex items-center gap-2 text-sm text-stone-800">
+                        <div className="flex items-center gap-2 text-sm text-stone-800 dark:text-stone-200">
                           <span className="text-green-600 font-medium">
                             {formatCurrency(location.estimatedCost)}
                           </span>
@@ -379,8 +379,8 @@ export function LocationWishlist() {
                     )}
 
                     {/* Actions */}
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="text-sm text-stone-800">
+                    <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.08]">
+                      <div className="text-sm text-stone-800 dark:text-stone-200">
                         Added {formatDate(location.dateAdded)}
                       </div>
 
@@ -411,11 +411,11 @@ export function LocationWishlist() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">
-              <Star className="h-16 w-16 text-stone-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-stone-900 mb-2">
+              <Star className="h-16 w-16 text-stone-300 dark:text-stone-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">
                 {searchQuery || filterPriority !== 'all' ? 'No matching destinations' : 'Your wishlist is empty'}
               </h3>
-              <p className="text-stone-800 mb-6">
+              <p className="text-stone-800 dark:text-stone-200 mb-6">
                 {searchQuery || filterPriority !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'Start planning your dream adventures by adding destinations to your wishlist!'

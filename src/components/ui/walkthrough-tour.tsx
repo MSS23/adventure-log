@@ -463,7 +463,7 @@ export function WalkthroughTour({
                     </span>
                     <button
                       onClick={() => endTour(false)}
-                      className="p-1 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                      className="p-1 rounded-lg text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                       aria-label="Close tour"
                     >
                       <X className="h-4 w-4" />
@@ -491,7 +491,7 @@ export function WalkthroughTour({
                   <div className="flex items-center justify-between gap-2">
                     <button
                       onClick={() => endTour(false)}
-                      className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors px-2 py-1"
+                      className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors px-2 py-1"
                     >
                       Skip tour
                     </button>

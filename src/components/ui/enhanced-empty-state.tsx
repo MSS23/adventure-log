@@ -87,8 +87,8 @@ export function EnhancedEmptyState({
         animate={{ opacity: 1, y: 0 }}
         transition={transitions.natural}
       >
-        <div className="text-stone-300 mb-3">{iconElement}</div>
-        <p className="text-stone-500 text-sm">{title}</p>
+        <div className="text-stone-300 dark:text-stone-600 mb-3">{iconElement}</div>
+        <p className="text-stone-500 dark:text-stone-400 text-sm">{title}</p>
         {action && (
           <Button
             variant="link"
@@ -106,7 +106,7 @@ export function EnhancedEmptyState({
     return (
       <motion.div
         className={cn(
-          'bg-white rounded-2xl border border-stone-100 shadow-sm p-8',
+          'bg-white dark:bg-[#1B170E] rounded-2xl border border-stone-100 dark:border-white/[0.08] shadow-sm p-8',
           className
         )}
         initial={{ opacity: 0, scale: 0.95 }}
@@ -121,9 +121,9 @@ export function EnhancedEmptyState({
           >
             {iconElement}
           </motion.div>
-          <h3 className="text-lg font-semibold text-stone-900 mb-2">{title}</h3>
+          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">{title}</h3>
           {description && (
-            <p className="text-stone-500 text-sm max-w-xs mb-4">{description}</p>
+            <p className="text-stone-500 dark:text-stone-400 text-sm max-w-xs mb-4">{description}</p>
           )}
           {action && (
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -185,9 +185,9 @@ export function EnhancedEmptyState({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <h3 className="text-xl font-semibold text-stone-900 mb-2">{title}</h3>
+        <h3 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2">{title}</h3>
         {description && (
-          <p className="text-stone-500 mb-6">{description}</p>
+          <p className="text-stone-500 dark:text-stone-400 mb-6">{description}</p>
         )}
       </motion.div>
 

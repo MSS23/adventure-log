@@ -148,7 +148,7 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <Trophy className="h-12 w-12 text-stone-300 mx-auto mb-4" />
+        <Trophy className="h-12 w-12 text-stone-300 dark:text-stone-600 mx-auto mb-4" />
         <p className="text-stone-500">{error}</p>
       </div>
     )
@@ -233,9 +233,9 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
                   {earnedInCategory}/{categoryAchievements.length}
                 </span>
                 {isExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-stone-400" />
+                  <ChevronUp className="h-5 w-5 text-stone-400 dark:text-stone-500" />
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-stone-400" />
+                  <ChevronDown className="h-5 w-5 text-stone-400 dark:text-stone-500" />
                 )}
               </div>
             </button>
@@ -350,7 +350,7 @@ function AchievementCard({ achievement, index }: AchievementCardProps) {
 
         {/* Earned Date */}
         {achievement.isEarned && achievement.earnedAt && (
-          <p className="text-xs text-stone-400 mt-1">
+          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
             Earned {new Date(achievement.earnedAt).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',

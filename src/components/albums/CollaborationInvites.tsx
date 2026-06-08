@@ -79,7 +79,7 @@ export function CollaborationInvites({ className }: CollaborationInvitesProps) {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Users className="h-6 w-6 text-stone-400" />
+                    <Users className="h-6 w-6 text-stone-400 dark:text-stone-500" />
                   </div>
                 )}
               </div>

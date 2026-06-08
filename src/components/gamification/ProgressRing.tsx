@@ -229,7 +229,7 @@ export function ProgressRing({
               cy={y}
               r={3}
               className={cn(
-                progress >= milestone ? 'fill-current' : 'fill-stone-300',
+                progress >= milestone ? 'fill-current' : 'fill-stone-300 dark:fill-stone-600',
                 variant !== 'gradient' && colors.stroke.replace('stroke-', 'text-')
               )}
               style={variant === 'gradient' && progress >= milestone ? { fill: '#D97706' } : undefined}
@@ -244,7 +244,7 @@ export function ProgressRing({
           <motion.div
             className={cn(
               config.labelSize,
-              'font-bold text-stone-900'
+              'font-bold text-stone-900 dark:text-stone-100'
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -317,11 +317,11 @@ export function StatProgressRing({
         label={
           <div className="flex flex-col items-center">
             <span className="font-bold">{current}</span>
-            <span className="text-xs text-stone-500">/ {target}{unit}</span>
+            <span className="text-xs text-stone-500 dark:text-stone-400">/ {target}{unit}</span>
           </div>
         }
       />
-      <span className="text-sm font-medium text-stone-700">{title}</span>
+      <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{title}</span>
     </div>
   )
 }
@@ -405,7 +405,7 @@ export function MultiProgressRing({
                 'w-2 h-2 rounded-full',
                 colorVariants[ring.variant].stroke.replace('stroke-', 'bg-')
               )} />
-              <span className="text-stone-600">{ring.label || `${Math.round(ring.progress)}%`}</span>
+              <span className="text-stone-600 dark:text-stone-400">{ring.label || `${Math.round(ring.progress)}%`}</span>
             </div>
           ))}
         </div>
@@ -465,12 +465,12 @@ export function ProgressBar({
     <div ref={barRef} className={cn('w-full', className)}>
       {showLabel && (
         <div className="flex justify-between items-center mb-1">
-          <span className="text-sm text-stone-600">{label}</span>
-          <span className="text-sm font-medium text-stone-900">{Math.round(progress)}%</span>
+          <span className="text-sm text-stone-600 dark:text-stone-400">{label}</span>
+          <span className="text-sm font-medium text-stone-900 dark:text-stone-100">{Math.round(progress)}%</span>
         </div>
       )}
 
-      <div className={cn('relative w-full bg-stone-100 rounded-full overflow-hidden', barSizes[size])}>
+      <div className={cn('relative w-full bg-stone-100 dark:bg-white/[0.06] rounded-full overflow-hidden', barSizes[size])}>
         {/* Progress fill */}
         <motion.div
           className={cn('h-full rounded-full', barColors[variant])}

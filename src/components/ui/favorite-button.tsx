@@ -127,8 +127,8 @@ export function FavoriteButton({
         title={isOwnContent ? 'Cannot favorite your own content' : undefined}
         className={cn(
           'relative overflow-hidden transition-colors',
-          favorited && variant === 'ghost' && 'text-red-600 hover:text-red-700 hover:bg-red-50',
-          favorited && variant === 'outline' && 'border-red-300 text-red-600 hover:bg-red-50',
+          favorited && variant === 'ghost' && 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30',
+          favorited && variant === 'outline' && 'border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30',
           favorited && variant === 'default' && 'bg-red-600 hover:bg-red-700 text-white',
           isOwnContent && 'opacity-50 cursor-not-allowed',
           className
@@ -173,7 +173,7 @@ export function FavoriteButton({
       {showCount && count > 0 && (
         <Badge
           variant="secondary"
-          className="text-sm bg-stone-100 text-stone-800"
+          className="text-sm bg-stone-100 dark:bg-white/[0.06] text-stone-800 dark:text-stone-200"
         >
           {count}
         </Badge>

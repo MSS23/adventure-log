@@ -52,12 +52,12 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
 
     return (
       <div className="flex items-start gap-3 py-2">
-        <div className="p-2 bg-olive-50 rounded-lg">
+        <div className="p-2 bg-olive-50 dark:bg-olive-950/30 rounded-lg">
           <Icon className="h-4 w-4 text-olive-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</p>
-          <p className="text-sm text-stone-900 font-medium mt-0.5 break-words">{value}</p>
+          <p className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{label}</p>
+          <p className="text-sm text-stone-900 dark:text-stone-100 font-medium mt-0.5 break-words">{value}</p>
         </div>
       </div>
     )
@@ -86,7 +86,7 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Photo Preview */}
           <div className="space-y-4">
-            <div className="relative aspect-square w-full bg-stone-100 rounded-lg overflow-hidden">
+            <div className="relative aspect-square w-full bg-stone-100 dark:bg-white/[0.06] rounded-lg overflow-hidden">
               {photoUrl && (
                 <Image
                   src={photoUrl}
@@ -98,8 +98,8 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
               )}
             </div>
             {photo.caption && (
-              <div className="p-3 bg-stone-50 rounded-lg">
-                <p className="text-sm text-stone-700">{photo.caption}</p>
+              <div className="p-3 bg-stone-50 dark:bg-white/[0.04] rounded-lg">
+                <p className="text-sm text-stone-700 dark:text-stone-300">{photo.caption}</p>
               </div>
             )}
           </div>
@@ -108,7 +108,7 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
           <div className="space-y-6">
             {/* Basic Info */}
             <div>
-              <h3 className="font-semibold text-stone-900 mb-3 flex items-center gap-2">
+              <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
                 File Information
               </h3>
@@ -134,7 +134,7 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
             {/* Location Data */}
             {(photo.latitude || photo.longitude || photo.location_name) && (
               <div>
-                <h3 className="font-semibold text-stone-900 mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   Location
                 </h3>
@@ -158,7 +158,7 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
             {/* Camera Settings (EXIF) */}
             {exifData && Object.keys(exifData).length > 0 && (
               <div>
-                <h3 className="font-semibold text-stone-900 mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
                   <Camera className="h-4 w-4" />
                   Camera Settings
                 </h3>
@@ -202,7 +202,7 @@ export function PhotoMetadataViewer({ photo, trigger }: PhotoMetadataViewerProps
             {/* Technical Details */}
             {exifData && (
               <div>
-                <h3 className="font-semibold text-stone-900 mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
                   <Info className="h-4 w-4" />
                   Technical Details
                 </h3>

@@ -89,7 +89,7 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
       {albums.length > 0 && (
         <div className="bg-white dark:bg-[#111111] rounded-2xl border border-stone-200/60 dark:border-white/[0.06] p-4 sm:p-5">
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500 pointer-events-none" />
             <input
               type="text"
               placeholder={`Search ${albumsByCountry.length} countries...`}
@@ -131,7 +131,7 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
       ) : searchQuery.trim() ? (
         <div className="bg-white dark:bg-[#111111] rounded-2xl border border-stone-200/60 dark:border-white/[0.06] p-10 sm:p-12 text-center">
           <div className="w-16 h-16 bg-stone-100 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="h-8 w-8 text-stone-400" />
+            <Search className="h-8 w-8 text-stone-400 dark:text-stone-500" />
           </div>
           <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">
             No matches found

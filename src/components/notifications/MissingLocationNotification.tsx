@@ -53,7 +53,7 @@ export function MissingLocationNotification({
 
   if (compact) {
     return (
-      <div className={cn("flex items-center gap-3 p-3 bg-olive-50 border border-olive-200 rounded-lg", className)}>
+      <div className={cn("flex items-center gap-3 p-3 bg-olive-50 dark:bg-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded-lg", className)}>
         <AlertTriangle className="h-4 w-4 text-olive-600 flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm text-olive-800">
@@ -82,9 +82,9 @@ export function MissingLocationNotification({
   return (
     <Card className={cn(
       "border-l-4",
-      severity === 'high' ? "border-l-red-500 bg-red-50 border-red-200" :
-      severity === 'medium' ? "border-l-olive-500 bg-olive-50 border-olive-200" :
-      "border-l-olive-500 bg-olive-50 border-olive-200",
+      severity === 'high' ? "border-l-red-500 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/40" :
+      severity === 'medium' ? "border-l-olive-500 bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-white/[0.08]" :
+      "border-l-olive-500 bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-white/[0.08]",
       className
     )}>
       <CardContent className="p-4">
@@ -92,9 +92,9 @@ export function MissingLocationNotification({
           <div className="flex items-start gap-3 flex-1">
             <div className={cn(
               "p-2 rounded-lg flex-shrink-0",
-              severity === 'high' ? "bg-red-100 text-red-600" :
-              severity === 'medium' ? "bg-olive-100 text-olive-600" :
-              "bg-olive-100 text-olive-600"
+              severity === 'high' ? "bg-red-100 dark:bg-red-950/30 text-red-600" :
+              severity === 'medium' ? "bg-olive-100 dark:bg-olive-950/30 text-olive-600" :
+              "bg-olive-100 dark:bg-olive-950/30 text-olive-600"
             )}>
               <MapPin className="h-4 w-4" />
             </div>
@@ -136,11 +136,11 @@ export function MissingLocationNotification({
 
               {/* Progress indicator */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-stone-600">
+                <div className="flex justify-between text-xs text-stone-600 dark:text-stone-400">
                   <span>Globe Coverage</span>
                   <span>{stats.percentageWithLocation}%</span>
                 </div>
-                <div className="w-full bg-stone-200 rounded-full h-2">
+                <div className="w-full bg-stone-200 dark:bg-white/[0.08] rounded-full h-2">
                   <div
                     className={cn(
                       "h-2 rounded-full transition-all duration-500",
@@ -160,7 +160,7 @@ export function MissingLocationNotification({
                     variant="ghost"
                     size="sm"
                     onClick={() => setExpanded(!expanded)}
-                    className="p-0 h-auto font-normal text-sm text-stone-600 hover:text-stone-800"
+                    className="p-0 h-auto font-normal text-sm text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-100"
                   >
                     <span className="flex items-center gap-1">
                       {expanded ? (
@@ -177,13 +177,13 @@ export function MissingLocationNotification({
                       {recentMissingAlbums.map((album) => (
                         <div
                           key={album.id}
-                          className="flex items-center justify-between p-2 bg-white/50 rounded border"
+                          className="flex items-center justify-between p-2 bg-white/50 dark:bg-white/[0.04] rounded border dark:border-white/[0.08]"
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-stone-900 truncate">
+                            <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
                               {album.title}
                             </p>
-                            <p className="text-xs text-stone-500">
+                            <p className="text-xs text-stone-500 dark:text-stone-400">
                               {new Date(album.createdAt).toLocaleDateString()} • {album.photoCount} photos
                             </p>
                           </div>

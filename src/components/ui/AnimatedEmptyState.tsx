@@ -23,8 +23,8 @@ export function AnimatedEmptyState({
   actionLabel,
   onAction,
   className,
-  iconColor = 'text-stone-400',
-  iconBgColor = 'bg-stone-100'
+  iconColor = 'text-stone-400 dark:text-stone-500',
+  iconBgColor = 'bg-stone-100 dark:bg-white/[0.06]'
 }: AnimatedEmptyStateProps) {
   return (
     <motion.div
@@ -53,7 +53,7 @@ export function AnimatedEmptyState({
       >
         {/* Subtle pulse ring */}
         <motion.div
-          className="absolute inset-0 rounded-full bg-stone-200"
+          className="absolute inset-0 rounded-full bg-stone-200 dark:bg-white/[0.08]"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.5, 0, 0.5]
@@ -80,7 +80,7 @@ export function AnimatedEmptyState({
 
       {/* Title with stagger */}
       <motion.h3
-        className="text-xl font-semibold text-stone-900 mb-2"
+        className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
@@ -91,7 +91,7 @@ export function AnimatedEmptyState({
       {/* Description */}
       {description && (
         <motion.p
-          className="text-stone-500 max-w-md"
+          className="text-stone-500 dark:text-stone-400 max-w-md"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
@@ -140,7 +140,7 @@ export function CompactEmptyState({
   return (
     <motion.div
       className={cn(
-        "flex items-center justify-center gap-3 py-8 text-stone-500",
+        "flex items-center justify-center gap-3 py-8 text-stone-500 dark:text-stone-400",
         className
       )}
       initial={{ opacity: 0 }}

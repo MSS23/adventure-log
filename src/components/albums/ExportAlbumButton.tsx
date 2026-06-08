@@ -103,17 +103,17 @@ export function ExportAlbumButton({
         <div className="space-y-6">
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 p-3 bg-stone-50 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-stone-50 dark:bg-white/[0.04] rounded-lg">
               <FileArchive className="h-8 w-8 text-olive-600" />
               <div>
-                <p className="text-sm text-stone-600">Photos</p>
+                <p className="text-sm text-stone-600 dark:text-stone-400">Photos</p>
                 <p className="text-lg font-semibold">{photos.length}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-stone-50 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-stone-50 dark:bg-white/[0.04] rounded-lg">
               <HardDrive className="h-8 w-8 text-green-600" />
               <div>
-                <p className="text-sm text-stone-600">Est. Size</p>
+                <p className="text-sm text-stone-600 dark:text-stone-400">Est. Size</p>
                 <p className="text-lg font-semibold">{formatFileSize(estimatedSize)}</p>
               </div>
             </div>
@@ -154,7 +154,7 @@ export function ExportAlbumButton({
 
           {/* Warning for large albums */}
           {photos.length > 50 && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-900/40 rounded-lg text-sm text-yellow-800">
               <p className="font-medium">Large album detected</p>
               <p className="mt-1">
                 This album contains {photos.length} photos. Export may take a few minutes and use significant bandwidth.

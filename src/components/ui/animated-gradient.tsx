@@ -161,7 +161,7 @@ export function GradientBorder({
       />
       {/* Content container */}
       <div
-        className="relative bg-white rounded-inherit"
+        className="relative bg-white dark:bg-[#1B170E] rounded-inherit"
         style={{ borderRadius: borderRadius - borderWidth }}
       >
         {children}

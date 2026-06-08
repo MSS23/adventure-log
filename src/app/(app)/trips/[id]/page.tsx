@@ -313,7 +313,7 @@ export default function TripDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           {trip.status === 'live' && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-xs font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
               LIVE
             </span>
@@ -581,7 +581,7 @@ export default function TripDetailPage() {
                             'p-1 rounded',
                             pin.visited_at
                               ? 'text-olive-700 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20'
-                              : 'text-stone-400 hover:bg-stone-100 dark:hover:bg-white/10'
+                              : 'text-stone-400 dark:text-stone-500 hover:bg-stone-100 dark:hover:bg-white/[0.06]'
                           )}
                           aria-label={pin.visited_at ? 'Mark unvisited' : 'Check in'}
                           title={pin.visited_at ? 'Visited — click to undo' : 'Check in here'}

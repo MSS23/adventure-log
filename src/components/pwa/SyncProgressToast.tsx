@@ -116,7 +116,7 @@ export function SyncProgressToast() {
       default:
         return {
           icon: Cloud,
-          iconClass: 'text-stone-400',
+          iconClass: 'text-stone-400 dark:text-stone-500',
           bgClass: 'bg-white dark:bg-[#1A1A1A]',
           borderClass: 'border-stone-200 dark:border-white/[0.1]',
           title: 'Ready to sync',
@@ -189,7 +189,7 @@ export function SyncProgressToast() {
                     style={{ originX: 0 }}
                   >
                     <Progress value={progress} className="h-1.5" />
-                    <p className="text-xs text-stone-400 mt-1 text-right">{progress}%</p>
+                    <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 text-right">{progress}%</p>
                   </motion.div>
                 )}
 
@@ -218,7 +218,7 @@ export function SyncProgressToast() {
                   animate={{ opacity: 1, scale: 1 }}
                   whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
                 >
-                  <X className="h-4 w-4 text-stone-400" />
+                  <X className="h-4 w-4 text-stone-400 dark:text-stone-500" />
                 </motion.button>
               )}
             </div>

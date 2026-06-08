@@ -126,14 +126,14 @@ export function PullToRefresh({
           opacity: indicatorOpacity,
         }}
       >
-        <div className="bg-white shadow-lg rounded-full p-3 border border-stone-100">
+        <div className="bg-white dark:bg-[#1B170E] shadow-lg rounded-full p-3 border border-stone-100 dark:border-white/[0.08]">
           <AnimatePresence mode="wait">
             {state === 'idle' || state === 'pulling' ? (
               <motion.div
                 key="arrow"
                 style={{ rotate: spinnerRotation, scale: spinnerScale }}
               >
-                <ArrowDown className="h-5 w-5 text-stone-500" />
+                <ArrowDown className="h-5 w-5 text-stone-500 dark:text-stone-400" />
               </motion.div>
             ) : state === 'ready' ? (
               <motion.div
@@ -171,7 +171,7 @@ export function PullToRefresh({
         style={{ opacity: indicatorOpacity }}
       >
         <motion.span
-          className="text-xs font-medium text-stone-500"
+          className="text-xs font-medium text-stone-500 dark:text-stone-400"
           key={state}
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
@@ -218,8 +218,8 @@ export function RefreshButton({
       onClick={handleRefresh}
       disabled={isRefreshing}
       className={cn(
-        'p-2 rounded-full bg-white shadow-md border border-stone-100',
-        'hover:bg-stone-50 transition-colors',
+        'p-2 rounded-full bg-white dark:bg-[#1B170E] shadow-md border border-stone-100 dark:border-white/[0.08]',
+        'hover:bg-stone-50 dark:hover:bg-white/[0.06] transition-colors',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         className
       )}
@@ -229,7 +229,7 @@ export function RefreshButton({
         animate={isRefreshing ? { rotate: 360 } : {}}
         transition={isRefreshing ? { duration: 1, repeat: Infinity, ease: 'linear' } : {}}
       >
-        <RefreshCw className="h-5 w-5 text-stone-600" />
+        <RefreshCw className="h-5 w-5 text-stone-600 dark:text-stone-300" />
       </motion.div>
     </motion.button>
   )

@@ -95,7 +95,7 @@ export function PhotoPreviewGrid({
                 <div className="flex gap-3 flex-wrap">
                   {/* Sort Dropdown */}
                   <div className="flex items-center gap-2">
-                    <ArrowUpDown className="h-4 w-4 text-stone-500" />
+                    <ArrowUpDown className="h-4 w-4 text-stone-500 dark:text-stone-400" />
                     <select
                       value={sortBy}
                       onChange={(e) => onSortByChange(e.target.value as typeof sortBy)}
@@ -110,7 +110,7 @@ export function PhotoPreviewGrid({
                   {/* Date Filter */}
                   {availableDates.length > 0 && (
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-stone-500" />
+                      <Calendar className="h-4 w-4 text-stone-500 dark:text-stone-400" />
                       <select
                         value={dateFilter}
                         onChange={(e) => onDateFilterChange(e.target.value)}
@@ -214,7 +214,7 @@ export function PhotoPreviewGrid({
                 <div className="space-y-6">
                   {Object.entries(photosByDate).map(([dateStr, datePhotos]) => (
                     <div key={dateStr}>
-                      <h3 className="text-sm font-medium text-stone-700 mb-3 flex items-center gap-2">
+                      <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3 flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         {dateStr} ({datePhotos.length})
                       </h3>
@@ -230,7 +230,7 @@ export function PhotoPreviewGrid({
                                   ? "border-olive-500 ring-4 ring-olive-200"
                                   : selectedPhotoId === photo.id && !bulkEditMode
                                   ? "border-olive-500 ring-2 ring-olive-200"
-                                  : "border-transparent hover:border-stone-300",
+                                  : "border-transparent hover:border-stone-300 dark:hover:border-white/[0.12]",
                                 photo.uploaded && "opacity-70"
                               )}
                               onClick={() => {
@@ -325,7 +325,7 @@ export function PhotoPreviewGrid({
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-stone-500 py-8">
+                <p className="text-center text-stone-500 dark:text-stone-400 py-8">
                   No photos match the selected filters
                 </p>
               )}
@@ -355,7 +355,7 @@ export function PhotoPreviewGrid({
 
                 {/* Duplicate Warning */}
                 {selectedPhoto.isDuplicate && selectedPhoto.duplicateOf && (
-                  <div className="p-3 bg-olive-50 border border-olive-200 rounded-lg">
+                  <div className="p-3 bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-900/40 rounded-lg">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-5 w-5 text-olive-600 mt-0.5" />
                       <div className="flex-1">
@@ -407,15 +407,15 @@ export function PhotoPreviewGrid({
                     {/* Location */}
                     {selectedPhoto.exif.location?.latitude && selectedPhoto.exif.location?.longitude && (
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-stone-600">
+                        <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
                           <MapPin className="h-4 w-4" />
                           <span className="font-medium">Location</span>
                         </div>
-                        <p className="text-xs text-stone-800 pl-6">
+                        <p className="text-xs text-stone-800 dark:text-stone-200 pl-6">
                           {selectedPhoto.exif.location.latitude.toFixed(6)}, {selectedPhoto.exif.location.longitude.toFixed(6)}
                         </p>
                         {selectedPhoto.exif.location.altitude && (
-                          <p className="text-xs text-stone-600 pl-6">
+                          <p className="text-xs text-stone-600 dark:text-stone-400 pl-6">
                             Altitude: {selectedPhoto.exif.location.altitude.toFixed(0)}m
                           </p>
                         )}
@@ -425,15 +425,15 @@ export function PhotoPreviewGrid({
                     {/* Camera */}
                     {(selectedPhoto.exif.camera?.make || selectedPhoto.exif.camera?.model) && (
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-stone-600">
+                        <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
                           <Camera className="h-4 w-4" />
                           <span className="font-medium">Camera</span>
                         </div>
-                        <p className="text-xs text-stone-800 pl-6">
+                        <p className="text-xs text-stone-800 dark:text-stone-200 pl-6">
                           {selectedPhoto.exif.camera.make} {selectedPhoto.exif.camera.model}
                         </p>
                         {selectedPhoto.exif.camera.lens && (
-                          <p className="text-xs text-stone-600 pl-6">{selectedPhoto.exif.camera.lens}</p>
+                          <p className="text-xs text-stone-600 dark:text-stone-400 pl-6">{selectedPhoto.exif.camera.lens}</p>
                         )}
                       </div>
                     )}
@@ -441,11 +441,11 @@ export function PhotoPreviewGrid({
                     {/* Date */}
                     {selectedPhoto.exif.dateTime?.dateTimeOriginal && (
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-stone-600">
+                        <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
                           <Calendar className="h-4 w-4" />
                           <span className="font-medium">Date Taken</span>
                         </div>
-                        <p className="text-xs text-stone-800 pl-6">
+                        <p className="text-xs text-stone-800 dark:text-stone-200 pl-6">
                           {new Date(selectedPhoto.exif.dateTime.dateTimeOriginal).toLocaleString()}
                         </p>
                       </div>
@@ -455,7 +455,7 @@ export function PhotoPreviewGrid({
 
                 {/* Error */}
                 {selectedPhoto.error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                  <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 rounded text-sm text-red-600">
                     {selectedPhoto.error}
                   </div>
                 )}
@@ -464,8 +464,8 @@ export function PhotoPreviewGrid({
           </>
         ) : (
           <Card>
-            <CardContent className="pt-6 text-center text-stone-500">
-              <ImageIcon className="h-12 w-12 mx-auto mb-3 text-stone-300" />
+            <CardContent className="pt-6 text-center text-stone-500 dark:text-stone-400">
+              <ImageIcon className="h-12 w-12 mx-auto mb-3 text-stone-300 dark:text-stone-600" />
               <p className="text-sm">Select a photo to view details</p>
             </CardContent>
           </Card>

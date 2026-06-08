@@ -173,10 +173,10 @@ export function CoverPhotoPositionEditor({
         <div className="space-y-4 sm:space-y-6 pt-2">
           {/* Full Image with Preview Frame Overlay */}
           <div className="space-y-2 sm:space-y-3">
-            <div className="flex items-center justify-between bg-gradient-to-r from-olive-50 to-olive-50 p-2 sm:p-3 rounded-lg border border-olive-200">
+            <div className="flex items-center justify-between bg-gradient-to-r from-olive-50 to-olive-50 dark:bg-olive-950/20 p-2 sm:p-3 rounded-lg border border-olive-200 dark:border-white/[0.08]">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Grip className="h-3 w-3 sm:h-4 sm:w-4 text-olive-600" />
-                <div className="text-xs sm:text-sm font-semibold text-olive-900">Full Image with Preview Frame</div>
+                <div className="text-xs sm:text-sm font-semibold text-olive-900 dark:text-stone-100">Full Image with Preview Frame</div>
               </div>
               <div className="text-[10px] sm:text-xs text-olive-700 font-medium hidden sm:block">Click & drag to reposition</div>
             </div>
@@ -184,8 +184,8 @@ export function CoverPhotoPositionEditor({
             <div
               ref={imageContainerRef}
               className={cn(
-                "relative w-full bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg sm:rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
-                isDragging ? "cursor-grabbing border-olive-500 shadow-2xl scale-[0.99]" : "cursor-grab border-stone-300 hover:border-olive-400"
+                "relative w-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-white/[0.06] dark:to-white/[0.08] rounded-lg sm:rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
+                isDragging ? "cursor-grabbing border-olive-500 shadow-2xl scale-[0.99]" : "cursor-grab border-stone-300 dark:border-white/[0.14] hover:border-olive-400"
               )}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
@@ -223,7 +223,7 @@ export function CoverPhotoPositionEditor({
                 {/* Clear area for the preview frame */}
                 <div
                   className={cn(
-                    "absolute bg-white transition-all duration-200",
+                    "absolute bg-white dark:bg-[#1B170E] transition-all duration-200",
                     isDragging && "ring-4 ring-olive-400"
                   )}
                   style={{
@@ -276,7 +276,7 @@ export function CoverPhotoPositionEditor({
                   "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200",
                   isDragging ? "scale-110" : "scale-100"
                 )}>
-                  <div className="relative w-10 h-10 bg-white rounded-full border-2 border-olive-500 shadow-xl flex items-center justify-center">
+                  <div className="relative w-10 h-10 bg-white dark:bg-[#1B170E] rounded-full border-2 border-olive-500 shadow-xl flex items-center justify-center">
                     <Move className="h-5 w-5 text-olive-600" />
                   </div>
                 </div>
@@ -307,14 +307,14 @@ export function CoverPhotoPositionEditor({
 
           {/* Final Preview - What will actually appear */}
           <div className="space-y-2 sm:space-y-3">
-            <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 p-2 sm:p-3 rounded-lg border border-green-200">
+            <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 p-2 sm:p-3 rounded-lg border border-green-200 dark:border-green-900/40">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                <div className="text-xs sm:text-sm font-semibold text-green-900">Final Feed Preview</div>
+                <div className="text-xs sm:text-sm font-semibold text-green-900 dark:text-stone-100">Final Feed Preview</div>
               </div>
               <div className="text-[10px] sm:text-xs text-green-700 font-medium">How it will appear</div>
             </div>
-            <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg sm:rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
+            <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-stone-100 to-stone-200 dark:from-white/[0.06] dark:to-white/[0.08] rounded-lg sm:rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
               {/* Container that simulates the crop from the blue frame */}
               <div className="absolute inset-0">
                 {/* Use object-position to simulate the crop without complex transforms */}
@@ -340,8 +340,8 @@ export function CoverPhotoPositionEditor({
           </div>
 
           {/* Preset Position Buttons */}
-          <div className="space-y-2 sm:space-y-3 bg-stone-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-stone-200">
-            <div className="text-xs sm:text-sm font-semibold text-stone-800">Quick Presets</div>
+          <div className="space-y-2 sm:space-y-3 bg-stone-50 dark:bg-white/[0.04] p-3 sm:p-4 rounded-lg sm:rounded-xl border border-stone-200 dark:border-white/[0.10]">
+            <div className="text-xs sm:text-sm font-semibold text-stone-800 dark:text-stone-200">Quick Presets</div>
             <div className="grid grid-cols-5 sm:flex sm:flex-wrap gap-2">
               <Button
                 type="button"
@@ -401,26 +401,26 @@ export function CoverPhotoPositionEditor({
               )}
             </div>
             {/* Position Values */}
-            <div className="text-[10px] sm:text-xs text-stone-600 flex items-center gap-3 sm:gap-4 pt-2 border-t border-stone-200">
+            <div className="text-[10px] sm:text-xs text-stone-600 dark:text-stone-400 flex items-center gap-3 sm:gap-4 pt-2 border-t border-stone-200 dark:border-white/[0.10]">
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="font-semibold">X:</span>
-                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-stone-300 text-[10px] sm:text-xs">{Math.round(xOffset)}%</span>
+                <span className="font-mono bg-white dark:bg-[#1B170E] px-1.5 sm:px-2 py-0.5 rounded border border-stone-300 dark:border-white/[0.14] text-[10px] sm:text-xs">{Math.round(xOffset)}%</span>
               </div>
               <div className="flex items-center gap-1 sm:gap-1.5">
                 <span className="font-semibold">Y:</span>
-                <span className="font-mono bg-white px-1.5 sm:px-2 py-0.5 rounded border border-stone-300 text-[10px] sm:text-xs">{Math.round(yOffset)}%</span>
+                <span className="font-mono bg-white dark:bg-[#1B170E] px-1.5 sm:px-2 py-0.5 rounded border border-stone-300 dark:border-white/[0.14] text-[10px] sm:text-xs">{Math.round(yOffset)}%</span>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-stone-200">
+          <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-3 pt-4 sm:pt-6 border-t-2 border-stone-200 dark:border-white/[0.10]">
             <Button
               type="button"
               variant="outline"
               onClick={handleReset}
               disabled={isSaving}
-              className="transition-all duration-200 hover:bg-stone-100"
+              className="transition-all duration-200 hover:bg-stone-100 dark:hover:bg-white/[0.06]"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset to Center
@@ -431,7 +431,7 @@ export function CoverPhotoPositionEditor({
                 variant="outline"
                 onClick={onClose}
                 disabled={isSaving}
-                className="flex-1 sm:flex-none transition-all duration-200 hover:bg-stone-100"
+                className="flex-1 sm:flex-none transition-all duration-200 hover:bg-stone-100 dark:hover:bg-white/[0.06]"
               >
                 Cancel
               </Button>

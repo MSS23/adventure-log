@@ -41,11 +41,11 @@ export function UploadDropZone({
               <p className="text-base font-medium text-stone-900 dark:text-stone-100 mb-1">
                 Tap to add photos or drag and drop
               </p>
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
                 JPEG, PNG, WebP, HEIC supported
               </p>
               {isProcessing && (
-                <p className="text-sm text-olive-600 mt-2 flex items-center justify-center gap-2">
+                <p className="text-sm text-olive-600 dark:text-olive-400 mt-2 flex items-center justify-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Processing EXIF data...
                 </p>

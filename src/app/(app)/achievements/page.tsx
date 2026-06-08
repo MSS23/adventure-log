@@ -19,7 +19,7 @@ export default function AchievementsPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto mb-4">
-            <Trophy className="h-7 w-7 text-stone-400" />
+            <Trophy className="h-7 w-7 text-stone-400 dark:text-stone-500" />
           </div>
           <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your achievements</p>
           <button onClick={() => router.push('/login')}>

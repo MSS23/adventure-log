@@ -86,13 +86,13 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
                          shadow-sm hover:shadow-lg hover:shadow-olive-500/10"
             >
               <motion.div
-                className="p-4 bg-stone-100 rounded-full transition-colors"
+                className="p-4 bg-stone-100 dark:bg-white/[0.06] rounded-full transition-colors"
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
-                <Plus className="h-8 w-8 text-stone-400" />
+                <Plus className="h-8 w-8 text-stone-400 dark:text-stone-500" />
               </motion.div>
-              <span className="text-sm font-medium text-stone-500">
+              <span className="text-sm font-medium text-stone-500 dark:text-stone-400">
                 Add Album
               </span>
             </motion.div>

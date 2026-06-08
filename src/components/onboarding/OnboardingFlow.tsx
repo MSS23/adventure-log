@@ -93,17 +93,17 @@ export function OnboardingFlow() {
   const Icon = currentStepData.icon
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-olive-50 via-olive-50 to-olive-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-olive-50 via-olive-50 to-olive-50 dark:from-[#1B170E] dark:via-[#1B170E] dark:to-[#1B170E] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-stone-700">
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
               Step {currentStep + 1} of {steps.length}
             </span>
             <button
               onClick={handleSkip}
-              className="text-sm text-stone-600 hover:text-stone-900 transition-colors"
+              className="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
             >
               Skip tour
             </button>
@@ -114,7 +114,7 @@ export function OnboardingFlow() {
                 key={step.id}
                 className={cn(
                   "h-2 flex-1 rounded-full transition-all duration-300",
-                  index <= currentStep ? "bg-olive-500" : "bg-stone-300"
+                  index <= currentStep ? "bg-olive-500" : "bg-stone-300 dark:bg-white/[0.10]"
                 )}
               />
             ))}
@@ -122,7 +122,7 @@ export function OnboardingFlow() {
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-12">
+        <div className="bg-white dark:bg-[#1B170E] rounded-3xl shadow-2xl p-8 sm:p-12">
           {/* Icon */}
           <div className="flex justify-center mb-8">
             <div className="p-6 bg-gradient-to-br from-olive-100 to-olive-100 rounded-full shadow-lg">
@@ -132,10 +132,10 @@ export function OnboardingFlow() {
 
           {/* Content */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100 mb-4">
               {currentStepData.title}
             </h2>
-            <p className="text-lg text-stone-600 max-w-lg mx-auto">
+            <p className="text-lg text-stone-600 dark:text-stone-400 max-w-lg mx-auto">
               {currentStepData.description}
             </p>
           </div>
@@ -143,20 +143,20 @@ export function OnboardingFlow() {
           {/* Features Grid (only on welcome screen) */}
           {currentStep === 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="p-4 bg-stone-50 rounded-xl text-center">
+              <div className="p-4 bg-stone-50 dark:bg-white/[0.04] rounded-xl text-center">
                 <Camera className="h-8 w-8 text-olive-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-stone-900">Photo Albums</p>
-                <p className="text-xs text-stone-600 mt-1">Organize your memories</p>
+                <p className="text-sm font-medium text-stone-900 dark:text-stone-100">Photo Albums</p>
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">Organize your memories</p>
               </div>
-              <div className="p-4 bg-stone-50 rounded-xl text-center">
+              <div className="p-4 bg-stone-50 dark:bg-white/[0.04] rounded-xl text-center">
                 <Globe className="h-8 w-8 text-olive-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-stone-900">3D Globe</p>
-                <p className="text-xs text-stone-600 mt-1">Visualize your travels</p>
+                <p className="text-sm font-medium text-stone-900 dark:text-stone-100">3D Globe</p>
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">Visualize your travels</p>
               </div>
-              <div className="p-4 bg-stone-50 rounded-xl text-center">
+              <div className="p-4 bg-stone-50 dark:bg-white/[0.04] rounded-xl text-center">
                 <Users className="h-8 w-8 text-olive-600 mx-auto mb-2" />
-                <p className="text-sm font-medium text-stone-900">Social Features</p>
-                <p className="text-xs text-stone-600 mt-1">Connect with travelers</p>
+                <p className="text-sm font-medium text-stone-900 dark:text-stone-100">Social Features</p>
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">Connect with travelers</p>
               </div>
             </div>
           )}
@@ -168,7 +168,7 @@ export function OnboardingFlow() {
                 <Button
                   onClick={handleNext}
                   variant="outline"
-                  className="flex-1 h-12 text-base border-stone-300 hover:bg-stone-50"
+                  className="flex-1 h-12 text-base border-stone-300 dark:border-white/[0.14] hover:bg-stone-50 dark:hover:bg-white/[0.06]"
                 >
                   Later
                 </Button>
@@ -215,7 +215,7 @@ export function OnboardingFlow() {
                 "w-2 h-2 rounded-full transition-all duration-300",
                 index === currentStep
                   ? "bg-olive-600 w-8"
-                  : "bg-stone-400 hover:bg-stone-500"
+                  : "bg-stone-400 dark:bg-white/[0.10] hover:bg-stone-500 dark:hover:bg-white/[0.14]"
               )}
               aria-label={`Go to step ${index + 1}`}
             />

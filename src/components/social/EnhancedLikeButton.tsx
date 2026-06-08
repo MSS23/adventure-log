@@ -74,7 +74,7 @@ export function EnhancedLikeButton({
         onClick={handleClick}
         className={cn(
           'relative p-2 rounded-full transition-colors touch-manipulation',
-          isLiked ? 'hover:bg-red-100 active:bg-red-200' : 'hover:bg-stone-100 active:bg-stone-200',
+          isLiked ? 'hover:bg-red-100 dark:hover:bg-red-950/30 active:bg-red-200' : 'hover:bg-stone-100 dark:hover:bg-white/[0.06] active:bg-stone-200',
           className
         )}
         whileTap={{ scale: 0.85 }}
@@ -107,7 +107,7 @@ export function EnhancedLikeButton({
             className={cn(
               sizeConfig.icon,
               'transition-all duration-200',
-              isLiked ? 'fill-red-500 text-red-500' : 'text-stone-700'
+              isLiked ? 'fill-red-500 text-red-500' : 'text-stone-700 dark:text-stone-300'
             )}
             strokeWidth={1.5}
           />
@@ -124,8 +124,8 @@ export function EnhancedLikeButton({
         className={cn(
           'relative flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200',
           isLiked
-            ? 'bg-red-50 text-red-600 hover:bg-red-100'
-            : 'bg-stone-100 text-stone-700 hover:bg-stone-200',
+            ? 'bg-red-50 dark:bg-red-950/30 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/30'
+            : 'bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.08]',
           className
         )}
         whileTap={{ scale: 0.95 }}
@@ -165,7 +165,7 @@ export function EnhancedLikeButton({
         showCount && 'px-3',
         isLiked
           ? 'bg-red-500 text-white hover:bg-red-600 shadow-md shadow-red-500/25'
-          : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50 hover:border-stone-300',
+          : 'bg-white dark:bg-[#1B170E] border border-stone-200 dark:border-white/[0.10] text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/[0.06] hover:border-stone-300 dark:hover:border-white/[0.12]',
         className
       )}
       whileHover={{ scale: 1.02 }}
@@ -277,7 +277,7 @@ export function LikeButtonWithBadge({
         <motion.span
           className={cn(
             'absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold px-1',
-            isLiked ? 'bg-red-500 text-white' : 'bg-stone-200 text-stone-700'
+            isLiked ? 'bg-red-500 text-white' : 'bg-stone-200 dark:bg-white/[0.08] text-stone-700 dark:text-stone-300'
           )}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}

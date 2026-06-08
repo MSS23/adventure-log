@@ -58,7 +58,7 @@ export function BioEditor({
           'relative rounded-xl border-2 transition-all',
           isFocused
             ? 'border-olive-400 shadow-sm shadow-olive-100'
-            : 'border-stone-200 hover:border-stone-300'
+            : 'border-stone-200 dark:border-white/[0.10] hover:border-stone-300 dark:hover:border-white/[0.12]'
         )}
       >
         <textarea
@@ -69,8 +69,8 @@ export function BioEditor({
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           className={cn(
-            'w-full px-4 py-3 bg-transparent resize-none text-stone-800',
-            'placeholder:text-stone-400 focus:outline-none',
+            'w-full px-4 py-3 bg-transparent resize-none text-stone-800 dark:text-stone-200',
+            'placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none',
             'min-h-[80px]'
           )}
           rows={3}
@@ -90,7 +90,7 @@ export function BioEditor({
                     ? 'text-red-500'
                     : isNearLimit
                     ? 'text-olive-500'
-                    : 'text-stone-400'
+                    : 'text-stone-400 dark:text-stone-500'
                 )}
               >
                 {charCount}/{maxLength}
@@ -167,7 +167,7 @@ export function SocialLinksEditor({
 
   return (
     <div className={cn('space-y-3', className)}>
-      <label className="text-sm font-medium text-stone-700">Social Links</label>
+      <label className="text-sm font-medium text-stone-700 dark:text-stone-300">Social Links</label>
 
       <div className="space-y-2">
         {socialPlatforms.map((platform) => {
@@ -182,17 +182,17 @@ export function SocialLinksEditor({
               className={cn(
                 'flex items-center gap-3 p-3 rounded-xl border transition-all',
                 isEditing
-                  ? 'border-olive-300 bg-olive-50/50'
+                  ? 'border-olive-300 bg-olive-50/50 dark:bg-olive-950/20'
                   : hasValue
-                  ? 'border-stone-200 bg-stone-50'
-                  : 'border-stone-200 border-dashed'
+                  ? 'border-stone-200 dark:border-white/[0.10] bg-stone-50 dark:bg-white/[0.04]'
+                  : 'border-stone-200 dark:border-white/[0.10] border-dashed'
               )}
               layout
             >
               <div
                 className={cn(
                   'p-2 rounded-lg',
-                  hasValue ? 'bg-olive-100 text-olive-600' : 'bg-stone-100 text-stone-400'
+                  hasValue ? 'bg-olive-100 text-olive-600 dark:bg-olive-950/30' : 'bg-stone-100 dark:bg-white/[0.06] text-stone-400 dark:text-stone-500'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -205,7 +205,7 @@ export function SocialLinksEditor({
                     value={currentValue}
                     onChange={(e) => handleLinkChange(platform.id, e.target.value)}
                     placeholder={platform.placeholder}
-                    className="flex-1 bg-transparent text-sm focus:outline-none text-stone-800 placeholder:text-stone-400"
+                    className="flex-1 bg-transparent text-sm focus:outline-none text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-500"
                     autoFocus
                   />
                   <button
@@ -222,7 +222,7 @@ export function SocialLinksEditor({
                       handleLinkChange(platform.id, '')
                       setEditingPlatform(null)
                     }}
-                    className="p-1.5 rounded-lg bg-stone-200 text-stone-600 hover:bg-stone-300"
+                    className="p-1.5 rounded-lg bg-stone-200 dark:bg-white/[0.08] text-stone-600 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-white/[0.06]"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -236,9 +236,9 @@ export function SocialLinksEditor({
                   className="flex-1 text-left"
                 >
                   {hasValue ? (
-                    <span className="text-sm text-stone-700">{currentValue}</span>
+                    <span className="text-sm text-stone-700 dark:text-stone-300">{currentValue}</span>
                   ) : (
-                    <span className="text-sm text-stone-400">Add {platform.label}</span>
+                    <span className="text-sm text-stone-400 dark:text-stone-500">Add {platform.label}</span>
                   )}
                 </button>
               )}
@@ -274,7 +274,7 @@ export function ProfileAboutEditor({
     <div className={cn('space-y-6', className)}>
       {/* Bio */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-stone-700">About You</label>
+        <label className="text-sm font-medium text-stone-700 dark:text-stone-300">About You</label>
         <BioEditor value={bio} onChange={onBioChange} />
       </div>
 
@@ -283,9 +283,9 @@ export function ProfileAboutEditor({
 
       {/* Travel Styles - imported from TravelStyleBadges */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-stone-700">Travel Style</label>
+        <label className="text-sm font-medium text-stone-700 dark:text-stone-300">Travel Style</label>
         {/* TravelStyleBadges component should be used here */}
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-stone-500 dark:text-stone-400">
           Select up to 5 travel styles that best describe your adventures
         </p>
       </div>

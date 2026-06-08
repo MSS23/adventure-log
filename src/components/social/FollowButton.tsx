@@ -134,7 +134,7 @@ export function FollowButton({
         return {
           icon: UserCheck,
           text: 'Following',
-          className: 'bg-gradient-to-r from-stone-100 to-stone-50 hover:from-stone-200 hover:to-stone-100 text-stone-900 border-stone-200',
+          className: 'bg-gradient-to-r from-stone-100 dark:from-white/[0.06] to-stone-50 dark:to-white/[0.04] hover:from-stone-200 dark:hover:from-white/[0.06] hover:to-stone-100 dark:hover:to-white/[0.06] text-stone-900 dark:text-stone-100 border-stone-200 dark:border-white/[0.10]',
           iconColor: 'text-green-600',
           showIcon: true
         }
@@ -142,7 +142,7 @@ export function FollowButton({
         return {
           icon: Clock,
           text: 'Requested',
-          className: 'bg-gradient-to-r from-olive-50 to-olive-50 hover:from-olive-100 hover:to-olive-100 text-olive-800 border-olive-200',
+          className: 'bg-gradient-to-r from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20 hover:from-olive-100 dark:hover:from-olive-950/30 hover:to-olive-100 dark:hover:to-olive-950/30 text-olive-800 dark:text-olive-300 border-olive-200 dark:border-white/[0.08]',
           iconColor: 'text-olive-600',
           showIcon: true
         }
@@ -150,8 +150,8 @@ export function FollowButton({
         return {
           icon: UserX,
           text: 'Blocked',
-          className: 'bg-stone-100 text-stone-400 cursor-not-allowed',
-          iconColor: 'text-stone-400',
+          className: 'bg-stone-100 dark:bg-white/[0.06] text-stone-400 dark:text-stone-500 cursor-not-allowed',
+          iconColor: 'text-stone-400 dark:text-stone-500',
           showIcon: true
         }
       default:

@@ -142,10 +142,10 @@ export function EmbedMapContent({
         ) : locations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3">
             <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
-              <Globe className="h-8 w-8 text-stone-600" />
+              <Globe className="h-8 w-8 text-stone-600 dark:text-stone-400" />
             </div>
-            <p className="text-stone-500 text-sm font-medium">No locations yet</p>
-            <p className="text-stone-600 text-xs">Adventures are waiting</p>
+            <p className="text-stone-500 dark:text-stone-400 text-sm font-medium">No locations yet</p>
+            <p className="text-stone-600 dark:text-stone-400 text-xs">Adventures are waiting</p>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-3">
@@ -155,7 +155,7 @@ export function EmbedMapContent({
               </div>
               <Globe className="h-8 w-8 text-olive-500 animate-pulse" />
             </div>
-            <p className="text-stone-500 text-xs">Loading globe...</p>
+            <p className="text-stone-500 dark:text-stone-400 text-xs">Loading globe...</p>
           </div>
         )}
       </div>

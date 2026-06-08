@@ -33,14 +33,14 @@ const privacyOptions: PrivacyOption[] = [
     label: 'Public',
     icon: <Globe className="w-4 h-4" />,
     description: 'Anyone can see this content',
-    color: 'text-green-600 border-green-200 bg-green-50 hover:bg-green-100'
+    color: 'text-green-600 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900/40 hover:bg-green-100 dark:hover:bg-green-950/50'
   },
   {
     value: 'friends',
     label: 'Friends',
     icon: <Users className="w-4 h-4" />,
     description: 'Only your friends can see this content',
-    color: 'text-olive-600 border-olive-200 bg-olive-50 hover:bg-olive-100'
+    color: 'text-olive-600 border-olive-200 bg-olive-50 dark:bg-olive-950/20 dark:border-white/[0.08] hover:bg-olive-100 dark:hover:bg-olive-950/30'
   },
   {
     value: 'private',
@@ -48,7 +48,7 @@ const privacyOptions: PrivacyOption[] = [
     icon: <Lock className="w-4 h-4" />,
     description: 'Only you can see this content',
     badge: 'Default',
-    color: 'text-stone-600 border-stone-200 bg-stone-50 hover:bg-stone-100'
+    color: 'text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.10] bg-stone-50 dark:bg-white/[0.04] hover:bg-stone-100 dark:hover:bg-white/[0.06]'
   }
 ]
 

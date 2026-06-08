@@ -341,7 +341,7 @@ export function AchievementUnlock({
             >
               <Button
                 onClick={handleShare}
-                className="bg-white text-stone-900 hover:bg-white/90 font-semibold px-6"
+                className="bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100 hover:bg-white/90 font-semibold px-6"
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
@@ -426,7 +426,7 @@ export function AchievementBadge({
         </div>
       </button>
       {showLabel && (
-        <span className="text-xs text-stone-600 font-medium text-center line-clamp-1 max-w-[80px]">
+        <span className="text-xs text-stone-600 dark:text-stone-400 font-medium text-center line-clamp-1 max-w-[80px]">
           {achievement.title}
         </span>
       )}
@@ -456,14 +456,14 @@ export function AchievementProgress({
   const icon = achievement.icon || achievementIcons[achievement.type] || <Trophy />
 
   return (
-    <div className={cn('flex items-center gap-3 p-3 rounded-xl bg-stone-50', className)}>
+    <div className={cn('flex items-center gap-3 p-3 rounded-xl bg-stone-50 dark:bg-white/[0.04]', className)}>
       {/* Icon */}
       <div className={cn(
         'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0',
-        progress >= 100 ? styles.badge : 'bg-stone-200'
+        progress >= 100 ? styles.badge : 'bg-stone-200 dark:bg-white/[0.08]'
       )}>
         <div className={cn(
-          progress >= 100 ? styles.text : 'text-stone-400',
+          progress >= 100 ? styles.text : 'text-stone-400 dark:text-stone-500',
           'w-6 h-6'
         )}>
           {icon}
@@ -473,16 +473,16 @@ export function AchievementProgress({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <h4 className="font-semibold text-stone-900 text-sm truncate">
+          <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm truncate">
             {achievement.title}
           </h4>
-          <span className="text-xs text-stone-500 flex-shrink-0 ml-2">
+          <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0 ml-2">
             {current}/{target}
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-stone-200 dark:bg-white/[0.08] rounded-full overflow-hidden">
           <motion.div
             className={cn(
               'h-full rounded-full bg-gradient-to-r',

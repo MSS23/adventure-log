@@ -96,27 +96,27 @@ export function YearSeasonSelector({
     <div className={cn('space-y-4', className)}>
       {/* Year Selector */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-stone-700">Year</label>
+        <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">Year</label>
         <div className="relative" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setIsYearOpen(!isYearOpen)}
             className={cn(
-              'w-full h-12 px-4 text-left bg-white border rounded-lg transition-all duration-200',
+              'w-full h-12 px-4 text-left bg-white dark:bg-[#1B170E] border rounded-lg transition-all duration-200',
               'flex items-center justify-between',
               'focus:outline-none focus:ring-2 focus:ring-olive-500/20 focus:border-olive-500',
-              error ? 'border-red-500' : 'border-stone-300 hover:border-stone-400',
+              error ? 'border-red-500' : 'border-stone-300 dark:border-white/[0.14] hover:border-stone-400 dark:hover:border-white/[0.12]',
               isYearOpen && 'border-olive-500 ring-2 ring-olive-500/20'
             )}
           >
-            <span className={year ? 'text-stone-900' : 'text-stone-500'}>
+            <span className={year ? 'text-stone-900 dark:text-stone-100' : 'text-stone-500 dark:text-stone-400'}>
               {year || 'Select year'}
             </span>
             <motion.div
               animate={{ rotate: isYearOpen ? 180 : 0 }}
               transition={transitions.snap}
             >
-              <ChevronDown className="h-5 w-5 text-stone-400" />
+              <ChevronDown className="h-5 w-5 text-stone-400 dark:text-stone-500" />
             </motion.div>
           </button>
 
@@ -127,7 +127,7 @@ export function YearSeasonSelector({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.96 }}
                 transition={transitions.snap}
-                className="absolute z-50 w-full mt-2 bg-white border border-stone-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1B170E] border border-stone-200 dark:border-white/[0.10] rounded-lg shadow-lg max-h-60 overflow-y-auto"
               >
                 <div className="py-1">
                   {years.map((y) => (
@@ -140,8 +140,8 @@ export function YearSeasonSelector({
                       }}
                       className={cn(
                         'w-full px-4 py-2.5 text-left transition-colors',
-                        'hover:bg-olive-50',
-                        year === y ? 'bg-olive-50 text-olive-700 font-medium' : 'text-stone-700'
+                        'hover:bg-olive-50 dark:hover:bg-white/[0.06]',
+                        year === y ? 'bg-olive-50 dark:bg-white/[0.06] text-olive-700 font-medium' : 'text-stone-700 dark:text-stone-300'
                       )}
                     >
                       {y}
@@ -156,7 +156,7 @@ export function YearSeasonSelector({
 
       {/* Season Cards */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-stone-700">Season</label>
+        <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">Season</label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {seasons.map((s) => {
             const isSelected = season === s.id
@@ -171,7 +171,7 @@ export function YearSeasonSelector({
                   'min-h-[80px] flex flex-col items-center justify-center gap-1',
                   isSelected
                     ? 'border-olive-500 bg-gradient-to-br ' + s.gradient
-                    : 'border-stone-200 hover:border-stone-300 bg-white'
+                    : 'border-stone-200 dark:border-white/[0.10] hover:border-stone-300 dark:hover:border-white/[0.12] bg-white dark:bg-[#1B170E]'
                 )}
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
@@ -194,7 +194,7 @@ export function YearSeasonSelector({
                 <span
                   className={cn(
                     'text-sm font-medium relative z-10',
-                    isSelected ? 'text-olive-700' : 'text-stone-700'
+                    isSelected ? 'text-olive-700' : 'text-stone-700 dark:text-stone-300'
                   )}
                 >
                   {s.name}
@@ -202,7 +202,7 @@ export function YearSeasonSelector({
                 <span
                   className={cn(
                     'text-xs relative z-10',
-                    isSelected ? 'text-olive-600' : 'text-stone-400'
+                    isSelected ? 'text-olive-600' : 'text-stone-400 dark:text-stone-500'
                   )}
                 >
                   {s.months}

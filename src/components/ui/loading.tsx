@@ -51,7 +51,7 @@ export function LoadingBar({ progress, className, showPercentage = false }: Load
     <div className={cn('space-y-2', className)}>
       <Progress value={progress} className="h-2" />
       {showPercentage && progress !== undefined && (
-        <div className="text-sm text-stone-800 text-center">
+        <div className="text-sm text-stone-800 dark:text-stone-200 text-center">
           {Math.round(progress)}%
         </div>
       )}
@@ -86,12 +86,12 @@ export function LoadingOverlay({
         </div>
       )}
 
-      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm mx-auto text-center">
+      <div className="absolute inset-0 bg-white/80 dark:bg-[#1B170E]/80 backdrop-blur-sm flex items-center justify-center z-10">
+        <div className="bg-white dark:bg-[#1B170E] rounded-lg shadow-lg p-6 max-w-sm mx-auto text-center">
           <LoadingSpinner size="lg" className="mx-auto mb-4 text-olive-600" />
 
           <div className="space-y-3">
-            <p className="text-stone-900 font-medium">{text}</p>
+            <p className="text-stone-900 dark:text-stone-100 font-medium">{text}</p>
 
             {stage && (
               <Badge variant="outline" className="text-sm">
@@ -120,12 +120,12 @@ export function FormLoading({ loadingState, className }: FormLoadingProps) {
   if (!isLoading) return null
 
   return (
-    <div className={cn('flex items-center space-x-3 p-4 bg-olive-50 rounded-lg border border-olive-200', className)}>
+    <div className={cn('flex items-center space-x-3 p-4 bg-olive-50 dark:bg-olive-950/20 rounded-lg border border-olive-200 dark:border-white/[0.08]', className)}>
       <LoadingSpinner size="sm" className="text-olive-600" />
 
       <div className="flex-1 space-y-2">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-olive-900">{loadingText}</p>
+          <p className="text-sm font-medium text-olive-900 dark:text-stone-100">{loadingText}</p>
           {stage && (
             <Badge variant="outline" className="text-sm">
               {stage}
@@ -178,7 +178,7 @@ export function InlineLoading({
   if (!isLoading) return null
 
   return (
-    <div className={cn('flex items-center space-x-2 text-stone-800', className)}>
+    <div className={cn('flex items-center space-x-2 text-stone-800 dark:text-stone-200', className)}>
       <LoadingSpinner size={size} />
       <span className={cn('text-sm', size === 'md' && 'text-base')}>{text}</span>
     </div>
@@ -191,7 +191,7 @@ export interface SkeletonProps {
 
 export function Skeleton({ className }: SkeletonProps) {
   return (
-    <div className={cn('animate-pulse bg-stone-200 rounded', className)} />
+    <div className={cn('animate-pulse bg-stone-200 dark:bg-white/[0.08] rounded', className)} />
   )
 }
 

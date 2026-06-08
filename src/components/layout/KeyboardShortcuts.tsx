@@ -100,14 +100,14 @@ export function KeyboardShortcuts() {
           <div className="space-y-6 mt-4">
             {Object.entries(groupedShortcuts).map(([category, categoryShortcuts]) => (
               <div key={category}>
-                <h3 className="text-sm font-semibold text-stone-700 mb-3">{category}</h3>
+                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3">{category}</h3>
                 <div className="space-y-2">
                   {categoryShortcuts.map((shortcut) => (
                     <div
                       key={shortcut.key}
-                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-stone-50 transition-colors"
+                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-stone-50 dark:hover:bg-white/[0.06] transition-colors"
                     >
-                      <span className="text-sm text-stone-700">{shortcut.label}</span>
+                      <span className="text-sm text-stone-700 dark:text-stone-300">{shortcut.label}</span>
                       <Badge variant="secondary" className="font-mono">
                         {shortcut.key === '/' ? (
                           <span>/</span>
@@ -124,8 +124,8 @@ export function KeyboardShortcuts() {
             ))}
           </div>
 
-          <div className="mt-6 pt-4 border-t text-center">
-            <p className="text-xs text-stone-500">
+          <div className="mt-6 pt-4 border-t dark:border-white/[0.08] text-center">
+            <p className="text-xs text-stone-500 dark:text-stone-400">
               Press <Badge variant="secondary" className="mx-1">?</Badge> anytime to view shortcuts
             </p>
           </div>

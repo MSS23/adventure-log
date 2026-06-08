@@ -402,10 +402,10 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
 
       {location && (
         <div className="absolute bottom-2 left-2 right-2 z-10 pointer-events-none">
-          <div className="bg-white/95 backdrop-blur-sm rounded-md px-2 py-1.5 shadow-sm border border-stone-200">
+          <div className="bg-white/95 dark:bg-[#1B170E]/95 backdrop-blur-sm rounded-md px-2 py-1.5 shadow-sm border border-stone-200 dark:border-white/[0.10]">
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3 text-red-500 flex-shrink-0" />
-              <p className="text-xs font-medium text-stone-900 truncate">{location}</p>
+              <p className="text-xs font-medium text-stone-900 dark:text-stone-100 truncate">{location}</p>
             </div>
           </div>
         </div>
@@ -466,7 +466,7 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
       className={cn(
         'inline-flex items-center gap-2 px-3 py-1.5 rounded-full',
         'bg-gradient-to-r from-olive-50 to-olive-50',
-        'border border-olive-200/50',
+        'border border-olive-200/50 dark:border-white/[0.08]',
         'text-sm text-olive-700 hover:text-olive-800',
         'transition-all duration-200',
         'hover:shadow-md hover:shadow-olive-100 hover:border-olive-300',
@@ -552,7 +552,7 @@ export const LocationBadge = memo(function LocationBadge({
       )}
       <Link
         href={linkUrl}
-        className="flex items-center gap-1.5 text-sm text-stone-600 hover:text-olive-600 transition-colors"
+        className="flex items-center gap-1.5 text-sm text-stone-600 dark:text-stone-400 hover:text-olive-600 transition-colors"
       >
         {countryCode && <span>{getFlag(countryCode)}</span>}
         <MapPin className="w-3.5 h-3.5" />

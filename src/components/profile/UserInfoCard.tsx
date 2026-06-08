@@ -28,11 +28,11 @@ export function UserInfoCard({
   followLoading
 }: UserInfoCardProps) {
   return (
-    <Card className="border border-stone-200 shadow-sm rounded-2xl">
+    <Card className="border border-stone-200 dark:border-white/[0.10] shadow-sm rounded-2xl">
       <CardContent className="p-6 space-y-6">
         {/* Avatar */}
         <div className="flex justify-center">
-          <Avatar className="h-40 w-40 ring-4 ring-white shadow-xl">
+          <Avatar className="h-40 w-40 ring-4 ring-white dark:ring-white/[0.08] shadow-xl">
             <AvatarImage
               src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
               alt={profile.display_name || profile.username || 'User'}
@@ -45,7 +45,7 @@ export function UserInfoCard({
 
         {/* Bio */}
         {profile.bio && (
-          <p className="text-sm text-stone-700 text-center leading-relaxed">
+          <p className="text-sm text-stone-700 dark:text-stone-300 text-center leading-relaxed">
             {profile.bio}
           </p>
         )}
@@ -63,7 +63,7 @@ export function UserInfoCard({
             disabled={followLoading}
             className={
               followStatus === 'following'
-                ? "w-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-300 rounded-lg font-medium"
+                ? "w-full bg-white dark:bg-[#1B170E] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-900 dark:text-stone-100 border border-stone-300 dark:border-white/[0.14] rounded-lg font-medium"
                 : "w-full bg-olive-500 hover:bg-olive-600 text-white rounded-lg font-medium"
             }
           >
@@ -83,9 +83,9 @@ export function UserInfoCard({
         )}
 
         {/* Follower/Following Stats - Inline */}
-        <div className="flex items-center justify-center gap-6 text-sm text-stone-600">
-          <span><span className="font-semibold text-stone-900">{followingCount}</span> Following</span>
-          <span><span className="font-semibold text-stone-900">{followersCount}</span> Followers</span>
+        <div className="flex items-center justify-center gap-6 text-sm text-stone-600 dark:text-stone-400">
+          <span><span className="font-semibold text-stone-900 dark:text-stone-100">{followingCount}</span> Following</span>
+          <span><span className="font-semibold text-stone-900 dark:text-stone-100">{followersCount}</span> Followers</span>
         </div>
       </CardContent>
     </Card>

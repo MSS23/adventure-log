@@ -199,8 +199,8 @@ export function NotificationSettings() {
     return (
       <Card>
         <CardContent className="py-12">
-          <div className="text-center text-stone-500">
-            <Bell className="h-12 w-12 mx-auto mb-3 text-stone-400 animate-pulse" />
+          <div className="text-center text-stone-500 dark:text-stone-400">
+            <Bell className="h-12 w-12 mx-auto mb-3 text-stone-400 dark:text-stone-500 animate-pulse" />
             <p>Loading preferences...</p>
           </div>
         </CardContent>

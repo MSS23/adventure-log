@@ -42,7 +42,7 @@ export function CountrySection({
       >
         {/* Flag with enhanced container */}
         <div className="relative">
-          <div className="w-12 h-12 bg-gradient-to-br from-stone-100 to-stone-50 rounded-xl flex items-center justify-center shadow-sm">
+          <div className="w-12 h-12 bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-50 dark:to-white/[0.04] rounded-xl flex items-center justify-center shadow-sm">
             <span className="text-2xl">
               {getFlagEmoji(countryCode)}
             </span>
@@ -61,7 +61,7 @@ export function CountrySection({
               {countryName}
             </h3>
             {countryCode === 'UNKNOWN' && (
-              <span className="text-xs px-2 py-0.5 bg-stone-100 text-stone-600 rounded-full">
+              <span className="text-xs px-2 py-0.5 bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-stone-400 rounded-full">
                 Location pending
               </span>
             )}
@@ -87,7 +87,7 @@ export function CountrySection({
           <ChevronDown
             className={cn(
               "h-5 w-5 transition-all duration-300",
-              isExpanded ? "rotate-180 text-olive-600" : "text-stone-400"
+              isExpanded ? "rotate-180 text-olive-600" : "text-stone-400 dark:text-stone-500"
             )}
           />
         </div>

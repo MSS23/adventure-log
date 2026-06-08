@@ -237,7 +237,7 @@ export default function PublicAlbumPage() {
   const coverPhotoUrl = album.cover_photo_url || album.cover_image_url || (photos[0]?.file_path ? getPhotoUrl(photos[0].file_path) : null)
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-stone-50 dark:bg-white/[0.04]">
       {/* Hero Section */}
       <AlbumHero
         title={album.title}
@@ -272,7 +272,7 @@ export default function PublicAlbumPage() {
         <div className="max-w-6xl mx-auto px-4 pb-20">
           {/* Album Info Card */}
           <motion.div
-            className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8"
+            className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden mb-8"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -286,7 +286,7 @@ export default function PublicAlbumPage() {
                   transition={{ delay: 0.4 }}
                 >
                   <Link href={`/profile/${owner.id}`}>
-                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 to-olive-50 rounded-xl mb-6 hover:from-olive-100 hover:to-olive-100 transition-all duration-200 cursor-pointer hover:shadow-sm">
+                    <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20 rounded-xl mb-6 hover:from-olive-100 dark:hover:from-olive-950/30 hover:to-olive-100 dark:hover:to-olive-950/30 transition-all duration-200 cursor-pointer hover:shadow-sm">
                       <Avatar className="h-12 w-12 ring-2 ring-olive-500/20">
                         <AvatarImage
                           src={owner.avatar_url ? getPhotoUrl(owner.avatar_url, 'avatars') || undefined : undefined}
@@ -297,12 +297,12 @@ export default function PublicAlbumPage() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <p className="text-sm text-stone-600">Created by</p>
-                        <p className="font-semibold text-stone-900">
+                        <p className="text-sm text-stone-600 dark:text-stone-400">Created by</p>
+                        <p className="font-semibold text-stone-900 dark:text-stone-100">
                           {owner.display_name || owner.username}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-olive-600 bg-white px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-2 text-sm text-olive-600 bg-white dark:bg-[#1B170E] px-3 py-1.5 rounded-full">
                         <User className="h-4 w-4" />
                         <span className="font-medium">View Profile</span>
                       </div>
@@ -320,7 +320,7 @@ export default function PublicAlbumPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <p className={cn(
-                    "text-stone-700 text-lg leading-relaxed max-w-prose",
+                    "text-stone-700 dark:text-stone-300 text-lg leading-relaxed max-w-prose",
                     !showFullDescription && album.description.length > 200 && "line-clamp-3"
                   )}>
                     {album.description}
@@ -344,7 +344,7 @@ export default function PublicAlbumPage() {
 
               {/* Action Bar */}
               <motion.div
-                className="flex flex-wrap items-center gap-3 pt-4 border-t"
+                className="flex flex-wrap items-center gap-3 pt-4 border-t dark:border-white/[0.08]"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
@@ -368,11 +368,11 @@ export default function PublicAlbumPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
-                <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
+              <div className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
+                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
                   <Camera className="h-5 w-5 text-olive-500" />
                   Photos
-                  <span className="text-sm font-normal text-stone-500">
+                  <span className="text-sm font-normal text-stone-500 dark:text-stone-400">
                     ({photos.length} {photos.length === 1 ? 'photo' : 'photos'})
                   </span>
                 </h2>
@@ -384,25 +384,25 @@ export default function PublicAlbumPage() {
             </motion.div>
           ) : (
             <motion.div
-              className="bg-white rounded-2xl shadow-xl overflow-hidden p-12 text-center"
+              className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-12 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <motion.div
-                className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                className="w-20 h-20 bg-stone-100 dark:bg-white/[0.06] rounded-full flex items-center justify-center mx-auto mb-4"
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
               >
                 <Camera className="h-10 w-10 text-stone-400" />
               </motion.div>
-              <p className="text-stone-600 text-lg">This album doesn&apos;t have any photos yet.</p>
+              <p className="text-stone-600 dark:text-stone-400 text-lg">This album doesn&apos;t have any photos yet.</p>
             </motion.div>
           )}
 
           {/* Social Share Section */}
           <motion.div
-            className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden p-6"
+            className="mt-8 bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
@@ -418,17 +418,17 @@ export default function PublicAlbumPage() {
           {/* Location Map */}
           {album.latitude && album.longitude && (
             <motion.div
-              className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden"
+              className="mt-8 bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <div className="p-6">
-                <h2 className="text-xl font-semibold text-stone-900 mb-4 flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-olive-500" />
                   Location
                 </h2>
-                <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-stone-100">
+                <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-stone-100 dark:bg-white/[0.06]">
                   <iframe
                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${album.longitude - 0.05}%2C${album.latitude - 0.05}%2C${album.longitude + 0.05}%2C${album.latitude + 0.05}&layer=mapnik&marker=${album.latitude}%2C${album.longitude}`}
                     className="w-full h-full border-0"
@@ -436,7 +436,7 @@ export default function PublicAlbumPage() {
                   />
                   {album.location_name && (
                     <motion.div
-                      className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-stone-700"
+                      className="absolute top-4 left-4 bg-white/90 dark:bg-white/[0.08] backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-stone-700 dark:text-stone-300"
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.8 }}

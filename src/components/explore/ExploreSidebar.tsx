@@ -9,11 +9,11 @@ export function ExploreSidebar() {
   if (!user) return null
 
   return (
-    <aside className="hidden lg:flex lg:w-[280px] xl:w-[340px] flex-col fixed right-0 top-0 bottom-0 bg-white z-30 border-l border-stone-100">
+    <aside className="hidden lg:flex lg:w-[280px] xl:w-[340px] flex-col fixed right-0 top-0 bottom-0 bg-white dark:bg-[#1B170E] z-30 border-l border-stone-100 dark:border-white/[0.08]">
       <div className="flex flex-col h-full overflow-y-auto scrollbar-hide">
         {/* Header */}
-        <div className="p-4 lg:p-6 border-b border-stone-100 sticky top-0 bg-white z-10">
-          <h2 className="text-base font-semibold text-stone-900">
+        <div className="p-4 lg:p-6 border-b border-stone-100 dark:border-white/[0.08] sticky top-0 bg-white dark:bg-[#1B170E] z-10">
+          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
             Suggested for you
           </h2>
         </div>

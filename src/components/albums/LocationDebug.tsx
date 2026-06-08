@@ -19,7 +19,7 @@ export function LocationDebug({ album }: LocationDebugProps) {
   const hasValidCoordinates = hasLatitude && hasLongitude && album.latitude !== 0 && album.longitude !== 0
 
   return (
-    <Card className="bg-yellow-50 border-yellow-200">
+    <Card className="bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-900/40">
       <CardContent className="p-4">
         <h3 className="font-semibold text-yellow-900 mb-2">Location Debug Info</h3>
         <div className="space-y-1 text-sm font-mono">
@@ -54,7 +54,7 @@ export function LocationDebug({ album }: LocationDebugProps) {
             <span>Valid coordinates: {hasValidCoordinates ? 'Yes' : 'No'}</span>
           </div>
         </div>
-        <div className="mt-3 p-2 bg-white rounded text-xs">
+        <div className="mt-3 p-2 bg-white dark:bg-[#1B170E] rounded text-xs">
           <p className="font-semibold mb-1">Should show LocationSection:</p>
           <p>{(hasLocationName || hasLatitude || hasLongitude) ? 'YES' : 'NO'}</p>
           {!hasLocationName && !hasLatitude && !hasLongitude && (

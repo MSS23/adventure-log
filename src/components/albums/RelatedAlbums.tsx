@@ -68,12 +68,12 @@ export function RelatedAlbums({
   if (loading) {
     return (
       <div className={cn("mt-12", className)}>
-        <h3 className="text-xl font-bold text-stone-900 mb-6">More from {username}</h3>
+        <h3 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-6">More from {username}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="aspect-[4/5] bg-gradient-to-br from-stone-200 to-stone-100 rounded-xl" />
-              <div className="h-4 bg-stone-200 rounded mt-3 w-3/4" />
+              <div className="aspect-[4/5] bg-gradient-to-br from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.04] rounded-xl" />
+              <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded mt-3 w-3/4" />
             </div>
           ))}
         </div>
@@ -110,7 +110,7 @@ export function RelatedAlbums({
   return (
     <div className={cn("mt-12", className)}>
       <motion.h3
-        className="text-xl font-bold text-stone-900 mb-6 flex items-center gap-2"
+        className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-6 flex items-center gap-2"
         initial={prefersReducedMotion ? {} : { opacity: 0, x: -10 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true }}
@@ -150,7 +150,7 @@ export function RelatedAlbums({
                 </div>
 
                 <Link href={`/albums/${album.id}`} className="block">
-                  <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-stone-100 shadow-md group-hover:shadow-xl transition-shadow duration-500">
+                  <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-stone-100 dark:bg-white/[0.06] shadow-md group-hover:shadow-xl transition-shadow duration-500">
                     {photoUrl ? (
                     <Image
                       src={photoUrl}
@@ -160,9 +160,9 @@ export function RelatedAlbums({
                       sizes="(max-width: 768px) 50vw, 25vw"
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
-                      <Camera className="h-8 w-8 text-stone-300 mb-2" />
-                      <span className="text-stone-400 text-xs">No photo</span>
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-stone-100 dark:from-white/[0.04] to-stone-200 dark:to-white/[0.08]">
+                      <Camera className="h-8 w-8 text-stone-300 dark:text-stone-600 mb-2" />
+                      <span className="text-stone-400 dark:text-stone-500 text-xs">No photo</span>
                     </div>
                   )}
 
@@ -193,11 +193,11 @@ export function RelatedAlbums({
 
                 {/* Title below image */}
                 <div className="mt-3">
-                  <h4 className="font-semibold text-stone-900 text-sm truncate group-hover:text-olive-600 transition-colors duration-300">
+                  <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm truncate group-hover:text-olive-600 transition-colors duration-300">
                     {album.title}
                   </h4>
                   {!album.location_name && album.date_start && (
-                    <p className="text-xs text-stone-500 mt-0.5">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                       {format(new Date(album.date_start), 'MMM d, yyyy')}
                     </p>
                   )}

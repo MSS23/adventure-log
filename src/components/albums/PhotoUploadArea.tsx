@@ -25,10 +25,10 @@ export function PhotoUploadArea({ onFilesSelected, isUploading = false }: PhotoU
     <div
       {...getRootProps()}
       className={cn(
-        "bg-white border-2 border-dashed rounded-xl p-16 text-center cursor-default transition-all flex flex-col items-center justify-center min-h-[300px]",
+        "bg-white dark:bg-[#1B170E] border-2 border-dashed rounded-xl p-16 text-center cursor-default transition-all flex flex-col items-center justify-center min-h-[300px]",
         isDragActive
-          ? "border-olive-500 bg-olive-50/30"
-          : "border-stone-300 hover:border-stone-400"
+          ? "border-olive-500 bg-olive-50/30 dark:bg-olive-950/20"
+          : "border-stone-300 dark:border-white/[0.14] hover:border-stone-400 dark:hover:border-white/[0.12]"
       )}
     >
       <input {...getInputProps()} />
@@ -36,7 +36,7 @@ export function PhotoUploadArea({ onFilesSelected, isUploading = false }: PhotoU
       {isUploading ? (
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-12 w-12 text-olive-500 animate-spin" />
-          <p className="text-base font-medium text-stone-700">Uploading photos...</p>
+          <p className="text-base font-medium text-stone-700 dark:text-stone-300">Uploading photos...</p>
         </div>
       ) : (
         <>
@@ -48,10 +48,10 @@ export function PhotoUploadArea({ onFilesSelected, isUploading = false }: PhotoU
             <p className="text-lg font-medium text-olive-700">Drop photos here</p>
           ) : (
             <>
-              <h3 className="text-lg font-medium text-stone-900 mb-2">
+              <h3 className="text-lg font-medium text-stone-900 dark:text-stone-100 mb-2">
                 Drag & Drop Photos Here
               </h3>
-              <p className="text-sm text-stone-500 mb-6">
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
                 or select from your computer
               </p>
               <Button

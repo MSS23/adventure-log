@@ -329,9 +329,9 @@ export default function EditAlbumPage() {
       case 'friends':
         return <Users className="h-4 w-4 text-olive-600" />
       case 'private':
-        return <Lock className="h-4 w-4 text-stone-800" />
+        return <Lock className="h-4 w-4 text-stone-800 dark:text-stone-300" />
       default:
-        return <Globe className="h-4 w-4 text-stone-800" />
+        return <Globe className="h-4 w-4 text-stone-800 dark:text-stone-300" />
     }
   }
 
@@ -352,9 +352,9 @@ export default function EditAlbumPage() {
     return (
       <div className="space-y-8">
         <div className="animate-pulse">
-          <div className="h-4 bg-stone-200 rounded w-32 mb-4"></div>
-          <div className="h-8 bg-stone-200 rounded w-64 mb-2"></div>
-          <div className="h-4 bg-stone-200 rounded w-48"></div>
+          <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-32 mb-4"></div>
+          <div className="h-8 bg-stone-200 dark:bg-white/[0.08] rounded w-64 mb-2"></div>
+          <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-48"></div>
         </div>
 
         <Card>
@@ -362,8 +362,8 @@ export default function EditAlbumPage() {
             <div className="space-y-4">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="h-4 bg-stone-200 rounded w-24"></div>
-                  <div className="h-10 bg-stone-200 rounded"></div>
+                  <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-24"></div>
+                  <div className="h-10 bg-stone-200 dark:bg-white/[0.08] rounded"></div>
                 </div>
               ))}
             </div>
@@ -378,13 +378,13 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
+          className="inline-flex items-center text-sm text-stone-800 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
         </button>
 
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30">
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-red-600 font-medium">Failed to load album</p>
@@ -409,7 +409,7 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
+          className="inline-flex items-center text-sm text-stone-800 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -418,7 +418,7 @@ export default function EditAlbumPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-stone-800">Album not found</p>
+              <p className="text-stone-800 dark:text-stone-200">Album not found</p>
               <Link href="/albums" className="mt-4 inline-block">
                 <Button variant="outline">Back to Albums</Button>
               </Link>
@@ -435,7 +435,7 @@ export default function EditAlbumPage() {
       <div className="space-y-4">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 hover:text-stone-900 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
+          className="inline-flex items-center text-sm text-stone-800 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -512,9 +512,9 @@ export default function EditAlbumPage() {
                 <p className="text-sm text-red-600">{errors.location_name.message}</p>
               )}
               {albumLocation && (
-                <div className="p-2 bg-olive-50 border border-olive-200 rounded text-sm">
-                  <p className="text-olive-800 font-medium">Selected: {albumLocation.display_name}</p>
-                  <p className="text-olive-600 text-sm">
+                <div className="p-2 bg-olive-50 dark:bg-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded text-sm">
+                  <p className="text-olive-800 dark:text-stone-200 font-medium">Selected: {albumLocation.display_name}</p>
+                  <p className="text-olive-600 dark:text-stone-400 text-sm">
                     Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
                   </p>
                 </div>
@@ -555,12 +555,12 @@ export default function EditAlbumPage() {
               <div className="flex items-center justify-between space-x-2">
                 <div className="space-y-0.5 flex-1">
                   <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4 text-stone-800" />
+                    <CalendarIcon className="h-4 w-4 text-stone-800 dark:text-stone-200" />
                     <Label htmlFor="show_exact_dates" className="text-base font-medium">
                       Show Exact Dates
                     </Label>
                   </div>
-                  <p className="text-sm text-stone-800">
+                  <p className="text-sm text-stone-800 dark:text-stone-300">
                     {showExactDates
                       ? 'Full dates will be displayed (e.g., "December 12, 1999")'
                       : 'Only month and year will be shown (e.g., "December 1999")'}
@@ -573,8 +573,8 @@ export default function EditAlbumPage() {
                   className="cursor-pointer"
                 />
               </div>
-              <div className="p-3 bg-olive-50 border border-olive-200 rounded-md">
-                <p className="text-sm text-olive-800">
+              <div className="p-3 bg-olive-50 dark:bg-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded-md">
+                <p className="text-sm text-olive-800 dark:text-stone-200">
                   <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
                   Sharing exact dates can reveal when you&apos;re away from home.
                 </p>
@@ -623,7 +623,7 @@ export default function EditAlbumPage() {
                 </SelectContent>
               </Select>
               {visibility && (
-                <p className="text-sm text-stone-800 flex items-center gap-2">
+                <p className="text-sm text-stone-800 dark:text-stone-300 flex items-center gap-2">
                   {getVisibilityIcon(visibility)}
                   {getVisibilityDescription(visibility)}
                 </p>
@@ -655,7 +655,7 @@ export default function EditAlbumPage() {
             {photosLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="aspect-square bg-stone-200 rounded-lg animate-pulse"></div>
+                  <div key={i} className="aspect-square bg-stone-200 dark:bg-white/[0.08] rounded-lg animate-pulse"></div>
                 ))}
               </div>
             ) : photos.length === 0 ? (

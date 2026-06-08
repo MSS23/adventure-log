@@ -27,8 +27,8 @@ export function CoverPhotoSelector({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-6">
-      <p className="text-sm text-stone-600 mb-4">
+    <div className="bg-white dark:bg-[#1B170E] rounded-2xl border border-stone-200 dark:border-white/[0.10] p-6">
+      <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">
         Click a photo to select it as your cover image.
       </p>
 
@@ -40,7 +40,7 @@ export function CoverPhotoSelector({
               "relative w-24 h-24 flex-shrink-0 group cursor-pointer rounded-lg overflow-hidden transition-all border-2",
               selectedCoverId === index
                 ? "border-olive-500 ring-2 ring-olive-200"
-                : "border-stone-200 hover:border-stone-300"
+                : "border-stone-200 dark:border-white/[0.10] hover:border-stone-300 dark:hover:border-white/[0.12]"
             )}
             onClick={() => onSelectCover(index)}
           >

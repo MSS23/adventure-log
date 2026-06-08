@@ -92,7 +92,7 @@ function ProfileQRCode({ url, size = 160 }: { url: string; size?: number }) {
 
   return (
     <div className="relative">
-      <div className="rounded-2xl overflow-hidden bg-white p-3 shadow-lg border border-stone-200 dark:border-stone-700">
+      <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#1B170E] p-3 shadow-lg border border-stone-200 dark:border-stone-700">
         <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
       </div>
       <div className="absolute -bottom-2 -right-2 size-8 rounded-full bg-olive-600 flex items-center justify-center shadow-md ring-2 ring-white dark:ring-black">
@@ -136,7 +136,7 @@ function GlobeCoverageRing({ percentage, countriesCount }: { percentage: number;
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-bold text-stone-900 dark:text-white tabular-nums">{percentage.toFixed(1)}%</span>
-        <span className="text-[9px] font-semibold text-stone-400 uppercase tracking-[0.15em]">
+        <span className="text-[9px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-[0.15em]">
           {countriesCount} / 195
         </span>
       </div>
@@ -330,7 +330,7 @@ export function PublicPassportContent({
                 <p className="text-xl md:text-2xl font-bold text-stone-900 dark:text-white tabular-nums">
                   {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                 </p>
-                <p className="text-[10px] text-stone-500 uppercase tracking-wider font-medium">{stat.label}</p>
+                <p className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wider font-medium">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -353,7 +353,7 @@ export function PublicPassportContent({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55 }}
         >
-          <p className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-3">Continents</p>
+          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3">Continents</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {allContinents.map((continent, i) => {
               const visited = continentsVisited.includes(continent)
@@ -378,7 +378,7 @@ export function PublicPassportContent({
                     <p className={cn("text-sm font-semibold", visited ? "text-olive-800 dark:text-olive-200" : "text-stone-400")}>
                       {continent}
                     </p>
-                    <p className="text-[10px] text-stone-400 font-medium">
+                    <p className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">
                       {visited ? '✓ Explored' : 'Not yet'}
                     </p>
                   </div>
@@ -396,7 +396,7 @@ export function PublicPassportContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65 }}
           >
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-3">Countries Visited</p>
+            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3">Countries Visited</p>
             <div className="bg-white dark:bg-[#111] rounded-2xl border border-stone-200 dark:border-stone-800 p-4 sm:p-5">
               <div className="flex flex-wrap gap-2">
                 {countryCodes.map((code, i) => (
@@ -429,7 +429,7 @@ export function PublicPassportContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.75 }}
           >
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] mb-3">Journey</p>
+            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3">Journey</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {firstTrip && (
                 <div className="bg-white dark:bg-[#111] rounded-xl border border-stone-200 dark:border-stone-800 p-4">
@@ -437,16 +437,16 @@ export function PublicPassportContent({
                     <div className="size-8 rounded-full bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
                       <Plane className="h-3.5 w-3.5 text-olive-600 dark:text-olive-400" />
                     </div>
-                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">First Adventure</span>
+                    <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">First Adventure</span>
                   </div>
                   <p className="font-semibold text-stone-900 dark:text-white">{firstTrip.title}</p>
                   {firstTrip.location && (
-                    <p className="text-sm text-stone-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-stone-500 dark:text-stone-400 flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {firstTrip.location.split(',')[0]}
                     </p>
                   )}
-                  <p className="text-xs text-stone-400 mt-1">
+                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
                     {new Date(firstTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </p>
                 </div>
@@ -457,16 +457,16 @@ export function PublicPassportContent({
                     <div className="size-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
                       <MapPin className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Latest Adventure</span>
+                    <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Latest Adventure</span>
                   </div>
                   <p className="font-semibold text-stone-900 dark:text-white">{latestTrip.title}</p>
                   {latestTrip.location && (
-                    <p className="text-sm text-stone-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-stone-500 dark:text-stone-400 flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {latestTrip.location.split(',')[0]}
                     </p>
                   )}
-                  <p className="text-xs text-stone-400 mt-1">
+                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
                     {new Date(latestTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </p>
                 </div>
@@ -524,7 +524,7 @@ export function PublicPassportContent({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
         >
-          <p className="text-xs text-stone-400 mb-1">
+          <p className="text-xs text-stone-400 dark:text-stone-500 mb-1">
             Member since {new Date(memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </p>
           <p className="text-sm text-stone-400 dark:text-stone-500 mb-4">

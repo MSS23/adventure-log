@@ -74,19 +74,19 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
       <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
         {Array.from({ length: limit }).map((_, i) => (
           <div key={i} className="group">
-            <div className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm">
-              <div className="aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 animate-pulse" />
+            <div className="bg-white dark:bg-[#1B170E] rounded-2xl overflow-hidden border border-stone-100 dark:border-white/[0.08] shadow-sm">
+              <div className="aspect-[4/3] bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-200 dark:to-white/[0.08] animate-pulse" />
               <div className="p-5 space-y-4">
                 <div>
-                  <div className="h-5 bg-stone-200 rounded-md animate-pulse w-3/4" />
-                  <div className="h-4 bg-stone-100 rounded-md w-1/2 animate-pulse mt-2" />
+                  <div className="h-5 bg-stone-200 dark:bg-white/[0.08] rounded-md animate-pulse w-3/4" />
+                  <div className="h-4 bg-stone-100 dark:bg-white/[0.06] rounded-md w-1/2 animate-pulse mt-2" />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-full bg-stone-200 animate-pulse" />
-                    <div className="h-4 bg-stone-100 rounded-md w-24 animate-pulse" />
+                    <div className="h-8 w-8 rounded-full bg-stone-200 dark:bg-white/[0.08] animate-pulse" />
+                    <div className="h-4 bg-stone-100 dark:bg-white/[0.06] rounded-md w-24 animate-pulse" />
                   </div>
-                  <div className="h-9 w-24 bg-gradient-to-r from-stone-200 to-stone-100 rounded-lg animate-pulse" />
+                  <div className="h-9 w-24 bg-gradient-to-r from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06] rounded-lg animate-pulse" />
                 </div>
               </div>
             </div>
@@ -99,11 +99,11 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="p-4 bg-red-50 rounded-full mb-4">
+        <div className="p-4 bg-red-50 dark:bg-red-950/30 rounded-full mb-4">
           <MapPin className="h-8 w-8 text-red-400" />
         </div>
-        <p className="text-stone-700 font-medium mb-2">Oops, something went wrong</p>
-        <p className="text-stone-500 text-sm mb-3">{error}</p>
+        <p className="text-stone-700 dark:text-stone-300 font-medium mb-2">Oops, something went wrong</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm mb-3">{error}</p>
         <Button
           variant="outline"
           size="sm"
@@ -119,11 +119,11 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
   if (albums.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="p-4 bg-stone-50 rounded-full mb-4">
-          <MapPin className="h-8 w-8 text-stone-400" />
+        <div className="p-4 bg-stone-50 dark:bg-white/[0.04] rounded-full mb-4">
+          <MapPin className="h-8 w-8 text-stone-400 dark:text-stone-500" />
         </div>
-        <p className="text-stone-700 font-medium mb-2">No journeys yet</p>
-        <p className="text-stone-500 text-sm">Be the first to share your adventure!</p>
+        <p className="text-stone-700 dark:text-stone-300 font-medium mb-2">No journeys yet</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm">Be the first to share your adventure!</p>
       </div>
     )
   }
@@ -182,7 +182,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
             }}
           >
             <motion.div
-              className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm transition-shadow duration-300"
+              className="bg-white dark:bg-[#1B170E] rounded-2xl overflow-hidden border border-stone-100 dark:border-white/[0.08] shadow-sm transition-shadow duration-300"
               whileHover={{
                 y: -4,
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
@@ -190,7 +190,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
               {/* Album Cover Image */}
-              <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100">
+              <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-50 dark:from-white/[0.04] to-stone-100 dark:to-white/[0.06]">
                 {coverUrl ? (
                   <>
                     <motion.div
@@ -227,12 +227,12 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                 {/* Title and Country */}
                 <div>
                   <Link href={`/albums/${album.id}`}>
-                    <h3 className="text-[17px] font-semibold text-stone-900 line-clamp-1 hover:text-olive-600 transition-colors duration-200">
+                    <h3 className="text-[17px] font-semibold text-stone-900 dark:text-stone-100 line-clamp-1 hover:text-olive-600 transition-colors duration-200">
                       {album.title}
                     </h3>
                   </Link>
                   {country && (
-                    <p className="text-sm text-stone-500 mt-1 flex items-center gap-1">
+                    <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
                       {country}
                     </p>
@@ -246,13 +246,13 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                       href={`/profile/${user.username}`}
                       className="flex items-center gap-2 group/user min-w-0 flex-1"
                     >
-                      <Avatar className="h-8 w-8 ring-2 ring-stone-100 group-hover/user:ring-olive-200 transition-all duration-200 flex-shrink-0">
+                      <Avatar className="h-8 w-8 ring-2 ring-stone-100 dark:ring-white/[0.08] group-hover/user:ring-olive-200 transition-all duration-200 flex-shrink-0">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
                         <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-xs font-bold">
                           {(user.display_name || user.username || 'U')[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm text-stone-600 group-hover/user:text-stone-900 transition-colors duration-200 truncate">
+                      <span className="text-sm text-stone-600 dark:text-stone-400 group-hover/user:text-stone-900 dark:group-hover/user:text-stone-100 transition-colors duration-200 truncate">
                         <span className="hidden sm:inline">by </span><span className="font-medium">{user.display_name || user.username}</span>
                       </span>
                     </Link>

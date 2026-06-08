@@ -84,7 +84,7 @@ export function ShareButton({
       <div className={cn("relative", className)}>
         <motion.button
           onClick={handleNativeShare}
-          className="p-2 rounded-full text-stone-600 hover:text-olive-600 hover:bg-olive-50 transition-colors"
+          className="p-2 rounded-full text-stone-600 dark:text-stone-400 hover:text-olive-600 hover:bg-olive-50 dark:hover:bg-white/[0.06] transition-colors"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -102,7 +102,7 @@ export function ShareButton({
                 onClick={() => setShowQuickShare(false)}
               />
               <motion.div
-                className="absolute right-0 top-full mt-2 z-50 bg-white rounded-xl shadow-xl border border-stone-100 p-3 min-w-[200px]"
+                className="absolute right-0 top-full mt-2 z-50 bg-white dark:bg-[#1B170E] rounded-xl shadow-xl border border-stone-100 dark:border-white/[0.08] p-3 min-w-[200px]"
                 initial={{ opacity: 0, scale: 0.9, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: -10 }}
@@ -111,7 +111,7 @@ export function ShareButton({
                 <div className="space-y-1">
                   <motion.button
                     onClick={handleCopyLink}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-700 hover:bg-stone-50 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/[0.06] transition-colors"
                     whileTap={{ scale: 0.98 }}
                   >
                     {copied ? (
@@ -131,7 +131,7 @@ export function ShareButton({
                       target="_blank"
                       rel="noopener noreferrer"
                       className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-700 transition-colors",
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-700 dark:text-stone-300 transition-colors",
                         link.color
                       )}
                       whileTap={{ scale: 0.98 }}
@@ -147,7 +147,7 @@ export function ShareButton({
                     albumTitle={albumTitle}
                     trigger={
                       <motion.button
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-700 hover:bg-olive-50 hover:text-olive-600 transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-stone-700 dark:text-stone-300 hover:bg-olive-50 dark:hover:bg-white/[0.06] hover:text-olive-600 transition-colors"
                         whileTap={{ scale: 0.98 }}
                       >
                         <QrCode className="h-4 w-4" />
@@ -172,7 +172,7 @@ export function ShareButton({
         trigger={
           <motion.button
             className={cn(
-              "flex items-center gap-2 text-stone-600 hover:text-olive-600 transition-colors",
+              "flex items-center gap-2 text-stone-600 dark:text-stone-400 hover:text-olive-600 transition-colors",
               className
             )}
             whileHover={{ scale: 1.05 }}

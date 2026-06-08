@@ -260,7 +260,7 @@ export function AlbumImageModal({
                     whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                   >
-                    <ZoomIn className="h-4 w-4 text-stone-700" />
+                    <ZoomIn className="h-4 w-4 text-stone-700 dark:text-stone-300" />
                   </motion.button>
                 </div>
               </motion.div>
@@ -279,7 +279,7 @@ export function AlbumImageModal({
                   whileHover={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 1.1 }}
                   whileTap={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 0.9 }}
                 >
-                  <ChevronLeft className="h-4 w-4 text-stone-700" />
+                  <ChevronLeft className="h-4 w-4 text-stone-700 dark:text-stone-300" />
                 </motion.button>
                 <motion.button
                   className={cn(
@@ -291,7 +291,7 @@ export function AlbumImageModal({
                   whileHover={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 1.1 }}
                   whileTap={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 0.9 }}
                 >
-                  <ChevronRight className="h-4 w-4 text-stone-700" />
+                  <ChevronRight className="h-4 w-4 text-stone-700 dark:text-stone-300" />
                 </motion.button>
               </>
             )}
@@ -357,7 +357,7 @@ export function AlbumImageModal({
               Previous
             </motion.button>
 
-            <span className="text-xs text-stone-400 tabular-nums">
+            <span className="text-xs text-stone-400 dark:text-stone-500 tabular-nums">
               {currentLocationIndex + 1} / {totalLocations}
             </span>
 

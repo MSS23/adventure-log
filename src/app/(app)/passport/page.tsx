@@ -422,7 +422,7 @@ function PassportQRCode({ url, size = 180 }: { url: string; size?: number }) {
 
   return (
     <div className="relative">
-      <div className="rounded-2xl overflow-hidden bg-white p-3 shadow-xl shadow-olive-900/10 dark:shadow-black/40 border-2 border-olive-100 dark:border-olive-800/50">
+      <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#1B170E] p-3 shadow-xl shadow-olive-900/10 dark:shadow-black/40 border-2 border-olive-100 dark:border-olive-800/50">
         <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
       </div>
       <div className="absolute -bottom-2 -right-2 size-9 rounded-full bg-gradient-to-br from-olive-500 to-olive-700 flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-stone-900">
@@ -514,7 +514,7 @@ export default function TravelPassportPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="size-7 animate-spin text-olive-600 dark:text-olive-400" />
-          <p className="text-stone-400 text-sm">Loading passport...</p>
+          <p className="text-stone-400 dark:text-stone-500 text-sm">Loading passport...</p>
         </div>
       </div>
     )

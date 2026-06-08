@@ -124,10 +124,10 @@ export function GlobeControls({
   // Compact version - zoom + fit
   if (variant === 'compact') {
     return (
-      <div className={cn('flex flex-col gap-2 bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg', className)}>
+      <div className={cn('flex flex-col gap-2 bg-white/80 dark:bg-stone-800/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg', className)}>
         <ControlButton onClick={onZoomIn} icon={ZoomIn} label="Zoom in" />
         <ControlButton onClick={onZoomOut} icon={ZoomOut} label="Zoom out" />
-        <div className="h-px bg-stone-200 my-1" />
+        <div className="h-px bg-stone-200 dark:bg-white/[0.08] my-1" />
         <ControlButton onClick={onFitToJourneys} icon={Maximize2} label="Fit to journeys" disabled={!hasJourneys} />
         <ControlButton onClick={onReset} icon={RotateCcw} label="Reset view" />
       </div>
@@ -138,14 +138,14 @@ export function GlobeControls({
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       {/* Main controls */}
-      <div className="flex flex-col gap-2 bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-lg border border-stone-100">
+      <div className="flex flex-col gap-2 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-lg border border-stone-100 dark:border-white/[0.08]">
         {/* Zoom controls */}
         <div className="flex flex-col gap-1">
           <ControlButton onClick={onZoomIn} icon={ZoomIn} label="Zoom in (+)" />
           <ControlButton onClick={onZoomOut} icon={ZoomOut} label="Zoom out (-)" />
         </div>
 
-        <div className="h-px bg-stone-200" />
+        <div className="h-px bg-stone-200 dark:bg-white/[0.08]" />
 
         {/* Zoom presets dropdown */}
         <div className="relative">
@@ -153,7 +153,7 @@ export function GlobeControls({
             onClick={() => setShowPresets(!showPresets)}
             className={cn(
               'w-full p-2.5 rounded-xl transition-all flex items-center justify-between',
-              'bg-stone-50 hover:bg-stone-100 text-stone-700'
+              'bg-stone-50 dark:bg-white/[0.04] hover:bg-stone-100 dark:hover:bg-white/[0.06] text-stone-700 dark:text-stone-300'
             )}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
           >
@@ -186,13 +186,13 @@ export function GlobeControls({
                       className={cn(
                         'w-full px-3 py-2 flex items-center gap-2 text-left text-sm transition-colors',
                         isActive
-                          ? 'bg-olive-50 text-olive-700 font-medium'
-                          : 'text-stone-700 hover:bg-stone-50'
+                          ? 'bg-olive-50 dark:bg-olive-950/20 text-olive-700 font-medium'
+                          : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/[0.06]'
                       )}
                     >
                       <Icon className="h-4 w-4" />
                       <span>{preset.label}</span>
-                      <span className="ml-auto text-xs text-stone-400 font-mono">
+                      <span className="ml-auto text-xs text-stone-400 dark:text-stone-500 font-mono">
                         {preset.shortcut}
                       </span>
                     </button>
@@ -203,7 +203,7 @@ export function GlobeControls({
           </AnimatePresence>
         </div>
 
-        <div className="h-px bg-stone-200" />
+        <div className="h-px bg-stone-200 dark:bg-white/[0.08]" />
 
         {/* View controls */}
         <ControlButton
@@ -217,7 +217,7 @@ export function GlobeControls({
 
       {/* Journey playback controls */}
       {hasJourneys && (
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-lg border border-stone-100">
+        <div className="bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm rounded-2xl p-2.5 shadow-lg border border-stone-100 dark:border-white/[0.08]">
           <motion.button
             onClick={() => {
               triggerSelection()
@@ -248,7 +248,7 @@ export function GlobeControls({
 
       {/* Keyboard shortcut hint */}
       <div className="text-center">
-        <span className="text-xs text-stone-400">
+        <span className="text-xs text-stone-400 dark:text-stone-500">
           Press 1-4 for zoom presets
         </span>
       </div>

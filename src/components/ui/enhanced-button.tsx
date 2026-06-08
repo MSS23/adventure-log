@@ -16,10 +16,10 @@ const buttonVariants = cva(
         destructive:
           'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md focus-visible:ring-red-500/20',
         outline:
-          'border border-stone-300 bg-white shadow-sm hover:bg-stone-50 hover:border-stone-400 text-stone-700',
+          'border border-stone-300 dark:border-white/[0.14] bg-white dark:bg-[#1B170E] shadow-sm hover:bg-stone-50 dark:hover:bg-white/[0.06] hover:border-stone-400 dark:hover:border-white/[0.12] text-stone-700 dark:text-stone-300',
         secondary:
-          'bg-stone-100 text-stone-900 hover:bg-stone-200 border border-stone-200',
-        ghost: 'hover:bg-stone-100 hover:text-stone-900 text-stone-700',
+          'bg-stone-100 dark:bg-white/[0.06] text-stone-900 dark:text-stone-100 hover:bg-stone-200 dark:hover:bg-white/[0.06] border border-stone-200 dark:border-white/[0.10]',
+        ghost: 'hover:bg-stone-100 dark:hover:bg-white/[0.06] hover:text-stone-900 dark:hover:text-stone-100 text-stone-700 dark:text-stone-300',
         link: 'text-olive-600 underline-offset-4 hover:underline hover:text-olive-700',
         glow: 'bg-gradient-to-r from-olive-500 to-olive-500 text-white shadow-lg shadow-olive-500/25 hover:shadow-xl hover:shadow-olive-500/30',
       },
@@ -209,9 +209,9 @@ export function ButtonGroup({
   return (
     <div
       className={cn(
-        'inline-flex rounded-lg overflow-hidden border border-stone-200',
+        'inline-flex rounded-lg overflow-hidden border border-stone-200 dark:border-white/[0.10]',
         '[&>button]:rounded-none [&>button]:border-0',
-        '[&>button:not(:last-child)]:border-r [&>button:not(:last-child)]:border-stone-200',
+        '[&>button:not(:last-child)]:border-r [&>button:not(:last-child)]:border-stone-200 dark:[&>button:not(:last-child)]:border-white/[0.10]',
         className
       )}
     >

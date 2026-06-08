@@ -301,7 +301,7 @@ export function CompactPrivateGate({
   return (
     <motion.div
       className={cn(
-        "flex flex-col items-center justify-center p-8 bg-stone-50 rounded-2xl border border-stone-200",
+        "flex flex-col items-center justify-center p-8 bg-stone-50 dark:bg-white/[0.04] rounded-2xl border border-stone-200 dark:border-white/[0.10]",
         className
       )}
       initial={{ opacity: 0, scale: 0.95 }}
@@ -328,11 +328,11 @@ export function CompactPrivateGate({
         )}
       </motion.div>
 
-      <h3 className="text-lg font-semibold text-stone-900 mb-2">
+      <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">
         {visibilityLevel === 'friends' ? 'Friends Only' : 'Private Album'}
       </h3>
 
-      <p className="text-stone-500 text-sm text-center mb-4">
+      <p className="text-stone-500 dark:text-stone-400 text-sm text-center mb-4">
         {visibilityLevel === 'friends'
           ? "Follow the creator to request access"
           : "This album is only visible to the owner"}

@@ -9,13 +9,13 @@ export default function GlobalError({
 }) {
   return (
     <html>
-      <body className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
+      <body className="min-h-screen bg-stone-50 dark:bg-white/[0.04] flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center">
           <div className="text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-stone-900 mb-2">Something went wrong</h1>
-          <p className="text-stone-600 mb-6">An unexpected error occurred. Please try again.</p>
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Something went wrong</h1>
+          <p className="text-stone-600 dark:text-stone-400 mb-6">An unexpected error occurred. Please try again.</p>
           {error.digest && (
-            <p className="text-xs text-stone-400 mb-4 font-mono">Error ID: {error.digest}</p>
+            <p className="text-xs text-stone-400 dark:text-stone-500 mb-4 font-mono">Error ID: {error.digest}</p>
           )}
           <button
             onClick={reset}

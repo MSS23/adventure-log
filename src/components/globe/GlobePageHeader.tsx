@@ -118,17 +118,17 @@ export function GlobePageHeader({
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-olive-50 dark:bg-olive-900/30 rounded-md border border-olive-100 dark:border-olive-800/50">
                   <MapPin className="h-3 w-3 text-olive-600 dark:text-olive-400" />
                   <span className="text-xs font-bold text-stone-900 dark:text-stone-100">{stats.totalAlbums}</span>
-                  <span className="text-[11px] text-stone-500">adventures</span>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">adventures</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-olive-50 dark:bg-olive-900/30 rounded-md border border-olive-100 dark:border-olive-800/50">
                   <Globe2 className="h-3 w-3 text-olive-600 dark:text-olive-400" />
                   <span className="text-xs font-bold text-stone-900 dark:text-stone-100">{stats.totalCountries}</span>
-                  <span className="text-[11px] text-stone-500">countries</span>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">countries</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-olive-50 dark:bg-olive-900/30 rounded-md border border-olive-100 dark:border-olive-800/50">
                   <Route className="h-3 w-3 text-olive-600 dark:text-olive-400" />
                   <span className="text-xs font-bold text-stone-900 dark:text-stone-100">{formatDistance(totalDistance)}</span>
-                  <span className="text-[11px] text-stone-500">traveled</span>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">traveled</span>
                 </div>
               </div>
             )}
@@ -138,12 +138,12 @@ export function GlobePageHeader({
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-olive-50 dark:bg-olive-900/30 rounded-md border border-olive-100 dark:border-olive-800/50">
                   <Users className="h-3 w-3 text-olive-600 dark:text-olive-400" />
                   <span className="text-xs font-bold text-stone-900 dark:text-stone-100">{exploreStats.travelers}</span>
-                  <span className="text-[11px] text-stone-500">travelers</span>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">travelers</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-olive-50 dark:bg-olive-900/30 rounded-md border border-olive-100 dark:border-olive-800/50">
                   <Compass className="h-3 w-3 text-olive-600 dark:text-olive-400" />
                   <span className="text-xs font-bold text-stone-900 dark:text-stone-100">{exploreStats.albums}</span>
-                  <span className="text-[11px] text-stone-500">worldwide</span>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">worldwide</span>
                 </div>
               </div>
             )}
@@ -203,7 +203,7 @@ export function GlobePageHeader({
                 {friends.length > 4 && (
                   <Link
                     href="/followers?tab=following"
-                    className="flex items-center justify-center h-8 w-8 rounded-full bg-stone-200 ring-2 ring-white dark:ring-[#111111] text-[10px] font-semibold text-stone-600 hover:bg-stone-300 transition-all duration-200 cursor-pointer"
+                    className="flex items-center justify-center h-8 w-8 rounded-full bg-stone-200 dark:bg-white/[0.08] ring-2 ring-white dark:ring-[#111111] text-[10px] font-semibold text-stone-600 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-white/[0.12] transition-all duration-200 cursor-pointer"
                   >
                     +{friends.length - 4}
                   </Link>

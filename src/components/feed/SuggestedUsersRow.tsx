@@ -17,14 +17,14 @@ export const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: S
             alt={user.display_name || user.username}
             fallback={(user.display_name || user.username)[0]?.toUpperCase() || 'U'}
             size="sm"
-            className="ring-1 ring-stone-200"
+            className="ring-1 ring-stone-200 dark:ring-white/[0.08]"
           />
         </Link>
         <div className="flex-1 min-w-0">
           <Link href={`/u/${user.username}`} className="text-sm font-semibold text-stone-900 dark:text-stone-100 hover:text-olive-600 transition-colors truncate block">
             {user.display_name || user.username}
           </Link>
-          <p className="text-xs text-stone-500">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
         </div>
         <FollowButton userId={user.id} size="sm" showText={true} />
       </div>
@@ -45,7 +45,7 @@ export const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: S
         <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
           {user.display_name || user.username}
         </p>
-        <p className="text-xs text-stone-500 mb-2">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
       </Link>
       <FollowButton userId={user.id} size="sm" showText={true} className="w-full" />
     </div>

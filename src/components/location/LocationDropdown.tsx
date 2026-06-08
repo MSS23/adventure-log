@@ -347,7 +347,7 @@ export function LocationDropdown({
       {/* Input Row */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500 pointer-events-none" />
           <Input
             ref={inputRef}
             type="text"
@@ -375,7 +375,7 @@ export function LocationDropdown({
               className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
               aria-label="Clear"
             >
-              <X className="h-4 w-4 text-stone-400" />
+              <X className="h-4 w-4 text-stone-400 dark:text-stone-500" />
             </button>
           )}
         </div>
@@ -442,16 +442,16 @@ export function LocationDropdown({
           {query.length >= 2 && isSearching && results.length === 0 && (
             <div className="px-4 py-6 text-center">
               <Loader2 className="h-5 w-5 animate-spin text-olive-500 mx-auto mb-2" />
-              <p className="text-sm text-stone-400">Searching...</p>
+              <p className="text-sm text-stone-400 dark:text-stone-500">Searching...</p>
             </div>
           )}
 
           {/* No results */}
           {query.length >= 2 && !isSearching && results.length === 0 && (
             <div className="px-4 py-6 text-center">
-              <MapPin className="h-5 w-5 text-stone-300 mx-auto mb-2" />
-              <p className="text-sm text-stone-500">No results for &quot;{query}&quot;</p>
-              <p className="text-xs text-stone-400 mt-1">Try a different spelling or city name</p>
+              <MapPin className="h-5 w-5 text-stone-300 dark:text-stone-600 mx-auto mb-2" />
+              <p className="text-sm text-stone-500 dark:text-stone-400">No results for &quot;{query}&quot;</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Try a different spelling or city name</p>
             </div>
           )}
 

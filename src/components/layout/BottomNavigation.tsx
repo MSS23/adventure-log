@@ -33,7 +33,7 @@ export function BottomNavigation() {
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
-              (item.href !== '/profile' && pathname.startsWith(item.href))
+              (item.href !== '/dashboard' && item.href !== '/feed' && pathname.startsWith(item.href))
 
             const Icon = item.icon
 
@@ -47,7 +47,7 @@ export function BottomNavigation() {
                   'min-h-[44px] min-w-[44px]',
                   isActive
                     ? 'text-[color:var(--color-forest)]'
-                    : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink-soft)]',
+                    : 'text-[color:var(--color-muted-warm)] dark:text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink-soft)]',
                 )}
                 aria-label={item.name}
                 aria-current={isActive ? 'page' : undefined}

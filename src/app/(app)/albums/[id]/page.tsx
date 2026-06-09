@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark, MapPin, Calendar, Share2, X, Check, Flag } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Album, Photo, User } from '@/types/database'
+import { Album, Photo } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { Comments } from '@/components/social/Comments'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
@@ -511,7 +511,7 @@ export default function AlbumDetailPage() {
     }
   }
 
-  const albumUser = album.user || (album as unknown as { users?: User }).users
+  const albumUser = album.user
 
   // Format date for mobile header
   const formatDate = () => {
@@ -523,7 +523,7 @@ export default function AlbumDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F1] dark:bg-black pb-24 md:pb-8">
+    <div className="min-h-screen bg-[color:var(--background)] pb-24 md:pb-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {photos.length > 0 ? (
           <>
@@ -586,7 +586,7 @@ export default function AlbumDetailPage() {
                     <Link href={`/profile/${albumUser.username}`} className="shrink-0 cursor-pointer">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-olive-400 to-olive-600 flex items-center justify-center ring-2 ring-white dark:ring-stone-800 shadow-sm overflow-hidden relative">
                         {albumUser.avatar_url ? (
-                          <Image src={albumUser.avatar_url} alt="" fill className="object-cover" sizes="40px" />
+                          <Image src={albumUser.avatar_url} alt={`${albumUser.display_name || albumUser.username || 'User'} avatar`} fill className="object-cover" sizes="40px" />
                         ) : (
                           <span className="text-white text-sm font-semibold">
                             {albumUser.display_name?.[0] || albumUser.username?.[0] || 'U'}

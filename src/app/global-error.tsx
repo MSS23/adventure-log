@@ -19,7 +19,7 @@ export default function GlobalError({
           )}
           <button
             onClick={reset}
-            className="px-6 py-2.5 bg-stone-900 text-white rounded-lg hover:bg-stone-800 transition-colors"
+            className="px-6 py-2.5 bg-[color:var(--color-forest)] text-white rounded-lg hover:bg-[color:var(--color-forest-deep)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] focus-visible:ring-offset-2"
           >
             Try Again
           </button>

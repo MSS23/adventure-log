@@ -98,10 +98,14 @@ export function CityPinSystem({
 
   cities.forEach(city => {
     if (processedCities.has(city.id)) return
+    // Skip cities with missing/NaN coordinates before any distance math —
+    // these would produce NaN clusters or phantom pins at (0,0).
+    if (!Number.isFinite(city.latitude) || !Number.isFinite(city.longitude)) return
 
     // Find nearby cities (within the current zoom-aware radius)
     const nearbyCities = cities.filter(c => {
       if (processedCities.has(c.id)) return false
+      if (!Number.isFinite(c.latitude) || !Number.isFinite(c.longitude)) return false
       const distance = Math.sqrt(
         Math.pow(c.latitude - city.latitude, 2) +
         Math.pow(c.longitude - city.longitude, 2)

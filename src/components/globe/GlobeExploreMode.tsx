@@ -46,8 +46,8 @@ export function GlobeExploreStrip({
       ) : (
         <>
           <div className="flex items-center gap-1.5 mb-2 px-0.5">
-            <Compass className="h-3 w-3 text-olive-400/70" />
-            <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">Community</span>
+            <Compass className="h-3 w-3 text-olive-400" />
+            <span className="text-[10px] font-semibold text-white/75 uppercase tracking-wider">Community</span>
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             {exploreAlbums.map((album) => (
@@ -90,7 +90,7 @@ export function GlobeExploreStrip({
                         {album.title}
                       </p>
                       {album.owner && (
-                        <p className="text-[8px] text-white/50 line-clamp-1 mt-0.5">
+                        <p className="text-[9px] text-white/80 line-clamp-1 mt-0.5">
                           @{album.owner.username}
                         </p>
                       )}

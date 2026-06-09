@@ -164,7 +164,7 @@ export function PublicProfileContent({
               <div className="absolute -inset-1.5 bg-gradient-to-br from-white/30 to-white/10 rounded-full blur-sm" />
               <Avatar className="relative w-28 h-28 ring-4 ring-white/30 shadow-2xl">
                 <AvatarImage
-                  src={getPhotoUrl(user.avatar_url) || undefined}
+                  src={getPhotoUrl(user.avatar_url, 'avatars') || undefined}
                   alt={displayName}
                 />
                 <AvatarFallback className="text-3xl bg-gradient-to-br from-olive-400 to-olive-600 text-white font-heading">
@@ -211,7 +211,7 @@ export function PublicProfileContent({
       <div className="max-w-4xl mx-auto px-6">
         {/* ───────── Stats Bar ───────── */}
         <motion.div
-          className="-mt-8 relative z-10 bg-white dark:bg-[#111111] rounded-2xl shadow-lg border border-stone-200/60 dark:border-stone-800 p-6 mb-10"
+          className="-mt-8 relative z-10 bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-lg border border-stone-200/60 dark:border-stone-800 p-6 mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
@@ -253,7 +253,7 @@ export function PublicProfileContent({
               {countryCodes.slice(0, 30).map((code, i) => (
                 <motion.span
                   key={code}
-                  className="inline-flex items-center gap-1.5 bg-white dark:bg-[#111111] border border-stone-200 dark:border-stone-800 rounded-full px-3 py-1.5 text-sm shadow-sm hover:shadow-md hover:border-olive-300 dark:hover:border-olive-700 transition-all duration-200"
+                  className="inline-flex items-center gap-1.5 bg-white dark:bg-[color:var(--card)] border border-stone-200 dark:border-stone-800 rounded-full px-3 py-1.5 text-sm shadow-sm hover:shadow-md hover:border-olive-300 dark:hover:border-olive-700 transition-all duration-200"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.2, delay: 0.5 + i * 0.03 }}
@@ -342,7 +342,7 @@ export function PublicProfileContent({
 
         {/* ───────── Albums Grid ───────── */}
         {isPrivate ? (
-          <div className="text-center py-16 bg-white dark:bg-[#111111] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm">
+          <div className="text-center py-16 bg-white dark:bg-[color:var(--card)] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm">
             <Users className="h-12 w-12 mx-auto text-stone-300 dark:text-stone-600 mb-3" />
             <p className="text-stone-500 dark:text-stone-400 font-medium">
               This account is private
@@ -371,7 +371,7 @@ export function PublicProfileContent({
                   transition={{ duration: 0.35, delay: 0.65 + i * 0.04 }}
                 >
                   <Link href={`/albums/${album.id}/public`}>
-                    <div className="group cursor-pointer bg-white dark:bg-[#111111] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-stone-200/60 dark:border-stone-800 transition-all duration-300 hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-olive-500 focus-within:ring-offset-2">
+                    <div className="group cursor-pointer bg-white dark:bg-[color:var(--card)] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-stone-200/60 dark:border-stone-800 transition-all duration-300 hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-olive-500 focus-within:ring-offset-2">
                       {/* Image */}
                       <div className="relative aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-900">
                         {album.cover_photo_url ? (
@@ -425,7 +425,7 @@ export function PublicProfileContent({
             </div>
           </motion.div>
         ) : (
-          <div className="text-center py-16 bg-white dark:bg-[#111111] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm mb-10">
+          <div className="text-center py-16 bg-white dark:bg-[color:var(--card)] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm mb-10">
             <Globe className="h-12 w-12 mx-auto text-stone-300 dark:text-stone-600 mb-3" />
             <p className="text-stone-500 dark:text-stone-400">No public adventures yet</p>
           </div>
@@ -443,7 +443,7 @@ export function PublicProfileContent({
               <Share2 className="h-4 w-4" />
               Share This Profile
             </h2>
-            <div className="bg-white dark:bg-[#111111] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-[color:var(--card)] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm overflow-hidden">
               {/* Copy profile URL */}
               <div className="p-5 border-b border-stone-100 dark:border-stone-800">
                 <p className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">

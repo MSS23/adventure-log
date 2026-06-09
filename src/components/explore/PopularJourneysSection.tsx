@@ -144,7 +144,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         }
       }}
     >
-      {albums.map((album) => {
+      {albums.map((album, idx) => {
         // Type assertion for Supabase join
         const albumWithUser = album as Album & { users?: { username?: string; display_name?: string; avatar_url?: string } }
         const user = album.user || albumWithUser.users
@@ -202,6 +202,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                         src={coverUrl}
                         alt={album.title}
                         fill
+                        priority={idx < 3}
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />

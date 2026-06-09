@@ -180,7 +180,7 @@ export function EmbedMapContent({
               <span className="text-[13px] font-semibold text-white/90 group-hover:text-white transition-colors leading-tight">
                 {displayName}
               </span>
-              <span className="text-[10px] text-white/40 leading-tight">@{username}</span>
+              <span className="text-[10px] text-white/75 leading-tight">@{username}</span>
             </div>
           </Link>
         </div>
@@ -222,7 +222,7 @@ export function EmbedMapContent({
                     </span>
                   ))}
                   {countryCodes.length > 20 && (
-                    <span className="text-[10px] text-white/30 ml-0.5 font-medium">
+                    <span className="text-[10px] text-white/70 ml-0.5 font-medium">
                       +{countryCodes.length - 20}
                     </span>
                   )}

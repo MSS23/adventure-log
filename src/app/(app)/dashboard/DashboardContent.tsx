@@ -127,31 +127,68 @@ export default function DashboardContent({
             transition={{ duration: 0.6, ease: EDITORIAL_EASE, delay: 0.1 }}
             className="relative rounded-[22px] overflow-hidden min-h-[320px] p-8 text-white"
           >
+            {/* Base gradient — brightest olive sits near the globe (top-right) and
+                deepens to a near-black warm ink at the lower-left, so the headline
+                and stats always sit on the darkest, highest-contrast area. */}
             <div
               className="absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(160deg, #14110A 0%, #2A2418 30%, #3B4A1C 65%, #5A6F2B 100%)',
+                  'radial-gradient(135% 130% at 84% 6%, #6E8A33 0%, #4A5D23 32%, #2A3517 62%, #141A0C 100%)',
               }}
             />
 
-            {/* Decorative pins */}
+            {/* Cartographic grid — faint meridians & parallels evoke an atlas page,
+                masked so it fades out over the text and never hurts legibility. */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(0deg, rgba(247,242,231,0.07) 0px, rgba(247,242,231,0.07) 1px, transparent 1px, transparent 46px), repeating-linear-gradient(90deg, rgba(247,242,231,0.07) 0px, rgba(247,242,231,0.07) 1px, transparent 1px, transparent 46px)',
+                maskImage:
+                  'radial-gradient(120% 120% at 82% 8%, #000 0%, rgba(0,0,0,0.45) 58%, transparent 100%)',
+                WebkitMaskImage:
+                  'radial-gradient(120% 120% at 82% 8%, #000 0%, rgba(0,0,0,0.45) 58%, transparent 100%)',
+              }}
+            />
+
+            {/* Soft warm halo behind the globe for depth */}
+            <div
+              className="absolute right-[-50px] top-[-80px] w-[380px] h-[380px] rounded-full pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(circle at 42% 42%, rgba(242,161,121,0.34) 0%, rgba(199,91,58,0.16) 46%, transparent 72%)',
+                filter: 'blur(10px)',
+              }}
+            />
+
+            {/* Decorative globe — a little world with pins dropped across it */}
             <motion.div
               initial={{ opacity: 0, scale: 0.85, rotate: -8 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               transition={{ duration: 1.1, ease: EDITORIAL_EASE, delay: 0.25 }}
-              className="absolute right-[-60px] top-[-40px] w-[320px] h-[320px] rounded-full pointer-events-none"
+              className="absolute right-[-50px] top-[-44px] w-[300px] h-[300px] rounded-full pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(circle at 35% 35%, rgba(242,161,121,0.6) 0%, rgba(226,85,58,0.5) 40%, rgba(26,19,13,0.2) 80%)',
-                boxShadow: 'inset -30px -40px 80px rgba(0,0,0,0.4)',
+                  'radial-gradient(circle at 34% 30%, rgba(242,161,121,0.55) 0%, rgba(199,91,58,0.42) 42%, rgba(20,16,10,0.32) 82%)',
+                boxShadow:
+                  'inset -26px -36px 72px rgba(0,0,0,0.45), inset 16px 20px 52px rgba(242,161,121,0.22), 0 0 60px rgba(199,91,58,0.16)',
+                border: '1px solid rgba(247,242,231,0.10)',
               }}
             >
+              {/* concentric meridian rings on the sphere */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  background:
+                    'repeating-radial-gradient(circle at 50% 50%, transparent 0px, transparent 27px, rgba(247,242,231,0.09) 27px, rgba(247,242,231,0.09) 28px)',
+                }}
+              />
               {[
-                { x: 42, y: 30, c: '#E2553A' },
-                { x: 70, y: 45, c: '#C99B3B' },
-                { x: 30, y: 60, c: '#E2553A' },
-                { x: 58, y: 70, c: '#F2A179' },
+                { x: 42, y: 30, c: '#F2A179' },
+                { x: 70, y: 45, c: '#E8C77A' },
+                { x: 30, y: 60, c: '#F2A179' },
+                { x: 58, y: 70, c: '#FBE3CF' },
                 { x: 48, y: 48, c: '#ffffff' },
               ].map((p, i) => (
                 <motion.span
@@ -176,17 +213,27 @@ export default function DashboardContent({
               ))}
             </motion.div>
 
+            {/* Contrast scrim — anchors the headline & stats over any texture */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'linear-gradient(to top right, rgba(8,7,4,0.58) 0%, rgba(8,7,4,0.18) 44%, transparent 68%)',
+              }}
+            />
+
             <div className="relative z-10 flex flex-col h-full min-h-[260px]">
-              <span className="al-badge !bg-white/15 !text-white !border-white/20 backdrop-blur">
+              <span className="al-badge !bg-white/20 !text-white !border-white/30 backdrop-blur-md">
+                <GlobeIcon className="h-3 w-3" strokeWidth={2} />
                 Your atlas
               </span>
               <div className="flex-1" />
-              <div className="font-mono text-[10px] tracking-[0.12em] uppercase opacity-80">
+              <div className="font-mono text-[11px] tracking-[0.12em] uppercase text-white/90">
                 {stats.countries} countries · {stats.cities} cities · {stats.albums} albums
               </div>
               <h2
                 className="font-heading text-[40px] md:text-[52px] font-semibold mt-2 leading-[0.98]"
-                style={{ letterSpacing: '-0.02em' }}
+                style={{ letterSpacing: '-0.02em', textShadow: '0 2px 28px rgba(0,0,0,0.30)' }}
               >
                 Your world,
                 <br />

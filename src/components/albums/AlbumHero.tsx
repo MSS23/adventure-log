@@ -86,7 +86,7 @@ export function AlbumHero({
             sizes="100vw"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-olive-500 via-olive-600 to-olive-700" />
+          <div className="w-full h-full bg-gradient-to-br from-olive-500 via-olive-600 to-olive-700 dark:from-olive-900 dark:via-olive-800 dark:to-olive-950" />
         )}
 
         {/* Gradient Overlay */}
@@ -218,7 +218,7 @@ export function AlbumHeroCompact({
           sizes="(max-width: 768px) 100vw, 80vw"
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-olive-500 via-olive-600 to-olive-700" />
+        <div className="w-full h-full bg-gradient-to-br from-olive-500 via-olive-600 to-olive-700 dark:from-olive-900 dark:via-olive-800 dark:to-olive-950" />
       )}
 
       {/* Gradient Overlay */}

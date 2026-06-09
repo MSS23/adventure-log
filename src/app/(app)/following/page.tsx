@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 
 // Animated counter component
@@ -273,7 +274,10 @@ export default function FollowingPage() {
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
                             <Avatar className="h-12 w-12 ring-2 ring-stone-100 dark:ring-white/[0.08] group-hover:ring-olive-200 transition-all">
-                              <AvatarImage src={followingUser.avatar_url || ''} />
+                              <AvatarImage
+                                src={getPhotoUrl(followingUser.avatar_url, 'avatars') || ''}
+                                alt={followingUser.display_name || followingUser.username || 'User'}
+                              />
                               <AvatarFallback className="bg-gradient-to-br from-olive-500 to-pink-500 text-white font-semibold">
                                 {(followingUser.display_name || followingUser.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>

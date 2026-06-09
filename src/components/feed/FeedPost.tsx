@@ -84,6 +84,15 @@ const ActionButton = memo(
 ActionButton.displayName = 'ActionButton'
 
 export const FeedItem = memo(({ album }: { album: FeedAlbum; currentUserId?: string }) => {
+  // Defensive fallback: the `user` relation can be missing at runtime even though
+  // the type marks it required (Supabase join may return null). Guard against
+  // accessing properties of undefined (e.g. display_name[0]).
+  const user = album.user ?? {
+    id: album.user_id,
+    username: 'unknown',
+    display_name: 'Unknown',
+    avatar_url: undefined,
+  }
   const { triggerLight, triggerDoubleTap } = useHaptics()
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showShareToast, setShowShareToast] = useState(false)
@@ -107,7 +116,7 @@ export const FeedItem = memo(({ album }: { album: FeedAlbum; currentUserId?: str
       try {
         await navigator.share({
           title: album.title,
-          text: `Check out ${album.user.display_name}'s journey: ${album.title}`,
+          text: `Check out ${user.display_name}'s journey: ${album.title}`,
           url: `${window.location.origin}/albums/${album.id}`,
         })
       } catch {
@@ -131,11 +140,11 @@ export const FeedItem = memo(({ album }: { album: FeedAlbum; currentUserId?: str
     >
       {/* Byline — avatar, name, location chip, date */}
       <header className="px-5 pt-4 pb-3 flex items-center gap-3">
-        <UserAvatarLink user={album.user}>
+        <UserAvatarLink user={user}>
           <OptimizedAvatar
-            src={album.user.avatar_url}
-            alt={album.user.display_name}
-            fallback={album.user.display_name[0]?.toUpperCase() || 'U'}
+            src={user.avatar_url}
+            alt={user.display_name}
+            fallback={user.display_name[0]?.toUpperCase() || 'U'}
             size="md"
           />
         </UserAvatarLink>
@@ -143,10 +152,10 @@ export const FeedItem = memo(({ album }: { album: FeedAlbum; currentUserId?: str
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <UserLink
-              user={album.user}
+              user={user}
               className="text-[14px] font-semibold text-[color:var(--color-ink)] hover:text-[color:var(--color-forest)] transition-colors"
             >
-              {album.user.display_name || album.user.username}
+              {user.display_name || user.username}
             </UserLink>
             {album.country_code && (
               <span className="text-[13px] leading-none" title={album.country || album.location} aria-hidden>
@@ -154,7 +163,7 @@ export const FeedItem = memo(({ album }: { album: FeedAlbum; currentUserId?: str
               </span>
             )}
           </div>
-          <p className="font-mono text-[10.5px] tracking-[0.04em] uppercase text-[color:var(--color-muted-warm)] mt-0.5">
+          <p className="font-mono text-[10.5px] tracking-[0.04em] uppercase text-[color:var(--color-ink-soft)] mt-0.5">
             {dateFormatted}
           </p>
         </div>
@@ -169,7 +178,7 @@ export const FeedItem = memo(({ album }: { album: FeedAlbum; currentUserId?: str
               color: 'var(--color-forest)',
               border: '1px solid var(--color-forest-soft)',
             }}
-            title={`Open ${album.user.display_name || album.user.username}'s globe`}
+            title={`Open ${user.display_name || user.username}'s globe`}
           >
             <MapPin className="w-3 h-3" strokeWidth={2.2} aria-hidden />
             <span className="truncate max-w-[140px]">{album.location}</span>

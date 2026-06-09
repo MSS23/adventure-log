@@ -280,8 +280,9 @@ function AlbumsPageContent() {
               <Camera className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className={cn(instagramStyles.text.heading, "text-xl")}>My Albums</h1>
-              <p className={instagramStyles.text.caption}>Organize your travel memories</p>
+              <p className="al-eyebrow mb-0.5">Library</p>
+              <h1 className="al-display text-2xl md:text-3xl">Albums</h1>
+              <p className="text-xs text-[color:var(--color-muted-warm)] font-mono tracking-wide mt-1">Organize your travel memories</p>
             </div>
           </div>
           <Link href="/albums/new">
@@ -292,7 +293,7 @@ function AlbumsPageContent() {
           </Link>
         </div>
 
-        <div className={cn(instagramStyles.card, "border-red-200 bg-red-50 dark:bg-red-900/20 p-6")}>
+        <div className={cn("al-card", "border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 p-6")}>
           <div className="text-center">
             <p className="text-red-600 dark:text-red-400 font-medium">Failed to load albums</p>
             <p className="text-red-500 dark:text-red-400 text-sm mt-1">{error}</p>
@@ -706,12 +707,12 @@ function AlbumsPageContent() {
                           )}
 
                           {/* Mobile: Bottom gradient with title always visible */}
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 pt-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 md:from-black/50">
-                            <h3 className="text-white font-semibold text-xs sm:text-sm truncate">
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-2 pt-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 md:from-black/80">
+                            <h3 className="text-white font-semibold text-xs sm:text-sm truncate drop-shadow-md">
                               {album.title}
                             </h3>
                             {album.location_name && (
-                              <div className="flex items-center gap-1 text-white/80 text-[10px] sm:text-xs mt-0.5">
+                              <div className="flex items-center gap-1 text-white/90 text-[10px] sm:text-xs mt-0.5 drop-shadow-sm">
                                 <MapPin className="h-2.5 w-2.5 flex-shrink-0" />
                                 <span className="truncate">{album.location_name}</span>
                               </div>
@@ -756,8 +757,8 @@ function AlbumsPageContent() {
 
                           {/* Photo count indicator (always visible) */}
                           <div className="absolute top-2 left-2">
-                            <div className="bg-black/50 backdrop-blur-sm text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1">
-                              <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                            <div className="bg-black/50 backdrop-blur-sm text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1 drop-shadow-sm">
+                              <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white drop-shadow" />
                               <span>{album.photos?.length || 0}</span>
                             </div>
                           </div>

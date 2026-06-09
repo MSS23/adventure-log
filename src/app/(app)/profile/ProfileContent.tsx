@@ -21,9 +21,7 @@ import { Album, User } from '@/types/database'
 import { AchievementsBadges } from '@/components/achievements/AchievementsBadges'
 import { ProfileHero } from '@/components/profile/ProfileHero'
 import { ProfileAlbumGrid } from '@/components/profile/ProfileAlbumGrid'
-import { GlobePreviewCard } from '@/components/profile/GlobePreviewCard'
 import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
-import { TravelMapCard } from '@/components/profile/TravelMapCard'
 import { AlbumGridShimmer } from '@/components/ui/shimmer-skeleton'
 
 type TabType = 'albums' | 'badges'
@@ -62,7 +60,7 @@ export default function ProfileContent({
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
   const [followStats, setFollowStats] = useState(initialFollowStats)
-  const [countryCodes, setCountryCodes] = useState<string[]>(initialCountryCodes)
+  const [, setCountryCodes] = useState<string[]>(initialCountryCodes)
   const [travelStats, setTravelStats] = useState(initialTravelStats)
   const [showInvite, setShowInvite] = useState(false)
   const supabase = createClient()

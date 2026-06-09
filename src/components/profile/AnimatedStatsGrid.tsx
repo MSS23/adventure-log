@@ -14,34 +14,37 @@ interface StatCardProps {
   onClick?: () => void
 }
 
+// Each stat gets its own Field Notebook accent so the four read as distinct.
+// Backgrounds/icons use the *-tint tokens (defined for both light and dark),
+// values/icons use the accent token directly — keeping dark mode robust.
 const gradientStyles = {
   teal: {
-    bg: 'bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-100 dark:to-olive-950/30',
-    border: 'border-olive-200/50 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]',
-    shadow: 'hover:shadow-olive-500/20',
-    icon: 'bg-olive-100 dark:bg-olive-950/30 text-olive-600',
-    value: 'text-olive-700 dark:text-olive-400'
+    bg: 'bg-[color:var(--color-forest-tint)]',
+    border: 'border-[color:var(--color-line-warm)] hover:border-[color:var(--color-forest)]',
+    shadow: '',
+    icon: 'bg-[color:var(--color-forest-tint)] text-[color:var(--color-forest)]',
+    value: 'text-[color:var(--color-forest)]'
   },
   blue: {
-    bg: 'bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-100 dark:to-olive-950/30',
-    border: 'border-olive-200/50 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]',
-    shadow: 'hover:shadow-olive-500/20',
-    icon: 'bg-olive-100 dark:bg-olive-950/30 text-olive-600',
-    value: 'text-olive-700 dark:text-olive-400'
+    bg: 'bg-[color:var(--color-sky-tint)]',
+    border: 'border-[color:var(--color-line-warm)] hover:border-[color:var(--color-sky)]',
+    shadow: '',
+    icon: 'bg-[color:var(--color-sky-tint)] text-[color:var(--color-sky)]',
+    value: 'text-[color:var(--color-sky)]'
   },
   purple: {
-    bg: 'bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-pink-100 dark:to-pink-950/30',
-    border: 'border-olive-200/50 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]',
-    shadow: 'hover:shadow-olive-500/20',
-    icon: 'bg-olive-100 dark:bg-olive-950/30 text-olive-600',
-    value: 'text-olive-700 dark:text-olive-400'
+    bg: 'bg-[color:var(--color-coral-tint)]',
+    border: 'border-[color:var(--color-line-warm)] hover:border-[color:var(--color-coral)]',
+    shadow: '',
+    icon: 'bg-[color:var(--color-coral-tint)] text-[color:var(--color-coral)]',
+    value: 'text-[color:var(--color-coral)]'
   },
   orange: {
-    bg: 'bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-100 dark:to-olive-950/30',
-    border: 'border-olive-200/50 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]',
-    shadow: 'hover:shadow-olive-500/20',
-    icon: 'bg-olive-100 dark:bg-olive-950/30 text-olive-600',
-    value: 'text-olive-700 dark:text-olive-400'
+    bg: 'bg-[color:var(--color-gold-tint)]',
+    border: 'border-[color:var(--color-line-warm)] hover:border-[color:var(--color-gold)]',
+    shadow: '',
+    icon: 'bg-[color:var(--color-gold-tint)] text-[color:var(--color-gold)]',
+    value: 'text-[color:var(--color-gold)]'
   }
 }
 

@@ -135,7 +135,7 @@ export function Sidebar() {
                 'relative flex items-center justify-center w-[18px] h-[18px] transition-colors duration-200',
                 isActive
                   ? 'text-[color:var(--color-forest)]'
-                  : 'text-[color:var(--color-muted-warm)]',
+                  : 'text-[color:var(--color-ink-soft)]',
               )}
             >
               <Icon className="h-[18px] w-[18px]" strokeWidth={1.6} />

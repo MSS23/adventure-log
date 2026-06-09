@@ -66,7 +66,7 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/60 hover:text-white hover:bg-black/60 transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500"
         >
           <X className="h-4 w-4" />
         </button>
@@ -74,7 +74,7 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <h3 className="text-lg font-semibold text-white mb-1">{album.title}</h3>
           {album.location_name && (
-            <p className="text-sm text-white/60 flex items-center gap-1.5">
+            <p className="text-sm text-white/80 flex items-center gap-1.5">
               {flag && <span className="text-base">{flag}</span>}
               <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
               <span className="truncate">{album.location_name}</span>
@@ -87,7 +87,7 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Date */}
         {travelDate && (
-          <div className="flex items-center gap-2 text-sm text-white/50">
+          <div className="flex items-center gap-2 text-sm text-white/80">
             <Calendar className="h-4 w-4 flex-shrink-0" />
             <span>{travelDate}</span>
           </div>
@@ -154,13 +154,13 @@ export function MobileFeaturedAlbum({ album, isOwnProfile, onClose }: MobileFeat
         <div className="flex-1 min-w-0">
           <h3 className="text-xs font-semibold text-white truncate">{album.title}</h3>
           {album.location_name && (
-            <p className="text-[10px] text-white/50 flex items-center gap-1 truncate">
+            <p className="text-[10px] text-white/80 flex items-center gap-1 truncate">
               {flag && <span className="text-xs">{flag}</span>}
               <span className="truncate">{album.location_name.split(',')[0]}</span>
             </p>
           )}
           {travelDate && (
-            <p className="text-[10px] text-white/40 flex items-center gap-1 truncate">
+            <p className="text-[10px] text-white/75 flex items-center gap-1 truncate">
               <Calendar className="h-2.5 w-2.5 flex-shrink-0" />
               <span className="truncate">{travelDate}</span>
             </p>
@@ -176,7 +176,7 @@ export function MobileFeaturedAlbum({ album, isOwnProfile, onClose }: MobileFeat
         </Link>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors duration-200 flex-shrink-0 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors duration-200 flex-shrink-0 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
         >
           <X className="h-3.5 w-3.5" />
         </button>

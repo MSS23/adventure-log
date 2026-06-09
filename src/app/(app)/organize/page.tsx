@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -47,14 +47,8 @@ export default function OrganizePage() {
   const supabase = createClient();
   const gridRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, filterType]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    if (!user) return;
     try {
       setLoading(true);
 
@@ -62,7 +56,7 @@ export default function OrganizePage() {
       const { data: albumsData } = await supabase
         .from('albums')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       setAlbums(albumsData || []);
@@ -71,7 +65,7 @@ export default function OrganizePage() {
       let query = supabase
         .from('photos')
         .select('*')
-        .eq('user_id', user!.id);
+        .eq('user_id', user.id);
 
       if (filterType === 'no-album') {
         query = query.is('album_id', null);
@@ -86,6 +80,8 @@ export default function OrganizePage() {
       setPhotos(photosData || []);
     } catch (error) {
       log.error('Failed to fetch photos', { component: 'OrganizePage' }, error as Error);
+      // Keep photos as an array so downstream .length/.filter never crash
+      setPhotos([]);
       await Toast.show({
         text: 'Failed to load photos',
         duration: 'short',
@@ -93,7 +89,13 @@ export default function OrganizePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, filterType, supabase]);
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user, fetchData]);
 
   const togglePhotoSelection = (photoId: string) => {
     const newSelection = new Set(selectedPhotos);
@@ -214,14 +216,16 @@ export default function OrganizePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPhotos, photos]);
 
-  const filteredPhotos = photos.filter(photo => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      photo.caption?.toLowerCase().includes(query) ||
-      photo.location_name?.toLowerCase().includes(query)
-    );
-  });
+  const filteredPhotos = useMemo(() => {
+    return photos.filter(photo => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        photo.caption?.toLowerCase().includes(query) ||
+        photo.location_name?.toLowerCase().includes(query)
+      );
+    });
+  }, [photos, searchQuery]);
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-black pb-20">

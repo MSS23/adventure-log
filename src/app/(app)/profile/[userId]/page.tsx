@@ -315,7 +315,7 @@ export default function UserProfilePage() {
     return (
       <div className="min-h-screen bg-white dark:bg-[color:var(--background)]">
         <div className="max-w-2xl mx-auto p-6 pt-20">
-          <Card className="border-stone-200 dark:border-stone-800 dark:bg-[#1A1A1A]">
+          <Card className="border-stone-200 dark:border-[color:var(--color-line-warm)] dark:bg-[color:var(--card)]">
             <CardContent className="pt-8 pb-8 text-center">
               <div className="mx-auto w-16 h-16 bg-stone-100 dark:bg-white/[0.06] rounded-full flex items-center justify-center mb-4">
                 <MapPin className="h-8 w-8 text-stone-400" />
@@ -539,14 +539,14 @@ export default function UserProfilePage() {
           {/* Right Content - Tabs and Content */}
           <div className="space-y-6">
             {/* Tabs */}
-            <div className="bg-white dark:bg-[#111] rounded-xl shadow-sm border border-stone-200 dark:border-stone-800 p-1">
+            <div className="bg-white dark:bg-[color:var(--card)] rounded-xl shadow-sm border border-stone-200 dark:border-[color:var(--color-line-warm)] p-1">
               <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab('albums')}
                   className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none ${
                     activeTab === 'albums'
                       ? 'bg-stone-900 dark:bg-olive-600 text-white shadow-sm'
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'
+                      : 'text-stone-700 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'
                   }`}
                 >
                   Albums
@@ -556,7 +556,7 @@ export default function UserProfilePage() {
                   className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none ${
                     activeTab === 'map'
                       ? 'bg-stone-900 dark:bg-olive-600 text-white shadow-sm'
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'
+                      : 'text-stone-700 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'
                   }`}
                 >
                   Map View
@@ -623,7 +623,7 @@ export default function UserProfilePage() {
                                   className="object-cover"
                                 />
                               ) : (
-                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-stone-100 to-stone-200">
+                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-white/[0.06] dark:to-white/[0.03]">
                                   <Camera className="h-8 w-8 text-stone-400" />
                                 </div>
                               )}
@@ -641,7 +641,7 @@ export default function UserProfilePage() {
                       ))
                     ) : (
                       <motion.div
-                        className="col-span-full bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] text-center py-16"
+                        className="col-span-full bg-white dark:bg-[color:var(--card)] rounded-xl border border-stone-200 dark:border-[color:var(--color-line-warm)] text-center py-16"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
@@ -661,7 +661,7 @@ export default function UserProfilePage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="bg-white dark:bg-[#1B170E] rounded-xl shadow-sm border border-stone-200 dark:border-white/[0.10] overflow-hidden"
+                  className="bg-white dark:bg-[color:var(--card)] rounded-xl shadow-sm border border-stone-200 dark:border-[color:var(--color-line-warm)] overflow-hidden"
                 >
                   <div className="w-full aspect-square max-h-[calc(100vh-220px)] bg-gradient-to-br from-stone-900 to-stone-800 relative">
                     <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />

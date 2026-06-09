@@ -51,7 +51,7 @@ export function GlobeTimeline({
               <div className="relative z-10">
                 <div className={cn(
                   "font-bold text-2xl",
-                  !effectiveSelectedYear ? "text-white" : "text-stone-200"
+                  !effectiveSelectedYear ? "text-white" : "text-white"
                 )}>
                   All Years
                 </div>
@@ -88,7 +88,7 @@ export function GlobeTimeline({
                   <div className="relative z-10">
                     <div className={cn(
                       "font-bold text-2xl",
-                      isSelected ? "text-white" : "text-stone-200"
+                      isSelected ? "text-white" : "text-white"
                     )}>
                       {year}
                     </div>
@@ -125,7 +125,7 @@ export function GlobeTimeline({
                         <div className="p-1.5 bg-olive-500/20 rounded-lg">
                           <Plane className="h-4 w-4 text-olive-400 flex-shrink-0" />
                         </div>
-                        <span className="text-base font-bold text-stone-400 uppercase tracking-widest">
+                        <span className="text-base font-bold text-stone-200 uppercase tracking-widest">
                           Location {currentLocationIndex + 1} of {locations.length}
                         </span>
                       </div>

@@ -52,7 +52,7 @@ export function SuggestionsSidebar() {
 
         {/* Footer Links */}
         <div className="pt-4">
-          <div className="flex flex-wrap gap-2 text-xs text-stone-400 dark:text-stone-500 mb-3">
+          <div className="flex flex-wrap gap-2 text-xs text-stone-500 dark:text-stone-400 mb-3">
             <Link href="/privacy" className="hover:underline">
               Privacy
             </Link>
@@ -65,7 +65,7 @@ export function SuggestionsSidebar() {
               Settings
             </Link>
           </div>
-          <p className="text-xs text-stone-400 dark:text-stone-500">
+          <p className="text-xs text-stone-500 dark:text-stone-400">
             © 2025 ADVENTURE LOG
           </p>
         </div>

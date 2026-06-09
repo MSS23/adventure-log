@@ -281,7 +281,7 @@ export function NotificationCenter() {
             )}
             <Link href="/settings/notifications">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-stone-100 dark:hover:bg-white/[0.06]">
-                <Settings className="h-4 w-4 text-stone-600 dark:text-stone-400" />
+                <Settings className="h-4 w-4 text-stone-700 dark:text-stone-400" />
               </Button>
             </Link>
           </div>
@@ -296,7 +296,7 @@ export function NotificationCenter() {
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center text-stone-500 dark:text-stone-400">
-              <Bell className="h-12 w-12 mx-auto mb-3 text-stone-300 dark:text-stone-600" />
+              <Bell className="h-12 w-12 mx-auto mb-3 text-stone-400 dark:text-stone-500" />
               <p className="font-medium mb-1">No notifications yet</p>
               <p className="text-sm text-stone-400 dark:text-stone-500">
                 We&apos;ll notify you when something happens

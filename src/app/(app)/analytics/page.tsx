@@ -136,6 +136,18 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
   const DAY_LABEL_W = 20 // px for M/W/F column
   const gridW = totalWeeks * (CELL + GAP) - GAP
 
+  if (activeDays === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <Calendar className="h-8 w-8 text-stone-300 dark:text-stone-600 mb-3" />
+        <p className="text-sm text-stone-500 dark:text-stone-400">No travel activity recorded yet</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+          Add albums with dates to see your {year} activity here.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div>
       {/* Active days summary */}

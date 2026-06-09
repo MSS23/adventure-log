@@ -76,7 +76,7 @@ export function GlobePageHeader({
           {/* Left: Title + Mode Toggle */}
           <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-shrink">
             <h1 className="text-base md:text-xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 flex-shrink-0">
-              <Globe2 className="h-6 w-6 md:h-8 md:w-8 text-olive-500" />
+              <Globe2 className="h-6 w-6 md:h-8 md:w-8 text-olive-700 dark:text-olive-400" />
               <span className="hidden md:inline truncate max-w-[200px] lg:max-w-none">
                 {exploreMode ? 'Explore Globe' : isOwnProfile ? 'Travel Globe' : `${profileUser?.display_name || profileUser?.username}'s Globe`}
               </span>

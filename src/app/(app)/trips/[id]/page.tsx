@@ -85,6 +85,9 @@ export default function TripDetailPage() {
   // Save as album state
   const [savingAlbum, setSavingAlbum] = useState(false)
 
+  // Transient action error (e.g. check-in) surfaced to the user
+  const [actionError, setActionError] = useState<string | null>(null)
+
   const load = useCallback(async () => {
     if (!tripId) return
     try {
@@ -106,6 +109,13 @@ export default function TripDetailPage() {
   useEffect(() => {
     if (user && tripId) load()
   }, [user, tripId, load])
+
+  // Auto-dismiss transient action errors
+  useEffect(() => {
+    if (!actionError) return
+    const t = setTimeout(() => setActionError(null), 4000)
+    return () => clearTimeout(t)
+  }, [actionError])
 
   const colorByUser = useMemo(() => {
     const m = new Map<string, string>()
@@ -231,16 +241,22 @@ export default function TripDetailPage() {
 
   const handleCheckIn = async (pinId: string, currentlyVisited: boolean) => {
     if (!tripId) return
+    setActionError(null)
     try {
       const res = await apiFetch(`/api/trips/${tripId}/pins/${pinId}/checkin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ undo: currentlyVisited }),
       })
-      const data = await res.json()
-      if (res.ok) setPins((prev) => prev.map((p) => (p.id === pinId ? data.pin : p)))
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setPins((prev) => prev.map((p) => (p.id === pinId ? data.pin : p)))
+      } else {
+        setActionError(data.error || 'Could not update check-in. Please try again.')
+      }
     } catch (error) {
       log.error('Check-in failed', { component: 'TripDetail', action: 'checkin', tripId }, error as Error)
+      setActionError('Could not update check-in. Please try again.')
     }
   }
 
@@ -279,6 +295,24 @@ export default function TripDetailPage() {
     } catch (error) {
       log.error('Color change failed', { component: 'TripDetail', action: 'changeColor', tripId }, error as Error)
     }
+  }
+
+  if (!tripId) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-[60vh] text-center">
+        <MapPin className="h-8 w-8 text-olive-400 mb-3" />
+        <h2 className="text-lg font-semibold text-olive-950 dark:text-olive-50 mb-1">Trip not found</h2>
+        <p className="text-sm text-olive-600 dark:text-olive-400 mb-5">
+          This trip link looks incomplete or invalid.
+        </p>
+        <Link href="/trips">
+          <Button variant="outline" size="sm" className="rounded-xl">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to trips
+          </Button>
+        </Link>
+      </div>
+    )
   }
 
   if (loading || !trip) {
@@ -754,6 +788,21 @@ export default function TripDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Transient action error (e.g. check-in failure) */}
+      {actionError && (
+        <div
+          role="alert"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl text-xs font-medium shadow-lg"
+          style={{
+            background: 'var(--color-coral-tint)',
+            color: 'var(--color-stamp)',
+            border: '1px solid var(--color-coral)',
+          }}
+        >
+          {actionError}
+        </div>
+      )}
     </div>
   )
 }

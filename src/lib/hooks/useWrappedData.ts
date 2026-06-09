@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 export interface WrappedData {
   year: number | 'all'
@@ -104,7 +105,7 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       // Fetch all user albums with photos — use created_at as ordering fallback
       const query = supabase
         .from('albums')
-        .select('id, title, location_name, country_code, date_start, created_at, cover_photo_url, latitude, longitude, photos(id)')
+        .select('id, title, location_name, country_code, date_start, created_at, cover_photo_url, latitude, longitude, photos(id, file_path)')
         .eq('user_id', userId)
         .order('created_at', { ascending: true })
 
@@ -172,7 +173,7 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
             id: a.id,
             title: a.title,
             location_name: a.location_name || undefined,
-            cover_photo_url: a.cover_photo_url || undefined,
+            cover_photo_url: getPhotoUrl(a.cover_photo_url || a.photos?.[0]?.file_path),
             like_count: a.photos?.length || 0,
           }))
           .sort((a, b) => b.like_count - a.like_count)
@@ -196,7 +197,7 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
               name: a.location_name?.split(',')[0]?.trim() || a.title,
               date: dateStr,
               albumId: a.id,
-              coverUrl: a.cover_photo_url || undefined,
+              coverUrl: getPhotoUrl(a.cover_photo_url || a.photos?.[0]?.file_path),
               albumTitle: a.title,
               country: a.country_code || undefined,
             }

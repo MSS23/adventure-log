@@ -24,6 +24,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { UserAvatarLink } from '@/components/social/UserLink'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 
 interface Notification {
   id: string
@@ -49,9 +50,14 @@ export default function NotificationsPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (user) {
-      fetchNotifications()
-      subscribeToNotifications()
+    if (!user) return
+
+    fetchNotifications()
+    const unsub = subscribeToNotifications()
+
+    return () => {
+      // Guard: subscribeToNotifications always returns a cleanup fn, but stay defensive.
+      if (typeof unsub === 'function') unsub()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNotifications and subscribeToNotifications are stable functions defined below
   }, [user])
@@ -298,7 +304,7 @@ function NotificationItem({
       {notification.sender ? (
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-12 w-12 flex-shrink-0">
-            <AvatarImage src={notification.sender.avatar_url} />
+            <AvatarImage src={getAvatarUrl(notification.sender.avatar_url, notification.sender.username)} />
             <AvatarFallback className="bg-gradient-to-br from-olive-500 to-olive-500 text-white font-semibold">
               {notification.sender.display_name[0]?.toUpperCase()}
             </AvatarFallback>

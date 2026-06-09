@@ -45,7 +45,7 @@ class GlobeErrorBoundary extends Component<
     if (this.state.hasError) {
       return this.props.fallback ?? (
         <div className="w-full h-full flex items-center justify-center bg-black/50">
-          <div className="text-center text-white/40">
+          <div className="text-center text-white/65">
             <GlobeIcon className="h-12 w-12 mx-auto mb-2 opacity-30" />
             <p className="text-sm">Globe unavailable</p>
           </div>
@@ -334,7 +334,7 @@ export default function WrappedPage() {
 
               {/* Quick stats preview */}
               <motion.div
-                className="mt-8 flex gap-6 justify-center text-white/30 text-sm"
+                className="mt-8 flex gap-6 justify-center text-white/55 text-sm"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.3 }}
@@ -440,7 +440,7 @@ export default function WrappedPage() {
                 onClick={() => setPhase('stats')}
                 variant="ghost"
                 size="sm"
-                className="cursor-pointer text-white/40 hover:text-white/70 text-xs transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[44px] min-w-[44px]"
+                className="cursor-pointer text-white/65 hover:text-white/70 text-xs transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[44px] min-w-[44px]"
               >
                 Skip
               </Button>
@@ -552,7 +552,7 @@ export default function WrappedPage() {
               {/* Distance comparison */}
               {data.totalDistanceKm > 0 && (
                 <motion.p
-                  className="text-white/40 text-sm mb-8 text-center"
+                  className="text-white/65 text-sm mb-8 text-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1 }}

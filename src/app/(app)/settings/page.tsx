@@ -63,18 +63,25 @@ export default function SettingsPage() {
   }, [profile])
 
   const updatePrivacyLevel = async (newLevel: string) => {
+    const ALLOWED_PRIVACY_LEVELS = ['public', 'private', 'friends'] as const
+    if (!(ALLOWED_PRIVACY_LEVELS as readonly string[]).includes(newLevel)) {
+      log.error('Invalid privacy level', { component: 'Settings' }, new Error(`Unexpected privacy level: ${newLevel}`))
+      setError('Invalid privacy setting')
+      return
+    }
+    const validatedLevel = newLevel as (typeof ALLOWED_PRIVACY_LEVELS)[number]
     try {
       setLoading(true)
       setError(null)
 
       const { error } = await supabase
         .from('users')
-        .update({ privacy_level: newLevel, updated_at: new Date().toISOString() })
+        .update({ privacy_level: validatedLevel, updated_at: new Date().toISOString() })
         .eq('id', user?.id)
 
       if (error) throw error
 
-      setPrivacyLevel(newLevel as 'public' | 'private' | 'friends')
+      setPrivacyLevel(validatedLevel)
       await refreshProfile()
       setSuccess('Privacy updated')
       setTimeout(() => setSuccess(null), 3000)
@@ -422,8 +429,8 @@ export default function SettingsPage() {
             <div className="space-y-1">
               <Label className="text-xs text-stone-600 dark:text-stone-400">Current Password</Label>
               <div className="relative">
-                <Input type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
-                <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword}>
+                <Input id="current-password" type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
+                <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword} aria-controls="current-password">
                   {showCurrentPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" /> : <Eye className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />}
                 </button>
               </div>
@@ -431,8 +438,8 @@ export default function SettingsPage() {
             <div className="space-y-1">
               <Label className="text-xs text-stone-600 dark:text-stone-400">New Password</Label>
               <div className="relative">
-                <Input type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
-                <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword}>
+                <Input id="new-password" type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
+                <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword} aria-controls="new-password">
                   {showNewPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" /> : <Eye className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />}
                 </button>
               </div>

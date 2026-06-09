@@ -192,8 +192,8 @@ export function InteractivePhotoGallery({
 
               {/* Caption overlay */}
               {photo.caption && (
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                  <p className="text-white text-sm">{photo.caption}</p>
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                  <p className="text-white text-sm drop-shadow-md">{photo.caption}</p>
                 </div>
               )}
             </motion.div>
@@ -254,7 +254,7 @@ export function InteractivePhotoGallery({
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 80vw"
-                      priority={index === 0}
+                      priority={index <= 1}
                     />
                   )}
 

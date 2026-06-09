@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { FollowButton } from '@/components/social/FollowButton'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 
 // Animated counter component
@@ -291,7 +292,10 @@ export default function FollowersPage() {
                             className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer"
                           >
                             <Avatar className="h-11 w-11 ring-2 ring-olive-200 group-hover:ring-olive-300 transition-all">
-                              <AvatarImage src={requester.avatar_url || ''} />
+                              <AvatarImage
+                                src={getPhotoUrl(requester.avatar_url, 'avatars') || ''}
+                                alt={requester.display_name || requester.username || 'User'}
+                              />
                               <AvatarFallback className="bg-gradient-to-br from-olive-500 to-red-500 text-white font-semibold">
                                 {(requester.display_name || requester.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
@@ -451,7 +455,10 @@ export default function FollowersPage() {
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
                             <Avatar className="h-11 w-11 ring-2 ring-stone-100 group-hover:ring-olive-200 transition-all">
-                              <AvatarImage src={followerUser.avatar_url || ''} />
+                              <AvatarImage
+                                src={getPhotoUrl(followerUser.avatar_url, 'avatars') || ''}
+                                alt={followerUser.display_name || followerUser.username || 'User'}
+                              />
                               <AvatarFallback className="bg-gradient-to-br from-olive-500 to-olive-500 text-white font-semibold">
                                 {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>

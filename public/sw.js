@@ -3,10 +3,14 @@
  * Provides offline functionality, caching, and background sync
  */
 
-const CACHE_NAME = 'adventure-log-v8'
-const STATIC_CACHE = 'adventure-log-static-v8'
-const DYNAMIC_CACHE = 'adventure-log-dynamic-v8'
-const IMAGE_CACHE = 'adventure-log-images-v8'
+// Bump this version on any deploy that must invalidate stale caches for
+// returning visitors. The activate handler deletes every cache whose name
+// doesn't match the current set, so changing the suffix purges old content.
+const CACHE_VERSION = 'v9'
+const CACHE_NAME = `adventure-log-${CACHE_VERSION}`
+const STATIC_CACHE = `adventure-log-static-${CACHE_VERSION}`
+const DYNAMIC_CACHE = `adventure-log-dynamic-${CACHE_VERSION}`
+const IMAGE_CACHE = `adventure-log-images-${CACHE_VERSION}`
 
 // Static files to cache immediately
 const STATIC_FILES = [

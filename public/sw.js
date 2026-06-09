@@ -353,16 +353,80 @@ async function syncOfflinePhotos() {
   }
 }
 
-// Placeholder functions for offline data management
-// These would typically use IndexedDB for more complex data storage
-async function getOfflineData(type) {
-  // Implementation would depend on your offline storage strategy
-  return []
+// Offline data management (IndexedDB)
+//
+// Uses the SAME database/store names as the client-side helper in
+// `src/lib/utils/offline-queue.ts` so the page (writer) and this service
+// worker (reader) share storage. A service worker cannot read localStorage,
+// so IndexedDB is the only shared option.
+//
+// Schema (MUST stay in sync with offline-queue.ts):
+//   - database: `adventure-log-offline`, version 1
+//   - object stores: `albums` and `photos`, keyPath `id`
+const OFFLINE_DB_NAME = 'adventure-log-offline'
+const OFFLINE_DB_VERSION = 1
+const OFFLINE_STORES = ['albums', 'photos']
+
+// Open the offline DB, creating both stores in onupgradeneeded so the SW can
+// open it even if it races ahead of the client.
+function openOfflineDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(OFFLINE_DB_NAME, OFFLINE_DB_VERSION)
+
+    request.onupgradeneeded = () => {
+      const db = request.result
+      for (const store of OFFLINE_STORES) {
+        if (!db.objectStoreNames.contains(store)) {
+          db.createObjectStore(store, { keyPath: 'id' })
+        }
+      }
+    }
+
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => reject(request.error || new Error('Failed to open offline DB'))
+  })
 }
 
+// Return all queued records from the matching store ('albums' | 'photos').
+async function getOfflineData(type) {
+  try {
+    const db = await openOfflineDB()
+    try {
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(type, 'readonly')
+        const req = tx.objectStore(type).getAll()
+        req.onsuccess = () => resolve(req.result || [])
+        req.onerror = () => reject(req.error || new Error('Failed to read offline data'))
+      })
+    } finally {
+      db.close()
+    }
+  } catch (error) {
+    console.log('Service Worker: Failed to read offline data:', error)
+    return []
+  }
+}
+
+// Delete a record by id from the matching store ('albums' | 'photos').
 async function removeOfflineData(type, id) {
-  // Implementation would depend on your offline storage strategy
-  return true
+  try {
+    const db = await openOfflineDB()
+    try {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(type, 'readwrite')
+        tx.oncomplete = () => resolve()
+        tx.onerror = () => reject(tx.error || new Error('Failed to remove offline data'))
+        tx.onabort = () => reject(tx.error || new Error('Offline data transaction aborted'))
+        tx.objectStore(type).delete(id)
+      })
+    } finally {
+      db.close()
+    }
+    return true
+  } catch (error) {
+    console.log('Service Worker: Failed to remove offline data:', type, id, error)
+    return false
+  }
 }
 
 // Handle push notifications

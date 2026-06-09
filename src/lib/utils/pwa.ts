@@ -6,6 +6,7 @@
 
 import { log } from './logger'
 import { Platform } from './platform'
+import { addToQueue, getQueueCount } from './offline-queue'
 
 // Extend Navigator interface for PWA standalone detection
 declare global {
@@ -415,33 +416,27 @@ export class PWAManager {
   }
 
   // Offline storage utilities (cross-platform)
+  //
+  // Web path: writes into IndexedDB (`adventure-log-offline`) via the shared
+  // offline-queue helper so the service worker can read the SAME store during
+  // background sync. (A service worker cannot read localStorage, which is why
+  // the previous localStorage-based implementation never synced.)
+  //
+  // Native path: Capacitor has no service-worker background sync, so it keeps
+  // using Capacitor Preferences for at-rest queuing.
   async saveOfflineData(type: 'albums' | 'photos', data: OfflineDataItem): Promise<boolean> {
     try {
-      const storageKey = `adventure-log-offline-${type}`
-      let existingData: OfflineDataItem[] = []
-
-      // Get existing data from appropriate storage
-      if (Platform.isWeb() && typeof localStorage !== 'undefined') {
-        existingData = JSON.parse(localStorage.getItem(storageKey) || '[]')
+      if (Platform.isWeb()) {
+        // Persist into IndexedDB (shared with the service worker).
+        await addToQueue(type, data)
       } else {
-        // For native apps, use Capacitor Preferences
+        // For native apps, use Capacitor Preferences (append to a JSON array).
+        const storageKey = `adventure-log-offline-${type}`
         try {
           const { Preferences } = await import('@capacitor/preferences')
           const result = await Preferences.get({ key: storageKey })
-          existingData = result.value ? JSON.parse(result.value) : []
-        } catch {
-          // Preferences not available, use empty array
-        }
-      }
-
-      existingData.push(data)
-
-      // Save data to appropriate storage
-      if (Platform.isWeb() && typeof localStorage !== 'undefined') {
-        localStorage.setItem(storageKey, JSON.stringify(existingData))
-      } else {
-        try {
-          const { Preferences } = await import('@capacitor/preferences')
+          const existingData: OfflineDataItem[] = result.value ? JSON.parse(result.value) : []
+          existingData.push(data)
           await Preferences.set({
             key: storageKey,
             value: JSON.stringify(existingData)
@@ -487,22 +482,21 @@ export class PWAManager {
 
   async getOfflineDataCount(type: 'albums' | 'photos'): Promise<number> {
     try {
-      const storageKey = `adventure-log-offline-${type}`
-      let data: OfflineDataItem[] = []
-
-      if (Platform.isWeb() && typeof localStorage !== 'undefined') {
-        data = JSON.parse(localStorage.getItem(storageKey) || '[]')
-      } else {
-        try {
-          const { Preferences } = await import('@capacitor/preferences')
-          const result = await Preferences.get({ key: storageKey })
-          data = result.value ? JSON.parse(result.value) : []
-        } catch {
-          // Preferences not available
-        }
+      if (Platform.isWeb()) {
+        // Read count from IndexedDB (shared with the service worker).
+        return await getQueueCount(type)
       }
 
-      return data.length
+      // Native: count entries stored via Capacitor Preferences.
+      const storageKey = `adventure-log-offline-${type}`
+      try {
+        const { Preferences } = await import('@capacitor/preferences')
+        const result = await Preferences.get({ key: storageKey })
+        const data: OfflineDataItem[] = result.value ? JSON.parse(result.value) : []
+        return data.length
+      } catch {
+        return 0
+      }
     } catch {
       return 0
     }

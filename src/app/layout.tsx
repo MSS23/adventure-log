@@ -109,7 +109,7 @@ export const metadata: Metadata = {
   category: 'travel',
   classification: 'Travel Social Platform',
   referrer: 'origin-when-cross-origin',
-  manifest: '/api/manifest',
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -133,7 +133,6 @@ export const metadata: Metadata = {
     'application-name': 'Adventure Log',
     'msapplication-TileColor': '#4A5D23',
     'msapplication-config': '/browserconfig.xml',
-    'theme-color': '#F7F2E7',
   },
 };
 

@@ -1,175 +1,142 @@
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { ArrowLeft, Mail, MessageSquare, Github, Twitter, Send } from 'lucide-react'
+
+export const metadata = {
+  title: 'Contact — Adventure Log',
+  description: 'Get in touch with the Adventure Log team — support, bugs, feature requests, and press.',
+}
+
+const CHANNELS = [
+  {
+    icon: Mail,
+    title: 'Email Support',
+    desc: 'For general inquiries and support.',
+    cta: 'support@adventurelog.app',
+    href: 'mailto:support@adventurelog.app',
+    ctaIcon: Send,
+    external: false,
+  },
+  {
+    icon: Github,
+    title: 'Bug Reports',
+    desc: 'Found a bug? Report it on GitHub.',
+    cta: 'Open an Issue',
+    href: 'https://github.com/adventurelog/issues',
+    ctaIcon: Github,
+    external: true,
+  },
+  {
+    icon: MessageSquare,
+    title: 'Feature Requests',
+    desc: 'Suggest new features and improvements.',
+    cta: 'feedback@adventurelog.app',
+    href: 'mailto:feedback@adventurelog.app',
+    ctaIcon: Send,
+    external: false,
+  },
+  {
+    icon: Twitter,
+    title: 'Social Media',
+    desc: 'Follow us for updates and news.',
+    cta: '@adventurelog',
+    href: 'https://twitter.com/adventurelog',
+    ctaIcon: Twitter,
+    external: true,
+  },
+]
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-muted/50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <Button variant="ghost" asChild className="mb-4 cursor-pointer transition-colors duration-200 hover:bg-olive-50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
-            <Link href="/" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
+    <div className="min-h-screen" style={{ background: 'var(--color-ivory)', color: 'var(--color-ink)' }}>
+      <div className="max-w-3xl mx-auto px-6 py-12">
+        <Link
+          href="/"
+          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest)] rounded-sm"
+          style={{ color: 'var(--color-muted-warm)' }}
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Home
+        </Link>
 
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-olive-100 rounded-lg">
-              <MessageSquare className="h-6 w-6 text-olive-600" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Contact Us
-              </h1>
-              <p className="text-muted-foreground">
-                We&apos;d love to hear from you
-              </p>
-            </div>
-          </div>
-        </div>
+        <p className="al-eyebrow mt-6 mb-2">We&apos;d love to hear from you</p>
+        <h1 className="al-display text-4xl mb-4">Contact Us</h1>
+        <p className="al-body mb-10 max-w-prose">
+          Have questions, feedback, or need support? We&apos;re here to help. Pick the channel that fits best.
+        </p>
 
-        <Card className="shadow-lg mb-6">
-          <CardHeader>
-            <CardTitle>Get in Touch</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-6 max-w-prose">
-              Have questions, feedback, or need support? We&apos;re here to help! Choose your preferred method of contact below.
-            </p>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Email Support */}
-              <Card className="border-2 border-stone-200 dark:border-stone-800 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-olive-100 dark:bg-olive-900/30 rounded-lg">
-                      <Mail className="h-5 w-5 text-olive-700 dark:text-olive-300" />
-                    </div>
-                    <h3 className="font-semibold text-lg">Email Support</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    For general inquiries and support
-                  </p>
-                  <a
-                    href="mailto:support@adventurelog.app"
-                    className="cursor-pointer inline-flex items-center gap-2 text-olive-700 dark:text-olive-300 hover:text-olive-800 dark:hover:text-olive-200 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm py-1"
-                  >
-                    <Send className="h-4 w-4" />
-                    support@adventurelog.app
-                  </a>
-                </CardContent>
-              </Card>
-
-              {/* Bug Reports */}
-              <Card className="border-2 border-stone-200 dark:border-stone-800 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-olive-100 dark:bg-olive-900/30 rounded-lg">
-                      <Github className="h-5 w-5 text-olive-700 dark:text-olive-300" />
-                    </div>
-                    <h3 className="font-semibold text-lg">Bug Reports</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    Found a bug? Report it on GitHub
-                  </p>
-                  <a
-                    href="https://github.com/adventurelog/issues"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="cursor-pointer inline-flex items-center gap-2 text-olive-700 dark:text-olive-300 hover:text-olive-800 dark:hover:text-olive-200 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm py-1"
-                  >
-                    <Github className="h-4 w-4" />
-                    Open an Issue
-                  </a>
-                </CardContent>
-              </Card>
-
-              {/* Feature Requests */}
-              <Card className="border-2 border-stone-200 dark:border-stone-800 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-olive-100 dark:bg-olive-900/30 rounded-lg">
-                      <MessageSquare className="h-5 w-5 text-olive-700 dark:text-olive-300" />
-                    </div>
-                    <h3 className="font-semibold text-lg">Feature Requests</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    Suggest new features and improvements
-                  </p>
-                  <a
-                    href="mailto:feedback@adventurelog.app"
-                    className="cursor-pointer inline-flex items-center gap-2 text-olive-700 dark:text-olive-300 hover:text-olive-800 dark:hover:text-olive-200 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm py-1"
-                  >
-                    <Send className="h-4 w-4" />
-                    feedback@adventurelog.app
-                  </a>
-                </CardContent>
-              </Card>
-
-              {/* Social Media */}
-              <Card className="border-2 border-stone-200 dark:border-stone-800 hover:border-olive-200 dark:hover:border-olive-700 hover:shadow-md transition-all duration-200">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-olive-100 dark:bg-olive-900/30 rounded-lg">
-                      <Twitter className="h-5 w-5 text-olive-700 dark:text-olive-300" />
-                    </div>
-                    <h3 className="font-semibold text-lg">Social Media</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    Follow us for updates and news
-                  </p>
-                  <a
-                    href="https://twitter.com/adventurelog"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="cursor-pointer inline-flex items-center gap-2 text-olive-700 dark:text-olive-300 hover:text-olive-800 dark:hover:text-olive-200 font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm py-1"
-                  >
-                    <Twitter className="h-4 w-4" />
-                    @adventurelog
-                  </a>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Business Inquiries</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              For partnerships, press inquiries, or other business matters:
-            </p>
-            <div className="bg-muted border border-border rounded-lg p-4">
+        {/* Channels grid */}
+        <div className="grid sm:grid-cols-2 gap-4 mb-6">
+          {CHANNELS.map((c) => (
+            <div
+              key={c.title}
+              className="al-card p-5 transition-all duration-200 hover:-translate-y-0.5"
+              style={{ boxShadow: '0 1px 2px rgba(26,20,14,0.04), 0 4px 16px rgba(26,20,14,0.06)' }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div
+                  className="p-2 rounded-lg"
+                  style={{ background: 'var(--color-forest-tint)' }}
+                >
+                  <c.icon className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
+                </div>
+                <h2 className="font-heading text-base font-semibold" style={{ color: 'var(--color-ink)' }}>
+                  {c.title}
+                </h2>
+              </div>
+              <p className="al-body text-sm mb-4">{c.desc}</p>
               <a
-                href="mailto:business@adventurelog.app"
-                className="cursor-pointer font-mono text-sm text-olive-600 hover:text-olive-700 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm"
+                href={c.href}
+                {...(c.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                className="inline-flex items-center gap-2 text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest)] rounded-sm py-0.5"
+                style={{ color: 'var(--color-forest)' }}
               >
-                business@adventurelog.app
+                <c.ctaIcon className="h-4 w-4" />
+                {c.cta}
               </a>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mt-6 border-olive-200 dark:border-olive-800/50 bg-olive-50 dark:bg-olive-900/20">
-          <CardContent className="pt-6">
-            <h3 className="font-semibold mb-2">Response Time</h3>
-            <p className="text-olive-800 dark:text-olive-200 text-sm">
-              We typically respond to emails within 24-48 hours during business days. For urgent issues, please indicate &quot;URGENT&quot; in your subject line.
-            </p>
-          </CardContent>
-        </Card>
-
-        <div className="mt-8 text-center">
-          <Button asChild className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-            <Link href="/">
-              Return to Adventure Log
-            </Link>
-          </Button>
+          ))}
         </div>
+
+        {/* Business inquiries */}
+        <div className="al-card p-6 mb-6">
+          <h2 className="font-heading text-lg font-semibold mb-2" style={{ color: 'var(--color-ink)' }}>
+            Business Inquiries
+          </h2>
+          <p className="al-body mb-4">
+            For partnerships, press inquiries, or other business matters:
+          </p>
+          <a
+            href="mailto:business@adventurelog.app"
+            className="font-mono text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest)] rounded-sm"
+            style={{ color: 'var(--color-coral)' }}
+          >
+            business@adventurelog.app
+          </a>
+        </div>
+
+        {/* Response time */}
+        <div
+          className="rounded-2xl p-6"
+          style={{
+            background: 'var(--color-gold-tint)',
+            border: '1px solid var(--color-line-warm)',
+          }}
+        >
+          <h2 className="font-heading text-base font-semibold mb-2" style={{ color: 'var(--color-ink)' }}>
+            Response Time
+          </h2>
+          <p className="al-body">
+            We typically respond within 24–48 hours during business days. For urgent issues, please add &quot;URGENT&quot; to your subject line.
+          </p>
+        </div>
+
+        <p className="al-caption mt-10">
+          Prefer to look around first?{' '}
+          <Link href="/discover" className="underline" style={{ color: 'var(--color-forest)' }}>
+            Explore the community globe
+          </Link>
+          .
+        </p>
       </div>
     </div>
   )

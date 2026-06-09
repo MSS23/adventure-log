@@ -153,7 +153,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
       {/* Active days summary */}
       <div className="flex items-baseline gap-1.5 mb-4">
         <span className="text-2xl font-bold text-stone-900 dark:text-white">{activeDays}</span>
-        <span className="text-sm text-stone-400">active days in {year}</span>
+        <span className="text-sm text-stone-500 dark:text-stone-400">active days in {year}</span>
       </div>
 
       <div className="overflow-x-auto -mx-1 px-1 pb-1">
@@ -416,7 +416,7 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto mb-4">
-            <BarChart3 className="h-7 w-7 text-stone-400" />
+            <BarChart3 className="h-7 w-7 text-stone-400 dark:text-stone-500" />
           </div>
           <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your analytics</p>
           <button onClick={() => router.push('/login')}><Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 active:scale-[0.97] text-white transition-all duration-200">Log In</Button></button>
@@ -444,7 +444,7 @@ export default function AnalyticsPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <Globe2 className="h-10 w-10 text-stone-300 mx-auto mb-3" />
+          <Globe2 className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
           <p className="text-stone-500 dark:text-stone-400">Unable to load analytics</p>
         </div>
       </div>
@@ -520,7 +520,7 @@ export default function AnalyticsPage() {
               <SectionTitle icon={Globe2}>Top Destinations</SectionTitle>
               <div className="text-right">
                 <p className="text-xl font-bold text-olive-600 dark:text-olive-400">{worldPercentage}%</p>
-                <p className="text-[11px] text-stone-400">of the world</p>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400">of the world</p>
               </div>
             </div>
             <div className="space-y-3">
@@ -533,7 +533,7 @@ export default function AnalyticsPage() {
                         <span className="text-base">{getFlagEmoji(dest.country_code)}</span>
                         <span className="text-sm text-stone-700 dark:text-stone-300">{dest.country_name}</span>
                       </div>
-                      <span className="text-xs text-stone-400">{dest.count} {dest.count === 1 ? 'album' : 'albums'}</span>
+                      <span className="text-xs text-stone-500 dark:text-stone-400">{dest.count} {dest.count === 1 ? 'album' : 'albums'}</span>
                     </div>
                     <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2 overflow-hidden">
                       <motion.div
@@ -547,7 +547,7 @@ export default function AnalyticsPage() {
                 )
               })}
               {stats.topDestinations.length === 0 && (
-                <p className="text-stone-400 text-sm text-center py-6">No country data yet</p>
+                <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-6">No country data yet</p>
               )}
             </div>
           </Section>
@@ -560,7 +560,7 @@ export default function AnalyticsPage() {
                 const heightPct = maxMonthCount > 0 ? (m.count / maxMonthCount) * 100 : 0
                 return (
                   <div key={m.month} className="flex-1 flex flex-col items-center justify-end group cursor-pointer">
-                    <div className="text-[10px] text-stone-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="text-[10px] text-stone-500 dark:text-stone-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       {m.count || ''}
                     </div>
                     <motion.div
@@ -576,7 +576,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-700 pt-2 mt-1">
               {stats.photosByMonth.map(m => (
                 <div key={m.month} className="flex-1 text-center">
-                  <span className="text-[10px] text-stone-400">{m.month}</span>
+                  <span className="text-[10px] text-stone-500 dark:text-stone-400">{m.month}</span>
                 </div>
               ))}
             </div>
@@ -585,13 +585,13 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-2 gap-3 mt-5 pt-5 border-t border-stone-100 dark:border-stone-700">
               <div className="text-center">
                 <p className="text-xl font-bold text-stone-900 dark:text-white">{stats.averagePhotosPerAlbum}</p>
-                <p className="text-xs text-stone-400">Avg photos/album</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Avg photos/album</p>
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold text-stone-900 dark:text-white">
                   {stats.photosByYear.reduce((max, y) => y.count > max.count ? y : max, stats.photosByYear[0])?.year || '—'}
                 </p>
-                <p className="text-xs text-stone-400">Most active year</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Most active year</p>
               </div>
             </div>
           </Section>

@@ -6,7 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark, MapPin, Calendar, Share2, X, Check, Flag } from 'lucide-react'
+import { Trash2, ArrowLeft, Heart, MessageCircle, Globe, Bookmark, MapPin, Calendar, Share2, X, Check, Flag, Camera, Lock, Users } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album, Photo } from '@/types/database'
@@ -343,8 +343,8 @@ export default function AlbumDetailPage() {
                   <Trash2 className="h-6 w-6 text-olive-600" />
                 </div>
                 <div>
-                  <p className="text-olive-900 font-medium text-lg">Album Deleted</p>
-                  <p className="text-olive-700 text-sm mt-1">
+                  <p className="text-olive-900 dark:text-olive-200 font-medium text-lg">Album Deleted</p>
+                  <p className="text-olive-700 dark:text-olive-400 text-sm mt-1">
                     This album has been deleted and is no longer available.
                   </p>
                 </div>
@@ -425,8 +425,8 @@ export default function AlbumDetailPage() {
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
-                    <p className="text-red-600 font-medium text-lg">Unable to Load Album</p>
-                    <p className="text-red-600 text-sm mt-1">{error}</p>
+                    <p className="text-red-600 dark:text-red-400 font-medium text-lg">Unable to Load Album</p>
+                    <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
                   </div>
                   <div className="flex gap-2 justify-center pt-2">
                     <Button onClick={fetchAlbumData} disabled={loading} className="min-w-[120px]">
@@ -476,8 +476,8 @@ export default function AlbumDetailPage() {
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
-                    <p className="text-olive-900 font-medium text-lg">Login Required</p>
-                    <p className="text-olive-700 text-sm mt-1">
+                    <p className="text-olive-900 dark:text-olive-200 font-medium text-lg">Login Required</p>
+                    <p className="text-olive-700 dark:text-olive-400 text-sm mt-1">
                       This album is {album.visibility}. Please log in to view it.
                     </p>
                   </div>
@@ -636,7 +636,7 @@ export default function AlbumDetailPage() {
               </div>
 
               {/* Title + metadata */}
-              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white leading-tight mb-2">
+              <h1 className="al-display text-2xl sm:text-3xl lg:text-4xl text-stone-900 dark:text-white leading-tight mb-2">
                 {album.title}
               </h1>
 
@@ -667,6 +667,17 @@ export default function AlbumDetailPage() {
                 )}
                 {photos.length > 0 && (
                   <span className="text-stone-400 dark:text-stone-500">{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
+                )}
+                {isOwner && album.visibility && (
+                  <span className="al-badge">
+                    {album.visibility === 'private' ? (
+                      <><Lock className="h-2.5 w-2.5" /> Private</>
+                    ) : album.visibility === 'friends' ? (
+                      <><Users className="h-2.5 w-2.5" /> Friends</>
+                    ) : (
+                      <><Globe className="h-2.5 w-2.5" /> Public</>
+                    )}
+                  </span>
                 )}
               </div>
 
@@ -845,9 +856,13 @@ export default function AlbumDetailPage() {
           </>
         ) : (
           /* No Photos Empty State */
-          <div className="bg-white dark:bg-stone-800/80 rounded-2xl border border-stone-200 dark:border-stone-700/60 p-8 sm:p-16">
+          <div className="al-card p-8 sm:p-16">
             <div className="text-center max-w-md mx-auto">
-              <h3 className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-white mb-3">
+              <div className="mx-auto mb-5 w-14 h-14 rounded-2xl bg-olive-100 dark:bg-olive-950/30 flex items-center justify-center">
+                <Camera className="h-7 w-7 text-olive-600 dark:text-olive-400" />
+              </div>
+              <p className="al-eyebrow mb-2">{isOwner ? 'New adventure' : 'Album'}</p>
+              <h3 className="al-display text-xl sm:text-2xl mb-3">
                 {isOwner ? 'Start Your Journey' : 'No photos yet'}
               </h3>
               <p className="text-stone-600 dark:text-stone-400 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
@@ -857,7 +872,7 @@ export default function AlbumDetailPage() {
               </p>
               {isOwner && (
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="lg" className="bg-olive-600 hover:bg-olive-700 text-white">
+                  <Button size="lg" className="al-btn-coral text-white px-6">
                     Upload Photos
                   </Button>
                 </Link>

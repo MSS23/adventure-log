@@ -333,10 +333,10 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                 data-tour-step="add-destination-btn"
                 onClick={() => setShowAddForm(!showAddForm)}
                 className={cn(
-                  'gap-2 shrink-0',
+                  'gap-2 shrink-0 rounded-full',
                   showAddForm
-                    ? 'bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-700'
-                    : 'bg-gradient-to-r from-olive-600 to-olive-700 hover:from-olive-700 hover:to-olive-800 text-white shadow-lg shadow-olive-500/20'
+                    ? 'bg-[color:var(--color-ivory-alt)] text-[color:var(--color-ink-soft)] hover:bg-[color:var(--color-line-warm)]'
+                    : 'al-btn-coral'
                 )}
               >
                 {showAddForm ? (
@@ -393,7 +393,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Why do you want to visit? Any must-see spots..."
-                      className="rounded-xl dark:bg-[#1A1A1A] dark:border-white/[0.1] resize-none min-h-[80px]"
+                      className="rounded-xl resize-none min-h-[80px]"
                     />
                   </div>
 
@@ -408,10 +408,10 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                           key={p}
                           onClick={() => setPriority(p)}
                           className={cn(
-                            'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
+                            'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none',
                             priority === p
-                              ? 'bg-olive-50 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400 border-olive-200 dark:border-olive-700 shadow-sm'
-                              : 'bg-white dark:bg-[#1A1A1A] text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.1] hover:border-stone-300 dark:hover:border-stone-600'
+                              ? 'bg-[color:var(--color-coral-tint)] text-[color:var(--color-coral)] border-[color:var(--color-coral)]/40 shadow-sm'
+                              : 'bg-[color:var(--card)] text-[color:var(--color-muted-warm)] border-[color:var(--color-line-warm)] hover:border-[color:var(--color-coral)]/30'
                           )}
                         >
                           <span
@@ -427,7 +427,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                   <Button
                     onClick={handleAddItem}
                     disabled={!location || isAdding}
-                    className="w-full gap-2 bg-gradient-to-r from-olive-600 to-olive-700 hover:from-olive-700 hover:to-olive-800 text-white shadow-lg shadow-olive-500/20"
+                    className="al-btn-coral w-full gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isAdding ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -459,11 +459,16 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
               key={key}
               onClick={() => setActiveFilter(key)}
               className={cn(
-                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
+                'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none',
                 activeFilter === key
-                  ? 'bg-olive-600 text-white border-olive-600 shadow-md shadow-olive-500/20'
-                  : 'bg-white dark:bg-[#111111] text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.1] hover:bg-olive-50 dark:hover:bg-[#1A1A1A]'
+                  ? 'text-white shadow-sm'
+                  : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]'
               )}
+              style={
+                activeFilter === key
+                  ? { background: 'var(--color-coral)' }
+                  : { background: 'var(--card)', border: '1px solid var(--color-line-warm)' }
+              }
             >
               {label}
               <span
@@ -471,7 +476,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                   'ml-2 px-1.5 py-0.5 text-xs rounded-full inline-block',
                   activeFilter === key
                     ? 'bg-white/20 text-white'
-                    : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
+                    : 'bg-[color:var(--color-ivory-alt)] text-[color:var(--color-muted-warm)]'
                 )}
               >
                 {counts[key]}
@@ -766,7 +771,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                     value={suggestNote}
                                     onChange={(e) => setSuggestNote(e.target.value)}
                                     placeholder="Add a note (optional)..."
-                                    className="rounded-xl dark:bg-[#1A1A1A] dark:border-white/[0.1] resize-none min-h-[60px] text-sm"
+                                    className="rounded-xl resize-none min-h-[60px] text-sm"
                                   />
                                   <div className="flex gap-2 justify-end">
                                     <Button
@@ -784,7 +789,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                       size="sm"
                                       disabled={!suggestLocation || isSuggesting}
                                       onClick={() => handleSuggest(partner.id)}
-                                      className="gap-1.5 bg-gradient-to-r from-olive-600 to-olive-700 hover:from-olive-700 hover:to-olive-800 text-white"
+                                      className="al-btn-coral gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                                     >
                                       {isSuggesting ? (
                                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -819,8 +824,8 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                   className={cn(
                                     'flex items-center justify-between p-3 rounded-xl border transition-colors',
                                     item.completed_at
-                                      ? 'bg-stone-50 dark:bg-stone-900/50 border-stone-100 dark:border-white/[0.04] opacity-50'
-                                      : 'bg-white dark:bg-[#111111] border-stone-200/50 dark:border-white/[0.08] hover:border-olive-200 dark:hover:border-olive-800/40'
+                                      ? 'bg-[color:var(--color-ivory-alt)] border-[color:var(--color-line-warm)] opacity-50'
+                                      : 'bg-[color:var(--card)] border-[color:var(--color-line-warm)] hover:border-[color:var(--color-coral)]/40'
                                   )}
                                 >
                                   <div className="flex items-center gap-3 min-w-0">

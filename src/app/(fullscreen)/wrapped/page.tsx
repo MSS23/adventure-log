@@ -286,7 +286,7 @@ export default function WrappedPage() {
                 <Plane className="h-16 w-16 text-olive-400 mx-auto" />
               </motion.div>
               <motion.h1
-                className="text-5xl md:text-7xl font-black mb-3"
+                className="al-display text-5xl md:text-7xl !text-white mb-3"
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -294,9 +294,9 @@ export default function WrappedPage() {
                 {mode === 'all' ? 'Your' : `Your ${data.year}`}
               </motion.h1>
               <motion.h2
-                className="text-2xl md:text-3xl font-light opacity-80 mb-2"
+                className="text-2xl md:text-3xl font-light tracking-wide text-white/85 mb-2"
                 initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 0.8 }}
+                animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
                 Travel Wrapped
@@ -334,14 +334,16 @@ export default function WrappedPage() {
 
               {/* Quick stats preview */}
               <motion.div
-                className="mt-8 flex gap-6 justify-center text-white/55 text-sm"
+                className="mt-8 flex gap-4 sm:gap-6 justify-center items-center text-white/70 text-sm"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.3 }}
               >
-                <span>{data.totalTrips} trips</span>
-                <span>{data.countryCodes.length} countries</span>
-                <span>{data.totalDistanceKm.toLocaleString()} km</span>
+                <span><span className="font-semibold text-white">{data.totalTrips}</span> trips</span>
+                <span className="text-white/25" aria-hidden>&middot;</span>
+                <span><span className="font-semibold text-white">{data.countryCodes.length}</span> countries</span>
+                <span className="text-white/25" aria-hidden>&middot;</span>
+                <span><span className="font-semibold text-white">{data.totalDistanceKm.toLocaleString()}</span> km</span>
               </motion.div>
             </div>
           </motion.div>
@@ -385,9 +387,9 @@ export default function WrappedPage() {
 
             {/* Flight progress bar */}
             <div className="absolute top-16 left-4 right-4 z-30">
-              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-white/15 rounded-full overflow-hidden shadow-sm">
                 <motion.div
-                  className="h-full bg-olive-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-olive-500 to-olive-400 rounded-full shadow-[0_0_8px_rgba(153,177,105,0.6)]"
                   animate={{ width: `${flightProgress * 100}%` }}
                   transition={{ duration: 0.5 }}
                 />
@@ -440,7 +442,7 @@ export default function WrappedPage() {
                 onClick={() => setPhase('stats')}
                 variant="ghost"
                 size="sm"
-                className="cursor-pointer text-white/65 hover:text-white/70 text-xs transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[44px] min-w-[44px]"
+                className="cursor-pointer text-white/70 hover:text-white text-xs transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[44px] min-w-[44px]"
               >
                 Skip
               </Button>
@@ -477,10 +479,10 @@ export default function WrappedPage() {
                 transition={{ delay: 0.2, type: 'spring' }}
               >
                 <Sparkles className="h-10 w-10 mx-auto mb-3 text-olive-400" />
-                <p className="text-white/60 text-sm mb-1">
+                <p className="al-eyebrow !text-olive-400 mb-2">
                   Your travel personality
                 </p>
-                <h2 className="text-4xl md:text-5xl font-black text-white">
+                <h2 className="al-display text-4xl md:text-6xl !text-white">
                   {data.personality}
                 </h2>
               </motion.div>
@@ -552,31 +554,43 @@ export default function WrappedPage() {
               {/* Distance comparison */}
               {data.totalDistanceKm > 0 && (
                 <motion.p
-                  className="text-white/65 text-sm mb-8 text-center"
+                  className="text-white/75 text-sm sm:text-base mb-8 text-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1 }}
                 >
+                  <GlobeIcon className="inline-block h-4 w-4 mr-1.5 -mt-0.5 text-olive-400" aria-hidden />
                   {data.totalDistanceKm >= 40075
                     ? `That's ${(data.totalDistanceKm / 40075).toFixed(1)}x around the Earth!`
                     : `That's ${((data.totalDistanceKm / 40075) * 100).toFixed(0)}% around the Earth`}
                 </motion.p>
               )}
 
-              {/* Share actions */}
+              {/* Share actions — the viral moment. Lead with a prominent
+                  primary CTA; download + replay are secondary. */}
               <motion.div
-                className="flex gap-3 flex-wrap justify-center"
+                className="flex flex-col items-center gap-3 w-full max-w-md"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2 }}
               >
-                <Button
-                  onClick={handleShare}
-                  className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white font-semibold px-6 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                <motion.div
+                  initial={{ scale: 0.92, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 1.3, type: 'spring', stiffness: 260, damping: 18 }}
+                  className="w-full sm:w-auto"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
+                  <Button
+                    onClick={handleShare}
+                    size="lg"
+                    className="al-btn-coral cursor-pointer w-full sm:w-auto text-white font-semibold px-10 py-6 text-base rounded-full gap-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  >
+                    <Share2 className="h-5 w-5" />
+                    Share My Wrapped
+                  </Button>
+                </motion.div>
+
+                <div className="flex gap-3 flex-wrap justify-center">
                 {user && (
                   <Button
                     onClick={async () => {
@@ -626,11 +640,22 @@ export default function WrappedPage() {
                     setCurrentCity('')
                   }}
                   variant="ghost"
-                  className="cursor-pointer text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                  className="cursor-pointer text-white/65 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Replay
                 </Button>
+                </div>
+
+                {/* Subtle attribution that travels with screenshots */}
+                <motion.p
+                  className="al-eyebrow !text-white/55 mt-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5 }}
+                >
+                  Adventure Log
+                </motion.p>
               </motion.div>
             </div>
           </motion.div>
@@ -650,10 +675,10 @@ function StatPill({
   label: string
 }) {
   return (
-    <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-2 rounded-full">
+    <div className="flex items-center gap-2 bg-black/55 backdrop-blur-md px-3.5 py-2 rounded-full border border-white/10 shadow-lg shadow-black/30">
       <span className="text-olive-400">{icon}</span>
-      <span className="text-white font-bold text-sm">{value}</span>
-      <span className="text-white/50 text-xs">{label}</span>
+      <span className="text-white font-bold text-sm tabular-nums">{value}</span>
+      <span className="text-white/70 text-xs">{label}</span>
     </div>
   )
 }
@@ -668,10 +693,10 @@ function StatCard({
   icon: React.ReactNode
 }) {
   return (
-    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 text-center border border-white/10">
+    <div className="bg-white/[0.07] backdrop-blur-md rounded-2xl p-4 sm:p-5 text-center border border-white/15 shadow-lg shadow-black/20">
       <div className="text-olive-400 mb-2 flex justify-center">{icon}</div>
-      <p className="text-2xl sm:text-3xl font-bold text-white">{value}</p>
-      <p className="text-xs text-white/50 mt-1">{label}</p>
+      <p className="al-stat-value text-3xl sm:text-4xl !text-white tabular-nums">{value}</p>
+      <p className="al-eyebrow !text-white/65 mt-1.5">{label}</p>
     </div>
   )
 }

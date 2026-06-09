@@ -76,7 +76,7 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
             <div className="max-w-2xl space-y-3 sm:space-y-4">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                <div className="h-2 w-2 bg-olive-400 rounded-full animate-pulse" />
+                <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: 'var(--color-gold-soft)' }} />
                 <span className="text-xs font-medium text-white/90 uppercase tracking-wider">
                   Featured This Week
                 </span>
@@ -103,7 +103,8 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
                 <Link href={`/search?q=${encodeURIComponent(destination.searchQuery || destination.name)}`}>
                   <Button
                     size="default"
-                    className="bg-olive-500 hover:bg-olive-600 active:bg-olive-700 text-white font-semibold rounded-lg px-6 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
+                    className="text-white font-semibold rounded-full px-6 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200 border-0"
+                    style={{ background: 'var(--color-coral)' }}
                   >
                     <span className="flex items-center gap-2">
                       Explore Journeys
@@ -115,7 +116,7 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
                 <Button
                   size="default"
                   variant="outline"
-                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-medium rounded-lg px-5 shadow-lg"
+                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-medium rounded-full px-5 shadow-lg"
                 >
                   Learn More
                 </Button>
@@ -127,9 +128,9 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
           <div className="absolute top-6 right-6 hidden md:block">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/10">
               <div className="flex -space-x-1.5">
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-olive-400 to-olive-400 border-2 border-white" />
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-olive-400 to-pink-400 border-2 border-white" />
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-olive-400 to-red-400 border-2 border-white" />
+                <div className="h-6 w-6 rounded-full border-2 border-white" style={{ background: 'var(--color-forest-soft)' }} />
+                <div className="h-6 w-6 rounded-full border-2 border-white" style={{ background: 'var(--color-gold-soft)' }} />
+                <div className="h-6 w-6 rounded-full border-2 border-white" style={{ background: 'var(--color-coral-soft)' }} />
               </div>
               <span className="text-xs text-white/90 font-medium ml-1">
                 234 travelers visited

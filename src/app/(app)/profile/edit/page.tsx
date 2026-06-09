@@ -153,9 +153,9 @@ export default function EditProfilePage() {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
-          <p className="text-stone-600 dark:text-stone-400">Profile not found</p>
+          <p className="text-[color:var(--color-muted-warm)]">Profile not found</p>
           <Link href="/setup" className="mt-3 inline-block">
-            <Button>Complete Profile Setup</Button>
+            <Button className="al-btn-coral">Complete Profile Setup</Button>
           </Link>
         </div>
       </div>
@@ -166,11 +166,12 @@ export default function EditProfilePage() {
     <div className="max-w-xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/profile" className="inline-flex items-center text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 mb-3 cursor-pointer transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded">
+        <Link href="/profile" className="inline-flex items-center text-sm text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] mb-3 cursor-pointer transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none rounded">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to profile
         </Link>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Edit Profile</h1>
+        <p className="al-eyebrow mb-1">Your account</p>
+        <h1 className="al-display text-3xl">Edit Profile</h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -181,16 +182,20 @@ export default function EditProfilePage() {
         )}
 
         {/* Avatar */}
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] p-5">
+        <div className="al-card p-5">
           <div className="flex items-center gap-5">
             <div className="relative">
-              <Avatar className="h-20 w-20 ring-2 ring-stone-200 dark:ring-stone-700">
+              <Avatar className="h-20 w-20 ring-2 ring-[color:var(--color-line-warm)]">
                 <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
-                <AvatarFallback className="text-lg bg-olive-100 dark:bg-olive-900/40 text-olive-700 dark:text-olive-300">
+                <AvatarFallback className="text-lg text-white" style={{ background: 'var(--color-coral)' }}>
                   {(watch('display_name') || watch('username') || 'U').charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <Label htmlFor="avatar" className="absolute -bottom-1 -right-1 p-1.5 bg-olive-600 rounded-full cursor-pointer hover:bg-olive-700 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 active:scale-95">
+              <Label
+                htmlFor="avatar"
+                className="absolute -bottom-1 -right-1 p-1.5 rounded-full cursor-pointer transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 active:scale-95"
+                style={{ background: 'var(--color-coral)' }}
+              >
                 <Camera className="h-3.5 w-3.5 text-white" />
               </Label>
               <Input
@@ -202,30 +207,30 @@ export default function EditProfilePage() {
               />
             </div>
             <div>
-              <p className="text-sm font-medium text-stone-900 dark:text-stone-100">Profile photo</p>
-              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Square image, at least 200x200px</p>
+              <p className="text-sm font-semibold text-[color:var(--color-ink)]">Profile photo</p>
+              <p className="text-xs text-[color:var(--color-muted-warm)] mt-0.5">Square image, at least 200&times;200px</p>
             </div>
           </div>
         </div>
 
         {/* Form fields */}
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] p-5 space-y-4">
+        <div className="al-card p-5 space-y-5">
           {/* Username */}
           <div className="space-y-1.5">
-            <Label htmlFor="username" className="text-stone-700 dark:text-stone-300">Username</Label>
+            <Label htmlFor="username" className="text-[color:var(--color-ink-soft)] font-medium">Username</Label>
             <div className="relative">
               <Input
                 id="username"
                 {...register('username')}
                 className={cn(
-                  "dark:bg-stone-900 dark:border-stone-700",
-                  errors.username || usernameAvailable === false ? 'border-red-500 dark:border-red-500' : '',
-                  usernameAvailable === true ? 'border-green-500 dark:border-green-500' : ''
+                  "pr-9",
+                  errors.username || (usernameAvailable === false && watch('username') !== profile?.username) ? 'border-red-500 dark:border-red-500' : '',
+                  usernameAvailable === true ? 'border-[color:var(--color-forest)]' : ''
                 )}
               />
               <div className="absolute right-3 top-2.5">
-                {checkingUsername && <Loader2 className="h-4 w-4 animate-spin text-stone-400 dark:text-stone-500" />}
-                {!checkingUsername && usernameAvailable === true && <Check className="h-4 w-4 text-olive-600 dark:text-olive-400" />}
+                {checkingUsername && <Loader2 className="h-4 w-4 animate-spin text-[color:var(--color-muted-warm)]" />}
+                {!checkingUsername && usernameAvailable === true && <Check className="h-4 w-4" style={{ color: 'var(--color-forest)' }} />}
                 {!checkingUsername && usernameAvailable === false && watch('username') !== profile?.username && <X className="h-4 w-4 text-red-500" />}
               </div>
             </div>
@@ -234,32 +239,32 @@ export default function EditProfilePage() {
               <p className="text-xs text-red-600 dark:text-red-400">Username taken</p>
             )}
             {!errors.username && usernameAvailable === true && (
-              <p className="text-xs text-olive-700 dark:text-olive-400">Available</p>
+              <p className="text-xs" style={{ color: 'var(--color-forest)' }}>Available</p>
             )}
           </div>
 
           {/* Display Name */}
           <div className="space-y-1.5">
-            <Label htmlFor="display_name" className="text-stone-700 dark:text-stone-300">Display Name</Label>
+            <Label htmlFor="display_name" className="text-[color:var(--color-ink-soft)] font-medium">Display Name</Label>
             <Input
               id="display_name"
               {...register('display_name')}
               placeholder="Your name"
-              className={cn("dark:bg-stone-900 dark:border-stone-700", errors.display_name ? 'border-red-500' : '')}
+              className={cn(errors.display_name ? 'border-red-500' : '')}
             />
             {errors.display_name && <p className="text-xs text-red-600 dark:text-red-400">{errors.display_name.message}</p>}
           </div>
 
           {/* Bio */}
           <div className="space-y-1.5">
-            <Label htmlFor="bio" className="text-stone-700 dark:text-stone-300">Bio</Label>
+            <Label htmlFor="bio" className="text-[color:var(--color-ink-soft)] font-medium">Bio</Label>
             <Textarea
               id="bio"
               {...register('bio')}
               placeholder="Tell others about yourself..."
               rows={3}
               maxLength={1000}
-              className={cn("dark:bg-stone-900 dark:border-stone-700 resize-none", errors.bio ? 'border-red-500' : '')}
+              className={cn("resize-none", errors.bio ? 'border-red-500' : '')}
             />
             {errors.bio && <p className="text-xs text-red-600 dark:text-red-400">{errors.bio.message}</p>}
           </div>
@@ -267,21 +272,21 @@ export default function EditProfilePage() {
           {/* Location + Website */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="location" className="text-stone-700 dark:text-stone-300">Location</Label>
+              <Label htmlFor="location" className="text-[color:var(--color-ink-soft)] font-medium">Location</Label>
               <Input
                 id="location"
                 {...register('location')}
                 placeholder="City, Country"
-                className={cn("dark:bg-stone-900 dark:border-stone-700", errors.location ? 'border-red-500' : '')}
+                className={cn(errors.location ? 'border-red-500' : '')}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="website" className="text-stone-700 dark:text-stone-300">Website</Label>
+              <Label htmlFor="website" className="text-[color:var(--color-ink-soft)] font-medium">Website</Label>
               <Input
                 id="website"
                 {...register('website')}
                 placeholder="your-site.com"
-                className={cn("dark:bg-stone-900 dark:border-stone-700", errors.website ? 'border-red-500' : '')}
+                className={cn(errors.website ? 'border-red-500' : '')}
               />
             </div>
           </div>
@@ -290,14 +295,14 @@ export default function EditProfilePage() {
         {/* Actions */}
         <div className="flex gap-3 justify-end">
           <Link href="/profile">
-            <Button type="button" variant="outline" className="cursor-pointer dark:border-stone-700 dark:text-stone-300 transition-all duration-200 hover:bg-stone-50 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
+            <Button type="button" variant="outline" className="cursor-pointer transition-all duration-200 hover:bg-[color:var(--color-ivory-alt)] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
               Cancel
             </Button>
           </Link>
           <Button
             type="submit"
             disabled={loading}
-            className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+            className="al-btn-coral cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>

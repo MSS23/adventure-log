@@ -81,21 +81,25 @@ export default function CreatorsPage() {
   }, [user?.id, supabase])
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen" style={{ background: 'var(--color-ivory)' }}>
       {/* Header */}
-      <header className="bg-white dark:bg-black border-b border-stone-100 dark:border-stone-800 sticky top-0 z-50">
+      <header
+        className="border-b border-[color:var(--color-line-warm)] sticky top-0 z-50 backdrop-blur-md"
+        style={{ background: 'color-mix(in srgb, var(--card) 88%, transparent)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-4">
-            <Link href="/explore">
-              <Button variant="ghost" size="sm" className="gap-2 cursor-pointer transition-all duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Explore
-              </Button>
+            <Link
+              href="/explore"
+              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-coral)] transition-colors group"
+            >
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+              Back to Explore
             </Link>
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-olive-600 dark:text-olive-400" />
-              <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-                Creators to Follow
+              <Users className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
+              <h1 className="font-heading text-xl font-semibold text-[color:var(--color-ink)]">
+                Creators to follow
               </h1>
             </div>
           </div>
@@ -107,31 +111,31 @@ export default function CreatorsPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[...Array(12)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-[#111] border border-stone-200 dark:border-stone-800 rounded-xl p-6">
+              <div key={i} className="rounded-2xl p-6 border border-[color:var(--color-line-warm)]" style={{ background: 'var(--card)' }}>
                 <div className="flex flex-col items-center space-y-3">
-                  <div className="h-24 w-24 bg-stone-200 dark:bg-white/[0.08] rounded-full animate-pulse" />
-                  <div className="h-4 w-32 bg-stone-200 dark:bg-white/[0.08] rounded animate-pulse" />
-                  <div className="h-3 w-24 bg-stone-200 dark:bg-white/[0.08] rounded animate-pulse" />
-                  <div className="h-9 w-full bg-stone-200 dark:bg-white/[0.08] rounded-lg animate-pulse" />
+                  <div className="h-24 w-24 rounded-full animate-pulse" style={{ background: 'var(--color-ivory-alt)' }} />
+                  <div className="h-4 w-32 rounded animate-pulse" style={{ background: 'var(--color-ivory-alt)' }} />
+                  <div className="h-3 w-24 rounded animate-pulse" style={{ background: 'var(--color-ivory-alt)' }} />
+                  <div className="h-9 w-full rounded-full animate-pulse" style={{ background: 'var(--color-ivory-alt)' }} />
                 </div>
               </div>
             ))}
           </div>
         ) : creators.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
-              <Users className="h-10 w-10 text-stone-400 dark:text-stone-500" />
+            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
+              <Users className="h-10 w-10" style={{ color: 'var(--color-forest)' }} />
             </div>
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">No creators found</h3>
-            <p className="text-stone-600 dark:text-stone-400">
+            <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">No creators found</h3>
+            <p className="text-[color:var(--color-ink-soft)]">
               Check back later for more travelers to follow
             </p>
           </div>
         ) : (
           <>
             <div className="mb-6">
-              <p className="text-stone-600 dark:text-stone-400">
-                Discover {creators.length} amazing travelers and their adventures
+              <p className="text-[color:var(--color-ink-soft)]">
+                Discover {creators.length} travelers and their adventures
               </p>
             </div>
 
@@ -139,13 +143,20 @@ export default function CreatorsPage() {
               {creators.map((creator) => (
                 <div
                   key={creator.id}
-                  className="bg-white dark:bg-[#111] border border-stone-200 dark:border-stone-800 rounded-xl p-6 hover:shadow-lg hover:border-olive-500 dark:hover:border-olive-600 transition-all duration-200 cursor-pointer"
+                  className="group rounded-2xl p-6 border border-[color:var(--color-line-warm)] hover:shadow-[0_18px_40px_-20px_rgba(26,20,14,0.25)] hover:-translate-y-1 transition-all duration-200 cursor-pointer"
+                  style={{ background: 'var(--card)' }}
                 >
                   <div className="flex flex-col items-center text-center space-y-3">
                     <Link href={`/profile/${creator.username}`} className="cursor-pointer">
-                      <Avatar className="h-24 w-24 border-2 border-stone-100 dark:border-stone-700 hover:border-olive-400 dark:hover:border-olive-500 transition-all duration-200 hover:scale-105">
+                      <Avatar
+                        className="h-24 w-24 ring-2 transition-all duration-200 group-hover:scale-105"
+                        style={{ '--tw-ring-color': 'var(--color-forest-tint)' } as React.CSSProperties}
+                      >
                         <AvatarImage src={getAvatarUrl(creator.avatar_url, creator.username)} alt={creator.display_name} />
-                        <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 dark:from-olive-900 dark:to-olive-800 text-olive-700 dark:text-olive-300 text-2xl font-bold">
+                        <AvatarFallback
+                          className="text-2xl font-bold"
+                          style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}
+                        >
                           {creator.display_name?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
@@ -154,23 +165,23 @@ export default function CreatorsPage() {
                     <div className="w-full min-h-[80px]">
                       <Link
                         href={`/profile/${creator.username}`}
-                        className="font-semibold text-stone-900 dark:text-stone-100 hover:text-olive-600 dark:hover:text-olive-400 transition-colors duration-200 line-clamp-1 block cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded"
+                        className="font-heading font-semibold text-[color:var(--color-ink)] hover:text-[color:var(--color-forest)] transition-colors duration-200 line-clamp-1 block cursor-pointer rounded"
                       >
                         {creator.display_name}
                       </Link>
-                      <p className="text-sm text-stone-500 dark:text-stone-400 mb-2">@{creator.username}</p>
+                      <p className="font-mono text-[11px] tracking-[0.04em] text-[color:var(--color-muted-warm)] mb-2">@{creator.username}</p>
 
                       {creator.bio ? (
-                        <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2">
+                        <p className="text-sm text-[color:var(--color-ink-soft)] line-clamp-2">
                           {creator.bio}
                         </p>
                       ) : (
-                        <p className="text-sm text-stone-500 dark:text-stone-500 italic">
+                        <p className="text-sm text-[color:var(--color-muted-warm)] italic">
                           Adventure seeker
                         </p>
                       )}
 
-                      <div className="flex items-center justify-center gap-4 mt-2 text-xs text-stone-600 dark:text-stone-400">
+                      <div className="flex items-center justify-center gap-3 mt-2 font-mono text-[11px] tracking-[0.04em] text-[color:var(--color-muted-warm)]">
                         <span>{creator.albumCount || 0} albums</span>
                         <span>·</span>
                         <span>{creator.followerCount || 0} followers</span>

@@ -59,27 +59,33 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-50 transition-opacity"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in duration-200"
         onClick={onClose}
       />
 
       {/* Dialog */}
-      <div className="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50">
-        <div className="bg-white dark:bg-[#1B170E] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md sm:mx-4 shadow-2xl overflow-hidden">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Invite friends"
+        className="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50"
+      >
+        <div className="bg-white dark:bg-[#1B170E] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md sm:mx-4 shadow-2xl overflow-hidden border border-stone-200/60 dark:border-white/[0.08] animate-in slide-in-from-bottom sm:zoom-in-95 fade-in duration-300 max-h-[92vh] overflow-y-auto">
           {/* Header */}
-          <div className="relative bg-gradient-to-br from-olive-500 to-olive-600 px-6 py-8 text-white">
+          <div className="relative bg-gradient-to-br from-olive-500 via-olive-600 to-olive-700 px-6 py-8 text-white">
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
+              aria-label="Close"
+              className="absolute top-4 right-4 p-2 hover:bg-white/15 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
               <X className="h-5 w-5" />
             </button>
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 ring-1 ring-white/25 shadow-lg shadow-black/10">
                 <Share2 className="h-8 w-8" />
               </div>
               <h2 className="text-2xl font-bold mb-2">Invite Friends</h2>
-              <p className="text-olive-50 text-sm">
+              <p className="text-white/85 text-sm max-w-xs mx-auto">
                 Share your adventures and grow the community together
               </p>
             </div>
@@ -97,29 +103,39 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                   type="text"
                   value={inviteUrl}
                   readOnly
-                  className="flex-1 px-4 py-3 bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/[0.10] rounded-lg text-stone-700 dark:text-stone-300 text-sm"
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="flex-1 min-w-0 px-4 py-3 bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/[0.10] rounded-lg text-stone-700 dark:text-stone-300 text-sm font-mono truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500/60"
                 />
                 <Button
                   onClick={handleCopyLink}
-                  className={`px-4 transition-all duration-200 ${
+                  aria-label={copied ? 'Link copied' : 'Copy invite link'}
+                  className={`shrink-0 gap-1.5 px-4 transition-all duration-200 active:scale-[0.97] ${
                     copied
                       ? 'bg-green-500 hover:bg-green-600'
                       : 'bg-olive-500 hover:bg-olive-600'
                   } text-white`}
                 >
                   {copied ? (
-                    <Check className="h-5 w-5" />
+                    <>
+                      <Check className="h-4 w-4" />
+                      <span className="text-sm font-medium">Copied</span>
+                    </>
                   ) : (
-                    <Copy className="h-5 w-5" />
+                    <>
+                      <Copy className="h-4 w-4" />
+                      <span className="text-sm font-medium">Copy</span>
+                    </>
                   )}
                 </Button>
               </div>
-              {copied && (
-                <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
-                  <Check className="h-3 w-3" />
-                  Link copied to clipboard!
-                </p>
-              )}
+              <div className="h-5 mt-2" aria-live="polite">
+                {copied && (
+                  <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                    <Check className="h-3 w-3" />
+                    Link copied to clipboard!
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Divider */}
@@ -139,8 +155,8 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                 variant="outline"
                 className="w-full justify-start gap-3 py-6 border-stone-300 dark:border-white/[0.14] hover:bg-stone-50 dark:hover:bg-white/[0.06]"
               >
-                <div className="p-2 bg-olive-100 rounded-lg">
-                  <Mail className="h-5 w-5 text-olive-600" />
+                <div className="p-2 bg-olive-100 dark:bg-olive-500/20 rounded-lg">
+                  <Mail className="h-5 w-5 text-olive-600 dark:text-olive-300" />
                 </div>
                 <div className="text-left flex-1">
                   <div className="font-semibold text-stone-900 dark:text-stone-100">Email</div>
@@ -153,8 +169,8 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                 variant="outline"
                 className="w-full justify-start gap-3 py-6 border-stone-300 dark:border-white/[0.14] hover:bg-stone-50 dark:hover:bg-white/[0.06]"
               >
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <MessageSquare className="h-5 w-5 text-green-600" />
+                <div className="p-2 bg-green-100 dark:bg-green-500/20 rounded-lg">
+                  <MessageSquare className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="text-left flex-1">
                   <div className="font-semibold text-stone-900 dark:text-stone-100">Text Message</div>
@@ -168,8 +184,8 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                   variant="outline"
                   className="w-full justify-start gap-3 py-6 border-stone-300 dark:border-white/[0.14] hover:bg-stone-50 dark:hover:bg-white/[0.06]"
                 >
-                  <div className="p-2 bg-olive-100 rounded-lg">
-                    <Share2 className="h-5 w-5 text-olive-600" />
+                  <div className="p-2 bg-olive-100 dark:bg-olive-500/20 rounded-lg">
+                    <Share2 className="h-5 w-5 text-olive-600 dark:text-olive-300" />
                   </div>
                   <div className="text-left flex-1">
                     <div className="font-semibold text-stone-900 dark:text-stone-100">More Options</div>
@@ -181,14 +197,14 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
 
             {/* Benefits */}
             <div className="p-4 bg-olive-50 dark:bg-olive-950/20 rounded-lg border border-olive-100 dark:border-white/[0.08] mt-6">
-              <h3 className="text-sm font-semibold text-olive-900 mb-2">
+              <h3 className="text-sm font-semibold text-olive-900 dark:text-olive-200 mb-2">
                 Why invite friends?
               </h3>
-              <ul className="space-y-1 text-xs text-olive-700">
-                <li>• Share and discover travel inspiration together</li>
-                <li>• Follow each other&apos;s adventures in real-time</li>
-                <li>• Collaborate on trip planning</li>
-                <li>• Build your travel community</li>
+              <ul className="space-y-1.5 text-xs text-olive-700 dark:text-olive-300/90">
+                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-olive-500 dark:text-olive-400" />Share and discover travel inspiration together</li>
+                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-olive-500 dark:text-olive-400" />Follow each other&apos;s adventures in real-time</li>
+                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-olive-500 dark:text-olive-400" />Collaborate on trip planning</li>
+                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-olive-500 dark:text-olive-400" />Build your travel community</li>
               </ul>
             </div>
           </div>

@@ -43,8 +43,8 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
         className={cn(
           'group relative aspect-[4/5] rounded-2xl overflow-hidden',
           'bg-stone-100 dark:bg-stone-900 cursor-pointer',
-          'shadow-sm hover:shadow-xl hover:shadow-olive-500/20',
-          'ring-1 ring-stone-200/50 dark:ring-stone-700/50 hover:ring-olive-300/50 dark:hover:ring-olive-600/50',
+          'shadow-sm hover:shadow-xl',
+          'ring-1 ring-[color:var(--color-line-warm)] hover:ring-[color:var(--color-coral)]/40',
           'transition-all duration-300',
           className
         )}
@@ -64,8 +64,8 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-300 flex items-center justify-center">
-              <Camera className="h-10 w-10 text-stone-400" />
+            <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-300 dark:from-white/[0.06] dark:to-white/[0.03] flex items-center justify-center">
+              <Camera className="h-10 w-10 text-stone-400 dark:text-stone-500" />
             </div>
           )}
         </motion.div>

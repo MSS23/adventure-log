@@ -306,7 +306,7 @@ export default function UserProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
+        <Loader2 className="h-8 w-8 animate-spin" style={{ color: 'var(--color-coral)' }} />
       </div>
     )
   }
@@ -374,10 +374,10 @@ export default function UserProfilePage() {
                         onClick={handleFollowToggle}
                         disabled={followLoading}
                         variant={followStatus === 'following' ? 'outline' : 'default'}
-                        className={`cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 ${
+                        className={`cursor-pointer rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] ${
                           followStatus === 'following'
                             ? "bg-white dark:bg-white/[0.08] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-900 dark:text-stone-100 border border-stone-300 dark:border-white/[0.14]"
-                            : "bg-olive-500 hover:bg-olive-600 text-white"
+                            : "al-btn-coral"
                         }`}
                       >
                         {followLoading ? (
@@ -459,7 +459,7 @@ export default function UserProfilePage() {
                     src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
                     alt={profile.display_name || profile.username || 'User'}
                   />
-                  <AvatarFallback className="text-2xl bg-olive-500 text-white">
+                  <AvatarFallback className="text-2xl text-white" style={{ background: 'var(--color-coral)' }}>
                     {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -488,10 +488,10 @@ export default function UserProfilePage() {
                   <Button
                     onClick={handleFollowToggle}
                     disabled={followLoading}
-                    className={`cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 ${
+                    className={`w-full cursor-pointer rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] ${
                       followStatus === 'following'
-                        ? "w-full bg-white dark:bg-white/[0.08] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-900 dark:text-stone-100 border border-stone-300 dark:border-white/[0.14]"
-                        : "w-full bg-olive-500 hover:bg-olive-600 text-white"
+                        ? "bg-white dark:bg-white/[0.08] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-900 dark:text-stone-100 border border-stone-300 dark:border-white/[0.14]"
+                        : "al-btn-coral"
                     }`}
                   >
                     {followLoading ? (
@@ -543,21 +543,23 @@ export default function UserProfilePage() {
               <div className="flex gap-1">
                 <button
                   onClick={() => setActiveTab('albums')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none ${
+                  className="flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none"
+                  style={
                     activeTab === 'albums'
-                      ? 'bg-stone-900 dark:bg-olive-600 text-white shadow-sm'
-                      : 'text-stone-700 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'
-                  }`}
+                      ? { background: 'var(--color-coral)', color: '#fff' }
+                      : { color: 'var(--color-muted-warm)' }
+                  }
                 >
                   Albums
                 </button>
                 <button
                   onClick={() => setActiveTab('map')}
-                  className={`flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none ${
+                  className="flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none"
+                  style={
                     activeTab === 'map'
-                      ? 'bg-stone-900 dark:bg-olive-600 text-white shadow-sm'
-                      : 'text-stone-700 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'
-                  }`}
+                      ? { background: 'var(--color-coral)', color: '#fff' }
+                      : { color: 'var(--color-muted-warm)' }
+                  }
                 >
                   Map View
                 </button>
@@ -641,13 +643,18 @@ export default function UserProfilePage() {
                       ))
                     ) : (
                       <motion.div
-                        className="col-span-full bg-white dark:bg-[color:var(--card)] rounded-xl border border-stone-200 dark:border-[color:var(--color-line-warm)] text-center py-16"
+                        className="col-span-full al-card text-center py-16"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
                       >
-                        <Camera className="h-12 w-12 mx-auto text-stone-300 mb-3" />
-                        <p className="text-stone-500 text-sm">No public albums yet</p>
+                        <div
+                          className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-3"
+                          style={{ background: 'var(--color-ivory-alt)' }}
+                        >
+                          <Camera className="h-7 w-7" style={{ color: 'var(--color-muted-warm)' }} />
+                        </div>
+                        <p className="text-sm text-[color:var(--color-muted-warm)]">No public albums yet</p>
                       </motion.div>
                     )}
                   </motion.div>

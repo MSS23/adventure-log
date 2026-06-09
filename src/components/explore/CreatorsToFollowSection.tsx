@@ -173,24 +173,24 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="p-4 bg-red-50 dark:bg-red-950/30 rounded-full mb-4">
-          <UserPlus className="h-8 w-8 text-red-400" />
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+        <div className="p-4 rounded-full mb-4 bg-[color:var(--color-coral-tint)]">
+          <UserPlus className="h-8 w-8" style={{ color: 'var(--color-coral)' }} />
         </div>
-        <p className="text-stone-700 dark:text-stone-300 font-medium mb-2">Unable to load creators</p>
-        <p className="text-stone-500 dark:text-stone-400 text-sm">{error}</p>
+        <p className="text-[color:var(--color-ink)] font-semibold mb-2">Unable to load creators</p>
+        <p className="text-[color:var(--color-ink-soft)] text-sm">{error}</p>
       </div>
     )
   }
 
   if (creators.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4">
-        <div className="p-4 bg-stone-50 dark:bg-white/[0.04] rounded-full mb-4">
-          <Users className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+        <div className="p-4 rounded-full mb-4 bg-[color:var(--color-forest-tint)]">
+          <Users className="h-8 w-8" style={{ color: 'var(--color-forest)' }} />
         </div>
-        <p className="text-stone-700 dark:text-stone-300 font-medium mb-2">No creators yet</p>
-        <p className="text-stone-500 dark:text-stone-400 text-sm">Join the community and start sharing!</p>
+        <p className="text-[color:var(--color-ink)] font-semibold mb-2">No creators yet</p>
+        <p className="text-[color:var(--color-ink-soft)] text-sm">Join the community and start sharing!</p>
       </div>
     )
   }
@@ -207,22 +207,34 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
             className="group flex flex-col items-center text-center w-full max-w-[200px] mx-auto"
           >
             {/* Card Container */}
-            <div className="bg-white dark:bg-[#1B170E] rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 w-full border border-stone-100 dark:border-white/[0.08] hover:border-olive-200 dark:hover:border-white/[0.12] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 space-y-3 sm:space-y-4">
+            <div
+              className="rounded-2xl p-4 sm:p-5 md:p-6 w-full border border-[color:var(--color-line-warm)] hover:shadow-[0_18px_40px_-20px_rgba(26,20,14,0.25)] hover:-translate-y-1 transition-all duration-300 space-y-3 sm:space-y-4"
+              style={{ background: 'var(--card)' }}
+            >
               {/* Avatar with hover effect */}
               <Link href={`/profile/${creator.username}`} className="block relative mx-auto">
                 <div className="relative">
-                  <Avatar className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 ring-4 ring-stone-50 dark:ring-white/[0.08] group-hover:ring-olive-100 group-hover:scale-105 transition-all duration-300">
+                  <Avatar
+                    className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 ring-4 group-hover:scale-105 transition-all duration-300"
+                    style={{ '--tw-ring-color': 'var(--color-forest-tint)' } as React.CSSProperties}
+                  >
                     <AvatarImage
                       src={getAvatarUrl(creator.avatar_url, creator.username)}
                       alt={creator.display_name || creator.username}
                       className="object-cover"
                     />
-                    <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-xl sm:text-2xl md:text-3xl font-bold">
+                    <AvatarFallback
+                      className="text-xl sm:text-2xl md:text-3xl font-bold"
+                      style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}
+                    >
                       {(creator.display_name || creator.username || 'U')[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  {/* Optional: Status indicator */}
-                  <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-green-500 rounded-full border-3 sm:border-4 border-white dark:border-[#1B170E]" />
+                  {/* Status indicator */}
+                  <div
+                    className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 rounded-full"
+                    style={{ background: 'var(--color-forest-soft)', border: '4px solid var(--card)' }}
+                  />
                 </div>
               </Link>
 
@@ -232,12 +244,12 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                   href={`/profile/${creator.username}`}
                   className="block"
                 >
-                  <h3 className="font-semibold text-stone-900 dark:text-stone-100 hover:text-olive-600 dark:hover:text-stone-100 transition-colors text-base line-clamp-1">
+                  <h3 className="font-heading font-semibold text-[color:var(--color-ink)] hover:text-[color:var(--color-forest)] transition-colors text-base line-clamp-1">
                     {creator.display_name || creator.username}
                   </h3>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">@{creator.username}</p>
+                  <p className="font-mono text-[11px] tracking-[0.04em] text-[color:var(--color-muted-warm)] mt-0.5">@{creator.username}</p>
                 </Link>
-                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2 h-10">
+                <p className="text-sm text-[color:var(--color-ink-soft)] line-clamp-2 h-10">
                   {creator.bio || 'Exploring the world, one adventure at a time'}
                 </p>
               </div>
@@ -246,12 +258,12 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
               <Button
                 onClick={() => handleFollowToggle(creator.id)}
                 disabled={isLoadingFollow || !user}
-                className={cn(
-                  "w-full font-semibold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md",
+                className="w-full font-semibold rounded-full transition-all duration-200 shadow-sm hover:shadow-md border-0"
+                style={
                   isFollowing
-                    ? "bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.06] border border-stone-200 dark:border-white/[0.10]"
-                    : "bg-olive-500 text-white hover:bg-olive-600 active:bg-olive-700"
-                )}
+                    ? { background: 'var(--color-ivory-alt)', color: 'var(--color-ink-soft)', border: '1px solid var(--color-line-warm)' }
+                    : { background: 'var(--color-forest)', color: 'var(--color-ivory)' }
+                }
                 size="default"
               >
                 {isLoadingFollow ? (

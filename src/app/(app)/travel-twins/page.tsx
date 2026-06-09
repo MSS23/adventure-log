@@ -76,7 +76,7 @@ export default function TravelTwinsPage() {
   if (!user) {
     return (
       <div className="flex-1 flex items-center justify-center p-6 min-h-[50vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+        <Loader2 className="h-6 w-6 animate-spin" style={{ color: 'var(--color-coral)' }} />
       </div>
     )
   }
@@ -96,24 +96,30 @@ export default function TravelTwinsPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+          <Loader2 className="h-6 w-6 animate-spin" style={{ color: 'var(--color-coral)' }} />
         </div>
       ) : twins.length === 0 ? (
-        <div className="text-center py-20">
-          <Users className="h-10 w-10 text-olive-400 mx-auto mb-3" />
-          <h2 className="text-lg font-semibold text-olive-950 dark:text-olive-50 mb-2">
+        <div className="al-card text-center py-16 px-6">
+          <div
+            className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"
+            style={{ background: 'var(--color-coral-tint)' }}
+          >
+            <Users className="h-8 w-8" style={{ color: 'var(--color-coral)' }} />
+          </div>
+          <h2 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">
             No travel twins yet
           </h2>
-          <p className="text-sm text-olive-600 dark:text-olive-400 max-w-md mx-auto">
+          <p className="text-sm text-[color:var(--color-muted-warm)] max-w-md mx-auto mb-6">
             Create albums with location data, or wait for more public travelers to match your footprint.
           </p>
+          <Button asChild className="al-btn-coral">
+            <Link href="/explore">Explore travelers</Link>
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-2">
-            <h2 className="text-xs uppercase tracking-wider font-semibold text-olive-600 dark:text-olive-400 mb-2">
-              Your twins
-            </h2>
+            <p className="al-eyebrow mb-2">Your twins</p>
             {twins.map((twin) => {
               const isSelected = twin.user_id === selectedTwinId
               const overlapPct = twin.my_country_count
@@ -123,24 +129,24 @@ export default function TravelTwinsPage() {
                 <button
                   key={twin.user_id}
                   onClick={() => setSelectedTwinId(twin.user_id)}
-                  className={`w-full text-left p-3 rounded-xl border transition-colors ${
-                    isSelected
-                      ? 'border-olive-500 bg-olive-50 dark:bg-olive-950/30'
-                      : 'border-stone-200 dark:border-white/10 hover:bg-stone-50 dark:hover:bg-white/5'
-                  }`}
+                  className="w-full text-left p-3 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
+                  style={{
+                    background: isSelected ? 'var(--color-coral-tint)' : 'var(--card)',
+                    border: `1px solid ${isSelected ? 'var(--color-coral)' : 'var(--color-line-warm)'}`,
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={twin.avatar_url || undefined} />
-                      <AvatarFallback>
+                      <AvatarFallback className="text-white" style={{ background: 'var(--color-coral)' }}>
                         {(twin.display_name || twin.username)[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm text-olive-950 dark:text-olive-50 truncate">
+                      <div className="font-semibold text-sm text-[color:var(--color-ink)] truncate">
                         {twin.display_name || twin.username}
                       </div>
-                      <div className="text-xs text-olive-600 dark:text-olive-400">
+                      <div className="text-xs text-[color:var(--color-muted-warm)]">
                         {twin.overlap_count} shared • {overlapPct}% match
                       </div>
                     </div>
@@ -160,18 +166,18 @@ export default function TravelTwinsPage() {
                     <div className="flex items-center gap-3 mb-3">
                       <Avatar className="h-14 w-14">
                         <AvatarImage src={twin.avatar_url || undefined} />
-                        <AvatarFallback>
+                        <AvatarFallback className="text-white" style={{ background: 'var(--color-coral)' }}>
                           {(twin.display_name || twin.username)[0]?.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <Link
                           href={`/u/${twin.username}`}
-                          className="font-semibold text-lg text-olive-950 dark:text-olive-50 hover:underline"
+                          className="font-heading font-semibold text-lg text-[color:var(--color-ink)] hover:text-[color:var(--color-coral)] transition-colors"
                         >
                           {twin.display_name || twin.username}
                         </Link>
-                        <p className="text-sm text-olive-600 dark:text-olive-400">
+                        <p className="text-sm text-[color:var(--color-muted-warm)]">
                           You&apos;ve both been to {twin.overlap_count}{' '}
                           {twin.overlap_count === 1 ? 'country' : 'countries'} — they&apos;ve been to{' '}
                           {twin.their_country_count} total
@@ -183,16 +189,16 @@ export default function TravelTwinsPage() {
                 )
               })()}
 
-            <h3 className="text-sm font-semibold text-olive-950 dark:text-olive-50 mb-3">
+            <h3 className="font-heading text-sm font-semibold text-[color:var(--color-ink)] mb-3">
               Places they&apos;ve been that you haven&apos;t
             </h3>
 
             {loadingRecs ? (
               <div className="flex justify-center py-10">
-                <Loader2 className="h-5 w-5 animate-spin text-olive-600" />
+                <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'var(--color-coral)' }} />
               </div>
             ) : recommendations.length === 0 ? (
-              <p className="text-sm text-olive-500 dark:text-olive-400 py-6">No new places to suggest right now.</p>
+              <p className="text-sm text-[color:var(--color-muted-warm)] py-6">No new places to suggest right now.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {recommendations.map((rec) => (
@@ -210,11 +216,11 @@ export default function TravelTwinsPage() {
                         </div>
                       )}
                       <div className="p-3">
-                        <div className="font-medium text-sm text-olive-950 dark:text-olive-50 line-clamp-1">
+                        <div className="font-medium text-sm text-[color:var(--color-ink)] line-clamp-1">
                           {rec.title}
                         </div>
                         {rec.location_name && (
-                          <div className="text-xs text-olive-600 dark:text-olive-400 flex items-center gap-1 mt-0.5">
+                          <div className="text-xs text-[color:var(--color-muted-warm)] flex items-center gap-1 mt-0.5">
                             <MapPin className="h-3 w-3" />
                             {rec.location_name}
                           </div>
@@ -226,7 +232,7 @@ export default function TravelTwinsPage() {
               </div>
             )}
 
-            <Button asChild variant="outline" className="mt-4 w-full">
+            <Button asChild variant="outline" className="mt-4 w-full rounded-full">
               <Link href="/explore">Explore more travelers</Link>
             </Button>
           </div>

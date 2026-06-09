@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Plus, Map as MapIcon, Loader2, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
   Dialog,
@@ -123,19 +122,19 @@ export default function TripsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
+    <div className="max-w-5xl mx-auto px-4 pt-4 sm:pt-6 pb-24 md:pb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+        <div className="min-w-0">
           <p className="al-eyebrow mb-2">Plan · Together</p>
-          <h1 className="al-display text-4xl">Trip Planner</h1>
-          <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl">
+          <h1 className="al-display text-3xl md:text-4xl">Trip Planner</h1>
+          <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
             Collaborate on trips — paste Google Maps links, each person pins in their own color.
           </p>
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="al-btn-coral h-10 px-5 font-semibold">
+            <Button className="al-btn-coral h-10 px-5 font-semibold shrink-0 w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               New Trip
             </Button>

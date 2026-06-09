@@ -27,6 +27,7 @@ import {
   Loader2
 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
 import { log } from '@/lib/utils/logger';
 import { Toast } from '@capacitor/toast';
@@ -349,12 +350,49 @@ export default function OrganizePage() {
             <p className="text-stone-500 dark:text-stone-400">Loading photos...</p>
           </div>
         ) : filteredPhotos.length === 0 ? (
-          <div className="text-center py-16">
-            <Search className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
-            <p className="text-stone-500 dark:text-stone-400">
-              {searchQuery ? 'No photos match your search' : 'No photos to organize'}
-            </p>
-          </div>
+          searchQuery ? (
+            <div className="max-w-md mx-auto text-center py-16">
+              <div className="w-16 h-16 bg-stone-100 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">
+                No matching photos
+              </h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-5">
+                Nothing matches &ldquo;{searchQuery}&rdquo;. Try a different caption or location.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSearchQuery('')}
+                className="cursor-pointer active:scale-[0.97] transition-all duration-200"
+              >
+                Clear search
+              </Button>
+            </div>
+          ) : (
+            <div className="max-w-md mx-auto text-center py-16">
+              <div className="w-16 h-16 bg-olive-100 dark:bg-olive-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Grid3x3 className="h-8 w-8 text-olive-600 dark:text-olive-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">
+                Nothing to organize yet
+              </h3>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-5">
+                {filterType === 'no-album'
+                  ? 'All your photos are already filed into albums.'
+                  : 'Upload photos to start sorting them into albums.'}
+              </p>
+              <Link href="/albums/new">
+                <Button
+                  size="sm"
+                  className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
+                >
+                  Create an album
+                </Button>
+              </Link>
+            </div>
+          )
         ) : (
           <div
             ref={gridRef}
@@ -386,10 +424,10 @@ export default function OrganizePage() {
                       className="object-cover rounded-lg"
                     />
                     <div
-                      className={`absolute top-2 left-2 p-1 rounded ${
+                      className={`absolute top-2 left-2 p-1 rounded transition-opacity duration-200 ${
                         selectedPhotos.has(photo.id)
                           ? 'bg-olive-600 text-white'
-                          : 'bg-white/80 text-stone-600 opacity-0 group-hover:opacity-100'
+                          : 'bg-white/85 dark:bg-black/55 text-stone-600 dark:text-stone-200 opacity-0 group-hover:opacity-100'
                       }`}
                     >
                       {selectedPhotos.has(photo.id) ? (
@@ -446,8 +484,8 @@ export default function OrganizePage() {
         )}
       </div>
 
-      {/* Keyboard shortcuts help */}
-      <div className="fixed bottom-4 right-4 p-3 bg-white dark:bg-[#111] rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-400 max-w-xs">
+      {/* Keyboard shortcuts help (desktop only) */}
+      <div className="hidden md:block fixed bottom-4 right-4 p-3 bg-white dark:bg-[#111] rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-400 max-w-xs">
         <p className="font-semibold mb-2 text-stone-800 dark:text-stone-200">Keyboard Shortcuts:</p>
         <ul className="space-y-1">
           <li><kbd className="px-1 py-0.5 bg-stone-100 dark:bg-stone-800 rounded text-stone-700 dark:text-stone-300">Ctrl/Cmd + A</kbd> - Select all</li>

@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ReportDialog } from '@/components/social/ReportDialog'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -139,7 +140,7 @@ export function PublicProfileContent({
   ]
 
   return (
-    <div className="min-h-screen bg-[#FAF7F1] dark:bg-black">
+    <div className="min-h-screen bg-[color:var(--background)]">
       {/* ───────── Hero Section ───────── */}
       <motion.section
         className="relative overflow-hidden"
@@ -164,7 +165,7 @@ export function PublicProfileContent({
               <div className="absolute -inset-1.5 bg-gradient-to-br from-white/30 to-white/10 rounded-full blur-sm" />
               <Avatar className="relative w-28 h-28 ring-4 ring-white/30 shadow-2xl">
                 <AvatarImage
-                  src={getPhotoUrl(user.avatar_url, 'avatars') || undefined}
+                  src={getAvatarUrl(user.avatar_url, user.username)}
                   alt={displayName}
                 />
                 <AvatarFallback className="text-3xl bg-gradient-to-br from-olive-400 to-olive-600 text-white font-heading">
@@ -202,7 +203,7 @@ export function PublicProfileContent({
           >
             <path
               d="M0 60V20C240 0 480 0 720 10C960 20 1200 40 1440 30V60H0Z"
-              className="fill-[#FAF7F1] dark:fill-black"
+              style={{ fill: 'var(--background)' }}
             />
           </svg>
         </div>
@@ -430,6 +431,40 @@ export function PublicProfileContent({
             <p className="text-stone-500 dark:text-stone-400">No public adventures yet</p>
           </div>
         )}
+
+        {/* ───────── Conversion CTA ───────── */}
+        <motion.div
+          className="mb-10"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.45 }}
+        >
+          <div className="relative overflow-hidden rounded-2xl shadow-lg">
+            {/* Forest gradient backdrop */}
+            <div className="absolute inset-0 bg-gradient-to-br from-olive-800 via-olive-700 to-olive-900" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
+            <div className="relative px-6 py-10 md:px-10 md:py-12 text-center">
+              <span className="al-eyebrow text-olive-200 mb-3 block">Adventure Log</span>
+              <h2 className="al-display text-2xl md:text-3xl text-white mb-3">
+                Map your own journey
+              </h2>
+              <p className="text-white/85 max-w-md mx-auto leading-relaxed mb-7">
+                Turn your trips into a living map, build your travel passport, and share
+                your adventures — free, forever.
+              </p>
+              <Link href="/sign-up">
+                <Button className="cursor-pointer bg-white text-olive-800 hover:bg-olive-50 font-semibold px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-olive-800">
+                  Create your free profile
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+              <p className="text-olive-200/80 text-xs mt-4">
+                No credit card · Set up in under a minute
+              </p>
+            </div>
+          </div>
+        </motion.div>
 
         {/* ───────── Share Section ───────── */}
         {!isPrivate && (

@@ -276,7 +276,7 @@ function AlbumsPageContent() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-pink-500 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-olive-700 flex items-center justify-center shadow-sm">
               <Camera className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -317,7 +317,7 @@ function AlbumsPageContent() {
       {/* Instagram-style Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-pink-500 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-olive-700 flex items-center justify-center shadow-sm">
             <Camera className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -399,10 +399,11 @@ function AlbumsPageContent() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className={cn(instagramStyles.text.heading, "text-lg")}>
+              <p className="al-eyebrow mb-0.5">Work in progress</p>
+              <h2 className="al-display text-lg md:text-xl">
                 Drafts
               </h2>
-              <p className={instagramStyles.text.caption}>
+              <p className={cn(instagramStyles.text.caption, "mt-0.5")}>
                 {drafts.length} album{drafts.length === 1 ? '' : 's'} waiting for photos
               </p>
             </div>
@@ -446,9 +447,7 @@ function AlbumsPageContent() {
                           <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
                             {draft.title}
                           </h3>
-                          <p className={cn(instagramStyles.text.caption, "text-xs")}>
-                            Draft
-                          </p>
+                          <span className="al-badge mt-1">Draft</span>
                         </div>
                       </div>
                       {draft.description && (
@@ -487,9 +486,7 @@ function AlbumsPageContent() {
                         <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
                           {draft.title}
                         </h3>
-                        <p className={cn(instagramStyles.text.caption, "text-xs")}>
-                          Draft
-                        </p>
+                        <span className="al-badge mt-1">Draft</span>
                       </div>
                     </div>
                     {draft.description && (

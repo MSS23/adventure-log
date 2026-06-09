@@ -11,7 +11,6 @@ import { FollowButton } from '@/components/social/FollowButton'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { cn } from '@/lib/utils'
 
 // Animated counter component
 function AnimatedCounter({ value, duration = 0.8 }: { value: number; duration?: number }) {
@@ -107,17 +106,16 @@ export default function FollowersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <motion.div
-          className="h-10 w-10 rounded-full border-4 border-solid border-olive-200 border-t-olive-600"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        <div
+          className="h-10 w-10 rounded-full border-4 animate-spin"
+          style={{ borderColor: 'var(--color-coral-tint)', borderTopColor: 'var(--color-coral)' }}
         />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 dark:from-[#1B170E] via-white dark:via-[#1B170E] to-olive-50/30 dark:to-olive-950/10">
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <div className="max-w-4xl mx-auto space-y-6 p-4">
         {/* Header */}
         <motion.div
@@ -134,7 +132,7 @@ export default function FollowersPage() {
               variant="ghost"
               onClick={() => window.history.back()}
               size="sm"
-              className="cursor-pointer hover:bg-white/80 dark:hover:bg-stone-800/80 backdrop-blur-sm border border-transparent hover:border-stone-200 dark:hover:border-stone-700 hover:shadow-sm transition-all duration-200 rounded-xl active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+              className="cursor-pointer hover:bg-[color:var(--color-ivory-alt)] border border-transparent hover:border-[color:var(--color-line-warm)] hover:shadow-sm transition-all duration-200 rounded-full active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
@@ -168,57 +166,53 @@ export default function FollowersPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <div className={cn(
-              "rounded-2xl p-6 text-center",
-              "bg-gradient-to-br from-white/95 dark:from-white/[0.06] to-white/80 dark:to-white/[0.04]",
-              "backdrop-blur-xl border border-white/50 dark:border-white/[0.08]",
-              "shadow-lg shadow-olive-500/5",
-              "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
-            )}>
+            <div
+              className="rounded-2xl p-6 text-center transition-shadow duration-300 hover:shadow-md"
+              style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
+            >
               <motion.div
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center mx-auto mb-3"
+                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
+                style={{ background: 'var(--color-forest-tint)' }}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
-                <Users className="h-7 w-7 text-olive-600" />
+                <Users className="h-7 w-7" style={{ color: 'var(--color-forest)' }} />
               </motion.div>
-              <div className="text-3xl font-bold text-stone-900 dark:text-stone-100">
+              <div className="al-stat-value text-3xl">
                 <AnimatedCounter value={stats.followersCount} />
               </div>
-              <div className="text-sm text-stone-600 dark:text-stone-400 font-medium">Followers</div>
+              <div className="al-eyebrow mt-1">Followers</div>
             </div>
           </motion.div>
           <motion.div variants={itemVariants}>
-            <div className={cn(
-              "rounded-2xl p-6 text-center relative overflow-hidden",
-              "bg-gradient-to-br from-white/95 dark:from-white/[0.06] to-white/80 dark:to-white/[0.04]",
-              "backdrop-blur-xl border border-white/50 dark:border-white/[0.08]",
-              "shadow-lg shadow-olive-500/5",
-              "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
-            )}>
+            <div
+              className="rounded-2xl p-6 text-center relative overflow-hidden transition-shadow duration-300 hover:shadow-md"
+              style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
+            >
               {stats.pendingRequestsCount > 0 && !prefersReducedMotion && (
                 <motion.div
-                  className="absolute top-2 right-2"
+                  className="absolute top-3 right-3"
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   <span className="flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-olive-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-olive-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: 'var(--color-coral-soft)' }}></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3" style={{ background: 'var(--color-coral)' }}></span>
                   </span>
                 </motion.div>
               )}
               <motion.div
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-olive-100 to-pink-100 flex items-center justify-center mx-auto mb-3"
+                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
+                style={{ background: 'var(--color-coral-tint)' }}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: -5 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
-                <UserPlus className="h-7 w-7 text-olive-600" />
+                <UserPlus className="h-7 w-7" style={{ color: 'var(--color-coral)' }} />
               </motion.div>
-              <div className="text-3xl font-bold text-stone-900 dark:text-stone-100">
+              <div className="al-stat-value text-3xl">
                 <AnimatedCounter value={stats.pendingRequestsCount} />
               </div>
-              <div className="text-sm text-stone-600 dark:text-stone-400 font-medium">Pending Requests</div>
+              <div className="al-eyebrow mt-1">Pending Requests</div>
             </div>
           </motion.div>
         </motion.div>
@@ -231,25 +225,25 @@ export default function FollowersPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className={cn(
-                "rounded-2xl overflow-hidden",
-                "bg-gradient-to-br from-olive-50/90 dark:from-olive-950/20 to-olive-50/70 dark:to-olive-950/10",
-                "backdrop-blur-xl border border-olive-200/50 dark:border-white/[0.08]",
-                "shadow-lg shadow-olive-500/10"
-              )}
+              className="rounded-2xl overflow-hidden"
+              style={{
+                background: 'var(--color-coral-tint)',
+                border: '1px solid var(--color-line-warm)',
+              }}
             >
-              <div className="px-6 py-4 border-b border-olive-200/50 dark:border-white/[0.08]">
-                <div className="flex items-center justify-between">
+              <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--color-line-warm)' }}>
+                <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <motion.div
                       animate={prefersReducedMotion ? {} : { rotate: [0, -10, 10, 0] }}
                       transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                     >
-                      <UserPlus className="h-5 w-5 text-olive-600" />
+                      <UserPlus className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
                     </motion.div>
-                    <span className="font-semibold text-stone-900 dark:text-stone-100">Follow Requests</span>
+                    <span className="font-heading font-semibold text-[color:var(--color-ink)]">Follow Requests</span>
                     <motion.span
-                      className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-gradient-to-r from-olive-500 to-olive-500 rounded-full"
+                      className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white rounded-full"
+                      style={{ background: 'var(--color-coral)' }}
                       initial={prefersReducedMotion ? {} : { scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.2 }}
@@ -257,7 +251,7 @@ export default function FollowersPage() {
                       {pendingRequests.length}
                     </motion.span>
                   </div>
-                  <p className="text-sm text-stone-600 dark:text-stone-400">
+                  <p className="hidden sm:block text-sm text-[color:var(--color-muted-warm)]">
                     Approve or decline follow requests
                   </p>
                 </div>
@@ -279,32 +273,28 @@ export default function FollowersPage() {
                           key={request.id}
                           variants={itemVariants}
                           layout={!prefersReducedMotion}
-                          className={cn(
-                            "flex items-center justify-between p-4 rounded-xl",
-                            "bg-white/80 dark:bg-stone-900/60 backdrop-blur-sm",
-                            "border border-olive-200/50 dark:border-olive-800/40",
-                            "hover:shadow-md hover:border-olive-300 transition-all duration-300"
-                          )}
+                          className="flex items-center justify-between p-4 rounded-xl hover:shadow-md transition-all duration-300"
+                          style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
                           whileHover={prefersReducedMotion ? {} : { y: -2 }}
                         >
                           <Link
                             href={`/globe?user=${requester.id}`}
                             className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer"
                           >
-                            <Avatar className="h-11 w-11 ring-2 ring-olive-200 group-hover:ring-olive-300 transition-all">
+                            <Avatar className="h-11 w-11 ring-2 ring-[color:var(--color-line-warm)] transition-all">
                               <AvatarImage
                                 src={getPhotoUrl(requester.avatar_url, 'avatars') || ''}
                                 alt={requester.display_name || requester.username || 'User'}
                               />
-                              <AvatarFallback className="bg-gradient-to-br from-olive-500 to-red-500 text-white font-semibold">
+                              <AvatarFallback className="text-white font-semibold" style={{ background: 'var(--color-coral)' }}>
                                 {(requester.display_name || requester.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-olive-600 transition-colors">
+                              <p className="font-semibold text-[color:var(--color-ink)] truncate group-hover:text-[color:var(--color-coral)] transition-colors">
                                 {requester.display_name || requester.username}
                               </p>
-                              <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
+                              <p className="text-xs text-[color:var(--color-muted-warm)] truncate">
                                 @{requester.username}
                               </p>
                             </div>
@@ -318,7 +308,8 @@ export default function FollowersPage() {
                               <Button
                                 size="icon"
                                 variant="default"
-                                className="cursor-pointer bg-gradient-to-r from-[#4A5D23] to-[#7A9248] hover:from-[#3B4A1C] hover:to-[#5A6F2B] h-9 w-9 rounded-full shadow-md shadow-[#4A5D23]/25 active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-[#4A5D23] transition-all duration-200"
+                                className="cursor-pointer h-9 w-9 rounded-full text-white shadow-md active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] transition-all duration-200"
+                                style={{ background: 'var(--color-forest)' }}
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
@@ -374,18 +365,14 @@ export default function FollowersPage() {
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
-          className={cn(
-            "rounded-2xl overflow-hidden",
-            "bg-gradient-to-br from-white/95 dark:from-white/[0.06] to-white/80 dark:to-white/[0.04]",
-            "backdrop-blur-xl border border-white/50 dark:border-white/[0.08]",
-            "shadow-xl shadow-black/5"
-          )}
+          className="rounded-2xl overflow-hidden"
+          style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
         >
-          <div className="px-6 py-4 border-b border-stone-100 dark:border-white/[0.08]">
-            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-              <Users className="h-5 w-5 text-olive-500" />
+          <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--color-line-warm)' }}>
+            <h2 className="font-heading text-lg font-bold text-[color:var(--color-ink)] flex items-center gap-2">
+              <Users className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
               Your Followers
-              <span className="text-sm font-normal text-stone-500 dark:text-stone-400">({followers.length})</span>
+              <span className="text-sm font-normal text-[color:var(--color-muted-warm)]">({followers.length})</span>
             </h2>
           </div>
           <div className="p-4">
@@ -401,21 +388,24 @@ export default function FollowersPage() {
                   animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-10 w-10 text-olive-400" />
+                  <div
+                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ background: 'var(--color-forest-tint)' }}
+                  >
+                    <Users className="h-10 w-10" style={{ color: 'var(--color-forest)' }} />
                   </div>
                 </motion.div>
-                <p className="text-stone-700 dark:text-stone-300 font-medium">No followers yet</p>
-                <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">
-                  Share your profile to gain followers!
+                <p className="font-heading text-[color:var(--color-ink)] font-semibold">No followers yet</p>
+                <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
+                  Share your profile to gain followers.
                 </p>
                 <Link href="/explore">
                   <motion.div
                     whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                   >
-                    <Button className="mt-6 cursor-pointer bg-gradient-to-r from-olive-500 to-olive-500 hover:from-olive-600 hover:to-olive-600 text-white shadow-lg shadow-olive-500/25 active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
-                      Explore & Connect
+                    <Button className="al-btn-coral mt-6 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
+                      Explore &amp; Connect
                     </Button>
                   </motion.div>
                 </Link>
@@ -437,13 +427,8 @@ export default function FollowersPage() {
                         key={follow.id}
                         variants={itemVariants}
                         layout={!prefersReducedMotion}
-                        className={cn(
-                          "flex items-center justify-between p-4 rounded-xl",
-                          "bg-white/60 dark:bg-stone-900/40 backdrop-blur-sm",
-                          "border border-stone-100 dark:border-stone-800",
-                          "hover:shadow-md hover:border-olive-200 hover:bg-white/80 transition-all duration-300",
-                          "group"
-                        )}
+                        className="group flex items-center justify-between p-4 rounded-xl hover:shadow-md transition-all duration-300"
+                        style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
                         whileHover={prefersReducedMotion ? {} : { y: -2 }}
                       >
                         <Link
@@ -454,21 +439,21 @@ export default function FollowersPage() {
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
-                            <Avatar className="h-11 w-11 ring-2 ring-stone-100 group-hover:ring-olive-200 transition-all">
+                            <Avatar className="h-11 w-11 ring-2 ring-[color:var(--color-line-warm)] transition-all">
                               <AvatarImage
                                 src={getPhotoUrl(followerUser.avatar_url, 'avatars') || ''}
                                 alt={followerUser.display_name || followerUser.username || 'User'}
                               />
-                              <AvatarFallback className="bg-gradient-to-br from-olive-500 to-olive-500 text-white font-semibold">
+                              <AvatarFallback className="text-white font-semibold" style={{ background: 'var(--color-forest)' }}>
                                 {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-olive-600 transition-colors">
+                            <p className="font-semibold text-[color:var(--color-ink)] truncate group-hover:text-[color:var(--color-coral)] transition-colors">
                               {followerUser.display_name || followerUser.username}
                             </p>
-                            <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
+                            <p className="text-xs text-[color:var(--color-muted-warm)] truncate">
                               @{followerUser.username}
                             </p>
                           </div>

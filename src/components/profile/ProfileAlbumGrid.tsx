@@ -77,22 +77,24 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
               whileHover={{ y: -6, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-              className="aspect-[4/5] rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700
-                         hover:border-olive-400 dark:hover:border-olive-600
-                         bg-gradient-to-br from-stone-50 to-white dark:from-stone-900 dark:to-stone-800
-                         hover:from-olive-50/50 hover:to-olive-50/30 dark:hover:from-olive-950/30 dark:hover:to-olive-950/20
+              className="group/add aspect-[4/5] rounded-2xl border-2 border-dashed
                          flex flex-col items-center justify-center gap-3
                          cursor-pointer transition-all duration-300
-                         shadow-sm hover:shadow-lg hover:shadow-olive-500/10"
+                         shadow-sm hover:shadow-lg"
+              style={{
+                borderColor: 'var(--color-line-warm)',
+                background: 'var(--color-ivory-alt)',
+              }}
             >
               <motion.div
-                className="p-4 bg-stone-100 dark:bg-white/[0.06] rounded-full transition-colors"
+                className="p-4 rounded-full transition-colors"
+                style={{ background: 'var(--color-coral-tint)' }}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
-                <Plus className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+                <Plus className="h-8 w-8" style={{ color: 'var(--color-coral)' }} />
               </motion.div>
-              <span className="text-sm font-medium text-stone-500 dark:text-stone-400">
+              <span className="text-sm font-semibold text-[color:var(--color-muted-warm)] group-hover/add:text-[color:var(--color-coral)] transition-colors">
                 Add Album
               </span>
             </motion.div>

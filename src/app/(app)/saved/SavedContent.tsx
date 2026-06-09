@@ -144,11 +144,12 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <motion.div
-                className="w-10 h-10 rounded-xl bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center shrink-0"
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'var(--color-coral-tint)' }}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.08, rotate: 4 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
-                <Bookmark className="h-5 w-5 text-olive-600 dark:text-olive-400" />
+                <Bookmark className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
               </motion.div>
               <div className="min-w-0">
                 <p className="al-eyebrow mb-1">Library</p>
@@ -160,7 +161,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
               </div>
             </div>
             <Link href="/explore" className="shrink-0">
-              <Button variant="outline" size="sm" className="gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500">
+              <Button variant="outline" size="sm" className="gap-2 rounded-full cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
                 <Compass className="h-4 w-4" />
                 <span className="hidden xs:inline sm:inline">Explore</span>
               </Button>
@@ -176,15 +177,19 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
             {/* Controls Bar */}
             <div className="flex flex-wrap items-center gap-3">
               {/* View Toggle */}
-              <div className="flex items-center bg-white dark:bg-[#1A1A1A] rounded-lg border border-stone-200 dark:border-white/10 p-1">
+              <div
+                className="flex items-center rounded-lg p-1"
+                style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
+              >
                 <button
                   onClick={() => setViewMode('grid')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] active:scale-[0.97]',
                     viewMode === 'grid'
-                      ? 'bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300 shadow-sm'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/30'
+                      ? 'text-white shadow-sm'
+                      : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]'
                   )}
+                  style={viewMode === 'grid' ? { background: 'var(--color-coral)' } : undefined}
                 >
                   <LayoutGrid className="h-4 w-4" />
                   <span className="hidden sm:inline">All</span>
@@ -192,11 +197,12 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                 <button
                   onClick={() => setViewMode('collections')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] active:scale-[0.97]',
                     viewMode === 'collections'
-                      ? 'bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300 shadow-sm'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700/30'
+                      ? 'text-white shadow-sm'
+                      : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]'
                   )}
+                  style={viewMode === 'collections' ? { background: 'var(--color-coral)' } : undefined}
                 >
                   <FolderOpen className="h-4 w-4" />
                   <span className="hidden sm:inline">Collections</span>
@@ -206,7 +212,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
               {/* Sort / Group By */}
               {viewMode === 'grid' ? (
                 <Select value={sortMode} onValueChange={(v: SortMode) => setSortMode(v)}>
-                  <SelectTrigger className="w-[160px] h-9 bg-white dark:bg-[#1A1A1A]">
+                  <SelectTrigger className="w-[160px] h-9" style={{ background: 'var(--card)' }}>
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -223,7 +229,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                 </Select>
               ) : (
                 <Select value={groupBy} onValueChange={(v: GroupBy) => setGroupBy(v)}>
-                  <SelectTrigger className="w-[170px] h-9 bg-white dark:bg-[#1A1A1A]">
+                  <SelectTrigger className="w-[170px] h-9" style={{ background: 'var(--card)' }}>
                     <SelectValue placeholder="Group by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -279,7 +285,8 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                     return (
                       <motion.div
                         key={group.key}
-                        className="bg-white dark:bg-[#111111] rounded-2xl border border-stone-200 dark:border-white/[0.06] overflow-hidden shadow-sm"
+                        className="rounded-2xl overflow-hidden shadow-sm"
+                        style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -287,33 +294,33 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                         {/* Collection Header */}
                         <button
                           onClick={() => toggleGroup(group.key)}
-                          className="w-full flex items-center justify-between px-5 py-4 hover:bg-stone-50 dark:hover:bg-white/[0.02] transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-olive-500 active:scale-[0.99]"
+                          className="w-full flex items-center justify-between px-5 py-4 hover:bg-[color:var(--color-ivory-alt)] transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--color-coral)] active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3">
                             {group.flag ? (
                               <span className="text-2xl">{group.flag}</span>
                             ) : groupBy === 'username' ? (
-                              <div className="w-8 h-8 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center">
-                                <User className="h-4 w-4 text-olive-600 dark:text-olive-400" />
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
+                                <User className="h-4 w-4" style={{ color: 'var(--color-forest)' }} />
                               </div>
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
-                                <MapPin className="h-4 w-4 text-stone-500 dark:text-stone-400" />
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--color-ivory-alt)' }}>
+                                <MapPin className="h-4 w-4" style={{ color: 'var(--color-muted-warm)' }} />
                               </div>
                             )}
                             <div className="text-left">
-                              <h3 className="font-semibold text-stone-900 dark:text-stone-100">
+                              <h3 className="font-heading font-semibold text-[color:var(--color-ink)]">
                                 {group.label}
                               </h3>
-                              <p className="text-xs text-stone-500 dark:text-stone-400">
+                              <p className="text-xs text-[color:var(--color-muted-warm)]">
                                 {group.albums.length} album{group.albums.length !== 1 ? 's' : ''}
                               </p>
                             </div>
                           </div>
                           {isCollapsed ? (
-                            <ChevronRight className="h-5 w-5 text-stone-400 dark:text-stone-500" />
+                            <ChevronRight className="h-5 w-5 text-[color:var(--color-muted-warm)]" />
                           ) : (
-                            <ChevronDown className="h-5 w-5 text-stone-400 dark:text-stone-500" />
+                            <ChevronDown className="h-5 w-5 text-[color:var(--color-muted-warm)]" />
                           )}
                         </button>
 
@@ -389,12 +396,8 @@ function AlbumCard({
 }) {
   return (
     <motion.div
-      className={cn(
-        "group relative rounded-xl overflow-hidden",
-        "bg-white dark:bg-[#1A1A1A] shadow-md hover:shadow-xl",
-        "border border-stone-100 dark:border-white/[0.06]",
-        "transition-all duration-300"
-      )}
+      className="group relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+      style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
       variants={{
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
@@ -435,21 +438,21 @@ function AlbumCard({
         {/* Album Info */}
         <div className={cn("p-3", compact ? "p-2.5" : "p-4")}>
           <h3 className={cn(
-            "font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-olive-600 dark:group-hover:text-olive-400 transition-colors",
+            "font-semibold text-[color:var(--color-ink)] truncate group-hover:text-[color:var(--color-coral)] transition-colors",
             compact ? "text-sm mb-0.5" : "mb-1"
           )}>
             {album.title}
           </h3>
 
           {album.location_name && (
-            <div className="flex items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400 mb-1">
+            <div className="flex items-center gap-1.5 text-sm text-[color:var(--color-muted-warm)] mb-1">
               <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
               <span className="truncate">{album.location_name}</span>
             </div>
           )}
 
           {!compact && album.user && (
-            <div className="flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500">
+            <div className="flex items-center gap-1.5 text-xs text-[color:var(--color-muted-warm)] opacity-80">
               <User className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">
                 {album.user.display_name || album.user.username}

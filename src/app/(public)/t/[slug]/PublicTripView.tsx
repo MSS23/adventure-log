@@ -3,8 +3,9 @@
 import dynamic from 'next/dynamic'
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { MapPin, Users, Loader2, Calendar } from 'lucide-react'
+import { MapPin, Users, Loader2, Calendar, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 import type { Trip, TripMember, TripPin } from '@/types/trips'
 
 const TripMap = dynamic(() => import('@/components/trips/TripMap'), {
@@ -132,7 +133,13 @@ export default function PublicTripView({ trip, members, pins }: Props) {
                         )}
                         <div className="flex items-center gap-2 mt-1">
                           <Avatar className="h-4 w-4">
-                            <AvatarImage src={member?.user?.avatar_url || undefined} />
+                            <AvatarImage
+                              src={getAvatarUrl(
+                                member?.user?.avatar_url,
+                                member?.user?.username
+                              )}
+                              alt={member?.user?.display_name || member?.user?.username || 'Planner'}
+                            />
                             <AvatarFallback className="text-[10px]">
                               {(member?.user?.display_name || member?.user?.username || '?')[0]}
                             </AvatarFallback>
@@ -152,14 +159,22 @@ export default function PublicTripView({ trip, members, pins }: Props) {
             </div>
           </div>
 
-          <div className="mt-4 p-4 rounded-xl bg-olive-50 dark:bg-white/5 text-sm text-olive-700 dark:text-olive-300">
-            <p className="font-medium mb-1">Plan your own trip</p>
-            <p className="text-xs text-olive-600 dark:text-olive-400">
-              Adventure Log lets you plan, live-log, and remember trips with friends.{' '}
-              <Link href="/sign-up" className="underline font-medium">
-                Start free →
+          <div className="mt-4 relative overflow-hidden rounded-xl shadow-md">
+            <div className="absolute inset-0 bg-gradient-to-br from-olive-800 via-olive-700 to-olive-900" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
+            <div className="relative p-5">
+              <p className="al-display text-lg text-white mb-1.5">Plan your own trip</p>
+              <p className="text-sm text-white/85 leading-relaxed mb-4">
+                Plan, live-log, and remember trips together with friends on Adventure Log.
+              </p>
+              <Link
+                href="/sign-up"
+                className="inline-flex items-center gap-1.5 bg-white text-olive-800 hover:bg-olive-50 font-semibold text-sm px-5 py-2 rounded-lg shadow-sm transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-olive-800"
+              >
+                Start free
+                <ArrowRight className="h-4 w-4" />
               </Link>
-            </p>
+            </div>
           </div>
         </div>
       </div>

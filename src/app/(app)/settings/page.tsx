@@ -282,6 +282,9 @@ export default function SettingsPage() {
       <div className="mb-6">
         <p className="al-eyebrow mb-1">Preferences</p>
         <h1 className="al-display text-3xl md:text-4xl">Settings</h1>
+        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+          Manage your profile, privacy, and account.
+        </p>
       </div>
 
       {/* Feedback */}

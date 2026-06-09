@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -23,7 +22,6 @@ import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
 import { UserAvatarLink } from '@/components/social/UserLink'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 
 interface Notification {
@@ -172,22 +170,22 @@ export default function NotificationsPage() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'like':
-        return <Heart className="h-5 w-5 text-red-500" />
+        return <Heart className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
       case 'comment':
-        return <MessageCircle className="h-5 w-5 text-olive-500" />
+        return <MessageCircle className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
       case 'follow':
-        return <UserPlus className="h-5 w-5 text-olive-600 dark:text-olive-400" />
+        return <UserPlus className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
       case 'album_invite':
       case 'collaboration':
-        return <Users className="h-5 w-5 text-olive-500" />
+        return <Users className="h-5 w-5" style={{ color: 'var(--color-sky)' }} />
       case 'photo':
-        return <Camera className="h-5 w-5 text-pink-500" />
+        return <Camera className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
       case 'location':
-        return <MapPin className="h-5 w-5 text-olive-500" />
+        return <MapPin className="h-5 w-5" style={{ color: 'var(--color-sky)' }} />
       case 'achievement':
-        return <Award className="h-5 w-5 text-yellow-500" />
+        return <Award className="h-5 w-5" style={{ color: 'var(--color-gold)' }} />
       default:
-        return <Bell className="h-5 w-5 text-stone-500" />
+        return <Bell className="h-5 w-5" style={{ color: 'var(--color-muted-warm)' }} />
     }
   }
 
@@ -196,15 +194,25 @@ export default function NotificationsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 p-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => window.history.back()} size="sm" className="cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-4 min-w-0">
+          <Button variant="ghost" onClick={() => window.history.back()} size="sm" className="cursor-pointer rounded-full active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <div>
+          <div className="min-w-0">
             <p className="al-eyebrow mb-0.5">Inbox</p>
-            <h1 className="al-display text-3xl md:text-4xl">Notifications</h1>
+            <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
+              Notifications
+              {unreadCount > 0 && (
+                <span
+                  className="inline-flex items-center justify-center min-w-6 h-6 px-2 text-[11px] font-bold text-white rounded-full"
+                  style={{ background: 'var(--color-coral)' }}
+                >
+                  {unreadCount}
+                </span>
+              )}
+            </h1>
             {unreadCount > 0 && (
               <p className="text-[color:var(--color-muted-warm)] text-sm mt-1 font-mono tracking-wide">
                 {unreadCount} unread
@@ -217,7 +225,7 @@ export default function NotificationsPage() {
             variant="outline"
             size="sm"
             onClick={markAllAsRead}
-            className="text-olive-600 hover:text-olive-700 border-olive-200 dark:border-olive-800 dark:text-olive-400 dark:hover:text-olive-300 cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500"
+            className="shrink-0 rounded-full text-xs font-semibold cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
           >
             <Check className="h-4 w-4 mr-2" />
             Mark all read
@@ -227,36 +235,50 @@ export default function NotificationsPage() {
 
       {/* Notifications List */}
       {loading ? (
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Bell className="h-8 w-8 text-stone-400 animate-pulse" />
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+          <div
+            className="h-8 w-8 rounded-full border-[3px] animate-spin"
+            style={{ borderColor: 'var(--color-coral-tint)', borderTopColor: 'var(--color-coral)' }}
+          />
+          <p className="text-sm text-[color:var(--color-muted-warm)]">Loading...</p>
         </div>
       ) : notifications.length === 0 ? (
-        <Card>
-          <CardContent className="py-16">
-            <div className="text-center">
-              <Bell className="h-16 w-16 mx-auto text-stone-300 mb-4" />
-              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">
-                No notifications yet
-              </h3>
-              <p className="text-stone-600 dark:text-stone-400">
-                We&apos;ll notify you when something happens
-              </p>
+        <div className="al-card py-16">
+          <div className="text-center">
+            <div
+              className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"
+              style={{ background: 'var(--color-ivory-alt)' }}
+            >
+              <Bell className="h-8 w-8" style={{ color: 'var(--color-muted-warm)' }} />
             </div>
-          </CardContent>
-        </Card>
+            <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">
+              No notifications yet
+            </h3>
+            <p className="text-sm text-[color:var(--color-muted-warm)]">
+              We&apos;ll let you know when something happens.
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="space-y-2">
           {notifications.map((notification) => (
-            <Card
+            <div
               key={notification.id}
-              className={cn(
-                'group relative transition-all duration-200 hover:shadow-md cursor-pointer',
-                !notification.is_read
-                  ? 'border-l-4 border-l-olive-600 bg-olive-50/30 dark:bg-olive-950/20'
-                  : 'dark:border-stone-700'
-              )}
+              className="group relative rounded-2xl transition-all duration-200 hover:shadow-md cursor-pointer overflow-hidden"
+              style={{
+                background: notification.is_read ? 'var(--card)' : 'var(--color-coral-tint)',
+                border: '1px solid var(--color-line-warm)',
+              }}
             >
-              <CardContent className="p-4">
+              {/* Unread accent rail */}
+              {!notification.is_read && (
+                <span
+                  className="absolute left-0 top-0 bottom-0 w-1"
+                  style={{ background: 'var(--color-coral)' }}
+                  aria-hidden
+                />
+              )}
+              <div className="p-4 pl-5">
                 {notification.link ? (
                   <Link
                     href={notification.link}
@@ -282,8 +304,8 @@ export default function NotificationsPage() {
                 >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -299,29 +321,32 @@ function NotificationItem({
   getIcon: (type: string) => React.ReactElement
 }) {
   return (
-    <div className="flex items-start gap-4">
+    <div className="flex items-start gap-4 pr-8">
       {/* Sender Avatar or Icon */}
       {notification.sender ? (
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-12 w-12 flex-shrink-0">
             <AvatarImage src={getAvatarUrl(notification.sender.avatar_url, notification.sender.username)} />
-            <AvatarFallback className="bg-gradient-to-br from-olive-500 to-olive-500 text-white font-semibold">
+            <AvatarFallback className="text-white font-semibold" style={{ background: 'var(--color-coral)' }}>
               {notification.sender.display_name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>
       ) : (
-        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-100 to-olive-100 flex items-center justify-center flex-shrink-0">
+        <div
+          className="h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: 'var(--color-ivory-alt)' }}
+        >
           {getIcon(notification.type)}
         </div>
       )}
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-stone-900 dark:text-stone-200 mb-1">
+        <p className="text-sm text-[color:var(--color-ink)] mb-1 leading-snug">
           {notification.message}
         </p>
-        <p className="text-xs text-stone-500 dark:text-stone-400">
+        <p className="text-xs font-mono tracking-wide text-[color:var(--color-muted-warm)]">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
       </div>

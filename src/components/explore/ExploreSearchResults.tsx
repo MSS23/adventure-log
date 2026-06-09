@@ -119,7 +119,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-olive-500" />
+        <Loader2 className="h-8 w-8 animate-spin" style={{ color: 'var(--color-forest)' }} />
       </div>
     )
   }
@@ -127,11 +127,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
-          <MapPin className="h-10 w-10 text-red-400" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[color:var(--color-coral-tint)]">
+          <MapPin className="h-8 w-8" style={{ color: 'var(--color-coral)' }} />
         </div>
-        <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">Search failed</h3>
-        <p className="text-stone-600 dark:text-stone-400">{error}</p>
+        <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">Search failed</h3>
+        <p className="text-[color:var(--color-ink-soft)]">{error}</p>
       </div>
     )
   }
@@ -141,11 +141,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   if (!hasResults) {
     return (
       <div className="text-center py-12">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-100 dark:bg-white/[0.06] flex items-center justify-center">
-          <MapPin className="h-10 w-10 text-stone-400 dark:text-stone-500" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[color:var(--color-forest-tint)]">
+          <MapPin className="h-8 w-8" style={{ color: 'var(--color-forest)' }} />
         </div>
-        <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">No results found</h3>
-        <p className="text-stone-600 dark:text-stone-400">
+        <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">No results found</h3>
+        <p className="text-[color:var(--color-ink-soft)]">
           Try searching for different keywords, locations, or usernames
         </p>
       </div>
@@ -157,26 +157,28 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
       {/* Users Results */}
       {users.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-4">
-            People ({users.length})
+          <p className="al-eyebrow mb-1">People</p>
+          <h2 className="font-heading text-xl font-semibold text-[color:var(--color-ink)] mb-4" style={{ letterSpacing: '-0.02em' }}>
+            {users.length} {users.length === 1 ? 'person' : 'people'}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {users.map((user) => (
               <Link
                 key={user.id}
                 href={`/profile/${user.username}`}
-                className="flex flex-col items-center p-4 bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] hover:border-olive-500 hover:shadow-md transition-all"
+                className="group flex flex-col items-center p-4 rounded-2xl border border-[color:var(--color-line-warm)] hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-16px_rgba(26,20,14,0.25)] transition-all"
+                style={{ background: 'var(--card)' }}
               >
                 <Avatar className="h-16 w-16 mb-3">
                   <AvatarImage src={user.avatar_url} />
-                  <AvatarFallback className="bg-olive-100 text-olive-700 text-xl">
+                  <AvatarFallback className="text-xl font-bold" style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}>
                     {user.display_name?.[0] || user.username?.[0] || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm text-center truncate w-full">
+                <p className="font-heading font-semibold text-[color:var(--color-ink)] group-hover:text-[color:var(--color-forest)] transition-colors text-sm text-center truncate w-full">
                   {user.display_name}
                 </p>
-                <p className="text-xs text-stone-500 dark:text-stone-400 truncate w-full text-center">
+                <p className="font-mono text-[11px] tracking-[0.04em] text-[color:var(--color-muted-warm)] truncate w-full text-center">
                   @{user.username}
                 </p>
               </Link>
@@ -188,8 +190,9 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
       {/* Albums Results */}
       {albums.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-4">
-            Albums ({albums.length})
+          <p className="al-eyebrow mb-1">Albums</p>
+          <h2 className="font-heading text-xl font-semibold text-[color:var(--color-ink)] mb-4" style={{ letterSpacing: '-0.02em' }}>
+            {albums.length} {albums.length === 1 ? 'album' : 'albums'}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {albums.map((album) => {
@@ -197,33 +200,37 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
               return (
                 <div
                   key={album.id}
-                  className="group bg-white dark:bg-[#1B170E] rounded-xl overflow-hidden border border-stone-200 dark:border-white/[0.10] hover:border-olive-500 hover:shadow-lg transition-all"
+                  className="group rounded-2xl overflow-hidden border border-[color:var(--color-line-warm)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-20px_rgba(26,20,14,0.25)] transition-all"
+                  style={{ background: 'var(--card)' }}
                 >
                   <Link href={`/albums/${album.id}`} className="block">
-                    <div className="relative aspect-[4/3] bg-stone-100 dark:bg-white/[0.06]">
+                    <div className="relative aspect-[4/3]" style={{ background: 'var(--color-ivory-alt)' }}>
                       {album.cover_photo_url ? (
-                        <Image
-                          src={album.cover_photo_url.startsWith('http') ? album.cover_photo_url : (getPhotoUrl(album.cover_photo_url) || '')}
-                          alt={album.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                        />
+                        <>
+                          <Image
+                            src={album.cover_photo_url.startsWith('http') ? album.cover_photo_url : (getPhotoUrl(album.cover_photo_url) || '')}
+                            alt={album.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <MapPin className="h-12 w-12 text-stone-300 dark:text-stone-600" />
+                        <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
+                          <MapPin className="h-12 w-12" style={{ color: 'var(--color-forest-soft)' }} />
                         </div>
                       )}
                     </div>
                   </Link>
                   <div className="p-4">
                     <Link href={`/albums/${album.id}`}>
-                      <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-1 group-hover:text-olive-600 transition-colors">
+                      <h3 className="font-heading font-semibold text-[color:var(--color-ink)] mb-1 group-hover:text-[color:var(--color-forest)] transition-colors line-clamp-1">
                         {album.title}
                       </h3>
                     </Link>
                     {album.location_name && (
-                      <p className="text-sm text-stone-600 dark:text-stone-400 mb-3 flex items-center gap-1">
+                      <p className="text-sm text-[color:var(--color-muted-warm)] mb-3 flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         {album.location_name}
                       </p>
@@ -233,11 +240,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={albumUser.avatar_url} />
-                            <AvatarFallback className="bg-stone-200 dark:bg-white/[0.08] text-stone-700 dark:text-stone-300 text-xs">
+                            <AvatarFallback className="text-xs font-bold" style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}>
                               {albumUser.display_name?.[0] || 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-xs text-stone-600 dark:text-stone-400">
+                          <span className="text-xs text-[color:var(--color-ink-soft)]">
                             by {albumUser.display_name}
                           </span>
                         </div>

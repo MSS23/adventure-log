@@ -24,6 +24,7 @@ import { AlbumSocialShare } from '@/components/albums/AlbumSocialShare'
 import { PrivateAlbumGate } from '@/components/albums/PrivateAlbumGate'
 import { ShareButton } from '@/components/albums/ShareButton'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/AuthProvider'
 
@@ -272,7 +273,7 @@ export default function PublicAlbumPage() {
         <div className="max-w-6xl mx-auto px-4 pb-20">
           {/* Album Info Card */}
           <motion.div
-            className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden mb-8"
+            className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden mb-8"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -289,7 +290,7 @@ export default function PublicAlbumPage() {
                     <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20 rounded-xl mb-6 hover:from-olive-100 dark:hover:from-olive-950/30 hover:to-olive-100 dark:hover:to-olive-950/30 transition-all duration-200 cursor-pointer hover:shadow-sm">
                       <Avatar className="h-12 w-12 ring-2 ring-olive-500/20">
                         <AvatarImage
-                          src={owner.avatar_url ? getPhotoUrl(owner.avatar_url, 'avatars') || undefined : undefined}
+                          src={getAvatarUrl(owner.avatar_url, owner.username)}
                           alt={owner.display_name || owner.username}
                         />
                         <AvatarFallback className="bg-olive-500 text-white">
@@ -302,7 +303,7 @@ export default function PublicAlbumPage() {
                           {owner.display_name || owner.username}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-olive-600 bg-white dark:bg-[#1B170E] px-3 py-1.5 rounded-full">
+                      <div className="flex items-center gap-2 text-sm text-olive-600 bg-white dark:bg-[color:var(--card)] px-3 py-1.5 rounded-full">
                         <User className="h-4 w-4" />
                         <span className="font-medium">View Profile</span>
                       </div>
@@ -368,7 +369,7 @@ export default function PublicAlbumPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <div className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
+              <div className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
                 <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
                   <Camera className="h-5 w-5 text-olive-500" />
                   Photos
@@ -384,7 +385,7 @@ export default function PublicAlbumPage() {
             </motion.div>
           ) : (
             <motion.div
-              className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-12 text-center"
+              className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-12 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -402,7 +403,7 @@ export default function PublicAlbumPage() {
 
           {/* Social Share Section */}
           <motion.div
-            className="mt-8 bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-6"
+            className="mt-8 bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
@@ -418,7 +419,7 @@ export default function PublicAlbumPage() {
           {/* Location Map */}
           {album.latitude && album.longitude && (
             <motion.div
-              className="mt-8 bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden"
+              className="mt-8 bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}

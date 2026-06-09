@@ -24,11 +24,14 @@ interface LeaderboardProps {
   metric?: 'albums' | 'countries' | 'photos' | 'followers' | 'score'
 }
 
-const RANK_ICONS = {
-  1: { icon: Trophy, color: 'text-yellow-500', bgColor: 'bg-yellow-50 dark:bg-yellow-950/30', borderColor: 'border-yellow-200 dark:border-yellow-900/40', ringColor: 'ring-yellow-200 dark:ring-white/[0.08]' },
-  2: { icon: Medal, color: 'text-stone-400 dark:text-stone-500', bgColor: 'bg-stone-50 dark:bg-white/[0.04]', borderColor: 'border-stone-200 dark:border-white/[0.10]', ringColor: 'ring-stone-200 dark:ring-white/[0.08]' },
-  3: { icon: Award, color: 'text-olive-500', bgColor: 'bg-olive-50 dark:bg-olive-950/20', borderColor: 'border-olive-200 dark:border-white/[0.08]', ringColor: 'ring-olive-200 dark:ring-white/[0.08]' }
-}
+// Top-3 accents use Field Notebook tokens: gold (1st), forest (2nd), coral (3rd).
+// `accent` drives the icon + metric color; `ring`/`tint` are applied via inline
+// CSS vars so they track light/dark automatically.
+const RANK_ACCENTS = {
+  1: { icon: Trophy, accent: 'var(--color-gold)', tint: 'var(--color-gold-tint)' },
+  2: { icon: Medal, accent: 'var(--color-forest)', tint: 'var(--color-forest-tint)' },
+  3: { icon: Award, accent: 'var(--color-coral)', tint: 'var(--color-coral-tint)' },
+} as const
 
 export function Leaderboard({ className, limit = 10, metric = 'score' }: LeaderboardProps) {
   const [leaders, setLeaders] = useState<UserWithStats[]>([])
@@ -198,16 +201,20 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
 
   if (isLoading) {
     return (
-      <div className={cn("space-y-3", className)}>
+      <div className={cn("space-y-2.5", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 bg-white dark:bg-[#1B170E] rounded-lg border border-stone-100 dark:border-white/[0.08] p-4 animate-pulse">
-            <div className="w-8 h-8 bg-stone-200 dark:bg-white/[0.08] rounded-full" />
-            <div className="h-12 w-12 bg-stone-200 dark:bg-white/[0.08] rounded-full" />
+          <div
+            key={i}
+            className="flex items-center gap-4 rounded-xl border border-[color:var(--color-line-warm)] p-4 animate-pulse"
+            style={{ background: 'var(--card)' }}
+          >
+            <div className="w-9 h-9 rounded-full" style={{ background: 'var(--color-ivory-alt)' }} />
+            <div className="h-12 w-12 rounded-full" style={{ background: 'var(--color-ivory-alt)' }} />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-1/3" />
-              <div className="h-3 bg-stone-100 dark:bg-white/[0.06] rounded w-1/4" />
+              <div className="h-4 rounded w-1/3" style={{ background: 'var(--color-ivory-alt)' }} />
+              <div className="h-3 rounded w-1/4" style={{ background: 'var(--color-ivory-alt)' }} />
             </div>
-            <div className="h-6 w-16 bg-stone-200 dark:bg-white/[0.08] rounded-full" />
+            <div className="h-6 w-16 rounded-full" style={{ background: 'var(--color-ivory-alt)' }} />
           </div>
         ))}
       </div>
@@ -216,84 +223,116 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 px-4">
-        <TrendingUp className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-2" />
-        <p className="text-sm text-stone-500 dark:text-stone-400">{error}</p>
+      <div className="flex flex-col items-center justify-center py-10 px-4">
+        <TrendingUp className="h-8 w-8 text-[color:var(--color-muted-warm)] mb-2" />
+        <p className="text-sm text-[color:var(--color-ink-soft)]">{error}</p>
       </div>
     )
   }
 
   if (leaders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 bg-stone-50 dark:bg-white/[0.04] rounded-xl border border-stone-100 dark:border-white/[0.08]">
-        <div className="p-4 bg-stone-100 dark:bg-white/[0.06] rounded-full mb-4">
-          <Trophy className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+      <div
+        className="flex flex-col items-center justify-center py-14 px-6 rounded-2xl border border-[color:var(--color-line-warm)] text-center"
+        style={{ background: 'var(--card)' }}
+      >
+        <div
+          className="w-14 h-14 flex items-center justify-center rounded-2xl mb-4"
+          style={{ background: 'var(--color-gold-tint)' }}
+        >
+          <Trophy className="h-7 w-7" style={{ color: 'var(--color-gold)' }} strokeWidth={1.8} />
         </div>
-        <p className="text-stone-700 dark:text-stone-300 font-medium mb-1">No rankings yet</p>
-        <p className="text-sm text-stone-500 dark:text-stone-400">Be the first to climb the leaderboard!</p>
+        <h4 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-1">
+          No rankings yet
+        </h4>
+        <p className="text-sm text-[color:var(--color-ink-soft)] mb-5 max-w-xs">
+          Log albums, visit countries, and grow your following to climb the board.
+        </p>
+        <Link
+          href="/albums/new"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold transition-shadow hover:shadow-[0_10px_28px_rgba(226,85,58,0.45)]"
+          style={{ background: 'var(--color-coral)', color: '#fff' }}
+        >
+          Start your first album
+        </Link>
       </div>
     )
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-2.5", className)}>
       {leaders.map((leader, index) => {
         const rank = index + 1
-        const rankIcon = RANK_ICONS[rank as keyof typeof RANK_ICONS]
+        const accent = RANK_ACCENTS[rank as keyof typeof RANK_ACCENTS]
         const metricValue = getMetricValue(leader)
-        const RankIcon = rankIcon?.icon
+        const RankIcon = accent?.icon
+        const isTopThree = !!accent
 
         return (
           <Link
             key={leader.id}
             href={`/profile/${leader.username}`}
-            className="group flex items-center gap-4 bg-white dark:bg-[#1B170E] rounded-lg border border-stone-100 dark:border-white/[0.08] hover:border-stone-200 dark:hover:border-white/[0.12] hover:shadow-md transition-all duration-200 p-4"
+            className="group flex items-center gap-4 rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(26,20,14,0.18)]"
+            style={{
+              background: 'var(--card)',
+              // Top-3 carry a hairline accent border; the rest use the warm line.
+              border: `1px solid ${isTopThree ? accent.accent : 'var(--color-line-warm)'}`,
+            }}
           >
-            {/* Rank */}
-            <div className={cn(
-              "flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm",
-              rankIcon ? rankIcon.bgColor : "bg-stone-50 dark:bg-white/[0.04] text-stone-600 dark:text-stone-400"
-            )}>
+            {/* Rank badge */}
+            <div
+              className="flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm flex-shrink-0"
+              style={
+                isTopThree
+                  ? { background: accent.tint, color: accent.accent }
+                  : { background: 'var(--color-ivory-alt)', color: 'var(--color-muted-warm)' }
+              }
+            >
               {RankIcon ? (
-                <RankIcon className={cn("h-5 w-5", rankIcon.color)} />
+                <RankIcon className="h-[18px] w-[18px]" strokeWidth={2} />
               ) : (
-                <span>{rank}</span>
+                <span className="font-mono">{rank}</span>
               )}
             </div>
 
-            {/* Avatar */}
-            <Avatar className={cn(
-              "h-12 w-12 ring-2 group-hover:ring-4 transition-all duration-200",
-              rankIcon ? rankIcon.ringColor : "ring-stone-100 dark:ring-white/[0.08] group-hover:ring-olive-200"
-            )}>
+            {/* Avatar — keep avatar URL logic unchanged */}
+            <Avatar
+              className="h-12 w-12 ring-2 transition-all duration-200 flex-shrink-0"
+              style={{ '--tw-ring-color': isTopThree ? accent.accent : 'var(--color-line-warm)' } as React.CSSProperties}
+            >
               <AvatarImage
                 src={getAvatarUrl(leader.avatar_url, leader.username)}
                 alt={leader.display_name || leader.username}
               />
-              <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 font-bold">
+              <AvatarFallback
+                className="font-bold"
+                style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}
+              >
                 {(leader.display_name || leader.username || 'U')[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-stone-900 dark:text-stone-100 group-hover:text-olive-600 transition-colors truncate">
+              <h3 className="font-heading font-semibold text-[color:var(--color-ink)] group-hover:text-[color:var(--color-forest)] transition-colors truncate">
                 {leader.display_name || leader.username}
               </h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400 truncate">
+              <p className="font-mono text-[11px] tracking-[0.04em] text-[color:var(--color-muted-warm)] truncate">
                 @{leader.username}
               </p>
             </div>
 
             {/* Metric Value */}
-            <div className="flex flex-col items-end">
-              <span className={cn(
-                "text-lg font-bold",
-                rankIcon ? rankIcon.color : "text-stone-900 dark:text-stone-100"
-              )}>
+            <div className="flex flex-col items-end flex-shrink-0">
+              <span
+                className="text-lg font-bold tabular-nums"
+                style={{ color: isTopThree ? accent.accent : 'var(--color-ink)' }}
+              >
                 {metricValue.toLocaleString()}
               </span>
-              <span className="text-xs text-stone-500 dark:text-stone-400">{getMetricLabel()}</span>
+              <span className="font-mono text-[10px] tracking-[0.08em] uppercase text-[color:var(--color-muted-warm)]">
+                {getMetricLabel()}
+              </span>
             </div>
           </Link>
         )

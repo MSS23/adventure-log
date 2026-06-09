@@ -157,7 +157,12 @@ export default function HomePage() {
               </div>
               <span className="text-lg font-heading font-bold text-white tracking-tight">Adventure Log</span>
             </Link>
-            <nav className="flex items-center gap-2">
+            <nav className="flex items-center gap-1 sm:gap-2">
+              <Link href="/discover" className="hidden sm:inline-flex">
+                <Button variant="ghost" className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
+                  Discover
+                </Button>
+              </Link>
               <Link href="/sign-in">
                 <Button variant="ghost" className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
                   Sign In
@@ -227,7 +232,7 @@ export default function HomePage() {
               <span className="block text-olive-400">One Globe.</span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-stone-400 max-w-lg mx-auto leading-relaxed mb-10">
+            <p className="text-base sm:text-lg md:text-xl text-stone-300 max-w-lg mx-auto leading-relaxed mb-10">
               Turn your adventures into a living, interactive 3D globe.
               See everywhere you&apos;ve been. Share who you are as a traveler.
             </p>
@@ -248,9 +253,18 @@ export default function HomePage() {
             </div>
 
             {/* Country flags */}
+            <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500 font-medium mb-3">
+              Travelers logging journeys across
+            </p>
             <div className="flex justify-center gap-1.5 flex-wrap max-w-sm mx-auto">
               {DEMO_LOCATIONS.slice(0, 14).map(loc => (
-                <span key={loc.country} className="text-base sm:text-lg opacity-50 hover:opacity-100 transition-opacity cursor-default" title={loc.name}>
+                <span
+                  key={loc.country}
+                  role="img"
+                  aria-label={loc.name}
+                  className="text-base sm:text-lg opacity-50 hover:opacity-100 transition-opacity cursor-default"
+                  title={loc.name}
+                >
                   {getFlag(loc.country)}
                 </span>
               ))}
@@ -258,13 +272,18 @@ export default function HomePage() {
           </div>
 
           {/* Scroll hint */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce opacity-40">
-            <ChevronDown className="h-5 w-5 text-stone-400" />
-          </div>
+          <button
+            type="button"
+            onClick={() => document.getElementById('stats')?.scrollIntoView({ behavior: 'smooth' })}
+            aria-label="Scroll to learn more"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 p-2 rounded-full opacity-40 hover:opacity-80 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]"
+          >
+            <ChevronDown className="h-5 w-5 text-stone-400 animate-bounce" />
+          </button>
         </section>
 
         {/* ── Stats Bar ── */}
-        <section className="relative z-10 py-8 border-y border-white/[0.04] bg-[#060a03]/90 backdrop-blur-2xl">
+        <section id="stats" className="relative z-10 py-8 border-y border-white/[0.04] bg-[#060a03]/90 backdrop-blur-2xl scroll-mt-16">
           <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
               { value: '195', label: 'Countries' },
@@ -291,7 +310,7 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold !text-white tracking-tight mb-5">
                 Not just another travel app
               </h2>
-              <p className="text-base text-stone-500 max-w-prose mx-auto leading-relaxed">
+              <p className="text-base text-stone-400 max-w-prose mx-auto leading-relaxed">
                 No competitor has a 3D globe. No competitor lets you export flyover videos.
                 No competitor shows your travel identity like this.
               </p>
@@ -307,7 +326,7 @@ export default function HomePage() {
                     <feature.icon className="h-5 w-5 text-olive-400" />
                   </div>
                   <h3 className="text-[15px] font-semibold !text-white mb-2">{feature.title}</h3>
-                  <p className="text-sm text-stone-500 leading-relaxed">{feature.desc}</p>
+                  <p className="text-sm text-stone-400 leading-relaxed">{feature.desc}</p>
                 </div>
               ))}
             </div>
@@ -338,7 +357,7 @@ export default function HomePage() {
                     <span className="text-xs font-bold text-olive-500/40 uppercase tracking-widest">{item.step}</span>
                   </div>
                   <h3 className="text-lg font-semibold !text-white mb-2">{item.title}</h3>
-                  <p className="text-sm text-stone-500 leading-relaxed">{item.desc}</p>
+                  <p className="text-sm text-stone-400 leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -355,7 +374,7 @@ export default function HomePage() {
                   Your travel identity,
                   <br />beautifully shareable
                 </h2>
-                <p className="text-base text-stone-500 leading-relaxed mb-8">
+                <p className="text-base text-stone-400 leading-relaxed mb-8">
                   Countries visited, continents explored, distance traveled, and your unique
                   travel personality — all on a beautiful page you can share anywhere.
                 </p>
@@ -399,7 +418,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {['FR','IT','JP','US','AU','GB','DE','ES','TH','BR','KR','AE'].map(code => (
-                    <span key={code} className="text-lg">{getFlag(code)}</span>
+                    <span key={code} role="img" aria-label={`${code} flag`} className="text-lg">{getFlag(code)}</span>
                   ))}
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -421,7 +440,7 @@ export default function HomePage() {
               Start mapping your
               <br />adventures today
             </h2>
-            <p className="text-base text-stone-500 mb-10 max-w-prose mx-auto leading-relaxed">
+            <p className="text-base text-stone-400 mb-10 max-w-prose mx-auto leading-relaxed">
               Free forever. No ads. Your travel story deserves better than a flat map.
             </p>
             <Link href="/sign-up">
@@ -434,20 +453,24 @@ export default function HomePage() {
         </section>
 
         {/* ── Footer ── */}
-        <footer className="py-10 px-6 lg:px-10 border-t border-white/[0.04]">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-olive-600 flex items-center justify-center">
-                <Compass className="h-3 w-3 text-white" />
+        <footer className="py-12 px-6 lg:px-10 border-t border-white/[0.04]">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-olive-600 flex items-center justify-center">
+                <Compass className="h-3.5 w-3.5 text-white" />
               </div>
-              <span className="text-sm text-stone-600">Adventure Log</span>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-stone-300 leading-tight">Adventure Log</div>
+                <div className="text-[11px] text-stone-600 leading-tight">Your travel life, on a globe.</div>
+              </div>
             </div>
-            <div className="flex gap-6 text-sm text-stone-600">
-              <Link href="/privacy" className="hover:text-stone-400 transition-colors duration-200 focus-visible:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Privacy</Link>
-              <Link href="/terms" className="hover:text-stone-400 transition-colors duration-200 focus-visible:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Terms</Link>
-              <Link href="/contact" className="hover:text-stone-400 transition-colors duration-200 focus-visible:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Contact</Link>
-            </div>
-            <div className="text-xs text-stone-700">
+            <nav className="flex gap-6 text-sm text-stone-500">
+              <Link href="/discover" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Discover</Link>
+              <Link href="/privacy" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Privacy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Terms</Link>
+              <Link href="/contact" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Contact</Link>
+            </nav>
+            <div className="text-xs text-stone-600">
               &copy; {new Date().getFullYear()} Adventure Log
             </div>
           </div>

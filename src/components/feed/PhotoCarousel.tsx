@@ -96,10 +96,10 @@ export function PhotoCarousel({
 
   if (!photos || photos.length === 0) {
     return (
-      <div className={cn("relative aspect-[4/3] min-h-0 bg-gradient-to-br from-stone-900 to-stone-800", className)}>
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20">
-          <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 dark:text-stone-600 mb-2 sm:mb-3" />
-          <p className="text-xs sm:text-sm text-stone-400 dark:text-stone-500 font-medium">No photos</p>
+      <div className={cn("relative aspect-[4/3] min-h-0", className)} style={{ background: 'var(--color-ivory-alt)' }}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
+          <Camera className="h-16 w-16 sm:h-20 sm:w-20 mb-2 sm:mb-3" style={{ color: 'var(--color-forest-soft)' }} />
+          <p className="text-xs sm:text-sm font-medium text-[color:var(--color-muted-warm)]">No photos</p>
         </div>
       </div>
     )
@@ -112,7 +112,8 @@ export function PhotoCarousel({
 
     return (
       <div
-        className={cn("relative aspect-[4/3] min-h-0 bg-gradient-to-br from-stone-900 to-stone-800", className)}
+        className={cn("relative aspect-[4/3] min-h-0", className)}
+        style={{ background: 'var(--color-ivory-alt)' }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onDoubleClick={handleDoubleTapLike}
@@ -137,9 +138,9 @@ export function PhotoCarousel({
             />
           </>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20">
-            <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 dark:text-stone-600 mb-2 sm:mb-3" />
-            <p className="text-xs sm:text-sm text-stone-400 dark:text-stone-500 font-medium">No image</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
+            <Camera className="h-16 w-16 sm:h-20 sm:w-20 mb-2 sm:mb-3" style={{ color: 'var(--color-forest-soft)' }} />
+            <p className="text-xs sm:text-sm font-medium text-[color:var(--color-muted-warm)]">No image</p>
           </div>
         )}
       </div>
@@ -163,7 +164,8 @@ export function PhotoCarousel({
             return (
               <div
                 key={photo.id}
-                className="flex-[0_0_100%] min-w-0 relative aspect-[4/3] bg-gradient-to-br from-stone-900 to-stone-800"
+                className="flex-[0_0_100%] min-w-0 relative aspect-[4/3]"
+                style={{ background: 'var(--color-ivory-alt)' }}
               >
                 {photoUrl ? (
                   <Image
@@ -182,9 +184,9 @@ export function PhotoCarousel({
                     priority={index === 0}
                   />
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20">
-                    <Camera className="h-16 w-16 sm:h-20 sm:w-20 text-stone-300 dark:text-stone-600 mb-2 sm:mb-3" />
-                    <p className="text-xs sm:text-sm text-stone-400 dark:text-stone-500 font-medium">No image</p>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
+                    <Camera className="h-16 w-16 sm:h-20 sm:w-20 mb-2 sm:mb-3" style={{ color: 'var(--color-forest-soft)' }} />
+                    <p className="text-xs sm:text-sm font-medium text-[color:var(--color-muted-warm)]">No image</p>
                   </div>
                 )}
               </div>
@@ -245,7 +247,7 @@ export function PhotoCarousel({
 
       {/* Dot indicators - Smaller and positioned at bottom */}
       {photos.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1 px-2 py-0.5 rounded-full bg-black/20 backdrop-blur-sm">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1 px-2 py-1 rounded-full bg-black/35 backdrop-blur-sm">
           {photos.map((_, index) => (
             <motion.div
               key={index}

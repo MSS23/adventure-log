@@ -11,7 +11,6 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { cn } from '@/lib/utils'
 
 // Animated counter component
 function AnimatedCounter({ value, duration = 0.8 }: { value: number; duration?: number }) {
@@ -98,17 +97,16 @@ export default function FollowingPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <motion.div
-          className="h-10 w-10 rounded-full border-4 border-solid border-olive-200 border-t-olive-600"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        <div
+          className="h-10 w-10 rounded-full border-4 animate-spin"
+          style={{ borderColor: 'var(--color-coral-tint)', borderTopColor: 'var(--color-coral)' }}
         />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30">
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <div className="max-w-4xl mx-auto space-y-6 p-4">
         {/* Header */}
         <motion.div
@@ -125,7 +123,7 @@ export default function FollowingPage() {
               variant="ghost"
               onClick={() => window.history.back()}
               size="sm"
-              className="cursor-pointer hover:bg-white/80 dark:hover:bg-stone-800/80 backdrop-blur-sm border border-transparent hover:border-stone-200 dark:hover:border-stone-700 hover:shadow-sm transition-all duration-200 rounded-xl active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+              className="cursor-pointer hover:bg-[color:var(--color-ivory-alt)] border border-transparent hover:border-[color:var(--color-line-warm)] hover:shadow-sm transition-all duration-200 rounded-full active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
@@ -157,24 +155,22 @@ export default function FollowingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.1 }}
         >
-          <div className={cn(
-            "rounded-2xl p-6 text-center",
-            "bg-gradient-to-br from-white/95 to-white/80",
-            "backdrop-blur-xl border border-white/50",
-            "shadow-lg shadow-olive-500/5",
-            "hover:shadow-xl hover:shadow-olive-500/10 transition-shadow duration-300"
-          )}>
+          <div
+            className="rounded-2xl p-6 text-center transition-shadow duration-300 hover:shadow-md"
+            style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
+          >
             <motion.div
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-olive-100 to-pink-100 flex items-center justify-center mx-auto mb-3"
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+              style={{ background: 'var(--color-coral-tint)' }}
               whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
-              <Users className="h-8 w-8 text-olive-600" />
+              <Users className="h-8 w-8" style={{ color: 'var(--color-coral)' }} />
             </motion.div>
-            <div className="text-4xl font-bold text-stone-900 dark:text-stone-100">
+            <div className="al-stat-value text-4xl">
               <AnimatedCounter value={stats.followingCount} />
             </div>
-            <div className="text-sm text-stone-600 dark:text-stone-400 font-medium mt-1">Following</div>
+            <div className="al-eyebrow mt-1">Following</div>
           </div>
         </motion.div>
 
@@ -183,18 +179,14 @@ export default function FollowingPage() {
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
-          className={cn(
-            "rounded-2xl overflow-hidden",
-            "bg-gradient-to-br from-white/95 to-white/80",
-            "backdrop-blur-xl border border-white/50",
-            "shadow-xl shadow-black/5"
-          )}
+          className="rounded-2xl overflow-hidden"
+          style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
         >
-          <div className="px-6 py-4 border-b border-stone-100 dark:border-white/[0.08]">
-            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-              <Heart className="h-5 w-5 text-pink-500" />
+          <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--color-line-warm)' }}>
+            <h2 className="font-heading text-lg font-bold text-[color:var(--color-ink)] flex items-center gap-2">
+              <Heart className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
               People You Follow
-              <span className="text-sm font-normal text-stone-500 dark:text-stone-400">({following.length})</span>
+              <span className="text-sm font-normal text-[color:var(--color-muted-warm)]">({following.length})</span>
             </h2>
           </div>
           <div className="p-4">
@@ -210,8 +202,11 @@ export default function FollowingPage() {
                   animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-olive-100 to-pink-100 flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-10 w-10 text-olive-400" />
+                  <div
+                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ background: 'var(--color-coral-tint)' }}
+                  >
+                    <Users className="h-10 w-10" style={{ color: 'var(--color-coral)' }} />
                   </div>
                   {!prefersReducedMotion && (
                     <motion.div
@@ -219,20 +214,20 @@ export default function FollowingPage() {
                       animate={{ rotate: [0, 15, -15, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 1 }}
                     >
-                      <Sparkles className="h-5 w-5 text-olive-400" />
+                      <Sparkles className="h-5 w-5" style={{ color: 'var(--color-gold)' }} />
                     </motion.div>
                   )}
                 </motion.div>
-                <p className="text-stone-700 dark:text-stone-300 font-medium">Not following anyone yet</p>
-                <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">
-                  Discover and follow travelers to see their adventures!
+                <p className="font-heading text-[color:var(--color-ink)] font-semibold">Not following anyone yet</p>
+                <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
+                  Discover and follow travelers to see their adventures.
                 </p>
                 <motion.div
                   whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
                   <Button
-                    className="mt-6 cursor-pointer bg-gradient-to-r from-olive-500 to-pink-500 hover:from-olive-600 hover:to-pink-600 text-white shadow-lg shadow-olive-500/25 active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
+                    className="al-btn-coral mt-6 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
                     onClick={() => router.push('/search?contentType=travelers')}
                   >
                     Discover People
@@ -256,13 +251,8 @@ export default function FollowingPage() {
                         key={follow.id}
                         variants={itemVariants}
                         layout={!prefersReducedMotion}
-                        className={cn(
-                          "flex items-center justify-between p-4 rounded-xl",
-                          "bg-white/60 dark:bg-stone-900/40 backdrop-blur-sm",
-                          "border border-stone-100 dark:border-stone-800",
-                          "hover:shadow-md hover:border-olive-200 hover:bg-white/80 transition-all duration-300",
-                          "group"
-                        )}
+                        className="group flex items-center justify-between p-4 rounded-xl hover:shadow-md transition-all duration-300"
+                        style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
                         whileHover={prefersReducedMotion ? {} : { y: -2 }}
                       >
                         <Link
@@ -273,25 +263,25 @@ export default function FollowingPage() {
                             whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                           >
-                            <Avatar className="h-12 w-12 ring-2 ring-stone-100 dark:ring-white/[0.08] group-hover:ring-olive-200 transition-all">
+                            <Avatar className="h-12 w-12 ring-2 ring-[color:var(--color-line-warm)] transition-all">
                               <AvatarImage
                                 src={getPhotoUrl(followingUser.avatar_url, 'avatars') || ''}
                                 alt={followingUser.display_name || followingUser.username || 'User'}
                               />
-                              <AvatarFallback className="bg-gradient-to-br from-olive-500 to-pink-500 text-white font-semibold">
+                              <AvatarFallback className="text-white font-semibold" style={{ background: 'var(--color-coral)' }}>
                                 {(followingUser.display_name || followingUser.username || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-olive-600 transition-colors">
+                            <p className="font-semibold text-[color:var(--color-ink)] truncate group-hover:text-[color:var(--color-coral)] transition-colors">
                               {followingUser.display_name || followingUser.username}
                             </p>
-                            <p className="text-sm text-stone-500 dark:text-stone-400 truncate">
+                            <p className="text-sm text-[color:var(--color-muted-warm)] truncate">
                               @{followingUser.username}
                             </p>
                             {followingUser.bio && (
-                              <p className="text-sm text-stone-400 dark:text-stone-500 truncate mt-0.5">
+                              <p className="text-sm text-[color:var(--color-muted-warm)] opacity-80 truncate mt-0.5">
                                 {followingUser.bio}
                               </p>
                             )}
@@ -307,7 +297,7 @@ export default function FollowingPage() {
                             variant="outline"
                             onClick={() => handleUnfollow(followingUser.id)}
                             disabled={actionLoading === followingUser.id}
-                            className="ml-4 cursor-pointer border-stone-200 dark:border-stone-700 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-all duration-200 rounded-full px-4 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500"
+                            className="ml-4 cursor-pointer hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-all duration-200 rounded-full px-4 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500"
                           >
                             {actionLoading === followingUser.id ? (
                               <motion.div

@@ -326,26 +326,28 @@ export default function TripDetailPage() {
   const myMember = user ? memberByUser.get(user.id) : null
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 pt-4 sm:pt-6 pb-24 md:pb-8">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-4">
-        <Link href="/trips">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{trip.cover_emoji || '🗺️'}</span>
-            <h1 className="text-2xl font-bold text-olive-950 dark:text-olive-50 truncate">
-              {trip.title}
-            </h1>
+      <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-4">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <Link href="/trips" className="shrink-0">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">{trip.cover_emoji || '🗺️'}</span>
+              <h1 className="al-display text-2xl md:text-3xl truncate">
+                {trip.title}
+              </h1>
+            </div>
+            {trip.description && (
+              <p className="text-sm text-[color:var(--color-muted-warm)] mt-1 leading-relaxed">{trip.description}</p>
+            )}
           </div>
-          {trip.description && (
-            <p className="text-sm text-olive-600 dark:text-olive-400 mt-1">{trip.description}</p>
-          )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
           {trip.status === 'live' && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-xs font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />

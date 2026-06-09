@@ -307,7 +307,7 @@ export default function DiscoverPage() {
                 loading={pinsLoading}
               />
             </div>
-            <p className="mt-3 text-center text-xs text-stone-500">
+            <p className="mt-3 text-center text-xs text-stone-400">
               Coordinates only — no usernames, photos, or trip details until
               you&apos;re a member.
             </p>

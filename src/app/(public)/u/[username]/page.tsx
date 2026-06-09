@@ -1,13 +1,17 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { PublicProfileContent } from '@/components/profile/PublicProfileContent'
 
-function getServerPhotoUrl(filePath: string | null | undefined): string | undefined {
+function getServerStorageUrl(
+  filePath: string | null | undefined,
+  bucket: 'photos' | 'avatars' = 'photos'
+): string | undefined {
   if (!filePath) return undefined
   if (filePath.startsWith('http')) return filePath
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!supabaseUrl) return undefined
-  return `${supabaseUrl}/storage/v1/object/public/photos/${filePath}`
+  return `${supabaseUrl}/storage/v1/object/public/${bucket}/${filePath}`
 }
 
 /**
@@ -67,7 +71,7 @@ export async function generateMetadata({
 
     const displayName = user.display_name || user.username || 'Traveler'
     const title = `${displayName} - Travel Adventures`
-    const avatarUrl = getServerPhotoUrl(user.avatar_url)
+    const avatarUrl = getServerStorageUrl(user.avatar_url, 'avatars')
     const description =
       user.bio ||
       `Explore ${displayName}'s travel adventures and destinations on Adventure Log`
@@ -119,10 +123,21 @@ export default async function PublicProfilePage({
 
   if (!user) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-stone-900 mb-2">Traveler not found</h1>
-          <p className="text-stone-500">This profile doesn&apos;t exist or has been removed.</p>
+      <div className="min-h-screen flex items-center justify-center bg-[color:var(--background)] px-6">
+        <div className="al-card max-w-md w-full text-center p-10">
+          <div className="w-16 h-16 rounded-full bg-[color:var(--color-forest-tint)] flex items-center justify-center mx-auto mb-5 text-3xl">
+            🧭
+          </div>
+          <h1 className="al-display text-2xl mb-2">Traveler not found</h1>
+          <p className="al-body mb-7">
+            This profile doesn&apos;t exist or has been removed.
+          </p>
+          <Link
+            href="/sign-up"
+            className="al-btn-coral inline-flex items-center justify-center px-7 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] focus-visible:ring-offset-2"
+          >
+            Start your own Adventure Log
+          </Link>
         </div>
       </div>
     )

@@ -26,6 +26,7 @@ import { InteractivePhotoGallery } from '@/components/albums/InteractivePhotoGal
 import { AlbumSocialShare } from '@/components/albums/AlbumSocialShare'
 import { ShareButton } from '@/components/albums/ShareButton'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 import { cn } from '@/lib/utils'
 
 interface SharedByUser {
@@ -157,17 +158,17 @@ export default function SharedAlbumPage() {
             {error || 'This share link may have expired or been revoked.'}
           </p>
           <div className="flex justify-center gap-3">
-            <Link href="/explore">
+            <Link href="/sign-up">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-                  Explore Albums
+                  Join Adventure Log
                 </Button>
               </motion.div>
             </Link>
-            <Link href="/sign-in">
+            <Link href="/explore">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button variant="outline" className="cursor-pointer border-white/30 text-white hover:bg-white/10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-                  Log In
+                  Explore Albums
                 </Button>
               </motion.div>
             </Link>
@@ -215,7 +216,7 @@ export default function SharedAlbumPage() {
         <div className="max-w-6xl mx-auto px-4 pb-20">
           {/* Album Info Card */}
           <motion.div
-            className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden mb-8"
+            className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden mb-8"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -231,7 +232,7 @@ export default function SharedAlbumPage() {
                 >
                   <Avatar className="h-12 w-12 ring-2 ring-olive-500/20">
                     <AvatarImage
-                      src={sharedBy.avatar_url ? getPhotoUrl(sharedBy.avatar_url, 'avatars') || undefined : undefined}
+                      src={getAvatarUrl(sharedBy.avatar_url, sharedBy.username)}
                       alt={sharedBy.display_name || sharedBy.username}
                     />
                     <AvatarFallback className="bg-olive-500 text-white">
@@ -244,7 +245,7 @@ export default function SharedAlbumPage() {
                       {sharedBy.display_name || sharedBy.username}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-olive-600 bg-white dark:bg-[#1B170E] px-3 py-1.5 rounded-full">
+                  <div className="flex items-center gap-2 text-sm text-olive-600 bg-white dark:bg-[color:var(--card)] px-3 py-1.5 rounded-full">
                     <Eye className="h-4 w-4" />
                     <span className="font-medium">
                       {share.permission_level === 'view' ? 'View Only' :
@@ -288,7 +289,7 @@ export default function SharedAlbumPage() {
 
               {/* Action Bar */}
               <motion.div
-                className="flex flex-wrap items-center gap-3 pt-4 border-t"
+                className="flex flex-wrap items-center gap-3 pt-4 border-t border-stone-200 dark:border-white/[0.08]"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
@@ -336,7 +337,7 @@ export default function SharedAlbumPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <div className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
+              <div className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
                 <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
                   <Camera className="h-5 w-5 text-olive-500" />
                   Photos
@@ -352,7 +353,7 @@ export default function SharedAlbumPage() {
             </motion.div>
           ) : (
             <motion.div
-              className="bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-12 text-center"
+              className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-12 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -380,7 +381,7 @@ export default function SharedAlbumPage() {
 
           {/* Social Share Section */}
           <motion.div
-            className="mt-8 bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden p-6"
+            className="mt-8 bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
@@ -396,7 +397,7 @@ export default function SharedAlbumPage() {
           {/* Location Map Mini Preview (if coordinates available) */}
           {album.latitude && album.longitude && (
             <motion.div
-              className="mt-8 bg-white dark:bg-[#1B170E] rounded-2xl shadow-xl overflow-hidden"
+              className="mt-8 bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
@@ -413,7 +414,7 @@ export default function SharedAlbumPage() {
                     title="Album Location"
                   />
                   <motion.div
-                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-stone-700 dark:text-stone-300"
+                    className="absolute top-4 left-4 bg-white/90 dark:bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-stone-700 dark:text-stone-100"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.8 }}
@@ -424,6 +425,33 @@ export default function SharedAlbumPage() {
               </div>
             </motion.div>
           )}
+
+          {/* Conversion CTA */}
+          <motion.div
+            className="mt-8 relative overflow-hidden rounded-2xl shadow-xl"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-olive-800 via-olive-700 to-olive-900" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
+            <div className="relative px-6 py-10 md:px-10 md:py-12 text-center">
+              <span className="al-eyebrow text-olive-200 mb-3 block">Adventure Log</span>
+              <h2 className="al-display text-2xl md:text-3xl text-white mb-3">
+                Make your travels unforgettable
+              </h2>
+              <p className="text-white/85 max-w-md mx-auto leading-relaxed mb-7">
+                Create beautiful albums like this one, pin your journeys on an interactive
+                globe, and share them with the world — free, forever.
+              </p>
+              <Link href="/sign-up">
+                <Button className="cursor-pointer bg-white text-olive-800 hover:bg-olive-50 font-semibold px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-olive-800">
+                  Start your free Adventure Log
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 export const metadata = {
   title: 'Terms of Service — Adventure Log',
@@ -11,10 +12,11 @@ export default function TermsPage() {
       <div className="max-w-2xl mx-auto px-6 py-12">
         <Link
           href="/"
-          className="font-mono text-[11px] uppercase tracking-wider hover:underline"
+          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest)] rounded-sm"
           style={{ color: 'var(--color-muted-warm)' }}
         >
-          ← Home
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Home
         </Link>
 
         <p className="al-eyebrow mt-6 mb-2">Last updated · April 2026</p>

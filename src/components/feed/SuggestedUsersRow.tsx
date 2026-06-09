@@ -10,21 +10,21 @@ import type { SuggestedUser } from '@/app/(app)/feed/useFeedPageData'
 export const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: SuggestedUser; variant?: 'vertical' | 'horizontal' }) => {
   if (variant === 'horizontal') {
     return (
-      <div className="flex items-center gap-3 py-2 hover:bg-stone-50 dark:hover:bg-white/[0.03] -mx-1 px-1 rounded-lg transition-colors duration-200">
+      <div className="flex items-center gap-3 py-2 hover:bg-[color:var(--color-ivory-alt)] -mx-1 px-1 rounded-lg transition-colors duration-200">
         <Link href={`/u/${user.username}`}>
           <OptimizedAvatar
             src={user.avatar_url || undefined}
             alt={user.display_name || user.username}
             fallback={(user.display_name || user.username)[0]?.toUpperCase() || 'U'}
             size="sm"
-            className="ring-1 ring-stone-200 dark:ring-white/[0.08]"
+            className="ring-1 ring-[color:var(--color-line-warm)]"
           />
         </Link>
         <div className="flex-1 min-w-0">
-          <Link href={`/u/${user.username}`} className="text-sm font-semibold text-stone-900 dark:text-stone-100 hover:text-olive-600 transition-colors truncate block">
+          <Link href={`/u/${user.username}`} className="text-sm font-semibold text-[color:var(--color-ink)] hover:text-[color:var(--color-forest)] transition-colors truncate block">
             {user.display_name || user.username}
           </Link>
-          <p className="text-xs text-stone-500 dark:text-stone-400">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
+          <p className="text-xs text-[color:var(--color-muted-warm)]">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
         </div>
         <FollowButton userId={user.id} size="sm" showText={true} />
       </div>
@@ -33,19 +33,22 @@ export const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: S
 
   // Vertical card for mobile scrollable row
   return (
-    <div className="flex-shrink-0 w-36 bg-white dark:bg-[#111111] rounded-xl border border-stone-200/50 dark:border-white/10 p-3 text-center cursor-pointer hover:shadow-md hover:border-olive-200 dark:hover:border-olive-800/40 transition-all duration-200">
+    <div
+      className="flex-shrink-0 w-36 rounded-xl border border-[color:var(--color-line-warm)] p-3 text-center cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+      style={{ background: 'var(--card)' }}
+    >
       <Link href={`/u/${user.username}`} className="block">
         <OptimizedAvatar
           src={user.avatar_url || undefined}
           alt={user.display_name || user.username}
           fallback={(user.display_name || user.username)[0]?.toUpperCase() || 'U'}
           size="lg"
-          className="mx-auto mb-2 ring-2 ring-olive-100 dark:ring-olive-900/30"
+          className="mx-auto mb-2 ring-2 ring-[color:var(--color-forest-tint)]"
         />
-        <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
+        <p className="text-sm font-semibold text-[color:var(--color-ink)] truncate">
           {user.display_name || user.username}
         </p>
-        <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
+        <p className="text-xs text-[color:var(--color-muted-warm)] mb-2">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
       </Link>
       <FollowButton userId={user.id} size="sm" showText={true} className="w-full" />
     </div>
@@ -61,8 +64,8 @@ export const SuggestedUsersRow = memo(({ users }: { users: SuggestedUser[] }) =>
   return (
     <div className="mb-4 xl:hidden">
       <div className="flex items-center justify-between px-1 mb-2">
-        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300">Suggested Travelers</h3>
-        <Link href="/explore" className="text-xs text-olive-600 hover:text-olive-700 font-medium cursor-pointer transition-colors duration-200">See All</Link>
+        <p className="al-eyebrow">Suggested travelers</p>
+        <Link href="/explore" className="text-xs font-semibold text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-coral)] cursor-pointer transition-colors duration-200">See all</Link>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
         {users.map(user => (

@@ -64,14 +64,14 @@ export default function UploadPhotosPage() {
             <ArrowLeft className="h-4 w-4 mr-1.5" />
             <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-stone-900 dark:text-stone-100 truncate">
+          <h1 className="al-display text-lg sm:text-xl text-stone-900 dark:text-stone-100 truncate">
             Upload Photos
           </h1>
         </div>
         <Button
           onClick={uploadPhotos}
           disabled={isUploading || photos.length === 0 || photos.every(p => p.uploaded)}
-          className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white font-semibold disabled:opacity-50 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+          className="cursor-pointer al-btn-coral text-white font-semibold px-5 disabled:opacity-50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
           size="sm"
         >
           {isUploading ? (

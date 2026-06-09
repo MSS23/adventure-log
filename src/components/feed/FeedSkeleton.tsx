@@ -46,7 +46,8 @@ function FeedCardSkeleton({ index = 0 }: { index?: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
-      className="bg-white dark:bg-[#1B170E] rounded-2xl border border-stone-100 dark:border-white/[0.08] shadow-sm overflow-hidden"
+      style={{ background: 'var(--card)' }}
+      className="rounded-2xl border border-[color:var(--color-line-warm)] shadow-sm overflow-hidden"
     >
       {/* Header - User info */}
       <div className="flex items-center gap-3 p-4">
@@ -138,7 +139,8 @@ function CompactCardSkeleton({ index = 0 }: { index?: number }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.08, duration: 0.3 }}
-      className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] shadow-sm overflow-hidden"
+      style={{ background: 'var(--card)' }}
+      className="rounded-xl border border-[color:var(--color-line-warm)] shadow-sm overflow-hidden"
     >
       {/* Square image */}
       <div className="relative overflow-hidden aspect-square bg-gradient-to-br from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06]">
@@ -284,10 +286,11 @@ export function LoadingSpinner({
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className={cn(
-          'rounded-full border-2 border-stone-200 dark:border-white/[0.08] border-t-olive-500',
-          sizes[size]
-        )}
+        className={cn('rounded-full border-2', sizes[size])}
+        style={{
+          borderColor: 'var(--color-line-warm)',
+          borderTopColor: 'var(--color-forest)',
+        }}
         animate={{ rotate: 360 }}
         transition={{
           duration: 1,
@@ -309,7 +312,7 @@ export function LoadingMore({ className }: { className?: string }) {
       className={cn('flex items-center justify-center gap-2 py-6', className)}
     >
       <LoadingSpinner size="sm" />
-      <span className="text-sm text-stone-500 dark:text-stone-400">Loading more...</span>
+      <span className="text-sm text-[color:var(--color-ink-soft)]">Loading more...</span>
     </motion.div>
   )
 }
@@ -335,8 +338,9 @@ export function PullToRefreshIndicator({
         <LoadingSpinner size="md" />
       ) : (
         <motion.div
-          className="w-6 h-6 rounded-full border-2 border-olive-500"
+          className="w-6 h-6 rounded-full border-2"
           style={{
+            borderColor: 'var(--color-forest)',
             borderTopColor: 'transparent',
             rotate: `${progress * 360}deg`,
           }}

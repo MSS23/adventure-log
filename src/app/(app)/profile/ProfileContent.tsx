@@ -117,29 +117,26 @@ export default function ProfileContent({
       {/* Profile Hero — compact cover + avatar + bio + follow counts */}
       <ProfileHero profile={profile} isOwnProfile={true} followStats={followStats} />
 
-      {/* Travel snapshot — 3 clean stats, one row */}
+      {/* Travel snapshot — 3 clean stats, one row, color-differentiated */}
       <div
-        className="mt-5 mx-4 md:mx-0 p-5 rounded-2xl grid grid-cols-3 gap-2"
+        className="mt-5 mx-4 md:mx-0 p-2 rounded-2xl grid grid-cols-3 gap-2"
         style={{
           background: 'var(--card)',
           border: '1px solid var(--color-line-warm)',
         }}
       >
-        <div className="text-center">
-          <div
-            className="al-stat-value text-[28px]"
-            style={{ color: 'var(--color-coral)' }}
-          >
+        <div className="text-center py-3 rounded-xl" style={{ background: 'var(--color-coral-tint)' }}>
+          <div className="al-stat-value text-[28px]" style={{ color: 'var(--color-coral)' }}>
             {travelStats.countries}
           </div>
           <div className="al-eyebrow mt-1">Countries</div>
         </div>
-        <div className="text-center">
-          <div className="al-stat-value text-[28px]">{travelStats.cities}</div>
+        <div className="text-center py-3 rounded-xl" style={{ background: 'var(--color-forest-tint)' }}>
+          <div className="al-stat-value text-[28px]" style={{ color: 'var(--color-forest)' }}>{travelStats.cities}</div>
           <div className="al-eyebrow mt-1">Cities</div>
         </div>
-        <div className="text-center">
-          <div className="al-stat-value text-[28px]">{albums.length}</div>
+        <div className="text-center py-3 rounded-xl" style={{ background: 'var(--color-gold-tint)' }}>
+          <div className="al-stat-value text-[28px]" style={{ color: 'var(--color-gold)' }}>{albums.length}</div>
           <div className="al-eyebrow mt-1">Albums</div>
         </div>
       </div>

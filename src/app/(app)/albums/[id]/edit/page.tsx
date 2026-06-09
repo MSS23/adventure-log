@@ -387,8 +387,8 @@ export default function EditAlbumPage() {
         <Card className="border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30">
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-red-600 font-medium">Failed to load album</p>
-              <p className="text-red-500 text-sm mt-1">{error}</p>
+              <p className="text-red-600 dark:text-red-400 font-medium">Failed to load album</p>
+              <p className="text-red-500 dark:text-red-400 text-sm mt-1">{error}</p>
               <div className="mt-4 space-x-2">
                 <Button variant="outline" onClick={fetchAlbum}>
                   Try Again
@@ -442,8 +442,9 @@ export default function EditAlbumPage() {
         </button>
 
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">Edit Album</h1>
-          <p className="text-stone-600 dark:text-stone-400">Update your album details and settings</p>
+          <p className="al-eyebrow mb-1">Editing</p>
+          <h1 className="al-display text-2xl sm:text-3xl">Edit Album</h1>
+          <p className="text-sm text-[color:var(--color-muted-warm)] mt-1.5">Update your album details and settings</p>
         </div>
       </div>
 
@@ -466,7 +467,7 @@ export default function EditAlbumPage() {
                 placeholder="Enter album title"
               />
               {errors.title && (
-                <p className="text-sm text-red-600">{errors.title.message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.title.message}</p>
               )}
             </div>
 
@@ -480,7 +481,7 @@ export default function EditAlbumPage() {
                 rows={4}
               />
               {errors.description && (
-                <p className="text-sm text-red-600">{errors.description.message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.description.message}</p>
               )}
             </div>
           </CardContent>
@@ -509,7 +510,7 @@ export default function EditAlbumPage() {
                 className={errors.location_name ? 'border-red-500' : ''}
               />
               {errors.location_name && (
-                <p className="text-sm text-red-600">{errors.location_name.message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.location_name.message}</p>
               )}
               {albumLocation && (
                 <div className="p-2 bg-olive-50 dark:bg-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded text-sm">
@@ -532,7 +533,7 @@ export default function EditAlbumPage() {
                   className={errors.start_date ? 'border-red-500' : ''}
                 />
                 {errors.start_date && (
-                  <p className="text-sm text-red-600">{errors.start_date.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.start_date.message}</p>
                 )}
               </div>
 
@@ -546,7 +547,7 @@ export default function EditAlbumPage() {
                   className={errors.end_date ? 'border-red-500' : ''}
                 />
                 {errors.end_date && (
-                  <p className="text-sm text-red-600">{errors.end_date.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.end_date.message}</p>
                 )}
               </div>
             </div>
@@ -735,9 +736,12 @@ export default function EditAlbumPage() {
             </Button>
           </Link>
 
-          <Button type="submit" disabled={saving} className="cursor-pointer active:scale-[0.97] transition-all duration-200">
+          <Button type="submit" disabled={saving} className="al-btn-coral text-white px-6 cursor-pointer disabled:opacity-60 active:scale-[0.97] transition-all duration-200">
             {saving ? (
-              'Saving...'
+              <>
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Saving...
+              </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />

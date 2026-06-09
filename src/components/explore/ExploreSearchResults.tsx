@@ -6,6 +6,7 @@ import { Loader2, MapPin } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlbumFavoriteButton } from '@/components/ui/favorite-button'
 import { log } from '@/lib/utils/logger'
@@ -144,9 +145,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[color:var(--color-forest-tint)]">
           <MapPin className="h-8 w-8" style={{ color: 'var(--color-forest)' }} />
         </div>
-        <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">No results found</h3>
+        <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">
+          No matches for &ldquo;{query.trim()}&rdquo;
+        </h3>
         <p className="text-[color:var(--color-ink-soft)]">
-          Try searching for different keywords, locations, or usernames
+          Try a different place, person, or username — or check your spelling.
         </p>
       </div>
     )
@@ -170,7 +173,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                 style={{ background: 'var(--card)' }}
               >
                 <Avatar className="h-16 w-16 mb-3">
-                  <AvatarImage src={user.avatar_url} />
+                  <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={user.display_name || user.username} />
                   <AvatarFallback className="text-xl font-bold" style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}>
                     {user.display_name?.[0] || user.username?.[0] || 'U'}
                   </AvatarFallback>
@@ -239,7 +242,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                       {albumUser && (
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
-                            <AvatarImage src={albumUser.avatar_url} />
+                            <AvatarImage src={getAvatarUrl(albumUser.avatar_url, albumUser.username)} alt={albumUser.display_name || albumUser.username} />
                             <AvatarFallback className="text-xs font-bold" style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}>
                               {albumUser.display_name?.[0] || 'U'}
                             </AvatarFallback>

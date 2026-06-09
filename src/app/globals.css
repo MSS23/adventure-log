@@ -384,6 +384,16 @@
     }
   }
 
+  /* Install banner sits clear of the mobile dock + FAB; bottom-anchored on desktop */
+  .install-banner-position {
+    bottom: calc(8.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 1024px) {
+    .install-banner-position {
+      bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
   .fab-position {
     bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
   }

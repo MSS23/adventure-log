@@ -128,11 +128,11 @@ export function InstallBanner() {
   }
 
   const confettiColors = [
-    'bg-olive-400',
-    'bg-olive-400',
-    'bg-emerald-400',
-    'bg-olive-400',
-    'bg-olive-400'
+    'bg-[color:var(--color-coral)]',
+    'bg-[color:var(--color-gold)]',
+    'bg-[color:var(--color-forest)]',
+    'bg-[color:var(--color-coral-soft)]',
+    'bg-[color:var(--color-gold-soft)]'
   ]
 
   return (
@@ -158,7 +158,7 @@ export function InstallBanner() {
 
               {/* Success checkmark */}
               <motion.div
-                className="w-16 h-16 bg-olive-500 rounded-full flex items-center justify-center shadow-lg"
+                className="w-16 h-16 bg-[color:var(--color-forest)] rounded-full flex items-center justify-center shadow-lg"
                 initial={{ scale: 0 }}
                 animate={{ scale: [0, 1.2, 1] }}
                 transition={{ duration: 0.4, type: 'spring' as const }}
@@ -169,13 +169,13 @@ export function InstallBanner() {
 
             {/* Success message */}
             <motion.div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-16 bg-white dark:bg-[#1B170E] rounded-xl shadow-xl px-6 py-3"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-16 al-card px-6 py-3"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <p className="text-lg font-semibold text-stone-900 dark:text-stone-100">App Installed!</p>
-              <p className="text-sm text-stone-500 dark:text-stone-400">Find it on your home screen</p>
+              <p className="text-lg font-semibold text-[color:var(--color-ink)]">App installed</p>
+              <p className="text-sm text-[color:var(--color-muted-warm)]">Find it on your home screen</p>
             </motion.div>
           </motion.div>
         )}
@@ -185,7 +185,7 @@ export function InstallBanner() {
       <AnimatePresence mode="wait">
         {showBanner && shouldShowBanner && (
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-safe"
+            className="fixed left-0 right-0 z-[45] px-4 install-banner-position"
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 100 }}
@@ -193,7 +193,7 @@ export function InstallBanner() {
           >
             <div className="max-w-lg mx-auto">
               <motion.div
-                className="bg-gradient-to-r from-olive-600 to-olive-600 rounded-2xl shadow-xl p-4 text-white"
+                className="bg-[color:var(--color-forest)] rounded-2xl shadow-xl p-4 text-white"
                 layout={!prefersReducedMotion}
               >
                 <AnimatePresence mode="wait">
@@ -232,7 +232,7 @@ export function InstallBanner() {
                               <Share className="h-4 w-4" />
                               <span className="font-medium">Tap the Share button</span>
                             </div>
-                            <p className="text-xs text-olive-100 mt-0.5">
+                            <p className="text-xs text-white/70 mt-0.5">
                               Located at the bottom of your Safari browser
                             </p>
                           </div>
@@ -252,7 +252,7 @@ export function InstallBanner() {
                               <PlusSquare className="h-4 w-4" />
                               <span className="font-medium">Add to Home Screen</span>
                             </div>
-                            <p className="text-xs text-olive-100 mt-0.5">
+                            <p className="text-xs text-white/70 mt-0.5">
                               Scroll down and tap this option
                             </p>
                           </div>
@@ -272,7 +272,7 @@ export function InstallBanner() {
                               <Check className="h-4 w-4" />
                               <span className="font-medium">Tap Add</span>
                             </div>
-                            <p className="text-xs text-olive-100 mt-0.5">
+                            <p className="text-xs text-white/70 mt-0.5">
                               Confirm to add the app to your home screen
                             </p>
                           </div>
@@ -281,9 +281,9 @@ export function InstallBanner() {
 
                       <Button
                         onClick={handleDismiss}
-                        className="w-full bg-white text-olive-700 hover:bg-olive-50 font-semibold"
+                        className="w-full bg-white text-[color:var(--color-forest-deep)] hover:bg-white/90 font-semibold"
                       >
-                        Got it!
+                        Got it
                       </Button>
                     </motion.div>
                   ) : (
@@ -304,15 +304,15 @@ export function InstallBanner() {
                       >
                         <div className="relative">
                           <Smartphone className="h-8 w-8" />
-                          <Globe className="h-4 w-4 absolute -bottom-1 -right-1 text-olive-200" />
+                          <Globe className="h-4 w-4 absolute -bottom-1 -right-1 text-[color:var(--color-gold-soft)]" />
                         </div>
                       </motion.div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-lg">Install Adventure Log</h3>
-                        <p className="text-sm text-olive-100 mt-1">
-                          Add to your home screen for quick access, offline support, and a native app experience.
+                        <p className="text-sm text-white/80 mt-1">
+                          Add to your home screen for quick access and offline support.
                         </p>
 
                         {/* Benefits */}
@@ -335,7 +335,7 @@ export function InstallBanner() {
                           <Button
                             onClick={handleInstall}
                             disabled={isInstalling}
-                            className="bg-white text-olive-700 hover:bg-olive-50 font-semibold px-4"
+                            className="bg-white text-[color:var(--color-forest-deep)] hover:bg-white/90 font-semibold px-4"
                           >
                             {isInstalling ? (
                               <>

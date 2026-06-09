@@ -108,6 +108,13 @@ export default function NewAlbumPage() {
           </button>
         </div>
 
+        {/* Plain-language explanation of the active mode */}
+        <p className="mt-2 text-[12px] text-[color:var(--color-muted-warm)] leading-relaxed">
+          {mode === 'quick'
+            ? 'Quick Post — drop a few photos and a place. We name it for you. Fastest way to share.'
+            : 'Full Album — add a title, story, dates and choose your cover. Best for trips worth remembering.'}
+        </p>
+
         {/* Import link */}
         <div className="mt-3">
           <Link

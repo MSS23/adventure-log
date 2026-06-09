@@ -13,11 +13,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Globe', href: '/globe', icon: Globe },
   { name: 'Feed', href: '/feed', icon: Home },
   { name: 'Explore', href: '/explore', icon: Compass },
-  { name: 'My Log', href: '/albums', icon: BookOpen },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Globe', href: '/globe', icon: Globe },
+  { name: 'Albums', href: '/albums', icon: BookOpen },
+  { name: 'You', href: '/profile', icon: User },
 ]
 
 export function BottomNavigation() {
@@ -27,7 +27,7 @@ export function BottomNavigation() {
     <MotionConfig reducedMotion="user">
       <nav
         aria-label="Mobile navigation"
-        className="fixed bottom-0 left-0 right-0 z-50 bg-[color:var(--color-ivory)]/85 dark:bg-[color:var(--color-ivory)]/85 backdrop-blur-xl border-t border-[color:var(--color-line-warm)] lg:hidden safe-area-pb"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[color:var(--color-ivory)]/90 backdrop-blur-xl border-t border-[color:var(--color-line-warm)] lg:hidden safe-area-pb"
       >
         <div className="flex items-center justify-around px-2 py-1.5">
           {navItems.map((item) => {
@@ -52,6 +52,14 @@ export function BottomNavigation() {
                 aria-label={item.name}
                 aria-current={isActive ? 'page' : undefined}
               >
+                {isActive && (
+                  <motion.span
+                    layoutId="bottom-nav-pill"
+                    className="absolute inset-x-1 inset-y-0.5 rounded-xl bg-[color:var(--color-forest-tint)]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                    aria-hidden
+                  />
+                )}
                 <motion.div
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 22 }}
@@ -61,18 +69,10 @@ export function BottomNavigation() {
                     className="h-5 w-5"
                     strokeWidth={isActive ? 2.3 : 1.6}
                   />
-                  {isActive && (
-                    <motion.span
-                      layoutId="bottom-nav-indicator"
-                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[color:var(--color-forest)]"
-                      transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-                      aria-hidden
-                    />
-                  )}
                 </motion.div>
                 <span
                   className={cn(
-                    'text-[11px] mt-1 transition-all duration-200',
+                    'relative text-[11px] mt-1 transition-all duration-200',
                     isActive ? 'font-semibold' : 'font-medium',
                   )}
                 >

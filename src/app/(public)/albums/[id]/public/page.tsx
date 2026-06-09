@@ -199,10 +199,10 @@ export default function PublicAlbumPage() {
             {error || 'This album may have been deleted or doesn\'t exist.'}
           </p>
           <div className="flex justify-center gap-3">
-            <Link href="/explore">
+            <Link href="/discover">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-                  Explore Albums
+                  Explore the globe
                 </Button>
               </motion.div>
             </Link>
@@ -251,8 +251,9 @@ export default function PublicAlbumPage() {
         longitude={album.longitude}
       />
 
-      {/* Floating Back Button */}
-      <Link href="/explore" className="fixed top-4 left-4 z-50">
+      {/* Floating Explore Button — /discover is the public surface
+          (in-app /explore requires auth, so logged-out visitors get bounced). */}
+      <Link href="/discover" className="fixed top-4 left-4 z-50">
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

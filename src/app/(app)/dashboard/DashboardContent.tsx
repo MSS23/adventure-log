@@ -16,6 +16,8 @@ import {
   Book,
   Star,
   Image as ImageIcon,
+  Camera,
+  Share2,
 } from 'lucide-react'
 import { MemoryLaneCard } from '@/components/memories/MemoryLaneCard'
 import { MotionList, MotionItem, MotionReveal } from '@/components/animations/MotionList'
@@ -101,6 +103,11 @@ export default function DashboardContent({
     .toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
     .replace(',', ' ·')
 
+  // First-run: a brand-new account with nothing logged yet. We keep the
+  // approved hero but swap the body for a focused, single-CTA onboarding so
+  // the page never reads as a half-empty dashboard full of dead links.
+  const isFirstRun = stats.albums === 0
+
   return (
     <MotionConfig reducedMotion="user">
       <div
@@ -114,7 +121,7 @@ export default function DashboardContent({
               <div>
                 <p className="al-eyebrow mb-1">{dateLabel}</p>
                 <h1 className="al-display text-4xl md:text-5xl">
-                  Welcome back, {firstName}.
+                  {isFirstRun ? `Welcome, ${firstName}.` : `Welcome back, ${firstName}.`}
                 </h1>
               </div>
             </div>
@@ -273,21 +280,32 @@ export default function DashboardContent({
             </div>
           </motion.section>
 
+          {isFirstRun ? (
+            <FirstRunGuide />
+          ) : (
+            <>
           {/* Quick access tile row */}
-          <MotionList className="grid grid-cols-2 md:grid-cols-4 gap-3" stagger={0.06}>
-            <MotionItem>
-              <QuickTile href="/albums" icon={<ImageIcon className="h-4 w-4" />} label="Albums" />
-            </MotionItem>
-            <MotionItem>
-              <QuickTile href="/passport" icon={<Book className="h-4 w-4" />} label="Passport" />
-            </MotionItem>
-            <MotionItem>
-              <QuickTile href="/wrapped" icon={<Sparkles className="h-4 w-4" />} label="Wrapped" />
-            </MotionItem>
-            <MotionItem>
-              <QuickTile href="/wishlist" icon={<Star className="h-4 w-4" />} label="Wishlist" />
-            </MotionItem>
-          </MotionList>
+          <section aria-labelledby="quick-access-heading">
+            <MotionReveal>
+              <p id="quick-access-heading" className="al-eyebrow mb-3">
+                Jump back in
+              </p>
+            </MotionReveal>
+            <MotionList className="grid grid-cols-2 md:grid-cols-4 gap-3" stagger={0.06}>
+              <MotionItem>
+                <QuickTile href="/albums" icon={<ImageIcon className="h-4 w-4" />} label="Albums" />
+              </MotionItem>
+              <MotionItem>
+                <QuickTile href="/passport" icon={<Book className="h-4 w-4" />} label="Passport" />
+              </MotionItem>
+              <MotionItem>
+                <QuickTile href="/wrapped" icon={<Sparkles className="h-4 w-4" />} label="Wrapped" />
+              </MotionItem>
+              <MotionItem>
+                <QuickTile href="/wishlist" icon={<Star className="h-4 w-4" />} label="Wishlist" />
+              </MotionItem>
+            </MotionList>
+          </section>
 
           {/* On this day */}
           <MotionReveal delay={0.15}>
@@ -369,6 +387,8 @@ export default function DashboardContent({
               </MotionList>
             )}
           </section>
+            </>
+          )}
         </div>
       </div>
     </MotionConfig>
@@ -407,6 +427,158 @@ function QuickTile({
       </span>
       <ArrowRight className="h-3 w-3 text-[color:var(--color-muted-warm)] transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[color:var(--color-coral)]" />
     </Link>
+  )
+}
+
+// Brand-new account: explain the core loop in one glance, give one obvious
+// primary action, and offer a few low-friction starting points.
+function FirstRunGuide() {
+  const loop = [
+    {
+      icon: <Camera className="h-5 w-5" strokeWidth={1.8} />,
+      title: 'Log a trip',
+      body: 'Add photos, a place, and a date. That’s an album.',
+    },
+    {
+      icon: <GlobeIcon className="h-5 w-5" strokeWidth={1.8} />,
+      title: 'See it on your globe',
+      body: 'Every album drops a pin on your own 3D world.',
+    },
+    {
+      icon: <Share2 className="h-5 w-5" strokeWidth={1.8} />,
+      title: 'Share the journey',
+      body: 'Build a passport, get your year Wrapped, share it.',
+    },
+  ]
+
+  const starters = [
+    'A weekend city break',
+    'Your last big trip',
+    'The place you call home',
+  ]
+
+  return (
+    <div className="space-y-8">
+      {/* Core-loop explainer */}
+      <section aria-labelledby="how-it-works-heading">
+        <MotionReveal>
+          <p className="al-eyebrow mb-1">How Adventure Log works</p>
+          <h3
+            id="how-it-works-heading"
+            className="font-heading text-2xl font-semibold mb-1"
+            style={{ letterSpacing: '-0.02em' }}
+          >
+            Three steps to your map of the world
+          </h3>
+          <p className="text-sm text-[color:var(--color-muted-warm)] mb-5 max-w-xl">
+            Turn your travels into a living atlas. It starts with a single album.
+          </p>
+        </MotionReveal>
+        <MotionList className="grid grid-cols-1 sm:grid-cols-3 gap-4" stagger={0.08}>
+          {loop.map((step, i) => (
+            <MotionItem key={step.title}>
+              <div
+                className="h-full p-5 rounded-2xl"
+                style={{
+                  background: 'var(--card)',
+                  border: '1px solid var(--color-line-warm)',
+                }}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span
+                    className="flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0"
+                    style={{
+                      background: 'var(--color-coral-tint)',
+                      color: 'var(--color-coral)',
+                    }}
+                  >
+                    {step.icon}
+                  </span>
+                  <span
+                    className="font-mono text-[11px] tracking-[0.12em] uppercase"
+                    style={{ color: 'var(--color-muted-warm)' }}
+                  >
+                    Step {i + 1}
+                  </span>
+                </div>
+                <h4 className="font-heading text-[16px] font-semibold leading-tight mb-1">
+                  {step.title}
+                </h4>
+                <p className="text-[13px] leading-relaxed text-[color:var(--color-muted-warm)]">
+                  {step.body}
+                </p>
+              </div>
+            </MotionItem>
+          ))}
+        </MotionList>
+      </section>
+
+      {/* Primary CTA — the one obvious next action */}
+      <MotionReveal delay={0.1}>
+        <div
+          className="relative overflow-hidden rounded-2xl p-7 sm:p-8 text-center"
+          style={{
+            background: 'var(--color-coral-tint)',
+            border: '1px solid var(--color-line-warm)',
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+            className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
+            style={{ background: 'var(--color-coral)', color: '#fff' }}
+          >
+            <MapPin className="h-5 w-5" strokeWidth={1.8} />
+          </motion.div>
+          <h3
+            className="font-heading text-2xl font-semibold mb-1"
+            style={{ letterSpacing: '-0.02em' }}
+          >
+            Drop your first pin
+          </h3>
+          <p className="text-sm text-[color:var(--color-muted-warm)] mb-5 max-w-md mx-auto">
+            Your world map is empty right now. Create one album and watch it come alive.
+          </p>
+          <motion.div whileTap={{ scale: 0.96 }} className="inline-block">
+            <Link
+              href="/albums/new"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold transition-shadow hover:shadow-[0_10px_28px_rgba(226,85,58,0.45)]"
+              style={{ background: 'var(--color-coral)', color: '#fff' }}
+            >
+              <Calendar className="h-4 w-4" strokeWidth={1.8} />
+              Create your first album
+            </Link>
+          </motion.div>
+
+          {/* Low-friction starting points */}
+          <div className="mt-6">
+            <p
+              className="font-mono text-[10px] tracking-[0.12em] uppercase mb-2.5"
+              style={{ color: 'var(--color-muted-warm)' }}
+            >
+              Not sure where to start? Try
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {starters.map((s) => (
+                <Link
+                  key={s}
+                  href="/albums/new"
+                  className="px-3.5 py-2 rounded-full text-[12.5px] font-medium transition-colors"
+                  style={{
+                    background: 'var(--card)',
+                    border: '1px solid var(--color-line-warm)',
+                    color: 'var(--color-ink)',
+                  }}
+                >
+                  {s}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </MotionReveal>
+    </div>
   )
 }
 

@@ -64,9 +64,12 @@ export default function UploadPhotosPage() {
             <ArrowLeft className="h-4 w-4 mr-1.5" />
             <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="al-display text-lg sm:text-xl text-stone-900 dark:text-stone-100 truncate">
-            Upload Photos
-          </h1>
+          <div className="min-w-0">
+            <p className="al-eyebrow">Add photos</p>
+            <h1 className="al-display text-lg sm:text-xl text-stone-900 dark:text-stone-100 truncate">
+              Upload Photos
+            </h1>
+          </div>
         </div>
         <Button
           onClick={uploadPhotos}

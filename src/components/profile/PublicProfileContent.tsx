@@ -111,6 +111,26 @@ export function PublicProfileContent({
     }
   }
 
+  // One-tap share: native share sheet on mobile (WhatsApp/Messages/etc.),
+  // clipboard copy + confirmation as the desktop fallback. This is the
+  // lowest-friction way for a visitor to pass the profile along.
+  const handleShareProfile = async () => {
+    const shareData = {
+      title: `${displayName} on Adventure Log`,
+      text: `Check out ${displayName}'s travels on Adventure Log 🌍`,
+      url: profileUrl,
+    }
+    if (typeof navigator !== 'undefined' && 'share' in navigator) {
+      try {
+        await navigator.share(shareData)
+        return
+      } catch {
+        // User cancelled or share unavailable — fall through to copy.
+      }
+    }
+    copyToClipboard(profileUrl, 'url')
+  }
+
   const stats = [
     {
       icon: Camera,
@@ -479,6 +499,17 @@ export function PublicProfileContent({
               Share This Profile
             </h2>
             <div className="bg-white dark:bg-[color:var(--card)] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm overflow-hidden">
+              {/* One-tap share — primary action */}
+              <div className="p-5 border-b border-stone-100 dark:border-stone-800">
+                <Button
+                  onClick={handleShareProfile}
+                  className="cursor-pointer w-full gap-2 bg-olive-600 hover:bg-olive-500 text-white rounded-xl py-6 text-base font-semibold shadow-md transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
+                >
+                  <Share2 className="h-5 w-5" />
+                  Share {displayName}&apos;s travels
+                </Button>
+              </div>
+
               {/* Copy profile URL */}
               <div className="p-5 border-b border-stone-100 dark:border-stone-800">
                 <p className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">

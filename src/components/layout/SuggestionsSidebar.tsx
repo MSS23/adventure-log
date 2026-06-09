@@ -11,7 +11,7 @@ export function SuggestionsSidebar() {
   if (!user || !profile) return null
 
   return (
-    <aside className="hidden xl:flex xl:w-[320px] flex-col fixed right-0 top-0 bottom-0 pt-8 z-30 bg-white dark:bg-[#1B170E]">
+    <aside className="hidden xl:flex xl:w-[320px] flex-col fixed right-0 top-0 bottom-0 pt-8 z-30 bg-[color:var(--color-ivory)] border-l border-[color:var(--color-line-warm)]">
       <div className="px-6 py-4 space-y-6 overflow-y-auto scrollbar-hide h-full">
         {/* User Profile Card */}
         <Link href="/profile" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -24,10 +24,10 @@ export function SuggestionsSidebar() {
             priority
           />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
+            <p className="text-sm font-semibold text-[color:var(--color-ink)] truncate">
               {profile.username}
             </p>
-            <p className="text-sm text-stone-500 dark:text-stone-400 truncate">
+            <p className="text-sm text-[color:var(--color-muted-warm)] truncate">
               {profile.display_name}
             </p>
           </div>
@@ -36,14 +36,14 @@ export function SuggestionsSidebar() {
         {/* Suggestions for You */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-stone-500 dark:text-stone-400">
-              Suggestions for You
+            <h3 className="al-eyebrow">
+              Suggestions for you
             </h3>
             <Link
               href="/search?mode=suggested"
-              className="text-xs font-semibold text-stone-900 dark:text-stone-100 hover:text-stone-700 dark:hover:text-stone-100"
+              className="text-xs font-semibold text-[color:var(--color-forest)] hover:text-[color:var(--color-forest-deep)]"
             >
-              See All
+              See all
             </Link>
           </div>
 
@@ -52,7 +52,7 @@ export function SuggestionsSidebar() {
 
         {/* Footer Links */}
         <div className="pt-4">
-          <div className="flex flex-wrap gap-2 text-xs text-stone-500 dark:text-stone-400 mb-3">
+          <div className="flex flex-wrap gap-2 text-xs text-[color:var(--color-muted-warm)] mb-3">
             <Link href="/privacy" className="hover:underline">
               Privacy
             </Link>
@@ -65,8 +65,8 @@ export function SuggestionsSidebar() {
               Settings
             </Link>
           </div>
-          <p className="text-xs text-stone-500 dark:text-stone-400">
-            © 2025 ADVENTURE LOG
+          <p className="text-xs text-[color:var(--color-muted-warm)]">
+            © 2025 Adventure Log
           </p>
         </div>
       </div>

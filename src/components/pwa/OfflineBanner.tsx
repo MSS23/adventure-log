@@ -54,9 +54,9 @@ export function OfflineBanner() {
     switch (connectionState) {
       case 'offline':
         return {
-          bg: 'bg-olive-500',
-          iconBg: 'bg-olive-600',
-          shadow: 'shadow-olive-500/25',
+          bg: 'bg-[color:var(--color-ink)]',
+          iconBg: 'bg-white/15',
+          shadow: 'shadow-[rgba(26,20,14,0.3)]',
           Icon: WifiOff,
           title: "You're offline",
           subtitle: 'Some features may be unavailable',
@@ -64,22 +64,22 @@ export function OfflineBanner() {
         }
       case 'reconnecting':
         return {
-          bg: 'bg-olive-500',
-          iconBg: 'bg-olive-600',
-          shadow: 'shadow-olive-500/25',
+          bg: 'bg-[color:var(--color-gold)]',
+          iconBg: 'bg-white/20',
+          shadow: 'shadow-[rgba(212,165,74,0.3)]',
           Icon: RefreshCw,
-          title: 'Reconnecting...',
+          title: 'Reconnecting…',
           subtitle: 'Restoring connection',
           showRefresh: false,
           iconSpin: true
         }
       case 'online':
         return {
-          bg: 'bg-green-500',
-          iconBg: 'bg-green-600',
-          shadow: 'shadow-[#4A5D23]/25',
+          bg: 'bg-[color:var(--color-forest)]',
+          iconBg: 'bg-white/15',
+          shadow: 'shadow-[rgba(74,93,35,0.3)]',
           Icon: wasOfflineRef.current ? Check : Wifi,
-          title: 'Back online!',
+          title: 'Back online',
           subtitle: 'All features are available',
           showRefresh: false
         }
@@ -148,8 +148,7 @@ export function OfflineBanner() {
                 <motion.button
                   onClick={handleRefresh}
                   className={cn(
-                    "p-2 rounded-lg transition-colors flex-shrink-0",
-                    connectionState === 'offline' ? "hover:bg-olive-600" : "hover:bg-current/20"
+                    "p-2 rounded-lg transition-colors flex-shrink-0 hover:bg-white/15"
                   )}
                   aria-label="Retry connection"
                   initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.8 }}

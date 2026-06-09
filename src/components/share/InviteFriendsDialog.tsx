@@ -86,7 +86,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
               </div>
               <h2 className="text-2xl font-bold mb-2">Invite Friends</h2>
               <p className="text-white/85 text-sm max-w-xs mx-auto">
-                Share your adventures and grow the community together
+                Travel is better together. Send a friend your link — they join free in seconds.
               </p>
             </div>
           </div>
@@ -148,8 +148,25 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
               </div>
             </div>
 
-            {/* Share Buttons */}
+            {/* Share Buttons — native share leads (lowest-friction, one tap
+                on mobile to WhatsApp/iMessage/etc.), then email + SMS. */}
             <div className="space-y-3">
+              {typeof navigator !== 'undefined' && 'share' in navigator && (
+                <Button
+                  onClick={handleNativeShare}
+                  variant="outline"
+                  className="w-full justify-start gap-3 py-6 border-olive-300 dark:border-olive-500/30 bg-olive-50/60 dark:bg-olive-500/10 hover:bg-olive-100 dark:hover:bg-olive-500/15"
+                >
+                  <div className="p-2 bg-olive-200/70 dark:bg-olive-500/25 rounded-lg">
+                    <Share2 className="h-5 w-5 text-olive-700 dark:text-olive-300" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="font-semibold text-stone-900 dark:text-stone-100">Share</div>
+                    <div className="text-xs text-stone-500 dark:text-stone-400">WhatsApp, Messages, and more</div>
+                  </div>
+                </Button>
+              )}
+
               <Button
                 onClick={handleShareEmail}
                 variant="outline"
@@ -160,7 +177,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                 </div>
                 <div className="text-left flex-1">
                   <div className="font-semibold text-stone-900 dark:text-stone-100">Email</div>
-                  <div className="text-xs text-stone-500 dark:text-stone-400">Send via email client</div>
+                  <div className="text-xs text-stone-500 dark:text-stone-400">Send via your email app</div>
                 </div>
               </Button>
 
@@ -177,22 +194,6 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                   <div className="text-xs text-stone-500 dark:text-stone-400">Share via SMS</div>
                 </div>
               </Button>
-
-              {typeof navigator !== 'undefined' && 'share' in navigator && (
-                <Button
-                  onClick={handleNativeShare}
-                  variant="outline"
-                  className="w-full justify-start gap-3 py-6 border-stone-300 dark:border-white/[0.14] hover:bg-stone-50 dark:hover:bg-white/[0.06]"
-                >
-                  <div className="p-2 bg-olive-100 dark:bg-olive-500/20 rounded-lg">
-                    <Share2 className="h-5 w-5 text-olive-600 dark:text-olive-300" />
-                  </div>
-                  <div className="text-left flex-1">
-                    <div className="font-semibold text-stone-900 dark:text-stone-100">More Options</div>
-                    <div className="text-xs text-stone-500 dark:text-stone-400">Share via other apps</div>
-                  </div>
-                </Button>
-              )}
             </div>
 
             {/* Benefits */}

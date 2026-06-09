@@ -40,27 +40,30 @@ export function PhotoUploadArea({ onFilesSelected, isUploading = false }: PhotoU
         </div>
       ) : (
         <>
-          <div className="w-14 h-14 rounded-full bg-olive-100 flex items-center justify-center mb-4">
-            <Cloud className="h-7 w-7 text-olive-600" />
+          <div className="w-14 h-14 rounded-full bg-olive-100 dark:bg-olive-950/40 flex items-center justify-center mb-4">
+            <Cloud className="h-7 w-7 text-olive-600 dark:text-olive-400" />
           </div>
 
           {isDragActive ? (
-            <p className="text-lg font-medium text-olive-700">Drop photos here</p>
+            <p className="text-lg font-medium text-olive-700 dark:text-olive-300">Drop photos here</p>
           ) : (
             <>
               <h3 className="text-lg font-medium text-stone-900 dark:text-stone-100 mb-2">
-                Drag & Drop Photos Here
+                Drag &amp; drop photos here
               </h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
-                or select from your computer
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-5">
+                or select them from your computer
               </p>
               <Button
                 type="button"
                 onClick={open}
-                className="bg-olive-500 hover:bg-olive-600 text-white font-medium rounded-md px-5 py-2"
+                className="al-btn-coral text-white font-semibold px-6 py-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
               >
-                Select Files
+                Select Photos
               </Button>
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-4">
+                JPEG, PNG, WebP or HEIC · up to 10&nbsp;MB each
+              </p>
             </>
           )}
         </>

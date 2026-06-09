@@ -311,8 +311,8 @@ export default function HomePage() {
                 Not just another travel app
               </h2>
               <p className="text-base text-stone-400 max-w-prose mx-auto leading-relaxed">
-                No competitor has a 3D globe. No competitor lets you export flyover videos.
-                No competitor shows your travel identity like this.
+                A 3D globe of everywhere you&apos;ve been. Cinematic flyover videos to share.
+                Your travel identity, beautifully captured. Nothing else does this.
               </p>
             </div>
 

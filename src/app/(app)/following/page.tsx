@@ -228,7 +228,7 @@ export default function FollowingPage() {
                 >
                   <Button
                     className="al-btn-coral mt-6 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
-                    onClick={() => router.push('/search?contentType=travelers')}
+                    onClick={() => router.push('/explore')}
                   >
                     Discover People
                   </Button>

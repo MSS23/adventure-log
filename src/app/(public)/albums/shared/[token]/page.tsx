@@ -165,10 +165,10 @@ export default function SharedAlbumPage() {
                 </Button>
               </motion.div>
             </Link>
-            <Link href="/explore">
+            <Link href="/discover">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button variant="outline" className="cursor-pointer border-white/30 text-white hover:bg-white/10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-                  Explore Albums
+                  Explore the globe
                 </Button>
               </motion.div>
             </Link>
@@ -194,8 +194,9 @@ export default function SharedAlbumPage() {
         longitude={album.longitude}
       />
 
-      {/* Floating Back Button */}
-      <Link href="/explore" className="fixed top-4 left-4 z-50">
+      {/* Floating Explore Button — keeps logged-out visitors inside the
+          funnel (the in-app /explore requires auth, so route to /discover). */}
+      <Link href="/discover" className="fixed top-4 left-4 z-50">
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -206,7 +207,7 @@ export default function SharedAlbumPage() {
             className="cursor-pointer bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 border border-white/20 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Explore
           </Button>
         </motion.div>
       </Link>

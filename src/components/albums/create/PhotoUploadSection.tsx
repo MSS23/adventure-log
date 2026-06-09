@@ -37,7 +37,6 @@ export function PhotoUploadSection({
   locationAutoExtracted,
   albumLocation,
   fileErrors,
-  mode,
   onDrop,
   onTakePhoto,
   onSelectFromGallery,
@@ -91,7 +90,7 @@ export function PhotoUploadSection({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2 px-3 py-2 bg-olive-50 border border-olive-200 rounded-lg text-sm text-olive-700"
+            className="flex items-center gap-2 px-3 py-2 bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800/40 rounded-lg text-sm text-olive-700 dark:text-olive-300"
           >
             <div className="h-4 w-4 border-2 border-olive-500 border-t-transparent rounded-full animate-spin" />
             Extracting location from photo GPS data...
@@ -106,7 +105,7 @@ export function PhotoUploadSection({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700"
+            className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 rounded-lg text-sm text-emerald-700 dark:text-emerald-300"
           >
             <MapPin className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">Location detected: {albumLocation.display_name?.split(',').slice(0, 2).join(',')}</span>
@@ -121,21 +120,26 @@ export function PhotoUploadSection({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-olive-50 border border-olive-200 rounded-lg p-3 text-sm"
+            className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-lg p-3 text-sm"
           >
-            <p className="font-medium text-olive-800 mb-1">Some files were rejected:</p>
-            <ul className="text-olive-700 text-xs space-y-0.5">
+            <p className="font-medium text-amber-800 dark:text-amber-300 mb-1">
+              A few photos couldn&apos;t be added:
+            </p>
+            <ul className="text-amber-700 dark:text-amber-400 text-xs space-y-0.5">
               {fileErrors.slice(0, 3).map((err, i) => (
                 <li key={i}>{err}</li>
               ))}
               {fileErrors.length > 3 && (
-                <li>...and {fileErrors.length - 3} more</li>
+                <li>…and {fileErrors.length - 3} more</li>
               )}
             </ul>
+            <p className="text-amber-700/80 dark:text-amber-400/80 text-xs mt-1.5">
+              Photos must be JPEG, PNG, WebP or GIF and under 10&nbsp;MB.
+            </p>
             <button
               type="button"
               onClick={onClearFileErrors}
-              className="text-olive-600 hover:text-olive-800 text-xs mt-2 underline cursor-pointer transition-all duration-200"
+              className="text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-200 text-xs mt-2 underline cursor-pointer transition-all duration-200"
             >
               Dismiss
             </button>
@@ -151,9 +155,9 @@ export function PhotoUploadSection({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {mode === 'full' && (
-              <p className="text-sm text-stone-600 mb-3">
-                Tap a photo to select it as your cover image.
+            {photos.length > 1 && (
+              <p className="text-sm text-stone-600 dark:text-stone-400 mb-3">
+                Tap a photo to make it your cover. The cover shows on your album and the globe.
               </p>
             )}
             <div className={cn(
@@ -213,13 +217,14 @@ export function PhotoUploadSection({
 
                   <button
                     type="button"
+                    aria-label={`Remove photo ${index + 1}`}
                     onClick={(e) => {
                       e.stopPropagation()
                       onRemovePhoto(index)
                     }}
-                    className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer active:scale-[0.9]"
+                    className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 cursor-pointer active:scale-[0.9] focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </motion.div>
               ))}

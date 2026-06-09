@@ -78,7 +78,7 @@ export function KeyboardShortcuts() {
       {/* Help Button - Bottom Left */}
       <button
         onClick={() => setShowHelp(true)}
-        className="hidden lg:flex fixed bottom-6 left-6 z-40 h-10 w-10 rounded-full bg-stone-800 hover:bg-stone-700 text-white shadow-lg items-center justify-center transition-all hover:scale-110"
+        className="hidden lg:flex fixed bottom-6 left-6 z-40 h-10 w-10 rounded-full bg-[color:var(--color-ink)] hover:bg-[color:var(--color-ink-soft)] text-[color:var(--color-ivory)] shadow-lg items-center justify-center transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]/60"
         title="Keyboard Shortcuts (?)"
       >
         <Command className="h-5 w-5" />

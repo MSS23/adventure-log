@@ -11,7 +11,8 @@ import {
   LogOut,
   Map as MapIcon,
   Settings,
-  Book,
+  BookOpen,
+  Plus,
   ChevronRight,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -32,10 +33,10 @@ const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
 const mainNavItems: NavItem[] = [
   { name: 'Feed', href: '/feed', icon: Home },
-  { name: 'Home', href: '/dashboard', icon: Compass },
+  { name: 'Explore', href: '/explore', icon: Compass },
   { name: 'Globe', href: '/globe', icon: Globe },
+  { name: 'Albums', href: '/albums', icon: BookOpen },
   { name: 'Trips', href: '/trips', icon: MapIcon },
-  { name: 'You', href: '/profile', icon: Book },
 ]
 
 const bottomNavItems: NavItem[] = [
@@ -220,6 +221,22 @@ export function Sidebar() {
                   est. 2025
                 </div>
               </div>
+            </Link>
+          </motion.div>
+
+          {/* Primary action — create a new album */}
+          <motion.div
+            className="px-3 pb-3"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: EDITORIAL_EASE, delay: 0.05 }}
+          >
+            <Link
+              href="/albums/new"
+              className="al-btn-accent flex items-center justify-center gap-2 w-full px-4 py-2.5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-ivory)]"
+            >
+              <Plus className="h-[18px] w-[18px]" strokeWidth={2.2} />
+              New album
             </Link>
           </motion.div>
 

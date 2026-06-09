@@ -8,6 +8,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { FeedItem, type FeedAlbum } from '@/components/feed/FeedPost'
 import { FeedSkeleton } from '@/components/ui/skeleton-screens'
 import { SuggestedUsersRow } from '@/components/feed/SuggestedUsersRow'
+import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { useSuggestedUsers } from '@/app/(app)/feed/useFeedPageData'
 import { MemoryLaneCard } from '@/components/memories/MemoryLaneCard'
 import { Button } from '@/components/ui/button'
@@ -242,26 +243,25 @@ export default function FeedPage() {
           <p className="al-eyebrow mb-3">Travelers to follow</p>
           <div className="flex gap-4 overflow-x-auto -mx-4 px-4 scrollbar-hide">
             {suggestedUsers.slice(0, 7).map((u) => {
-              const initial = (u.display_name || u.username || 'U')[0]?.toUpperCase() || 'U'
+              const name = u.display_name || u.username || 'Explorer'
               return (
                 <Link
                   key={u.id}
                   href={`/u/${u.username}`}
                   className="flex flex-col items-center gap-1.5 min-w-[60px] group"
+                  aria-label={`View ${name}'s profile`}
                 >
-                  <div
-                    className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-white font-semibold text-[15px] transition-transform group-hover:-translate-y-0.5"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, var(--color-forest) 0%, var(--color-forest-soft) 100%)',
-                      boxShadow: '0 2px 8px rgba(74,93,35,0.18)',
-                    }}
-                    aria-hidden
-                  >
-                    {initial}
-                  </div>
+                  <span className="transition-transform group-hover:-translate-y-0.5">
+                    <OptimizedAvatar
+                      src={u.avatar_url || undefined}
+                      alt={name}
+                      fallback={name[0]?.toUpperCase() || 'U'}
+                      size="lg"
+                      className="ring-2 ring-[color:var(--color-forest-tint)]"
+                    />
+                  </span>
                   <span className="text-[11px] font-medium text-[color:var(--color-ink-soft)] truncate max-w-[60px] text-center">
-                    {(u.display_name || u.username || '').split(' ')[0]}
+                    {name.split(' ')[0]}
                   </span>
                 </Link>
               )
@@ -364,23 +364,43 @@ function EmptyState({ mode }: { mode: FeedMode }) {
       </h3>
       <p className="text-[14px] leading-[1.6] text-[color:var(--color-ink-soft)] mb-7 max-w-sm mx-auto">
         {mode === 'following'
-          ? 'Follow a few travelers or post your own album — the feed fills as soon as someone you follow logs an adventure.'
+          ? 'Follow a few travelers to fill your feed — every adventure they log shows up here.'
           : 'Be the first to share a public adventure. Others will find it here once you post.'}
       </p>
       <div className="flex gap-3 justify-center">
-        <Button
-          asChild
-          className="rounded-full px-5 text-[13px] font-semibold"
-          style={{
-            background: 'var(--color-forest)',
-            color: 'var(--color-ivory)',
-          }}
-        >
-          <Link href="/albums/new">Create album</Link>
-        </Button>
-        <Button asChild variant="outline" className="rounded-full px-5 text-[13px]">
-          <Link href="/explore">Explore people</Link>
-        </Button>
+        {mode === 'following' ? (
+          <>
+            <Button
+              asChild
+              className="rounded-full px-5 text-[13px] font-semibold"
+              style={{
+                background: 'var(--color-forest)',
+                color: 'var(--color-ivory)',
+              }}
+            >
+              <Link href="/explore">Find people to follow</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full px-5 text-[13px]">
+              <Link href="/albums/new">Create album</Link>
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              asChild
+              className="rounded-full px-5 text-[13px] font-semibold"
+              style={{
+                background: 'var(--color-forest)',
+                color: 'var(--color-ivory)',
+              }}
+            >
+              <Link href="/albums/new">Create album</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full px-5 text-[13px]">
+              <Link href="/explore">Explore people</Link>
+            </Button>
+          </>
+        )}
       </div>
     </div>
   )

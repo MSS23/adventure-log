@@ -167,7 +167,7 @@ export function AlbumDetailsForm({
 
                 {/* Description */}
                 <FloatingTextarea
-                  label="Description"
+                  label="Description (optional)"
                   {...register('description')}
                   error={errors.description?.message}
                   maxLength={500}
@@ -176,7 +176,7 @@ export function AlbumDetailsForm({
 
                 {/* Memories & Stories */}
                 <FloatingTextarea
-                  label="Memories & Stories"
+                  label="Memories & Stories (optional)"
                   {...register('memories')}
                   error={errors.memories?.message}
                   maxLength={1000}
@@ -231,7 +231,9 @@ export function AlbumDetailsForm({
 
                 {/* Location */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">Location</label>
+                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">
+                    Location <span className="text-red-500">*</span>
+                  </label>
                   <LocationSearchInput
                     value={albumLocation}
                     onChange={(loc) => {
@@ -254,40 +256,37 @@ export function AlbumDetailsForm({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...transitions.natural, delay: 0.3 }}
-              className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-2"
+              className="flex flex-col gap-3 pt-2"
             >
+              {/* Single, honest primary action. The label reflects what will
+                  actually happen: with photos the album publishes; with none it
+                  saves as a draft you can finish later. */}
               <EnhancedButton
                 type="submit"
-                variant="outline"
+                variant="glow"
                 disabled={isSubmitting || !albumLocation}
-                loading={isSubmitting && photos.length === 0}
-                loadingText="Saving..."
-                className="order-2 sm:order-1"
+                loading={isSubmitting}
+                loadingText={photos.length === 0 ? 'Saving…' : 'Creating…'}
+                className="w-full sm:w-auto sm:self-end"
                 onClick={() => {
                   if (!currentTitle && suggestedTitle) {
                     setValue('title', suggestedTitle)
                   }
                 }}
               >
-                Save Draft
+                {photos.length === 0 ? 'Save as Draft' : 'Create Album'}
               </EnhancedButton>
 
-              {photos.length > 0 && (
-                <EnhancedButton
-                  type="submit"
-                  variant="glow"
-                  disabled={isSubmitting || !albumLocation}
-                  loading={isSubmitting}
-                  loadingText="Creating..."
-                  className="order-1 sm:order-2"
-                  onClick={() => {
-                    if (!currentTitle && suggestedTitle) {
-                      setValue('title', suggestedTitle)
-                    }
-                  }}
-                >
-                  Create Album
-                </EnhancedButton>
+              {/* Forgiving guidance instead of a silently-disabled button */}
+              {!albumLocation && (
+                <p className="text-xs text-[color:var(--color-muted-warm)] sm:text-right">
+                  Add a location to {photos.length === 0 ? 'save your draft' : 'create your album'}.
+                </p>
+              )}
+              {albumLocation && photos.length === 0 && (
+                <p className="text-xs text-[color:var(--color-muted-warm)] sm:text-right">
+                  No photos yet — we&apos;ll save this as a draft so you can add them later.
+                </p>
               )}
             </motion.div>
           </div>

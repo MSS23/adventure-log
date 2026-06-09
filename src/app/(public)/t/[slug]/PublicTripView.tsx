@@ -163,15 +163,16 @@ export default function PublicTripView({ trip, members, pins }: Props) {
             <div className="absolute inset-0 bg-gradient-to-br from-olive-800 via-olive-700 to-olive-900" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
             <div className="relative p-5">
-              <p className="al-display text-lg text-white mb-1.5">Plan your own trip</p>
+              <span className="al-eyebrow text-olive-200 mb-2 block">Like this trip?</span>
+              <p className="al-display text-lg text-white mb-1.5">Plan your next one together</p>
               <p className="text-sm text-white/85 leading-relaxed mb-4">
-                Plan, live-log, and remember trips together with friends on Adventure Log.
+                Map places with friends, live-log as you go, and turn every trip into a story worth sharing.
               </p>
               <Link
                 href="/sign-up"
-                className="inline-flex items-center gap-1.5 bg-white text-olive-800 hover:bg-olive-50 font-semibold text-sm px-5 py-2 rounded-lg shadow-sm transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-olive-800"
+                className="inline-flex items-center justify-center gap-1.5 bg-white text-olive-800 hover:bg-olive-50 font-semibold text-sm px-6 py-2.5 rounded-lg shadow-sm transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-olive-800"
               >
-                Start free
+                Start free — no credit card
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>

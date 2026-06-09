@@ -6,8 +6,9 @@ import { User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { Settings, Share2, MapPin } from 'lucide-react'
+import { Settings, Share2 } from 'lucide-react'
 import { AnimatedCounter } from '@/components/ui/animated-count'
+import { FollowButton } from '@/components/social/FollowButton'
 
 interface ProfileHeroProps {
   profile: User
@@ -137,16 +138,7 @@ export function ProfileHero({
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    className="rounded-full text-[12px] font-semibold"
-                    style={{
-                      background: 'var(--color-coral)',
-                      color: '#fff',
-                      boxShadow: '0 6px 18px rgba(226,85,58,0.33)',
-                    }}
-                  >
-                    Follow
-                  </Button>
+                  <FollowButton userId={profile.id} size="sm" showText />
                 )}
               </div>
             </motion.div>

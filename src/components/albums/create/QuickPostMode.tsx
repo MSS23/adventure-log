@@ -190,28 +190,41 @@ export function QuickPostMode({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...transitions.natural, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+            className="flex flex-col gap-2"
           >
-            <EnhancedButton
-              type="submit"
-              variant="glow"
-              disabled={isSubmitting || !albumLocation || photos.length === 0}
-              loading={isSubmitting}
-              loadingText="Posting..."
-              className="flex-1 sm:flex-none"
-            >
-              <Zap className="h-4 w-4 mr-1.5" />
-              Post
-            </EnhancedButton>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <EnhancedButton
+                type="submit"
+                variant="glow"
+                disabled={isSubmitting || !albumLocation || photos.length === 0}
+                loading={isSubmitting}
+                loadingText="Posting..."
+                className="flex-1 sm:flex-none"
+              >
+                <Zap className="h-4 w-4 mr-1.5" />
+                Post
+              </EnhancedButton>
 
-            <button
-              type="button"
-              onClick={onSwitchToFull}
-              className="flex items-center justify-center gap-1 text-sm text-stone-500 dark:text-stone-400 hover:text-olive-600 transition-all duration-200 py-2 cursor-pointer hover:translate-x-0.5"
-            >
-              Need more options? Switch to Full Album
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
+              <button
+                type="button"
+                onClick={onSwitchToFull}
+                className="flex items-center justify-center gap-1 text-sm text-stone-500 dark:text-stone-400 hover:text-olive-600 transition-all duration-200 py-2 cursor-pointer hover:translate-x-0.5"
+              >
+                Need more options? Switch to Full Album
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {/* Forgiving guidance when Post can't proceed yet */}
+            {!isSubmitting && (photos.length === 0 || !albumLocation) && (
+              <p className="text-xs text-[color:var(--color-muted-warm)]">
+                {photos.length === 0 && !albumLocation
+                  ? 'Add at least one photo and a place to post.'
+                  : photos.length === 0
+                    ? 'Add at least one photo to post.'
+                    : 'Add a place to post.'}
+              </p>
+            )}
           </motion.div>
         </div>
       </form>

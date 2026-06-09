@@ -146,16 +146,20 @@ export default function WrappedPage() {
   }, [])
 
   const handleShare = async () => {
-    const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" - check yours on Adventure Log!`
+    const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" — make yours free on Adventure Log:`
+    // Share a public landing surface, not this auth-gated /wrapped route —
+    // recipients who tap the link should reach a page they can act on.
+    const shareUrl =
+      typeof window !== 'undefined' ? window.location.origin : 'https://adventurelog.com'
     try {
       if (navigator.share) {
         await navigator.share({
           title: `${displayName}'s ${label} Travel Wrapped`,
           text: shareText,
-          url: window.location.href,
+          url: shareUrl,
         })
       } else {
-        await navigator.clipboard.writeText(shareText)
+        await navigator.clipboard.writeText(`${shareText} ${shareUrl}`)
         toast.success('Copied to clipboard!')
       }
     } catch {

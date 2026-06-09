@@ -132,31 +132,10 @@ export function PublicProfileContent({
   }
 
   const stats = [
-    {
-      icon: Camera,
-      value: albums.length,
-      label: 'Adventures',
-      color: 'text-olive-600',
-    },
-    {
-      icon: Globe,
-      value: countryCodes.length,
-      label: 'Countries',
-      color: 'text-olive-600',
-    },
-    {
-      icon: Users,
-      value: followerCount,
-      label: 'Followers',
-      color: 'text-olive-600',
-    },
-    {
-      icon: Plane,
-      value: formatDistance(totalDistance),
-      label: 'km traveled',
-      color: 'text-olive-600',
-      suffix: '',
-    },
+    { icon: Camera, value: albums.length, label: 'Adventures' },
+    { icon: Globe, value: countryCodes.length, label: 'Countries' },
+    { icon: Users, value: followerCount, label: 'Followers' },
+    { icon: Plane, value: formatDistance(totalDistance), label: 'km traveled' },
   ]
 
   return (
@@ -168,10 +147,12 @@ export function PublicProfileContent({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Gradient backdrop */}
-        <div className="absolute inset-0 bg-gradient-to-br from-olive-800 via-olive-700 to-olive-900" />
+        {/* Gradient backdrop — Field Notebook forest */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to bottom right, var(--color-forest-deep), var(--color-forest), var(--color-forest-deep))' }}
+        />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(74,93,35,0.4)_0%,_transparent_60%)]" />
         {/* Subtle pattern overlay */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
 
@@ -188,7 +169,7 @@ export function PublicProfileContent({
                   src={getAvatarUrl(user.avatar_url, user.username)}
                   alt={displayName}
                 />
-                <AvatarFallback className="text-3xl bg-gradient-to-br from-olive-400 to-olive-600 text-white font-heading">
+                <AvatarFallback className="text-3xl text-white font-heading" style={{ background: 'var(--color-coral)' }}>
                   {displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -203,7 +184,7 @@ export function PublicProfileContent({
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
               {displayName}
             </h1>
-            <p className="text-olive-200 text-lg mb-4">@{user.username}</p>
+            <p className="text-white/70 text-lg mb-4">@{user.username}</p>
             {user.bio && (
               <p className="text-white/80 max-w-prose mx-auto text-lg leading-relaxed">
                 {user.bio}
@@ -232,28 +213,22 @@ export function PublicProfileContent({
       <div className="max-w-4xl mx-auto px-6">
         {/* ───────── Stats Bar ───────── */}
         <motion.div
-          className="-mt-8 relative z-10 bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-lg border border-stone-200/60 dark:border-stone-800 p-6 mb-10"
+          className="-mt-8 relative z-10 al-card p-6 mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                className="text-center"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.4 + i * 0.08 }}
-              >
-                <stat.icon className={`h-5 w-5 mx-auto mb-2 ${stat.color}`} />
-                <p className="text-2xl md:text-3xl font-bold text-stone-900 dark:text-white tracking-tight">
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <stat.icon className="h-5 w-5 mx-auto mb-2" style={{ color: 'var(--color-forest)' }} />
+                <p className="al-stat-value text-2xl md:text-3xl">
                   {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                 </p>
-                <p className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wider mt-1">
+                <p className="al-caption uppercase tracking-wider mt-1">
                   {stat.label}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </motion.div>
@@ -266,7 +241,7 @@ export function PublicProfileContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.5 }}
           >
-            <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h2 className="al-eyebrow mb-4 flex items-center gap-2">
               <Compass className="h-4 w-4" />
               Travel Passport
             </h2>
@@ -274,21 +249,21 @@ export function PublicProfileContent({
               {countryCodes.slice(0, 30).map((code, i) => (
                 <motion.span
                   key={code}
-                  className="inline-flex items-center gap-1.5 bg-white dark:bg-[color:var(--card)] border border-stone-200 dark:border-stone-800 rounded-full px-3 py-1.5 text-sm shadow-sm hover:shadow-md hover:border-olive-300 dark:hover:border-olive-700 transition-all duration-200"
+                  className="inline-flex items-center gap-1.5 al-badge !normal-case !text-sm !py-1.5 !px-3"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.2, delay: 0.5 + i * 0.03 }}
                   title={code}
                 >
                   <span className="text-lg leading-none">{countryCodeToFlag(code)}</span>
-                  <span className="text-stone-600 dark:text-stone-300 font-medium">{code}</span>
+                  <span className="font-medium">{code}</span>
                 </motion.span>
               ))}
             </div>
           </motion.div>
         )}
 
-        {/* ───────── Travel Map Preview ───────── */}
+        {/* ───────── Travel Map entry point ───────── */}
         {!isPrivate && albums.some((a) => a.latitude && a.longitude) && (
           <motion.div
             className="mb-10"
@@ -296,79 +271,38 @@ export function PublicProfileContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.55 }}
           >
-            <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h2 className="al-eyebrow mb-4 flex items-center gap-2">
               <Map className="h-4 w-4" />
               Travel Map
             </h2>
-            <div className="relative bg-gradient-to-br from-olive-900 via-olive-800 to-olive-950 rounded-2xl overflow-hidden shadow-lg border border-stone-200/60 dark:border-stone-800">
-              {/* Map dots preview */}
-              <div className="relative h-48 md:h-64 overflow-hidden">
-                <div className="absolute inset-0 opacity-20">
-                  <svg viewBox="0 0 800 400" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                    {/* Simplified world map outline */}
-                    <ellipse cx="400" cy="200" rx="350" ry="170" fill="none" stroke="rgba(153,177,105,0.3)" strokeWidth="1" />
-                    <ellipse cx="400" cy="200" rx="250" ry="170" fill="none" stroke="rgba(153,177,105,0.15)" strokeWidth="1" />
-                    <line x1="50" y1="200" x2="750" y2="200" stroke="rgba(153,177,105,0.15)" strokeWidth="1" />
-                    <line x1="400" y1="30" x2="400" y2="370" stroke="rgba(153,177,105,0.15)" strokeWidth="1" />
-                  </svg>
+            <Link href={`/embed/${user.username}`} target="_blank">
+              <div className="al-card p-5 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: 'var(--color-forest-tint)' }}
+                >
+                  <Globe className="h-6 w-6" style={{ color: 'var(--color-forest)' }} />
                 </div>
-                {/* Plot album locations as dots */}
-                {albums
-                  .filter((a) => a.latitude && a.longitude)
-                  .slice(0, 20)
-                  .map((album, i) => {
-                    // Simple Mercator-ish projection onto the box
-                    const x = ((album.longitude! + 180) / 360) * 100
-                    const y = ((90 - album.latitude!) / 180) * 100
-                    return (
-                      <motion.div
-                        key={album.id}
-                        className="absolute w-3 h-3 rounded-full bg-olive-400 shadow-[0_0_8px_rgba(153,177,105,0.6)]"
-                        style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.6 + i * 0.05 }}
-                      />
-                    )
-                  })}
-                {/* Center text */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Globe className="h-8 w-8 mx-auto text-olive-400/60 mb-2" />
-                    <p className="text-olive-200/80 text-sm">
-                      {albums.filter((a) => a.latitude && a.longitude).length} locations pinned
-                    </p>
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-[color:var(--color-ink)]">View travel map</p>
+                  <p className="text-sm text-[color:var(--color-muted-warm)]">
+                    {albums.filter((a) => a.latitude && a.longitude).length} locations on the interactive 3D globe
+                  </p>
                 </div>
+                <ArrowRight className="h-5 w-5 shrink-0" style={{ color: 'var(--color-muted-warm)' }} />
               </div>
-
-              {/* CTA bar */}
-              <div className="px-5 py-4 bg-olive-900/50 border-t border-olive-700/30 flex items-center justify-between">
-                <p className="text-olive-200 text-sm">
-                  Explore the interactive 3D globe
-                </p>
-                <Link href={`/embed/${user.username}`} target="_blank">
-                  <Button
-                    size="sm"
-                    className="cursor-pointer bg-olive-500 hover:bg-olive-400 text-white rounded-xl gap-1.5 shadow-md transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
-                  >
-                    View Travel Map
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            </Link>
           </motion.div>
         )}
 
         {/* ───────── Albums Grid ───────── */}
         {isPrivate ? (
-          <div className="text-center py-16 bg-white dark:bg-[color:var(--card)] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm">
-            <Users className="h-12 w-12 mx-auto text-stone-300 dark:text-stone-600 mb-3" />
-            <p className="text-stone-500 dark:text-stone-400 font-medium">
+          <div className="al-card text-center py-16">
+            <Users className="h-12 w-12 mx-auto mb-3" style={{ color: 'var(--color-muted-warm)' }} />
+            <p className="font-medium text-[color:var(--color-ink)]">
               This account is private
             </p>
-            <p className="text-stone-400 dark:text-stone-500 text-sm mt-1">
+            <p className="text-[color:var(--color-muted-warm)] text-sm mt-1">
               Follow to see their adventures
             </p>
           </div>
@@ -379,7 +313,7 @@ export function PublicProfileContent({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.6 }}
           >
-            <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h2 className="al-eyebrow mb-4 flex items-center gap-2">
               <Camera className="h-4 w-4" />
               Adventures
             </h2>
@@ -392,9 +326,9 @@ export function PublicProfileContent({
                   transition={{ duration: 0.35, delay: 0.65 + i * 0.04 }}
                 >
                   <Link href={`/albums/${album.id}/public`}>
-                    <div className="group cursor-pointer bg-white dark:bg-[color:var(--card)] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg border border-stone-200/60 dark:border-stone-800 transition-all duration-300 hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-olive-500 focus-within:ring-offset-2">
+                    <div className="group cursor-pointer al-card overflow-hidden transition-all duration-300 hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[color:var(--color-coral)]">
                       {/* Image */}
-                      <div className="relative aspect-[4/3] overflow-hidden bg-stone-100 dark:bg-stone-900">
+                      <div className="relative aspect-[4/3] overflow-hidden" style={{ background: 'var(--color-ivory-alt)' }}>
                         {album.cover_photo_url ? (
                           <Image
                             src={getPhotoUrl(album.cover_photo_url) || ''}
@@ -404,8 +338,8 @@ export function PublicProfileContent({
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-olive-50 to-stone-100 dark:from-olive-950 dark:to-stone-900">
-                            <Globe className="h-10 w-10 text-olive-300 dark:text-olive-700" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Globe className="h-10 w-10" style={{ color: 'var(--color-muted-warm)' }} />
                           </div>
                         )}
                         {/* Subtle gradient overlay for readability */}
@@ -414,11 +348,11 @@ export function PublicProfileContent({
 
                       {/* Card content - always visible */}
                       <div className="p-4">
-                        <h3 className="font-semibold text-stone-900 dark:text-white text-base truncate mb-1.5">
+                        <h3 className="font-semibold text-[color:var(--color-ink)] text-base truncate mb-1.5">
                           {album.title}
                         </h3>
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 text-sm min-w-0">
+                          <div className="flex items-center gap-1.5 text-[color:var(--color-muted-warm)] text-sm min-w-0">
                             {album.country_code && (
                               <span className="text-base leading-none flex-shrink-0">
                                 {countryCodeToFlag(album.country_code)}
@@ -432,7 +366,7 @@ export function PublicProfileContent({
                             )}
                           </div>
                           {album.date_start && (
-                            <span className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1 flex-shrink-0">
+                            <span className="text-xs text-[color:var(--color-muted-warm)] flex items-center gap-1 flex-shrink-0">
                               <CalendarDays className="h-3 w-3" />
                               {formatDate(album.date_start)}
                             </span>
@@ -446,9 +380,9 @@ export function PublicProfileContent({
             </div>
           </motion.div>
         ) : (
-          <div className="text-center py-16 bg-white dark:bg-[color:var(--card)] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm mb-10">
-            <Globe className="h-12 w-12 mx-auto text-stone-300 dark:text-stone-600 mb-3" />
-            <p className="text-stone-500 dark:text-stone-400">No public adventures yet</p>
+          <div className="al-card text-center py-16 mb-10">
+            <Globe className="h-12 w-12 mx-auto mb-3" style={{ color: 'var(--color-muted-warm)' }} />
+            <p className="text-[color:var(--color-muted-warm)]">No public adventures yet</p>
           </div>
         )}
 
@@ -462,10 +396,13 @@ export function PublicProfileContent({
         >
           <div className="relative overflow-hidden rounded-2xl shadow-lg">
             {/* Forest gradient backdrop */}
-            <div className="absolute inset-0 bg-gradient-to-br from-olive-800 via-olive-700 to-olive-900" />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom right, var(--color-forest-deep), var(--color-forest), var(--color-forest-deep))' }}
+            />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
             <div className="relative px-6 py-10 md:px-10 md:py-12 text-center">
-              <span className="al-eyebrow text-olive-200 mb-3 block">Adventure Log</span>
+              <span className="al-eyebrow text-white/70 mb-3 block">Adventure Log</span>
               <h2 className="al-display text-2xl md:text-3xl text-white mb-3">
                 Map your own journey
               </h2>
@@ -474,12 +411,12 @@ export function PublicProfileContent({
                 your adventures — free, forever.
               </p>
               <Link href="/sign-up">
-                <Button className="cursor-pointer bg-white text-olive-800 hover:bg-olive-50 font-semibold px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-olive-800">
+                <Button className="cursor-pointer bg-white font-semibold px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white" style={{ color: 'var(--color-forest-deep)' }}>
                   Create your free profile
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </Link>
-              <p className="text-olive-200/80 text-xs mt-4">
+              <p className="text-white/70 text-xs mt-4">
                 No credit card · Set up in under a minute
               </p>
             </div>
@@ -494,16 +431,16 @@ export function PublicProfileContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.7 }}
           >
-            <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h2 className="al-eyebrow mb-4 flex items-center gap-2">
               <Share2 className="h-4 w-4" />
               Share This Profile
             </h2>
-            <div className="bg-white dark:bg-[color:var(--card)] rounded-2xl border border-stone-200/60 dark:border-stone-800 shadow-sm overflow-hidden">
+            <div className="al-card overflow-hidden">
               {/* One-tap share — primary action */}
-              <div className="p-5 border-b border-stone-100 dark:border-stone-800">
+              <div className="p-5 border-b border-[color:var(--color-line-warm)]">
                 <Button
                   onClick={handleShareProfile}
-                  className="cursor-pointer w-full gap-2 bg-olive-600 hover:bg-olive-500 text-white rounded-xl py-6 text-base font-semibold shadow-md transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
+                  className="al-btn-coral cursor-pointer w-full gap-2 py-6 text-base font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
                 >
                   <Share2 className="h-5 w-5" />
                   Share {displayName}&apos;s travels
@@ -511,23 +448,23 @@ export function PublicProfileContent({
               </div>
 
               {/* Copy profile URL */}
-              <div className="p-5 border-b border-stone-100 dark:border-stone-800">
-                <p className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">
+              <div className="p-5 border-b border-[color:var(--color-line-warm)]">
+                <p className="text-sm font-medium text-[color:var(--color-ink-soft)] mb-3">
                   Profile Link
                 </p>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-stone-50 dark:bg-stone-900 rounded-xl px-4 py-2.5 text-sm text-stone-600 dark:text-stone-400 truncate font-mono">
+                  <div className="flex-1 rounded-xl px-4 py-2.5 text-sm text-[color:var(--color-muted-warm)] truncate font-mono" style={{ background: 'var(--color-ivory-alt)' }}>
                     {profileUrl}
                   </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
                     onClick={() => copyToClipboard(profileUrl, 'url')}
                   >
                     {copiedUrl ? (
                       <>
-                        <Check className="h-4 w-4 text-olive-500" />
+                        <Check className="h-4 w-4" style={{ color: 'var(--color-forest)' }} />
                         Copied
                       </>
                     ) : (
@@ -542,25 +479,25 @@ export function PublicProfileContent({
 
               {/* Embed code */}
               <div className="p-5">
-                <p className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                <p className="text-sm font-medium text-[color:var(--color-ink-soft)] mb-1">
                   Embed on Your Website
                 </p>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mb-3">
+                <p className="text-xs text-[color:var(--color-muted-warm)] mb-3">
                   Add an interactive travel map to your blog or portfolio
                 </p>
                 <div className="flex items-start gap-2">
-                  <div className="flex-1 bg-stone-50 dark:bg-stone-900 rounded-xl px-4 py-2.5 text-xs text-stone-500 dark:text-stone-400 font-mono break-all leading-relaxed max-h-20 overflow-auto">
+                  <div className="flex-1 rounded-xl px-4 py-2.5 text-xs text-[color:var(--color-muted-warm)] font-mono break-all leading-relaxed max-h-20 overflow-auto" style={{ background: 'var(--color-ivory-alt)' }}>
                     {embedCode}
                   </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 mt-0.5 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 mt-0.5 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
                     onClick={() => copyToClipboard(embedCode, 'embed')}
                   >
                     {copiedEmbed ? (
                       <>
-                        <Check className="h-4 w-4 text-olive-500" />
+                        <Check className="h-4 w-4" style={{ color: 'var(--color-forest)' }} />
                         Copied
                       </>
                     ) : (
@@ -580,7 +517,7 @@ export function PublicProfileContent({
         <div className="mb-10 flex justify-center">
           <button
             onClick={() => setReportOpen(true)}
-            className="cursor-pointer flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200 py-2 px-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none min-h-[44px]"
+            className="cursor-pointer flex items-center gap-1.5 text-xs text-[color:var(--color-muted-warm)] hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200 py-2 px-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none min-h-[44px]"
           >
             <Flag className="h-3 w-3" />
             Report this profile
@@ -596,22 +533,23 @@ export function PublicProfileContent({
 
         {/* ───────── Footer ───────── */}
         <motion.footer
-          className="text-center py-10 border-t border-stone-200/60 dark:border-stone-800"
+          className="text-center py-10 border-t border-[color:var(--color-line-warm)]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.8 }}
         >
-          <p className="text-sm text-stone-400 dark:text-stone-500 mb-4">
+          <p className="text-sm text-[color:var(--color-muted-warm)] mb-4">
             Powered by{' '}
             <Link
               href="/"
-              className="text-olive-600 dark:text-olive-400 hover:text-olive-700 dark:hover:text-olive-300 font-semibold transition-colors"
+              className="font-semibold transition-colors"
+              style={{ color: 'var(--color-forest)' }}
             >
               Adventure Log
             </Link>
           </p>
           <Link href="/sign-up">
-            <Button className="cursor-pointer bg-gradient-to-r from-olive-600 to-olive-500 hover:from-olive-700 hover:to-olive-600 text-white px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
+            <Button className="al-btn-coral cursor-pointer px-8 py-2.5 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
               Start Your Adventure Log
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

@@ -8,7 +8,6 @@ import { log } from '@/lib/utils/logger'
 import {
   Grid,
   Trophy,
-  ChevronRight,
   BarChart3,
   Sparkles,
   Book,
@@ -141,16 +140,28 @@ export default function ProfileContent({
         </div>
       </div>
 
-      <div className="mt-6 mx-4 md:mx-0">
-        <p className="al-eyebrow mb-3">Your travel tools</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          <ToolTile href="/passport" icon={<Book className="h-4 w-4" />} label="Passport" hint="Stamps · Countries" />
-          <ToolTile href="/wrapped" icon={<Sparkles className="h-4 w-4" />} label="Wrapped" hint="Your year in motion" />
-          <ToolTile href="/wishlist" icon={<Star className="h-4 w-4" />} label="Wishlist" hint="Where to next" />
-          <ToolTile href="/saved" icon={<Bookmark className="h-4 w-4" />} label="Saved" hint="Bookmarked albums" />
-          <ToolTile href="/analytics" icon={<BarChart3 className="h-4 w-4" />} label="Analytics" hint="Your numbers" />
-          <ToolTile href="/travel-twins" icon={<UsersIcon className="h-4 w-4" />} label="Travel Twins" hint="Who shares your map" />
-        </div>
+      {/* Two things the user reaches for most — Passport & Wrapped */}
+      <div className="mt-6 mx-4 md:mx-0 grid grid-cols-2 gap-3">
+        <FeatureTile
+          href="/passport"
+          icon={<Book className="h-5 w-5" />}
+          label="Passport"
+          hint="Stamps & countries"
+        />
+        <FeatureTile
+          href="/wrapped"
+          icon={<Sparkles className="h-5 w-5" />}
+          label="Wrapped"
+          hint="Your year in motion"
+        />
+      </div>
+
+      {/* Secondary tools — quiet, grouped, still one tap away */}
+      <div className="mt-3 mx-4 md:mx-0 flex flex-wrap gap-2">
+        <QuietLink href="/wishlist" icon={<Star className="h-3.5 w-3.5" />} label="Wishlist" />
+        <QuietLink href="/saved" icon={<Bookmark className="h-3.5 w-3.5" />} label="Saved" />
+        <QuietLink href="/analytics" icon={<BarChart3 className="h-3.5 w-3.5" />} label="Analytics" />
+        <QuietLink href="/travel-twins" icon={<UsersIcon className="h-3.5 w-3.5" />} label="Travel Twins" />
       </div>
 
       {/* Simple tab pair — Adventures / Badges */}
@@ -215,7 +226,8 @@ export default function ProfileContent({
   )
 }
 
-function ToolTile({
+/** Primary entry point — Passport & Wrapped get prominence and breathing room. */
+function FeatureTile({
   href,
   icon,
   label,
@@ -229,33 +241,60 @@ function ToolTile({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-2.5 p-3 rounded-xl transition-all hover:-translate-y-0.5"
+      className="group flex flex-col gap-2.5 p-4 rounded-2xl transition-all hover:-translate-y-0.5"
       style={{
         background: 'var(--card)',
         border: '1px solid var(--color-line-warm)',
       }}
     >
       <span
-        className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
+        className="flex items-center justify-center w-10 h-10 rounded-xl"
         style={{
-          background: 'var(--color-ivory-alt)',
+          background: 'var(--color-coral-tint)',
           color: 'var(--color-coral)',
         }}
       >
         {icon}
       </span>
-      <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-semibold text-[color:var(--color-ink)] leading-tight truncate">
+      <div>
+        <div className="text-[15px] font-semibold text-[color:var(--color-ink)] leading-tight">
           {label}
         </div>
         <div
-          className="font-mono text-[10px] tracking-wide uppercase mt-0.5 truncate"
+          className="text-[12px] mt-0.5"
           style={{ color: 'var(--color-muted-warm)' }}
         >
           {hint}
         </div>
       </div>
-      <ChevronRight className="h-3 w-3 text-[color:var(--color-muted-warm)] group-hover:text-[color:var(--color-coral)] transition-colors flex-shrink-0" />
+    </Link>
+  )
+}
+
+/** Secondary tool — quiet pill, grouped below the primary pair. */
+function QuietLink({
+  href,
+  icon,
+  label,
+}: {
+  href: string
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="group inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[13px] font-medium transition-colors"
+      style={{
+        background: 'var(--card)',
+        border: '1px solid var(--color-line-warm)',
+        color: 'var(--color-ink-soft)',
+      }}
+    >
+      <span className="text-[color:var(--color-muted-warm)] group-hover:text-[color:var(--color-coral)] transition-colors">
+        {icon}
+      </span>
+      {label}
     </Link>
   )
 }

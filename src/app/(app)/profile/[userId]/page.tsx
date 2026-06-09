@@ -2,39 +2,24 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import {
   Camera,
   Lock,
   UserPlus,
   UserMinus,
   Loader2,
-  MapPin,
   Users
 } from 'lucide-react'
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Card, CardContent } from '@/components/ui/card'
-import { MeshGradient } from '@/components/ui/animated-gradient'
-import { GlassCard } from '@/components/ui/glass-card'
-import { AnimatedCounter } from '@/components/ui/animated-count'
-
-const EnhancedGlobe = dynamic(
-  () => import('@/components/globe/EnhancedGlobe').then((mod) => mod.EnhancedGlobe),
-  { ssr: false, loading: () => <div className="h-[600px] bg-stone-100 dark:bg-white/[0.06] animate-pulse rounded-lg" /> }
-)
-
-type TabType = 'albums' | 'map'
 
 export default function UserProfilePage() {
   const params = useParams()
@@ -45,7 +30,6 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isPrivate, setIsPrivate] = useState(false)
-  const [activeTab, setActiveTab] = useState<TabType>('albums')
   const supabase = useMemo(() => createClient(), [])
   const { getFollowStatus, followUser, unfollowUser } = useFollows()
   const [followStatus, setFollowStatus] = useState<'not_following' | 'following' | 'pending' | 'blocked'>('not_following')
@@ -313,22 +297,22 @@ export default function UserProfilePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[color:var(--background)]">
-        <div className="max-w-2xl mx-auto p-6 pt-20">
-          <Card className="border-stone-200 dark:border-[color:var(--color-line-warm)] dark:bg-[color:var(--card)]">
-            <CardContent className="pt-8 pb-8 text-center">
-              <div className="mx-auto w-16 h-16 bg-stone-100 dark:bg-white/[0.06] rounded-full flex items-center justify-center mb-4">
-                <MapPin className="h-8 w-8 text-stone-400" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2">User Not Found</h2>
-              <p className="text-stone-600 dark:text-stone-400 mb-6">{error}</p>
-              <div className="flex gap-3 justify-center">
-                <Button onClick={() => router.push('/feed')} className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500">
-                  Go to Feed
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="min-h-screen bg-[color:var(--background)]">
+        <div className="max-w-md mx-auto px-4 pt-24 text-center">
+          <div
+            className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"
+            style={{ background: 'var(--color-ivory-alt)' }}
+          >
+            <Users className="h-8 w-8" style={{ color: 'var(--color-muted-warm)' }} />
+          </div>
+          <h2 className="al-display text-2xl mb-2">User not found</h2>
+          <p className="text-sm text-[color:var(--color-muted-warm)] mb-6">{error}</p>
+          <Button
+            onClick={() => router.push('/feed')}
+            className="al-btn-coral cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
+          >
+            Go to Feed
+          </Button>
         </div>
       </div>
     )
@@ -338,345 +322,161 @@ export default function UserProfilePage() {
     return null
   }
 
+  const displayName = profile.display_name || profile.username || 'Anonymous User'
+  const isFriendsOnly = profile.privacy_level === 'friends'
+
+  const followButton = currentUser ? (
+    <Button
+      onClick={handleFollowToggle}
+      disabled={followLoading}
+      className={`cursor-pointer rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] ${
+        followStatus === 'following'
+          ? 'border border-[color:var(--color-line-warm)] bg-transparent text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]'
+          : 'al-btn-coral'
+      }`}
+    >
+      {followLoading ? (
+        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+      ) : followStatus === 'following' ? (
+        <UserMinus className="h-4 w-4 mr-2" />
+      ) : (
+        <UserPlus className="h-4 w-4 mr-2" />
+      )}
+      {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
+    </Button>
+  ) : null
+
   // Show private account message
   if (isPrivate) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[color:var(--background)]">
-        {/* Private Profile Content */}
-        <div className="max-w-4xl mx-auto p-6 pt-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Avatar */}
-                <Avatar className="h-24 w-24 md:h-32 md:w-32">
-                  <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={profile.display_name || profile.username || 'User'} />
-                  <AvatarFallback className="text-2xl">
-                    {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+      <div className="min-h-screen bg-[color:var(--background)]">
+        <div className="max-w-md mx-auto px-4 pt-10 pb-24 text-center">
+          <Avatar className="h-24 w-24 mx-auto ring-2 ring-[color:var(--color-line-warm)]">
+            <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={displayName} />
+            <AvatarFallback className="text-2xl text-white" style={{ background: 'var(--color-coral)' }}>
+              {displayName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
 
-                {/* Profile Info */}
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <h1 className="text-2xl font-bold">{profile.display_name || profile.username || 'Anonymous User'}</h1>
-                    {profile.username && profile.username !== profile.display_name && (
-                      <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">@{profile.username}</p>
-                    )}
-                  </div>
+          <h1 className="al-display text-2xl mt-4">{displayName}</h1>
+          {profile.username && (
+            <p className="text-sm text-[color:var(--color-muted-warm)] mt-1">@{profile.username}</p>
+          )}
+          {profile.bio && (
+            <p className="text-sm text-[color:var(--color-ink-soft)] mt-3 leading-relaxed">{profile.bio}</p>
+          )}
 
-                  {profile.bio && (
-                    <p className="text-stone-700 dark:text-stone-300">{profile.bio}</p>
-                  )}
-
-                  {currentUser && (
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        onClick={handleFollowToggle}
-                        disabled={followLoading}
-                        variant={followStatus === 'following' ? 'outline' : 'default'}
-                        className={`cursor-pointer rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] ${
-                          followStatus === 'following'
-                            ? "bg-white dark:bg-white/[0.08] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-900 dark:text-stone-100 border border-stone-300 dark:border-white/[0.14]"
-                            : "al-btn-coral"
-                        }`}
-                      >
-                        {followLoading ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : followStatus === 'following' ? (
-                          <UserMinus className="h-4 w-4 mr-2" />
-                        ) : (
-                          <UserPlus className="h-4 w-4 mr-2" />
-                        )}
-                        {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
-                      </Button>
-                    </div>
-                  )}
-
-                  <Badge variant="outline" className="gap-1 w-fit">
-                    {profile.privacy_level === 'friends' ? (
-                      <>
-                        <Users className="h-3 w-3" />
-                        Friends Only
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="h-3 w-3" />
-                        Private Account
-                      </>
-                    )}
-                  </Badge>
-
-                  <Card className="bg-olive-50 dark:bg-olive-950/30 border-olive-200 dark:border-olive-900/40">
-                    <CardContent className="pt-4 text-center">
-                      {profile.privacy_level === 'friends' ? (
-                        <>
-                          <Users className="h-12 w-12 mx-auto text-olive-600 mb-3" />
-                          <h3 className="font-semibold text-lg mb-2">Friends Only Account</h3>
-                          <p className="text-sm text-stone-700 dark:text-stone-300">
-                            Follow this account and wait for approval to see their albums and travel map.
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="h-12 w-12 mx-auto text-olive-600 mb-3" />
-                          <h3 className="font-semibold text-lg mb-2">This Account is Private</h3>
-                          <p className="text-sm text-stone-700 dark:text-stone-300">
-                            Follow this account and wait for approval to see their albums and travel map.
-                          </p>
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="al-card p-6 mt-6">
+            <div
+              className="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3"
+              style={{ background: 'var(--color-ivory-alt)' }}
+            >
+              {isFriendsOnly ? (
+                <Users className="h-6 w-6" style={{ color: 'var(--color-forest)' }} />
+              ) : (
+                <Lock className="h-6 w-6" style={{ color: 'var(--color-forest)' }} />
+              )}
+            </div>
+            <h2 className="font-semibold text-base text-[color:var(--color-ink)] mb-1">
+              {isFriendsOnly ? 'Friends-only account' : 'This account is private'}
+            </h2>
+            <p className="text-sm text-[color:var(--color-muted-warm)] mb-5">
+              Follow this account and wait for approval to see their adventures.
+            </p>
+            {followButton}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Mesh gradient background */}
-      <MeshGradient variant="subtle" className="fixed inset-0 -z-10" />
+    <div className="min-h-screen bg-[color:var(--background)]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24">
+        {/* ───────── Hero ───────── */}
+        <div className="al-card p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+            <Avatar className="h-24 w-24 shrink-0 ring-2 ring-[color:var(--color-line-warm)]">
+              <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={displayName} />
+              <AvatarFallback className="text-2xl text-white" style={{ background: 'var(--color-coral)' }}>
+                {displayName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
 
-      {/* Profile Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-          {/* Left Sidebar - Profile Info */}
-          <motion.div
-            className="lg:sticky lg:top-6 lg:self-start"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-          >
-            <GlassCard variant="frost" padding="none" hover="lift" className="overflow-hidden">
-              {/* Avatar */}
-              <div className="flex justify-center pt-6 pb-4">
-                <Avatar className="h-24 w-24 ring-4 ring-stone-100 dark:ring-white/[0.08]">
-                  <AvatarImage
-                    src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
-                    alt={profile.display_name || profile.username || 'User'}
-                  />
-                  <AvatarFallback className="text-2xl text-white" style={{ background: 'var(--color-coral)' }}>
-                    {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-
-              {/* Name & Username */}
-              <div className="text-center px-4 pb-4">
-                <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">
-                  {profile.display_name || profile.username || 'Anonymous User'}
-                </h1>
-                <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
-                  @{profile.username || 'anonymous'}
-                </p>
-              </div>
-
-              {/* Bio */}
+            <div className="flex-1 min-w-0">
+              <h1 className="al-display text-2xl sm:text-3xl">{displayName}</h1>
+              <p className="text-sm text-[color:var(--color-muted-warm)] mt-0.5">
+                @{profile.username || 'anonymous'}
+              </p>
               {profile.bio && (
-                <p className="text-sm text-stone-600 dark:text-stone-400 text-center px-4 pb-4 leading-relaxed">
+                <p className="text-sm text-[color:var(--color-ink-soft)] mt-3 leading-relaxed max-w-prose">
                   {profile.bio}
                 </p>
               )}
-
-              {/* Follow Button - only show when logged in */}
-              {currentUser && (
-                <div className="px-4 pb-4">
-                  <Button
-                    onClick={handleFollowToggle}
-                    disabled={followLoading}
-                    className={`w-full cursor-pointer rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] ${
-                      followStatus === 'following'
-                        ? "bg-white dark:bg-white/[0.08] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-900 dark:text-stone-100 border border-stone-300 dark:border-white/[0.14]"
-                        : "al-btn-coral"
-                    }`}
-                  >
-                    {followLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : followStatus === 'following' ? (
-                      <UserMinus className="h-4 w-4 mr-2" />
-                    ) : (
-                      <UserPlus className="h-4 w-4 mr-2" />
-                    )}
-                    {followStatus === 'following'
-                      ? 'Unfollow'
-                      : followStatus === 'pending'
-                      ? 'Requested'
-                      : 'Follow'}
-                  </Button>
-                </div>
-              )}
-
-              {/* Following/Followers Stats */}
-              <div className="grid grid-cols-2 gap-px bg-stone-200/50 dark:bg-stone-800/40 border-y border-stone-200/50 dark:border-stone-800/40">
-                <button className="cursor-pointer bg-white/80 dark:bg-stone-900/60 hover:bg-white dark:hover:bg-stone-800 py-3 text-center transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
-                  <AnimatedCounter value={followStats.followingCount} className="font-semibold text-stone-900 dark:text-stone-100" formatNumber={false} />
-                  <div className="text-xs text-stone-500 dark:text-stone-400">Following</div>
-                </button>
-                <button className="cursor-pointer bg-white/80 dark:bg-stone-900/60 hover:bg-white dark:hover:bg-stone-800 py-3 text-center transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
-                  <AnimatedCounter value={followStats.followersCount} className="font-semibold text-stone-900 dark:text-stone-100" formatNumber={false} />
-                  <div className="text-xs text-stone-500 dark:text-stone-400">Followers</div>
-                </button>
-              </div>
-
-              {/* Stats Cards */}
-              <div className="p-4 space-y-2">
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-sm text-stone-600 dark:text-stone-400">Albums</span>
-                  <AnimatedCounter value={albums.length} className="text-lg font-bold text-stone-900 dark:text-stone-100" formatNumber={false} />
-                </div>
-                <div className="flex justify-between items-center py-2 border-t border-stone-100 dark:border-white/[0.08]">
-                  <span className="text-sm text-stone-600 dark:text-stone-400">Countries</span>
-                  <AnimatedCounter value={countriesCount} className="text-lg font-bold text-stone-900 dark:text-stone-100" formatNumber={false} />
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
-
-          {/* Right Content - Tabs and Content */}
-          <div className="space-y-6">
-            {/* Tabs */}
-            <div className="bg-white dark:bg-[color:var(--card)] rounded-xl shadow-sm border border-stone-200 dark:border-[color:var(--color-line-warm)] p-1">
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setActiveTab('albums')}
-                  className="flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none"
-                  style={
-                    activeTab === 'albums'
-                      ? { background: 'var(--color-coral)', color: '#fff' }
-                      : { color: 'var(--color-muted-warm)' }
-                  }
-                >
-                  Albums
-                </button>
-                <button
-                  onClick={() => setActiveTab('map')}
-                  className="flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none"
-                  style={
-                    activeTab === 'map'
-                      ? { background: 'var(--color-coral)', color: '#fff' }
-                      : { color: 'var(--color-muted-warm)' }
-                  }
-                >
-                  Map View
-                </button>
-              </div>
+              {followButton && <div className="mt-4">{followButton}</div>}
             </div>
-
-            {/* Tab Content */}
-            <AnimatePresence mode="wait">
-              {activeTab === 'albums' && (
-                <motion.div
-                  key="albums"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  <motion.div
-                    className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
-                    initial="hidden"
-                    animate="visible"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      visible: {
-                        opacity: 1,
-                        transition: {
-                          staggerChildren: 0.06,
-                          delayChildren: 0.1
-                        }
-                      }
-                    }}
-                  >
-                    {albums.length > 0 ? (
-                      albums.map((album) => (
-                        <motion.div
-                          key={album.id}
-                          variants={{
-                            hidden: { opacity: 0, scale: 0.9 },
-                            visible: {
-                              opacity: 1,
-                              scale: 1,
-                              transition: {
-                                type: 'spring',
-                                stiffness: 300,
-                                damping: 24
-                              }
-                            }
-                          }}
-                        >
-                          <Link
-                            href={`/albums/${album.id}`}
-                            className="group relative aspect-square overflow-hidden rounded-xl bg-stone-100 dark:bg-white/[0.06] block shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
-                          >
-                            <motion.div
-                              className="w-full h-full"
-                              whileHover={{ scale: 1.05 }}
-                              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                            >
-                              {album.cover_photo_url || album.cover_image_url ? (
-                                <Image
-                                  src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
-                                  alt={album.title}
-                                  fill
-                                  className="object-cover"
-                                />
-                              ) : (
-                                <div className="flex items-center justify-center h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-white/[0.06] dark:to-white/[0.03]">
-                                  <Camera className="h-8 w-8 text-stone-400" />
-                                </div>
-                              )}
-                            </motion.div>
-                            {/* Album title overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="absolute bottom-0 left-0 right-0 p-3">
-                                <p className="text-white text-sm font-medium line-clamp-2">
-                                  {album.title}
-                                </p>
-                              </div>
-                            </div>
-                          </Link>
-                        </motion.div>
-                      ))
-                    ) : (
-                      <motion.div
-                        className="col-span-full al-card text-center py-16"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <div
-                          className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-3"
-                          style={{ background: 'var(--color-ivory-alt)' }}
-                        >
-                          <Camera className="h-7 w-7" style={{ color: 'var(--color-muted-warm)' }} />
-                        </div>
-                        <p className="text-sm text-[color:var(--color-muted-warm)]">No public albums yet</p>
-                      </motion.div>
-                    )}
-                  </motion.div>
-                </motion.div>
-              )}
-
-              {activeTab === 'map' && (
-                <motion.div
-                  key="map"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="bg-white dark:bg-[color:var(--card)] rounded-xl shadow-sm border border-stone-200 dark:border-[color:var(--color-line-warm)] overflow-hidden"
-                >
-                  <div className="w-full aspect-square max-h-[calc(100vh-220px)] bg-gradient-to-br from-stone-900 to-stone-800 relative">
-                    <EnhancedGlobe filterUserId={profile.id} hideHeader={true} />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
+
+          {/* Key stats */}
+          <div className="grid grid-cols-4 gap-2 mt-6 pt-6 border-t border-[color:var(--color-line-warm)]">
+            {[
+              { value: albums.length, label: 'Albums' },
+              { value: countriesCount, label: 'Countries' },
+              { value: followStats.followersCount, label: 'Followers' },
+              { value: followStats.followingCount, label: 'Following' },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <div className="al-stat-value text-xl sm:text-2xl">{s.value}</div>
+                <div className="al-caption mt-1">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ───────── Albums ───────── */}
+        <div className="mt-8">
+          <p className="al-eyebrow mb-3">Adventures</p>
+          {albums.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              {albums.map((album) => (
+                <Link
+                  key={album.id}
+                  href={`/albums/${album.id}`}
+                  className="group relative aspect-square overflow-hidden rounded-xl block shadow-sm cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none"
+                  style={{ background: 'var(--color-ivory-alt)' }}
+                >
+                  {album.cover_photo_url || album.cover_image_url ? (
+                    <Image
+                      src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
+                      alt={album.title}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width: 640px) 50vw, 33vw"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <Camera className="h-8 w-8" style={{ color: 'var(--color-muted-warm)' }} />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-white text-sm font-medium line-clamp-2">{album.title}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="al-card text-center py-16">
+              <div
+                className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-3"
+                style={{ background: 'var(--color-ivory-alt)' }}
+              >
+                <Camera className="h-7 w-7" style={{ color: 'var(--color-muted-warm)' }} />
+              </div>
+              <p className="text-sm text-[color:var(--color-muted-warm)]">No public albums yet</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

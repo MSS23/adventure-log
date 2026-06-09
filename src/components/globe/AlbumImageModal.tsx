@@ -426,7 +426,7 @@ export function AlbumImageModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 30, opacity: 0 }}
             transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[min(92vw,620px)] rounded-2xl overflow-hidden"
+            className="fixed bottom-[124px] left-1/2 -translate-x-1/2 z-[90] w-[min(88vw,560px)] rounded-2xl overflow-hidden"
             style={{
               background: 'var(--card)',
               border: '1px solid var(--color-line-warm)',

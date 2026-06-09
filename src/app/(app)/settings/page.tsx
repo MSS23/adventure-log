@@ -30,8 +30,12 @@ import {
   Camera,
   Loader2,
   Image as ImageIcon,
+  Bell,
+  UserCog,
+  ChevronRight,
 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { uploadCoverPhoto, deleteCoverPhoto } from '@/lib/utils/storage'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { FollowRequests } from '@/components/social/FollowRequests'
@@ -273,44 +277,58 @@ export default function SettingsPage() {
 
   const privacyOptions = [
     { value: 'public', label: 'Public', desc: 'Anyone can see your profile', icon: Globe },
-    { value: 'friends', label: 'Friends Only', desc: 'Only followers can see your content', icon: Users },
+    { value: 'friends', label: 'Friends only', desc: 'Only followers can see your content', icon: Users },
     { value: 'private', label: 'Private', desc: 'Only you can see your content', icon: Lock },
   ]
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
-      <div className="mb-6">
+      {/* Page header */}
+      <div className="mb-8">
         <p className="al-eyebrow mb-1">Preferences</p>
         <h1 className="al-display text-3xl md:text-4xl">Settings</h1>
-        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
-          Manage your profile, privacy, and account.
+        <p className="al-body mt-2 max-w-xl">
+          Manage your account, privacy, and data — all in one place.
         </p>
       </div>
 
       {/* Feedback */}
       {error && (
-        <div className="mb-4 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 px-4 py-3">
-          <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+        <div className="mb-5 rounded-xl border border-[color:var(--color-coral)]/40 bg-[color:var(--color-coral-tint)] px-4 py-3" role="alert">
+          <p className="text-sm text-[color:var(--color-coral)] font-medium">{error}</p>
         </div>
       )}
       {success && (
-        <div className="mb-4 rounded-xl border border-olive-300 dark:border-olive-700/40 bg-olive-50 dark:bg-olive-900/30 px-4 py-3">
-          <p className="text-sm text-olive-800 dark:text-olive-200">{success}</p>
+        <div className="mb-5 rounded-xl border border-[color:var(--color-forest)]/40 bg-[color:var(--color-forest-tint)] px-4 py-3" role="status">
+          <p className="text-sm text-[color:var(--color-forest-deep)] dark:text-[color:var(--color-forest-bright)] font-medium">{success}</p>
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-5">
 
-        {/* Cover Photo */}
-        <section className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] overflow-hidden">
-          <div className="px-5 py-4 border-b border-stone-100 dark:border-stone-800">
-            <div className="flex items-center gap-2.5">
-              <ImageIcon className="h-4 w-4 text-olive-600 dark:text-olive-400" />
-              <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Cover Photo</h2>
-            </div>
-          </div>
+        {/* ── ACCOUNT ─────────────────────────────────────────── */}
+        <SectionHeader title="Account" />
+
+        {/* Edit profile — identity fields live on the dedicated page */}
+        <Link
+          href="/profile/edit"
+          className="al-card flex items-center gap-4 p-5 group transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]"
+        >
+          <span className="grid place-items-center h-10 w-10 rounded-full bg-[color:var(--color-forest-tint)] text-[color:var(--color-forest)] shrink-0">
+            <UserCog className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-[color:var(--color-ink)]">Edit profile</span>
+            <span className="block text-xs text-[color:var(--color-muted-warm)] mt-0.5">Name, username, bio, photo, links</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-[color:var(--color-muted-warm)] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
+        </Link>
+
+        {/* Cover photo */}
+        <Card>
+          <CardHead icon={ImageIcon} title="Cover photo" subtitle="Shown across the top of your profile" />
           <div className="p-5 space-y-4">
-            <div className="relative w-full h-32 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800">
+            <div className="relative w-full h-32 rounded-xl overflow-hidden bg-[color:var(--color-ivory-alt)]">
               {(coverPhotoPreview || profile?.cover_photo_url) ? (
                 <Image
                   src={coverPhotoPreview || getPhotoUrl(profile?.cover_photo_url, 'covers') || ''}
@@ -320,29 +338,29 @@ export default function SettingsPage() {
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Camera className="h-8 w-8 text-stone-300 dark:text-stone-600" />
+                  <Camera className="h-8 w-8 text-[color:var(--color-muted-warm)] opacity-50" />
                 </div>
               )}
             </div>
             <div className="flex flex-wrap gap-2">
               {coverPhotoPreview ? (
                 <>
-                  <Button size="sm" onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200">
-                    {uploadingCover ? <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />Uploading</> : 'Save'}
+                  <Button size="sm" onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="al-btn-coral text-white min-h-[44px] px-5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]">
+                    {uploadingCover ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" />Uploading</> : 'Save'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setCoverPhotoFile(null); setCoverPhotoPreview(null) }} className="dark:border-stone-700 dark:text-stone-300 cursor-pointer active:scale-[0.97] transition-all duration-200">
+                  <Button size="sm" variant="outline" onClick={() => { setCoverPhotoFile(null); setCoverPhotoPreview(null) }} className="min-h-[44px] cursor-pointer active:scale-[0.97] transition-all duration-200">
                     Cancel
                   </Button>
                 </>
               ) : (
                 <>
-                  <Label htmlFor="cover-input" className="inline-flex items-center px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer text-xs font-medium text-stone-700 dark:text-stone-300 transition-all duration-200 hover:shadow-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500">
-                    <Camera className="h-3.5 w-3.5 mr-1.5" />
-                    {profile?.cover_photo_url ? 'Change' : 'Upload'}
+                  <Label htmlFor="cover-input" className="inline-flex items-center min-h-[44px] px-4 rounded-full border border-[color:var(--color-line-warm)] bg-[color:var(--card)] hover:bg-[color:var(--color-ivory-alt)] cursor-pointer text-sm font-medium text-[color:var(--color-ink-soft)] transition-all duration-200 hover:shadow-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]">
+                    <Camera className="h-4 w-4 mr-1.5" />
+                    {profile?.cover_photo_url ? 'Change photo' : 'Upload photo'}
                   </Label>
                   <input id="cover-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCoverPhotoSelect} className="hidden" />
                   {profile?.cover_photo_url && (
-                    <Button size="sm" variant="outline" onClick={handleRemoveCoverPhoto} disabled={uploadingCover} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30">
+                    <Button size="sm" variant="outline" onClick={handleRemoveCoverPhoto} disabled={uploadingCover} className="min-h-[44px] text-[color:var(--color-coral)] border-[color:var(--color-coral)]/30 hover:bg-[color:var(--color-coral-tint)] cursor-pointer">
                       Remove
                     </Button>
                   )}
@@ -350,143 +368,149 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
-        </section>
+        </Card>
 
-        {/* Home Location */}
-        <section className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] overflow-hidden">
-          <div className="px-5 py-4 border-b border-stone-100 dark:border-stone-800">
-            <div className="flex items-center gap-2.5">
-              <MapPin className="h-4 w-4 text-olive-600 dark:text-olive-400" />
-              <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Home Location</h2>
-            </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 ml-6.5">Used to calculate total distance traveled</p>
-          </div>
-          <div className="p-5 space-y-3">
+        {/* Home location */}
+        <Card>
+          <CardHead icon={MapPin} title="Home location" subtitle="Used to calculate total distance traveled" />
+          <div className="p-5 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs text-stone-600 dark:text-stone-400">City</Label>
-                <Input value={homeLocationData.city} onChange={(e) => setHomeLocationData(prev => ({ ...prev, city: e.target.value }))} placeholder="London" className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm" />
+              <div className="space-y-1.5">
+                <Label htmlFor="home-city" className="text-xs font-medium text-[color:var(--color-ink-soft)]">City</Label>
+                <Input id="home-city" value={homeLocationData.city} onChange={(e) => setHomeLocationData(prev => ({ ...prev, city: e.target.value }))} placeholder="London" className="min-h-[44px] text-sm" />
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-stone-600 dark:text-stone-400">Country</Label>
-                <Input value={homeLocationData.country} onChange={(e) => setHomeLocationData(prev => ({ ...prev, country: e.target.value }))} placeholder="United Kingdom" className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm" />
+              <div className="space-y-1.5">
+                <Label htmlFor="home-country" className="text-xs font-medium text-[color:var(--color-ink-soft)]">Country</Label>
+                <Input id="home-country" value={homeLocationData.country} onChange={(e) => setHomeLocationData(prev => ({ ...prev, country: e.target.value }))} placeholder="United Kingdom" className="min-h-[44px] text-sm" />
               </div>
             </div>
-            <Button size="sm" onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
-              {loading ? 'Saving...' : 'Save'}
+            <Button size="sm" onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="al-btn-coral text-white min-h-[44px] px-5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]">
+              {loading ? 'Saving…' : 'Save location'}
             </Button>
           </div>
-        </section>
+        </Card>
+
+        {/* ── PRIVACY & PEOPLE ────────────────────────────────── */}
+        <SectionHeader title="Privacy & people" className="pt-3" />
 
         {/* Privacy */}
-        <section className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] overflow-hidden">
-          <div className="px-5 py-4 border-b border-stone-100 dark:border-stone-800">
-            <div className="flex items-center gap-2.5">
-              <Shield className="h-4 w-4 text-olive-600 dark:text-olive-400" />
-              <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Privacy</h2>
-            </div>
-          </div>
+        <Card>
+          <CardHead icon={Shield} title="Who can see your content" subtitle="Applies to your profile, albums, and globe" />
           <div className="p-5">
-            <div className="space-y-2">
+            <div className="space-y-2" role="radiogroup" aria-label="Privacy level">
               {privacyOptions.map(opt => {
                 const Icon = opt.icon
                 const active = privacyLevel === opt.value
                 return (
                   <button
                     key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
                     onClick={() => updatePrivacyLevel(opt.value)}
                     disabled={loading}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.98]",
+                      "w-full flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl border text-left transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed",
                       active
-                        ? "border-olive-300 dark:border-olive-700 bg-olive-50 dark:bg-olive-950/30 shadow-sm"
-                        : "border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-900 hover:shadow-sm"
+                        ? "border-[color:var(--color-forest)] bg-[color:var(--color-forest-tint)] shadow-sm"
+                        : "border-[color:var(--color-line-warm)] hover:bg-[color:var(--color-ivory-alt)] hover:shadow-sm"
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-olive-600 dark:text-olive-400" : "text-stone-400 dark:text-stone-500")} />
-                    <div>
-                      <p className={cn("text-sm font-medium", active ? "text-olive-800 dark:text-olive-200" : "text-stone-700 dark:text-stone-300")}>{opt.label}</p>
-                      <p className="text-xs text-stone-500 dark:text-stone-400">{opt.desc}</p>
+                    <Icon className={cn("h-5 w-5 shrink-0", active ? "text-[color:var(--color-forest)]" : "text-[color:var(--color-muted-warm)]")} />
+                    <div className="min-w-0">
+                      <p className={cn("text-sm font-medium", active ? "text-[color:var(--color-forest-deep)] dark:text-[color:var(--color-forest-bright)]" : "text-[color:var(--color-ink)]")}>{opt.label}</p>
+                      <p className="text-xs text-[color:var(--color-muted-warm)]">{opt.desc}</p>
                     </div>
-                    {active && <div className="ml-auto w-2 h-2 rounded-full bg-olive-500 shrink-0" />}
+                    {active && <div className="ml-auto w-2 h-2 rounded-full bg-[color:var(--color-forest)] shrink-0" />}
                   </button>
                 )
               })}
             </div>
           </div>
-        </section>
+        </Card>
 
-        {/* Follow Requests & Lists */}
+        {/* Follow requests & lists (external components, kept as-is) */}
         <FollowRequests />
         <FollowLists />
 
-        {/* Change Password */}
-        <section className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] overflow-hidden">
-          <div className="px-5 py-4 border-b border-stone-100 dark:border-stone-800">
-            <div className="flex items-center gap-2.5">
-              <Key className="h-4 w-4 text-olive-600 dark:text-olive-400" />
-              <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Change Password</h2>
-            </div>
-          </div>
-          <div className="p-5 space-y-3">
-            <div className="space-y-1">
-              <Label className="text-xs text-stone-600 dark:text-stone-400">Current Password</Label>
+        {/* Notifications — managed on a dedicated page */}
+        <Link
+          href="/settings/notifications"
+          className="al-card flex items-center gap-4 p-5 group transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]"
+        >
+          <span className="grid place-items-center h-10 w-10 rounded-full bg-[color:var(--color-gold-tint)] text-[color:var(--color-gold)] shrink-0">
+            <Bell className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-[color:var(--color-ink)]">Notifications</span>
+            <span className="block text-xs text-[color:var(--color-muted-warm)] mt-0.5">Choose what activity you get notified about</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-[color:var(--color-muted-warm)] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
+        </Link>
+
+        {/* ── SECURITY & DATA ─────────────────────────────────── */}
+        <SectionHeader title="Security & data" className="pt-3" />
+
+        {/* Change password */}
+        <Card>
+          <CardHead icon={Key} title="Change password" subtitle="Use at least 8 characters" />
+          <div className="p-5 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="current-password" className="text-xs font-medium text-[color:var(--color-ink-soft)]">Current password</Label>
               <div className="relative">
-                <Input id="current-password" type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
-                <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword} aria-controls="current-password">
-                  {showCurrentPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" /> : <Eye className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />}
+                <Input id="current-password" type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="min-h-[44px] text-sm pr-11" />
+                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-9 w-9 grid place-items-center cursor-pointer rounded-md transition-colors duration-200 hover:bg-[color:var(--color-ivory-alt)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword} aria-controls="current-password">
+                  {showCurrentPassword ? <EyeOff className="h-4 w-4 text-[color:var(--color-muted-warm)]" /> : <Eye className="h-4 w-4 text-[color:var(--color-muted-warm)]" />}
                 </button>
               </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs text-stone-600 dark:text-stone-400">New Password</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="new-password" className="text-xs font-medium text-[color:var(--color-ink-soft)]">New password</Label>
               <div className="relative">
-                <Input id="new-password" type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm pr-9" />
-                <button type="button" className="absolute right-2.5 top-2 cursor-pointer p-1 rounded-md transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword} aria-controls="new-password">
-                  {showNewPassword ? <EyeOff className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" /> : <Eye className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />}
+                <Input id="new-password" type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="min-h-[44px] text-sm pr-11" />
+                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-9 w-9 grid place-items-center cursor-pointer rounded-md transition-colors duration-200 hover:bg-[color:var(--color-ivory-alt)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword} aria-controls="new-password">
+                  {showNewPassword ? <EyeOff className="h-4 w-4 text-[color:var(--color-muted-warm)]" /> : <Eye className="h-4 w-4 text-[color:var(--color-muted-warm)]" />}
                 </button>
               </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs text-stone-600 dark:text-stone-400">Confirm New Password</Label>
-              <Input type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} className="dark:bg-stone-900 dark:border-stone-700 h-9 text-sm" />
+            <div className="space-y-1.5">
+              <Label htmlFor="confirm-password" className="text-xs font-medium text-[color:var(--color-ink-soft)]">Confirm new password</Label>
+              <Input id="confirm-password" type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} className="min-h-[44px] text-sm" />
             </div>
-            <Button size="sm" onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
-              {loading ? 'Updating...' : 'Update Password'}
+            <Button size="sm" onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="al-btn-coral text-white min-h-[44px] px-5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]">
+              {loading ? 'Updating…' : 'Update password'}
             </Button>
           </div>
-        </section>
+        </Card>
 
-        {/* Data Export */}
-        <section className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111] overflow-hidden">
-          <div className="px-5 py-4 border-b border-stone-100 dark:border-stone-800">
+        {/* Export data */}
+        <Card>
+          <CardHead icon={Download} title="Export your data" subtitle="Download albums, photos, and profile as JSON" />
+          <div className="p-5">
+            <Button size="sm" variant="outline" onClick={exportData} disabled={loading} className="min-h-[44px] px-5 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] hover:shadow-sm hover:bg-[color:var(--color-ivory-alt)]">
+              <Download className="h-4 w-4 mr-1.5" />
+              {loading ? 'Preparing…' : 'Download data'}
+            </Button>
+          </div>
+        </Card>
+
+        {/* ── DANGER ZONE ─────────────────────────────────────── */}
+        <SectionHeader title="Danger zone" className="pt-3" tone="danger" />
+
+        <section className="rounded-[20px] border border-[color:var(--color-coral)]/35 bg-[color:var(--color-coral-tint)] overflow-hidden">
+          <div className="px-5 py-4 border-b border-[color:var(--color-coral)]/20">
             <div className="flex items-center gap-2.5">
-              <Download className="h-4 w-4 text-olive-600 dark:text-olive-400" />
-              <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Export Data</h2>
+              <Trash2 className="h-4 w-4 text-[color:var(--color-coral)]" />
+              <h2 className="text-sm font-semibold text-[color:var(--color-coral)]">Delete account</h2>
             </div>
           </div>
           <div className="p-5">
-            <p className="text-sm text-stone-600 dark:text-stone-400 mb-3">Download all your albums, photos, and profile data as JSON.</p>
-            <Button size="sm" variant="outline" onClick={exportData} disabled={loading} className="dark:border-stone-700 dark:text-stone-300 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 hover:shadow-sm">
-              <Download className="h-3.5 w-3.5 mr-1.5" />
-              {loading ? 'Preparing...' : 'Download Data'}
-            </Button>
-          </div>
-        </section>
-
-        {/* Danger Zone */}
-        <section className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 overflow-hidden">
-          <div className="px-5 py-4 border-b border-red-100 dark:border-red-900/30">
-            <div className="flex items-center gap-2.5">
-              <Trash2 className="h-4 w-4 text-red-500" />
-              <h2 className="text-sm font-semibold text-red-700 dark:text-red-400">Delete Account</h2>
-            </div>
-          </div>
-          <div className="p-5">
-            <p className="text-sm text-red-600/80 dark:text-red-400/80 mb-3">Your account will be deactivated with a 30-day recovery period before permanent deletion.</p>
+            <p className="text-sm text-[color:var(--color-ink-soft)] mb-4 leading-relaxed">
+              Your account is deactivated immediately. You have a 30-day recovery window before everything is permanently deleted.
+            </p>
             <Dialog>
               <DialogTrigger asChild>
-                <Button size="sm" variant="destructive">Delete Account</Button>
+                <Button size="sm" variant="destructive" className="min-h-[44px] px-5 cursor-pointer">Delete account</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -498,7 +522,7 @@ export default function SettingsPage() {
                 <DialogFooter>
                   <Button variant="outline">Cancel</Button>
                   <Button variant="destructive" onClick={deleteAccount} disabled={loading}>
-                    {loading ? 'Deleting...' : 'Delete my account'}
+                    {loading ? 'Deleting…' : 'Delete my account'}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -506,6 +530,32 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
+    </div>
+  )
+}
+
+/* ── Local presentational helpers — keep card markup consistent & low-noise ── */
+
+function SectionHeader({ title, className, tone = 'default' }: { title: string; className?: string; tone?: 'default' | 'danger' }) {
+  return (
+    <p className={cn('al-eyebrow', tone === 'danger' && 'text-[color:var(--color-coral)]', className)}>
+      {title}
+    </p>
+  )
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+  return <section className="al-card overflow-hidden">{children}</section>
+}
+
+function CardHead({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle?: string }) {
+  return (
+    <div className="px-5 py-4 border-b border-[color:var(--color-line-warm)]">
+      <div className="flex items-center gap-2.5">
+        <Icon className="h-4 w-4 text-[color:var(--color-forest)]" />
+        <h2 className="text-sm font-semibold text-[color:var(--color-ink)]">{title}</h2>
+      </div>
+      {subtitle && <p className="text-xs text-[color:var(--color-muted-warm)] mt-1 ml-[26px]">{subtitle}</p>}
     </div>
   )
 }

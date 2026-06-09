@@ -1,6 +1,7 @@
 'use client'
 
-import { MapPin, Camera, Calendar, X, ArrowRight, Star } from 'lucide-react'
+import { useRef, useState, useEffect, useCallback } from 'react'
+import { MapPin, Camera, Calendar, X, ArrowRight, Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -208,6 +209,74 @@ export function GlobeAlbumFilmstrip({
   onWishlistItemClick,
   hideOnMobileWhenSelected = false,
 }: GlobeAlbumFilmstripProps) {
+  const ITEM_W = 70 // 64px md thumb + 6px gap; representative slot width at desktop
+  const OVERSCAN = 8
+  const CAP = 50 // virtualization activates only above this
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [scrollLeft, setScrollLeft] = useState(0)
+  const [clientWidth, setClientWidth] = useState(0)
+  const [canLeft, setCanLeft] = useState(false)
+  const [canRight, setCanRight] = useState(false)
+  const virtualize = albums.length > CAP
+
+  // Measure with a single ResizeObserver.
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const update = () => {
+      setClientWidth(el.clientWidth)
+      setScrollLeft(el.scrollLeft)
+      setCanLeft(el.scrollLeft > 4)
+      setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [albums.length, showWishlist, wishlistItems.length])
+
+  // rAF-throttled scroll handler (ref latch, no library).
+  const rafRef = useRef<number | null>(null)
+  const onScroll = useCallback(() => {
+    if (rafRef.current != null) return
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null
+      const el = scrollRef.current
+      if (!el) return
+      setScrollLeft(el.scrollLeft)
+      setCanLeft(el.scrollLeft > 4)
+      setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
+    })
+  }, [])
+
+  // Window math (only when virtualize).
+  const firstVisible = virtualize ? Math.max(0, Math.floor(scrollLeft / ITEM_W) - OVERSCAN) : 0
+  const lastVisible = virtualize
+    ? Math.min(albums.length, Math.ceil((scrollLeft + (clientWidth || 800)) / ITEM_W) + OVERSCAN)
+    : albums.length
+  const visibleAlbums = virtualize ? albums.slice(firstVisible, lastVisible) : albums
+  const leftSpacer = firstVisible * ITEM_W
+  const rightSpacer = (albums.length - lastVisible) * ITEM_W
+
+  // Auto-scroll the selected album into center (clicking a globe pin must
+  // reveal its thumb even at a far index). Dep is selectedAlbumId only — do
+  // NOT add scrollLeft, or it fights manual scroll.
+  useEffect(() => {
+    if (!selectedAlbumId) return
+    const idx = albums.findIndex(a => a.id === selectedAlbumId)
+    if (idx < 0) return
+    const el = scrollRef.current
+    if (!el) return
+    const target = idx * ITEM_W - el.clientWidth / 2 + ITEM_W / 2
+    el.scrollTo({ left: Math.max(0, target), behavior: 'smooth' })
+  }, [selectedAlbumId, albums])
+
+  const nudge = (dir: 1 | -1) => {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * Math.max(el.clientWidth * 0.8, 6 * ITEM_W), behavior: 'smooth' })
+  }
+
   return (
     <div
       className={cn(
@@ -215,14 +284,54 @@ export function GlobeAlbumFilmstrip({
         hideOnMobileWhenSelected ? "hidden md:block" : "block"
       )}
     >
-      <div className="bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-2.5 py-2 shadow-2xl">
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide items-center">
-          {albums.map((album) => (
+      <div className="relative bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-2.5 py-2 shadow-2xl">
+        {/* Count chip */}
+        {albums.length > 24 && (
+          <span className="pointer-events-none absolute -top-2 right-3 z-20 px-1.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/70 tabular-nums">
+            {selectedAlbumId ? `${albums.findIndex(a => a.id === selectedAlbumId) + 1} / ${albums.length}` : `${albums.length} albums`}
+          </span>
+        )}
+
+        {/* Edge fade gradients */}
+        {canLeft && <div aria-hidden className="pointer-events-none absolute left-2.5 top-2 bottom-2 w-8 z-10 bg-gradient-to-r from-black/60 to-transparent rounded-l-xl" />}
+        {canRight && <div aria-hidden className="pointer-events-none absolute right-2.5 top-2 bottom-2 w-8 z-10 bg-gradient-to-l from-black/60 to-transparent rounded-r-xl" />}
+
+        {/* Scroll arrows (desktop only) */}
+        {canLeft && (
+          <button
+            onClick={() => nudge(-1)}
+            aria-label="Scroll albums left"
+            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/80 items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        )}
+        {canRight && (
+          <button
+            onClick={() => nudge(1)}
+            aria-label="Scroll albums right"
+            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/80 items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        )}
+
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          role="listbox"
+          aria-label={`${albums.length} albums`}
+          className="flex gap-1.5 overflow-x-auto scrollbar-hide items-center snap-x scroll-px-2.5"
+        >
+          {virtualize && leftSpacer > 0 && <div aria-hidden className="flex-shrink-0" style={{ width: leftSpacer }} />}
+          {visibleAlbums.map((album) => (
             <button
               key={album.id}
               onClick={() => onAlbumClick(album.id)}
+              role="option"
+              aria-selected={selectedAlbumId === album.id}
               className={cn(
-                "flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
+                "snap-start flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
                 selectedAlbumId === album.id
                   ? "w-[56px] sm:w-[68px] md:w-[80px] ring-2 ring-olive-400 shadow-lg shadow-olive-500/20"
                   : "w-[48px] sm:w-[56px] md:w-[64px] hover:ring-1 hover:ring-white/20 opacity-70 hover:opacity-100"
@@ -235,7 +344,9 @@ export function GlobeAlbumFilmstrip({
                     alt={album.title}
                     fill
                     className="object-cover"
-                    sizes="80px"
+                    sizes="64px"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-olive-900/40 to-stone-800">
@@ -257,6 +368,8 @@ export function GlobeAlbumFilmstrip({
               </div>
             </button>
           ))}
+
+          {virtualize && rightSpacer > 0 && <div aria-hidden className="flex-shrink-0" style={{ width: rightSpacer }} />}
 
           {/* Wishlist items */}
           {showWishlist && wishlistItems.length > 0 && (

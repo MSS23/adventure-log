@@ -174,10 +174,14 @@ export default function EditProfilePage() {
         <h1 className="al-display text-3xl">Edit Profile</h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {error && (
-          <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 px-4 py-3">
-            <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+          <div
+            className="rounded-xl border px-4 py-3"
+            style={{ background: 'var(--color-coral-tint)', borderColor: 'var(--color-coral-soft)' }}
+            role="alert"
+          >
+            <p className="text-sm" style={{ color: 'var(--color-coral)' }}>{error}</p>
           </div>
         )}
 
@@ -217,7 +221,9 @@ export default function EditProfilePage() {
         <div className="al-card p-5 space-y-5">
           {/* Username */}
           <div className="space-y-1.5">
-            <Label htmlFor="username" className="text-[color:var(--color-ink-soft)] font-medium">Username</Label>
+            <Label htmlFor="username" className="text-[color:var(--color-ink-soft)] font-medium">
+              Username <span style={{ color: 'var(--color-coral)' }}>*</span>
+            </Label>
             <div className="relative">
               <Input
                 id="username"
@@ -245,7 +251,9 @@ export default function EditProfilePage() {
 
           {/* Display Name */}
           <div className="space-y-1.5">
-            <Label htmlFor="display_name" className="text-[color:var(--color-ink-soft)] font-medium">Display Name</Label>
+            <Label htmlFor="display_name" className="text-[color:var(--color-ink-soft)] font-medium">
+              Display name <span className="text-[color:var(--color-muted-warm)] font-normal">(optional)</span>
+            </Label>
             <Input
               id="display_name"
               {...register('display_name')}
@@ -257,7 +265,9 @@ export default function EditProfilePage() {
 
           {/* Bio */}
           <div className="space-y-1.5">
-            <Label htmlFor="bio" className="text-[color:var(--color-ink-soft)] font-medium">Bio</Label>
+            <Label htmlFor="bio" className="text-[color:var(--color-ink-soft)] font-medium">
+              Bio <span className="text-[color:var(--color-muted-warm)] font-normal">(optional)</span>
+            </Label>
             <Textarea
               id="bio"
               {...register('bio')}
@@ -272,7 +282,9 @@ export default function EditProfilePage() {
           {/* Location + Website */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="location" className="text-[color:var(--color-ink-soft)] font-medium">Location</Label>
+              <Label htmlFor="location" className="text-[color:var(--color-ink-soft)] font-medium">
+                Location <span className="text-[color:var(--color-muted-warm)] font-normal">(optional)</span>
+              </Label>
               <Input
                 id="location"
                 {...register('location')}
@@ -281,7 +293,9 @@ export default function EditProfilePage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="website" className="text-[color:var(--color-ink-soft)] font-medium">Website</Label>
+              <Label htmlFor="website" className="text-[color:var(--color-ink-soft)] font-medium">
+                Website <span className="text-[color:var(--color-muted-warm)] font-normal">(optional)</span>
+              </Label>
               <Input
                 id="website"
                 {...register('website')}
@@ -292,25 +306,18 @@ export default function EditProfilePage() {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-3 justify-end">
-          <Link href="/profile">
-            <Button type="button" variant="outline" className="cursor-pointer transition-all duration-200 hover:bg-[color:var(--color-ivory-alt)] active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
-              Cancel
-            </Button>
-          </Link>
-          <Button
-            type="submit"
-            disabled={loading}
-            className="al-btn-coral cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
-            ) : (
-              <><Save className="h-4 w-4 mr-2" />Save Changes</>
-            )}
-          </Button>
-        </div>
+        {/* Actions — one obvious primary action; the back link handles cancel */}
+        <Button
+          type="submit"
+          disabled={loading || checkingUsername || (usernameAvailable === false && watch('username') !== profile?.username)}
+          className="al-btn-coral w-full cursor-pointer transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</>
+          ) : (
+            <><Save className="h-4 w-4 mr-2" />Save changes</>
+          )}
+        </Button>
       </form>
     </div>
   )

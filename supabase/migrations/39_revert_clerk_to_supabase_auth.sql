@@ -104,108 +104,121 @@ DROP VIEW IF EXISTS public.users_public;
 --    clerk_user_id(). Enumerated precisely from the migration files.
 -- ----------------------------------------------------------------------------
 
--- --- migration 31 step 9 (owner_all on every user_id table + users.* ) -----
--- m31 attached "<table>_owner_all" to every public table that had a TEXT
--- user_id column (created via DO loop). Enumerate the known set explicitly.
-DROP POLICY IF EXISTS "albums_owner_all"                    ON public.albums;
-DROP POLICY IF EXISTS "photos_owner_all"                    ON public.photos;
-DROP POLICY IF EXISTS "comments_owner_all"                  ON public.comments;
-DROP POLICY IF EXISTS "likes_owner_all"                     ON public.likes;
-DROP POLICY IF EXISTS "favorites_owner_all"                 ON public.favorites;
-DROP POLICY IF EXISTS "wishlist_items_owner_all"            ON public.wishlist_items;
-DROP POLICY IF EXISTS "stories_owner_all"                   ON public.stories;
-DROP POLICY IF EXISTS "notifications_owner_all"             ON public.notifications;
-DROP POLICY IF EXISTS "reactions_owner_all"                 ON public.reactions;
-DROP POLICY IF EXISTS "ai_usage_owner_all"                  ON public.ai_usage;
-DROP POLICY IF EXISTS "trip_planner_cache_owner_all"        ON public.trip_planner_cache;
-DROP POLICY IF EXISTS "itineraries_owner_all"               ON public.itineraries;
-DROP POLICY IF EXISTS "mentions_owner_all"                  ON public.mentions;
-DROP POLICY IF EXISTS "search_history_owner_all"            ON public.search_history;
-DROP POLICY IF EXISTS "activity_feed_owner_all"             ON public.activity_feed;
-DROP POLICY IF EXISTS "two_factor_auth_owner_all"           ON public.two_factor_auth;
-DROP POLICY IF EXISTS "check_ins_owner_all"                 ON public.check_ins;
-DROP POLICY IF EXISTS "journal_entries_owner_all"           ON public.journal_entries;
-DROP POLICY IF EXISTS "travel_profiles_owner_all"           ON public.travel_profiles;
-DROP POLICY IF EXISTS "user_preferences_owner_all"          ON public.user_preferences;
-DROP POLICY IF EXISTS "conversation_participants_owner_all" ON public.conversation_participants;
-DROP POLICY IF EXISTS "message_read_receipts_owner_all"     ON public.message_read_receipts;
-DROP POLICY IF EXISTS "album_collaborators_owner_all"       ON public.album_collaborators;
-DROP POLICY IF EXISTS "user_achievements_owner_all"         ON public.user_achievements;
-DROP POLICY IF EXISTS "user_challenges_owner_all"           ON public.user_challenges;
-DROP POLICY IF EXISTS "push_subscriptions_owner_all"        ON public.push_subscriptions;
-DROP POLICY IF EXISTS "trip_members_owner_all"              ON public.trip_members;
-DROP POLICY IF EXISTS "trip_pins_owner_all"                 ON public.trip_pins;
-DROP POLICY IF EXISTS "globe_reactions_owner_all"           ON public.globe_reactions;
-DROP POLICY IF EXISTS "storage_cleanup_queue_owner_all"     ON public.storage_cleanup_queue;
-DROP POLICY IF EXISTS "upload_queue_owner_all"              ON public.upload_queue;
-DROP POLICY IF EXISTS "playlists_owner_all"                 ON public.playlists;
-
--- m31 public.users policies
-DROP POLICY IF EXISTS users_self_write                      ON public.users;
-DROP POLICY IF EXISTS users_public_read                     ON public.users; -- created m31, tightened m35
-
--- --- migration 33 (public-read + assorted) ----------------------------------
-DROP POLICY IF EXISTS "albums_public_read"                  ON public.albums;
-DROP POLICY IF EXISTS "albums_collaborator_read"            ON public.albums;
-DROP POLICY IF EXISTS "photos_public_album_read"            ON public.photos;
-DROP POLICY IF EXISTS "follows_public_read"                 ON public.follows;
-DROP POLICY IF EXISTS "comments_public_target_read"         ON public.comments;
-DROP POLICY IF EXISTS "comments_authenticated_insert_on_public" ON public.comments;
-DROP POLICY IF EXISTS "likes_public_target_read"            ON public.likes;
-DROP POLICY IF EXISTS "likes_authenticated_insert_on_public" ON public.likes;
-DROP POLICY IF EXISTS "reactions_public_target_read"        ON public.reactions;
-DROP POLICY IF EXISTS "user_achievements_public_read"       ON public.user_achievements;
-DROP POLICY IF EXISTS "challenges_public_read"              ON public.challenges;
-DROP POLICY IF EXISTS "hashtags_public_read"                ON public.hashtags;
-DROP POLICY IF EXISTS "album_hashtags_public_read"          ON public.album_hashtags;
-DROP POLICY IF EXISTS "trips_owner_all"                     ON public.trips;
-DROP POLICY IF EXISTS "trips_member_read"                   ON public.trips;
-DROP POLICY IF EXISTS "trips_public_read"                   ON public.trips;
-DROP POLICY IF EXISTS "trip_members_member_read"            ON public.trip_members;
-DROP POLICY IF EXISTS "trip_members_public_trip_read"       ON public.trip_members;
-DROP POLICY IF EXISTS "trip_pins_member_read"               ON public.trip_pins;
-DROP POLICY IF EXISTS "trip_pins_public_trip_read"          ON public.trip_pins;
-DROP POLICY IF EXISTS "album_views_owner_read"              ON public.album_views;
-DROP POLICY IF EXISTS "album_views_self_insert"             ON public.album_views;
--- m33 step 13 recreated album_collaborators_owner_all (album-owner variant)
-DROP POLICY IF EXISTS "album_collaborators_owner_all"       ON public.album_collaborators;
-
--- --- migration 35 (globe_reactions + (re)created users_public_read) ----------
-DROP POLICY IF EXISTS "globe_reactions_recipient_read"      ON public.globe_reactions;
-DROP POLICY IF EXISTS "globe_reactions_recipient_update"    ON public.globe_reactions;
-DROP POLICY IF EXISTS "globe_reactions_public_read"         ON public.globe_reactions;
-
--- --- migration 36 (friends-read + RLS-coverage write paths) ------------------
-DROP POLICY IF EXISTS "albums_friends_read"                 ON public.albums;
-DROP POLICY IF EXISTS "photos_friends_album_read"           ON public.photos;
-DROP POLICY IF EXISTS "comments_friends_target_read"        ON public.comments;
-DROP POLICY IF EXISTS "likes_friends_target_read"           ON public.likes;
-DROP POLICY IF EXISTS "trip_pins_insert_editors"            ON public.trip_pins;
-DROP POLICY IF EXISTS "trip_pins_update_editors"            ON public.trip_pins;
-DROP POLICY IF EXISTS "trip_pins_delete_editors"            ON public.trip_pins;
-DROP POLICY IF EXISTS "follows_self_insert"                 ON public.follows;
-DROP POLICY IF EXISTS "follows_either_side_update"          ON public.follows;
-DROP POLICY IF EXISTS "follows_self_delete"                 ON public.follows;
-DROP POLICY IF EXISTS "user_blocks_either_side_read"        ON public.user_blocks;
-DROP POLICY IF EXISTS "user_blocks_blocker_insert"          ON public.user_blocks;
-DROP POLICY IF EXISTS "user_blocks_blocker_delete"          ON public.user_blocks;
-DROP POLICY IF EXISTS "companion_requests_either_side_read"   ON public.companion_requests;
-DROP POLICY IF EXISTS "companion_requests_sender_insert"      ON public.companion_requests;
-DROP POLICY IF EXISTS "companion_requests_either_side_update" ON public.companion_requests;
-DROP POLICY IF EXISTS "companion_requests_sender_delete"      ON public.companion_requests;
-DROP POLICY IF EXISTS "reports_reporter_read"               ON public.reports;
-DROP POLICY IF EXISTS "reports_reporter_insert"             ON public.reports;
-DROP POLICY IF EXISTS "conversations_participant_read"      ON public.conversations;
-DROP POLICY IF EXISTS "conversations_creator_insert"        ON public.conversations;
-DROP POLICY IF EXISTS "conversations_participant_update"    ON public.conversations;
-DROP POLICY IF EXISTS "conversations_creator_delete"        ON public.conversations;
-DROP POLICY IF EXISTS "messages_participant_read"           ON public.messages;
-DROP POLICY IF EXISTS "messages_sender_insert"              ON public.messages;
-DROP POLICY IF EXISTS "messages_sender_update"              ON public.messages;
-DROP POLICY IF EXISTS "messages_sender_delete"              ON public.messages;
-DROP POLICY IF EXISTS "playlist_subscribers_self_all"       ON public.playlist_subscribers;
-DROP POLICY IF EXISTS "playlist_collaborators_self_all"     ON public.playlist_collaborators;
-DROP POLICY IF EXISTS "playlist_collaborators_peer_read"    ON public.playlist_collaborators;
+-- These are enumerated for auditability but driven through a single guarded
+-- loop: plain "DROP POLICY IF EXISTS ... ON public.<t>" still RAISES
+-- "relation does not exist" when the TABLE is absent (IF EXISTS only tolerates
+-- a missing policy, not a missing relation). This schema is a superset — not
+-- every DB has every table — so each drop is gated on to_regclass(table).
+DO $$
+DECLARE
+  r RECORD;
+  -- [policyname, tablename] pairs from migrations 31 / 33 / 35 / 36.
+  pols CONSTANT text[][] := ARRAY[
+    -- m31 step 9: "<table>_owner_all" on every TEXT user_id table
+    ['albums_owner_all','albums'],
+    ['photos_owner_all','photos'],
+    ['comments_owner_all','comments'],
+    ['likes_owner_all','likes'],
+    ['favorites_owner_all','favorites'],
+    ['wishlist_items_owner_all','wishlist_items'],
+    ['stories_owner_all','stories'],
+    ['notifications_owner_all','notifications'],
+    ['reactions_owner_all','reactions'],
+    ['ai_usage_owner_all','ai_usage'],
+    ['trip_planner_cache_owner_all','trip_planner_cache'],
+    ['itineraries_owner_all','itineraries'],
+    ['mentions_owner_all','mentions'],
+    ['search_history_owner_all','search_history'],
+    ['activity_feed_owner_all','activity_feed'],
+    ['two_factor_auth_owner_all','two_factor_auth'],
+    ['check_ins_owner_all','check_ins'],
+    ['journal_entries_owner_all','journal_entries'],
+    ['travel_profiles_owner_all','travel_profiles'],
+    ['user_preferences_owner_all','user_preferences'],
+    ['conversation_participants_owner_all','conversation_participants'],
+    ['message_read_receipts_owner_all','message_read_receipts'],
+    ['album_collaborators_owner_all','album_collaborators'],
+    ['user_achievements_owner_all','user_achievements'],
+    ['user_challenges_owner_all','user_challenges'],
+    ['push_subscriptions_owner_all','push_subscriptions'],
+    ['trip_members_owner_all','trip_members'],
+    ['trip_pins_owner_all','trip_pins'],
+    ['globe_reactions_owner_all','globe_reactions'],
+    ['storage_cleanup_queue_owner_all','storage_cleanup_queue'],
+    ['upload_queue_owner_all','upload_queue'],
+    ['playlists_owner_all','playlists'],
+    -- m31 public.users policies
+    ['users_self_write','users'],
+    ['users_public_read','users'],            -- created m31, tightened m35
+    -- m33: public-read + assorted
+    ['albums_public_read','albums'],
+    ['albums_collaborator_read','albums'],
+    ['photos_public_album_read','photos'],
+    ['follows_public_read','follows'],
+    ['comments_public_target_read','comments'],
+    ['comments_authenticated_insert_on_public','comments'],
+    ['likes_public_target_read','likes'],
+    ['likes_authenticated_insert_on_public','likes'],
+    ['reactions_public_target_read','reactions'],
+    ['user_achievements_public_read','user_achievements'],
+    ['challenges_public_read','challenges'],
+    ['hashtags_public_read','hashtags'],
+    ['album_hashtags_public_read','album_hashtags'],
+    ['trips_owner_all','trips'],
+    ['trips_member_read','trips'],
+    ['trips_public_read','trips'],
+    ['trip_members_member_read','trip_members'],
+    ['trip_members_public_trip_read','trip_members'],
+    ['trip_pins_member_read','trip_pins'],
+    ['trip_pins_public_trip_read','trip_pins'],
+    ['album_views_owner_read','album_views'],
+    ['album_views_self_insert','album_views'],
+    ['album_collaborators_owner_all','album_collaborators'],  -- m33 step 13 variant
+    -- m35: globe_reactions
+    ['globe_reactions_recipient_read','globe_reactions'],
+    ['globe_reactions_recipient_update','globe_reactions'],
+    ['globe_reactions_public_read','globe_reactions'],
+    -- m36: friends-read + RLS-coverage write paths
+    ['albums_friends_read','albums'],
+    ['photos_friends_album_read','photos'],
+    ['comments_friends_target_read','comments'],
+    ['likes_friends_target_read','likes'],
+    ['trip_pins_insert_editors','trip_pins'],
+    ['trip_pins_update_editors','trip_pins'],
+    ['trip_pins_delete_editors','trip_pins'],
+    ['follows_self_insert','follows'],
+    ['follows_either_side_update','follows'],
+    ['follows_self_delete','follows'],
+    ['user_blocks_either_side_read','user_blocks'],
+    ['user_blocks_blocker_insert','user_blocks'],
+    ['user_blocks_blocker_delete','user_blocks'],
+    ['companion_requests_either_side_read','companion_requests'],
+    ['companion_requests_sender_insert','companion_requests'],
+    ['companion_requests_either_side_update','companion_requests'],
+    ['companion_requests_sender_delete','companion_requests'],
+    ['reports_reporter_read','reports'],
+    ['reports_reporter_insert','reports'],
+    ['conversations_participant_read','conversations'],
+    ['conversations_creator_insert','conversations'],
+    ['conversations_participant_update','conversations'],
+    ['conversations_creator_delete','conversations'],
+    ['messages_participant_read','messages'],
+    ['messages_sender_insert','messages'],
+    ['messages_sender_update','messages'],
+    ['messages_sender_delete','messages'],
+    ['playlist_subscribers_self_all','playlist_subscribers'],
+    ['playlist_collaborators_self_all','playlist_collaborators'],
+    ['playlist_collaborators_peer_read','playlist_collaborators']
+  ];
+  i int;
+BEGIN
+  FOR i IN 1 .. array_length(pols, 1) LOOP
+    IF to_regclass('public.' || quote_ident(pols[i][2])) IS NOT NULL THEN
+      EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I',
+        pols[i][1], pols[i][2]);
+    END IF;
+  END LOOP;
+END $$;
 
 -- Catch-all backstop: drop ANY remaining public.* policy whose expression
 -- still references clerk_user_id() (e.g. on a table not enumerated above).
@@ -989,23 +1002,35 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_twin_recommendations(UUID, UUID, INTEGER) TO authenticated;
 
 -- --- m35: trip helpers, admin/user helpers, notification/reaction/follow ----
+-- is_trip_member / can_edit_trip are LANGUAGE SQL, so their bodies are parsed
+-- and validated against public.trip_members at CREATE time (not deferred like
+-- plpgsql). On a DB that doesn't have trip_members this would RAISE
+-- "relation does not exist". Gate the whole rewrite on the table's existence.
+-- (We still drop the Clerk-era TEXT-signature variants unconditionally.)
 DROP FUNCTION IF EXISTS public.is_trip_member(UUID, TEXT);
-CREATE OR REPLACE FUNCTION public.is_trip_member(_trip_id UUID, _user_id UUID)
-RETURNS BOOLEAN LANGUAGE SQL STABLE SECURITY DEFINER SET search_path = public, pg_temp
-AS $$
-  SELECT EXISTS (SELECT 1 FROM public.trip_members
-    WHERE trip_id = _trip_id AND user_id = _user_id);
-$$;
-GRANT EXECUTE ON FUNCTION public.is_trip_member(UUID, UUID) TO authenticated;
-
 DROP FUNCTION IF EXISTS public.can_edit_trip(UUID, TEXT);
-CREATE OR REPLACE FUNCTION public.can_edit_trip(_trip_id UUID, _user_id UUID)
-RETURNS BOOLEAN LANGUAGE SQL STABLE SECURITY DEFINER SET search_path = public, pg_temp
-AS $$
-  SELECT EXISTS (SELECT 1 FROM public.trip_members
-    WHERE trip_id = _trip_id AND user_id = _user_id AND role IN ('owner', 'editor'));
-$$;
-GRANT EXECUTE ON FUNCTION public.can_edit_trip(UUID, UUID) TO authenticated;
+DO $do$
+BEGIN
+  IF to_regclass('public.trip_members') IS NULL THEN
+    RAISE NOTICE 'Skipping is_trip_member/can_edit_trip: public.trip_members is absent';
+    RETURN;
+  END IF;
+
+  EXECUTE $f$
+    CREATE OR REPLACE FUNCTION public.is_trip_member(_trip_id UUID, _user_id UUID)
+    RETURNS BOOLEAN LANGUAGE SQL STABLE SECURITY DEFINER SET search_path = public, pg_temp
+    AS 'SELECT EXISTS (SELECT 1 FROM public.trip_members WHERE trip_id = _trip_id AND user_id = _user_id)'
+  $f$;
+  EXECUTE 'GRANT EXECUTE ON FUNCTION public.is_trip_member(UUID, UUID) TO authenticated';
+
+  EXECUTE $f$
+    CREATE OR REPLACE FUNCTION public.can_edit_trip(_trip_id UUID, _user_id UUID)
+    RETURNS BOOLEAN LANGUAGE SQL STABLE SECURITY DEFINER SET search_path = public, pg_temp
+    AS 'SELECT EXISTS (SELECT 1 FROM public.trip_members WHERE trip_id = _trip_id AND user_id = _user_id AND role IN (''owner'', ''editor''))'
+  $f$;
+  EXECUTE 'GRANT EXECUTE ON FUNCTION public.can_edit_trip(UUID, UUID) TO authenticated';
+END
+$do$;
 
 DROP FUNCTION IF EXISTS public.soft_delete_user(TEXT);
 CREATE OR REPLACE FUNCTION public.soft_delete_user(p_user_id UUID)

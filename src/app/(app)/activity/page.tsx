@@ -153,9 +153,13 @@ export default function ActivityPage() {
                 <ActivityFeedItem
                   key={activity.id}
                   activity={activity}
+                  // Only rows targeted at me are notifications I can mark read
+                  // (RLS rejects is_read updates on anything else, so showing
+                  // the unread dot there would make it reappear on revisit).
+                  isUnread={!activity.is_read && activity.target_user_id === user?.id}
                   onMarkAsRead={(id) => {
                     markAsRead(id)
-                    if (!activity.is_read) decrementCount()
+                    decrementCount()
                   }}
                 />
               ))}

@@ -22,10 +22,17 @@ import type { ActivityFeedItemWithDetails } from '@/lib/hooks/useActivityFeed'
 
 interface ActivityFeedItemProps {
   activity: ActivityFeedItemWithDetails
+  /**
+   * Whether this item is an unread notification for the current user.
+   * RLS only permits flipping is_read on rows where target_user_id = viewer,
+   * so the unread treatment (and mark-as-read on click) must be limited to
+   * those rows — anything else would un-read itself on the next fetch.
+   */
+  isUnread?: boolean
   onMarkAsRead?: (activityId: string) => void
 }
 
-export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemProps) {
+export function ActivityFeedItem({ activity, isUnread = false, onMarkAsRead }: ActivityFeedItemProps) {
   const getActivityIcon = () => {
     switch (activity.activity_type) {
       case 'album_created':
@@ -178,7 +185,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
   }
 
   const handleClick = () => {
-    if (!activity.is_read && onMarkAsRead) {
+    if (isUnread && onMarkAsRead) {
       onMarkAsRead(activity.id)
     }
   }
@@ -187,7 +194,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
     <div
       className={`
         flex gap-3 p-4 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors cursor-pointer
-        ${!activity.is_read ? 'bg-olive-50/30 dark:bg-olive-950/20' : ''}
+        ${isUnread ? 'bg-olive-50/30 dark:bg-olive-950/20' : ''}
       `}
       onClick={handleClick}
     >
@@ -238,7 +245,7 @@ export function ActivityFeedItem({ activity, onMarkAsRead }: ActivityFeedItemPro
       )}
 
       {/* Unread Indicator */}
-      {!activity.is_read && (
+      {isUnread && (
         <div className="flex-shrink-0">
           <div className="w-2 h-2 bg-olive-600 rounded-full mt-2" />
         </div>

@@ -103,20 +103,20 @@ export function ReportDialog({
               exit={{ opacity: 0, scale: 0.95 }}
               className="flex flex-col items-center py-6 text-center"
             >
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-olive-100 dark:bg-olive-900/30">
-                <CheckCircle className="h-7 w-7 text-olive-600 dark:text-olive-400" />
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <CheckCircle className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-stone-900 dark:text-stone-100">
+              <h3 className="mb-2 font-heading text-lg font-semibold text-foreground">
                 Report Submitted
               </h3>
-              <p className="mb-6 max-w-sm text-sm text-stone-600 dark:text-stone-400">
+              <p className="mb-6 max-w-sm text-sm text-muted-foreground">
                 Thank you for helping keep our community safe. Our team will review your report
                 and take appropriate action.
               </p>
               <button
                 type="button"
                 onClick={() => handleOpenChange(false)}
-                className="rounded-lg bg-olive-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-olive-700 dark:bg-olive-700 dark:hover:bg-olive-600"
+                className="rounded-xl bg-primary px-6 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 Done
               </button>
@@ -130,14 +130,14 @@ export function ReportDialog({
             >
               <DialogHeader>
                 <div className="flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-olive-100 dark:bg-olive-900/30">
-                    <Flag className="h-5 w-5 text-olive-600 dark:text-olive-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                    <Flag className="h-5 w-5 text-primary" />
                   </div>
-                  <DialogTitle className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                  <DialogTitle className="font-heading text-lg font-semibold text-foreground">
                     Report {targetLabel}
                   </DialogTitle>
                 </div>
-                <DialogDescription className="pt-2 text-sm text-stone-600 dark:text-stone-400">
+                <DialogDescription className="pt-2 text-sm text-muted-foreground">
                   Select the reason that best describes why you are reporting this {targetLabel}.
                 </DialogDescription>
               </DialogHeader>
@@ -149,10 +149,10 @@ export function ReportDialog({
                   {REPORT_REASONS.map((option) => (
                     <label
                       key={option.value}
-                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${
                         selectedReason === option.value
-                          ? 'border-olive-500 bg-olive-50 dark:border-olive-400 dark:bg-olive-900/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50 dark:border-white/[0.1] dark:bg-[#1A1A1A] dark:hover:border-stone-600 dark:hover:bg-stone-750'
+                          ? 'border-primary/40 bg-primary/10'
+                          : 'border-border bg-card hover:border-primary/30 hover:bg-muted/60'
                       }`}
                     >
                       <input
@@ -161,13 +161,13 @@ export function ReportDialog({
                         value={option.value}
                         checked={selectedReason === option.value}
                         onChange={() => setSelectedReason(option.value)}
-                        className="mt-0.5 h-4 w-4 border-stone-300 text-olive-600 focus:ring-olive-500 dark:border-stone-600"
+                        className="mt-0.5 h-4 w-4 border-border text-primary focus:ring-ring"
                       />
                       <div className="flex-1">
-                        <span className="block text-sm font-medium text-stone-900 dark:text-stone-100">
+                        <span className="block text-sm font-medium text-foreground">
                           {option.label}
                         </span>
-                        <span className="block text-xs text-stone-500 dark:text-stone-400">
+                        <span className="block text-xs text-muted-foreground">
                           {option.description}
                         </span>
                       </div>
@@ -179,7 +179,7 @@ export function ReportDialog({
                 <div>
                   <label
                     htmlFor="report-description"
-                    className="mb-1.5 block text-sm font-medium text-stone-700 dark:text-stone-300"
+                    className="mb-1.5 block text-sm font-medium text-foreground"
                   >
                     Additional details (optional)
                   </label>
@@ -190,9 +190,9 @@ export function ReportDialog({
                     placeholder="Provide any additional context..."
                     maxLength={1000}
                     rows={3}
-                    className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-olive-500 focus:outline-none focus:ring-2 focus:ring-olive-500/20 dark:border-stone-600 dark:bg-[#1A1A1A] dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-olive-400 dark:focus:ring-olive-400/20"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
                   />
-                  <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {description.length}/1000 characters
                   </p>
                 </div>
@@ -203,7 +203,7 @@ export function ReportDialog({
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="text-sm text-red-600 dark:text-red-400"
+                      className="text-sm text-destructive"
                     >
                       {error}
                     </motion.p>
@@ -216,7 +216,7 @@ export function ReportDialog({
                   type="button"
                   onClick={() => handleOpenChange(false)}
                   disabled={isSubmitting}
-                  className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 disabled:opacity-50 dark:border-stone-600 dark:bg-[#1A1A1A] dark:text-stone-300 dark:hover:bg-stone-700"
+                  className="rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -224,7 +224,7 @@ export function ReportDialog({
                   type="button"
                   onClick={handleSubmit}
                   disabled={!selectedReason || isSubmitting}
-                  className="inline-flex items-center gap-2 rounded-lg bg-olive-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-olive-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-olive-700 dark:hover:bg-olive-600"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>

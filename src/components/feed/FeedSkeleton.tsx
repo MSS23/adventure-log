@@ -2,9 +2,10 @@
 
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * FeedSkeleton - Shimmer loading skeletons for the feed page
+ * FeedSkeleton - Loading skeletons for the feed page
  *
  * Provides smooth, animated loading states that match the feed card layout
  */
@@ -14,119 +15,56 @@ interface FeedSkeletonProps {
   className?: string
 }
 
-// Shimmer animation keyframes
-const shimmerVariants = {
-  initial: { x: '-100%' },
-  animate: {
-    x: '100%',
-    transition: {
-      repeat: Infinity,
-      duration: 1.5,
-      ease: 'linear' as const,
-    },
-  },
-}
-
-// Base shimmer component for reuse
-function ShimmerOverlay() {
-  return (
-    <motion.div
-      className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent"
-      variants={shimmerVariants}
-      initial="initial"
-      animate="animate"
-    />
-  )
-}
-
 // Individual feed card skeleton
 function FeedCardSkeleton({ index = 0 }: { index?: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.4 }}
-      style={{ background: 'var(--card)' }}
-      className="rounded-2xl border border-[color:var(--color-line-warm)] shadow-sm overflow-hidden"
+      transition={{ delay: index * 0.06, duration: 0.4 }}
+      className="rounded-2xl border border-border bg-card overflow-hidden"
     >
       {/* Header - User info */}
       <div className="flex items-center gap-3 p-4">
         {/* Avatar skeleton */}
-        <div className="relative overflow-hidden rounded-full w-10 h-10 bg-gradient-to-br from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06]">
-          <ShimmerOverlay />
-        </div>
+        <Skeleton className="h-10 w-10 rounded-full" />
         {/* Username and location */}
         <div className="flex-1 space-y-2">
-          <div className="relative overflow-hidden h-4 w-28 bg-gradient-to-r from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06] rounded-md">
-            <ShimmerOverlay />
-          </div>
-          <div className="relative overflow-hidden h-3 w-20 bg-gradient-to-r from-stone-100 dark:from-white/[0.06] to-stone-50 dark:to-white/[0.04] rounded-md">
-            <ShimmerOverlay />
-          </div>
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-3 w-20" />
         </div>
         {/* Menu dots */}
-        <div className="relative overflow-hidden h-6 w-6 bg-stone-100 dark:bg-white/[0.06] rounded-full">
-          <ShimmerOverlay />
-        </div>
+        <Skeleton className="h-6 w-6 rounded-full" />
       </div>
 
-      {/* Image skeleton - 4:5 aspect ratio */}
-      <div className="relative overflow-hidden aspect-[4/5] bg-gradient-to-br from-stone-200 dark:from-white/[0.08] via-stone-100 dark:via-white/[0.06] to-stone-200 dark:to-white/[0.08]">
-        <ShimmerOverlay />
-        {/* Simulated photo indicator dots */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className={cn(
-                'rounded-full bg-white/50',
-                i === 0 ? 'w-3 h-1.5' : 'w-1.5 h-1.5'
-              )}
-            />
-          ))}
-        </div>
-      </div>
+      {/* Image skeleton */}
+      <Skeleton className="aspect-[4/3] w-full rounded-none" />
 
       {/* Action buttons row */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-4">
           {/* Like, Comment, Share buttons */}
           {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="relative overflow-hidden h-7 w-7 bg-stone-100 dark:bg-white/[0.06] rounded-lg"
-            >
-              <ShimmerOverlay />
-            </div>
+            <Skeleton key={i} className="h-7 w-7 rounded-full" />
           ))}
         </div>
         {/* Bookmark button */}
-        <div className="relative overflow-hidden h-7 w-7 bg-stone-100 dark:bg-white/[0.06] rounded-lg">
-          <ShimmerOverlay />
-        </div>
+        <Skeleton className="h-7 w-7 rounded-full" />
       </div>
 
       {/* Content area */}
       <div className="px-4 pb-4 space-y-3">
         {/* Like count */}
-        <div className="relative overflow-hidden h-4 w-24 bg-gradient-to-r from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06] rounded-md">
-          <ShimmerOverlay />
-        </div>
+        <Skeleton className="h-4 w-24" />
 
         {/* Caption lines */}
         <div className="space-y-2">
-          <div className="relative overflow-hidden h-4 w-full bg-gradient-to-r from-stone-100 dark:from-white/[0.06] to-stone-50 dark:to-white/[0.04] rounded-md">
-            <ShimmerOverlay />
-          </div>
-          <div className="relative overflow-hidden h-4 w-3/4 bg-gradient-to-r from-stone-100 dark:from-white/[0.06] to-stone-50 dark:to-white/[0.04] rounded-md">
-            <ShimmerOverlay />
-          </div>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
         </div>
 
         {/* Date/time */}
-        <div className="relative overflow-hidden h-3 w-16 bg-stone-100 dark:bg-white/[0.06] rounded-md mt-2">
-          <ShimmerOverlay />
-        </div>
+        <Skeleton className="h-3 w-16" />
       </div>
     </motion.div>
   )
@@ -136,29 +74,20 @@ function FeedCardSkeleton({ index = 0 }: { index?: number }) {
 function CompactCardSkeleton({ index = 0 }: { index?: number }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.08, duration: 0.3 }}
-      style={{ background: 'var(--card)' }}
-      className="rounded-xl border border-[color:var(--color-line-warm)] shadow-sm overflow-hidden"
+      transition={{ delay: index * 0.05, duration: 0.3 }}
+      className="rounded-2xl border border-border bg-card overflow-hidden"
     >
       {/* Square image */}
-      <div className="relative overflow-hidden aspect-square bg-gradient-to-br from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06]">
-        <ShimmerOverlay />
-      </div>
+      <Skeleton className="aspect-square w-full rounded-none" />
 
       {/* Content */}
       <div className="p-3 space-y-2">
-        <div className="relative overflow-hidden h-4 w-full bg-gradient-to-r from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06] rounded-md">
-          <ShimmerOverlay />
-        </div>
+        <Skeleton className="h-4 w-full" />
         <div className="flex items-center gap-2">
-          <div className="relative overflow-hidden rounded-full w-5 h-5 bg-stone-200 dark:bg-white/[0.08]">
-            <ShimmerOverlay />
-          </div>
-          <div className="relative overflow-hidden h-3 w-16 bg-stone-100 dark:bg-white/[0.06] rounded-md">
-            <ShimmerOverlay />
-          </div>
+          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-3 w-16" />
         </div>
       </div>
     </motion.div>
@@ -210,15 +139,11 @@ export function ProfileStatsSkeleton() {
           key={i}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
+          transition={{ delay: i * 0.08 }}
           className="flex flex-col items-center gap-1"
         >
-          <div className="relative overflow-hidden h-6 w-10 bg-gradient-to-r from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06] rounded-md">
-            <ShimmerOverlay />
-          </div>
-          <div className="relative overflow-hidden h-3 w-16 bg-stone-100 dark:bg-white/[0.06] rounded-md">
-            <ShimmerOverlay />
-          </div>
+          <Skeleton className="h-6 w-10" />
+          <Skeleton className="h-3 w-16" />
         </motion.div>
       ))}
     </div>
@@ -231,24 +156,16 @@ export function CommentSkeleton({ index = 0 }: { index?: number }) {
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.08 }}
+      transition={{ delay: index * 0.06 }}
       className="flex gap-3 py-3"
     >
       {/* Avatar */}
-      <div className="relative overflow-hidden rounded-full w-8 h-8 bg-stone-200 dark:bg-white/[0.08] flex-shrink-0">
-        <ShimmerOverlay />
-      </div>
+      <Skeleton className="h-8 w-8 flex-shrink-0 rounded-full" />
       {/* Content */}
       <div className="flex-1 space-y-2">
-        <div className="relative overflow-hidden h-3.5 w-20 bg-stone-200 dark:bg-white/[0.08] rounded-md">
-          <ShimmerOverlay />
-        </div>
-        <div className="relative overflow-hidden h-3 w-full bg-stone-100 dark:bg-white/[0.06] rounded-md">
-          <ShimmerOverlay />
-        </div>
-        <div className="relative overflow-hidden h-3 w-2/3 bg-stone-100 dark:bg-white/[0.06] rounded-md">
-          <ShimmerOverlay />
-        </div>
+        <Skeleton className="h-3.5 w-20" />
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-2/3" />
       </div>
     </motion.div>
   )
@@ -257,7 +174,7 @@ export function CommentSkeleton({ index = 0 }: { index?: number }) {
 // Comments list skeleton
 export function CommentsListSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="divide-y divide-stone-50 dark:divide-white/[0.08]">
+    <div className="divide-y divide-border">
       {Array.from({ length: count }).map((_, i) => (
         <CommentSkeleton key={i} index={i} />
       ))}
@@ -286,11 +203,7 @@ export function LoadingSpinner({
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className={cn('rounded-full border-2', sizes[size])}
-        style={{
-          borderColor: 'var(--color-line-warm)',
-          borderTopColor: 'var(--color-forest)',
-        }}
+        className={cn('rounded-full border-2 border-muted border-t-primary', sizes[size])}
         animate={{ rotate: 360 }}
         transition={{
           duration: 1,
@@ -312,7 +225,7 @@ export function LoadingMore({ className }: { className?: string }) {
       className={cn('flex items-center justify-center gap-2 py-6', className)}
     >
       <LoadingSpinner size="sm" />
-      <span className="text-sm text-[color:var(--color-ink-soft)]">Loading more...</span>
+      <span className="text-sm text-muted-foreground">Loading more...</span>
     </motion.div>
   )
 }
@@ -338,10 +251,8 @@ export function PullToRefreshIndicator({
         <LoadingSpinner size="md" />
       ) : (
         <motion.div
-          className="w-6 h-6 rounded-full border-2"
+          className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent"
           style={{
-            borderColor: 'var(--color-forest)',
-            borderTopColor: 'transparent',
             rotate: `${progress * 360}deg`,
           }}
         />

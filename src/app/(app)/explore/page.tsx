@@ -24,24 +24,15 @@ function SectionHeader({
   href?: string
 }) {
   return (
-    <div className="flex items-end justify-between mb-5">
+    <div className="flex items-end justify-between gap-4 mb-4">
       <div>
-        <p className="al-eyebrow mb-1">{eyebrow}</p>
-        <h2
-          className="font-heading text-xl font-semibold"
-          style={{
-            color: 'var(--color-ink)',
-            letterSpacing: '-0.02em',
-          }}
-        >
-          {title}
-        </h2>
+        <p className="al-eyebrow mb-0.5">{eyebrow}</p>
+        <h2 className="al-display text-xl md:text-2xl">{title}</h2>
       </div>
       {href && (
         <Link
           href={href}
-          className="group flex items-center gap-0.5 text-[13px] font-semibold transition-colors"
-          style={{ color: 'var(--color-ink-soft)' }}
+          className="group flex items-center gap-0.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
         >
           View all
           <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -68,30 +59,22 @@ export default function ExplorePage() {
   const showDefaultContent = !searchQuery.trim()
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6">
+    <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 pb-24 md:pb-8 pt-6 md:pt-8">
       {/* Editorial header */}
-      <div className="mb-6">
-        <p className="al-eyebrow mb-1">Discover</p>
+      <header className="space-y-1 mb-6">
+        <p className="al-eyebrow">Discover</p>
         <h1 className="al-display text-3xl md:text-5xl leading-[1.02]">
           Where the world{' '}
-          <em className="italic font-normal" style={{ color: 'var(--color-coral)' }}>
-            is going.
-          </em>
+          <em className="italic font-normal text-accent">is going.</em>
         </h1>
-        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl">
+        <p className="text-sm text-muted-foreground max-w-xl">
           Destinations, journeys, and fellow adventurers.
         </p>
-      </div>
+      </header>
 
       {/* Search pill */}
-      <div
-        className="flex items-center gap-3 px-4 py-3 rounded-full mb-8"
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--color-line-warm)',
-        }}
-      >
-        <Search className="h-4 w-4 text-[color:var(--color-muted-warm)] pointer-events-none flex-shrink-0" />
+      <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-3 mb-8 transition-colors focus-within:border-ring">
+        <Search className="h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
         <input
           type="text"
           value={searchQuery}
@@ -99,12 +82,12 @@ export default function ExplorePage() {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder="Places, people, adventures…"
-          className="flex-1 bg-transparent border-none outline-none text-sm text-[color:var(--color-ink)] placeholder:text-[color:var(--color-muted-warm)]"
+          className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
         />
         {searchQuery ? (
           <button
             onClick={handleClearSearch}
-            className="text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Clear search"
           >
             <X className="h-4 w-4" />

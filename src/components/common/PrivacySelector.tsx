@@ -33,14 +33,14 @@ const privacyOptions: PrivacyOption[] = [
     label: 'Public',
     icon: <Globe className="w-4 h-4" />,
     description: 'Anyone can see this content',
-    color: 'text-green-600 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900/40 hover:bg-green-100 dark:hover:bg-green-950/50'
+    color: 'text-primary border-primary/20 bg-primary/10 hover:bg-primary/15'
   },
   {
     value: 'friends',
     label: 'Friends',
     icon: <Users className="w-4 h-4" />,
     description: 'Only your friends can see this content',
-    color: 'text-olive-600 border-olive-200 bg-olive-50 dark:bg-olive-950/20 dark:border-white/[0.08] hover:bg-olive-100 dark:hover:bg-olive-950/30'
+    color: 'text-[color:var(--color-sky)] border-[color:var(--color-sky)]/25 bg-[color:var(--color-sky-tint)] hover:bg-[color:var(--color-sky)]/20'
   },
   {
     value: 'private',
@@ -48,7 +48,7 @@ const privacyOptions: PrivacyOption[] = [
     icon: <Lock className="w-4 h-4" />,
     description: 'Only you can see this content',
     badge: 'Default',
-    color: 'text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/[0.10] bg-stone-50 dark:bg-white/[0.04] hover:bg-stone-100 dark:hover:bg-white/[0.06]'
+    color: 'text-muted-foreground border-border bg-muted hover:bg-muted/70'
   }
 ]
 
@@ -251,16 +251,16 @@ export function PrivacyInfo({ className = "" }: { className?: string }) {
   return (
     <div className={cn("space-y-2 text-sm text-muted-foreground", className)}>
       <div className="flex items-start gap-2">
-        <Info className="w-4 h-4 mt-0.5 text-olive-500" />
+        <Info className="w-4 h-4 mt-0.5 text-primary" />
         <div>
           <p className="font-medium text-foreground mb-1">Privacy Settings</p>
           <ul className="space-y-1 text-xs">
             <li className="flex items-center gap-2">
-              <Globe className="w-3 h-3 text-green-600" />
+              <Globe className="w-3 h-3 text-primary" />
               <span><strong>Public:</strong> Visible to everyone on Adventure Log</span>
             </li>
             <li className="flex items-center gap-2">
-              <Users className="w-3 h-3 text-olive-600" />
+              <Users className="w-3 h-3 text-[color:var(--color-sky)]" />
               <span><strong>Friends:</strong> Only visible to your accepted friends</span>
             </li>
             <li className="flex items-center gap-2">

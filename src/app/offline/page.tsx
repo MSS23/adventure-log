@@ -30,14 +30,14 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
+      staggerChildren: 0.06,
+      delayChildren: 0.1
     }
   }
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
@@ -105,7 +105,7 @@ export default function OfflinePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-olive-50 to-olive-100 dark:from-black dark:to-[#111111] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <motion.div
         className="max-w-2xl w-full space-y-6"
         variants={prefersReducedMotion ? {} : containerVariants}
@@ -114,15 +114,10 @@ export default function OfflinePage() {
       >
         {/* Main Offline Card */}
         <motion.div variants={prefersReducedMotion ? {} : itemVariants}>
-          <Card className="bg-white/80 dark:bg-[#111111]/90 backdrop-blur-sm border-0 dark:border dark:border-white/[0.1] shadow-2xl overflow-hidden">
+          <Card className="overflow-hidden">
             <CardHeader className="text-center pb-6">
-              {/* Animated Icon */}
-              <motion.div
-                className="mx-auto w-20 h-20 bg-gradient-to-br from-olive-500 to-olive-600 rounded-full flex items-center justify-center mb-4 relative"
-                initial={prefersReducedMotion ? {} : { scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring' as const, stiffness: 200, damping: 15, delay: 0.3 }}
-              >
+              {/* Status icon */}
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <AnimatePresence mode="wait">
                   {isOnline ? (
                     <motion.div
@@ -131,7 +126,7 @@ export default function OfflinePage() {
                       animate={{ scale: 1 }}
                       exit={prefersReducedMotion ? {} : { scale: 0 }}
                     >
-                      <Wifi className="h-10 w-10 text-white" />
+                      <Wifi className="h-8 w-8" />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -140,113 +135,71 @@ export default function OfflinePage() {
                       animate={{ scale: 1 }}
                       exit={prefersReducedMotion ? {} : { scale: 0 }}
                     >
-                      <WifiOff className="h-10 w-10 text-white" />
+                      <WifiOff className="h-8 w-8" />
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
 
-                {/* Pulsing ring animation when offline */}
-                {!isOnline && !prefersReducedMotion && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full border-4 border-olive-400"
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      opacity: [0.5, 0, 0.5]
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                )}
-              </motion.div>
-
-              <motion.div
-                initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <CardTitle className="text-3xl font-bold text-stone-900 dark:text-white">
+              <div>
+                <CardTitle className="al-display text-3xl">
                   {isOnline ? 'Back Online!' : "You're Offline"}
                 </CardTitle>
-                <CardDescription className="text-lg text-stone-800 dark:text-stone-300 mt-2">
+                <CardDescription className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mt-2">
                   {isOnline
                     ? 'Connection restored. Redirecting you back...'
                     : 'No internet connection detected. Some features are still available!'
                   }
                 </CardDescription>
-              </motion.div>
+              </div>
 
               {/* Connection Status */}
-              <motion.div
-                className="flex items-center justify-center gap-2 mt-4"
-                initial={prefersReducedMotion ? {} : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                <motion.div
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <span
                   className={cn(
-                    "w-3 h-3 rounded-full",
-                    isOnline ? "bg-green-500" : "bg-red-500"
+                    "h-2.5 w-2.5 rounded-full",
+                    isOnline ? "bg-primary" : "bg-destructive"
                   )}
-                  animate={!isOnline && !prefersReducedMotion ? { scale: [1, 1.2, 1] } : {}}
-                  transition={{ duration: 1.5, repeat: Infinity }}
+                  aria-hidden
                 />
-                <span className="text-sm text-stone-800 dark:text-stone-300">
+                <span className="text-xs font-mono tracking-wide text-muted-foreground">
                   {isOnline ? 'Connected' : 'Disconnected'}
                   {connectionType !== 'unknown' && ` • ${connectionType}`}
                 </span>
-              </motion.div>
+              </div>
             </CardHeader>
 
             <CardContent className="space-y-6">
               {/* Retry Section */}
-              <motion.div
-                className="text-center"
-                initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <motion.div
-                  whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                  whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+              <div className="text-center">
+                <Button
+                  onClick={handleRetry}
+                  disabled={isRetrying || isOnline}
+                  size="lg"
+                  className="cursor-pointer"
                 >
-                  <Button
-                    onClick={handleRetry}
-                    disabled={isRetrying || isOnline}
-                    size="lg"
-                    className="cursor-pointer bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
-                  >
-                    {isRetrying ? (
-                      <>
-                        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                        Checking Connection...
-                      </>
-                    ) : isOnline ? (
-                      <>
-                        <CheckCircle className="h-5 w-5 mr-2" />
-                        Reconnected!
-                      </>
-                    ) : (
-                      <>
-                        <motion.div
-                          animate={prefersReducedMotion ? {} : { rotate: [0, 360] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                          style={{ display: 'inline-flex' }}
-                        >
-                          <RefreshCw className="h-5 w-5 mr-2" />
-                        </motion.div>
-                        Try Again
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
+                  {isRetrying ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                      Checking Connection...
+                    </>
+                  ) : isOnline ? (
+                    <>
+                      <CheckCircle className="h-5 w-5 mr-2" />
+                      Reconnected!
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-5 w-5 mr-2" />
+                      Try Again
+                    </>
+                  )}
+                </Button>
 
                 <AnimatePresence>
                   {retryCount > 0 && !isOnline && (
                     <motion.p
-                      className="text-sm text-stone-800 dark:text-stone-300 mt-2"
+                      className="text-sm text-muted-foreground mt-2"
                       initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
@@ -255,38 +208,33 @@ export default function OfflinePage() {
                     </motion.p>
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </div>
 
               {/* Offline Data Status */}
               <AnimatePresence>
                 {totalPending > 0 && (
                   <motion.div
-                    className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg p-4"
+                    className="rounded-xl bg-muted/50 p-4"
                     initial={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
                     transition={transitions.natural}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <motion.div
-                        animate={prefersReducedMotion ? {} : { rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
-                        <Clock className="h-5 w-5 text-olive-600" />
-                      </motion.div>
-                      <h3 className="font-semibold text-olive-900 dark:text-olive-100">Pending Sync</h3>
+                      <Clock className="h-5 w-5 text-primary" />
+                      <h3 className="font-heading text-base font-semibold text-foreground">Pending Sync</h3>
                     </div>
-                    <p className="text-sm text-olive-800 dark:text-olive-200 mb-3">
+                    <p className="text-sm text-muted-foreground mb-3">
                       You have {totalPending} item{totalPending !== 1 ? 's' : ''} waiting to sync when you&apos;re back online.
                     </p>
                     <div className="flex gap-2">
                       {offlineCount.albums > 0 && (
-                        <Badge variant="outline" className="text-olive-700 border-olive-300">
+                        <Badge variant="secondary">
                           {offlineCount.albums} Album{offlineCount.albums !== 1 ? 's' : ''}
                         </Badge>
                       )}
                       {offlineCount.photos > 0 && (
-                        <Badge variant="outline" className="text-olive-700 border-olive-300">
+                        <Badge variant="secondary">
                           {offlineCount.photos} Photo{offlineCount.photos !== 1 ? 's' : ''}
                         </Badge>
                       )}
@@ -296,12 +244,8 @@ export default function OfflinePage() {
               </AnimatePresence>
 
               {/* Available Features */}
-              <motion.div
-                initial={prefersReducedMotion ? {} : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
-              >
-                <h3 className="font-semibold text-stone-900 dark:text-white mb-4 flex items-center gap-2">
+              <div>
+                <h3 className="font-heading text-base font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Smartphone className="h-5 w-5" />
                   What You Can Still Do
                 </h3>
@@ -310,149 +254,94 @@ export default function OfflinePage() {
                   {features.map((feature, index) => {
                     const Icon = feature.icon
                     return (
-                      <motion.div
+                      <div
                         key={index}
                         className={cn(
-                          "flex items-center gap-3 p-3 rounded-lg border",
-                          feature.available
-                            ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
-                            : "bg-stone-50 dark:bg-stone-900/30 border-stone-200 dark:border-stone-700"
+                          "flex items-center gap-3 rounded-xl p-3",
+                          feature.available ? "bg-primary/10" : "bg-muted/50"
                         )}
-                        initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.8 + index * 0.1 }}
-                        whileHover={prefersReducedMotion ? {} : { x: 4 }}
                       >
-                        <motion.div
+                        <div
                           className={cn(
-                            "p-2 rounded-lg",
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
                             feature.available
-                              ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
-                              : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-400"
+                              ? "bg-primary/10 text-primary"
+                              : "bg-muted text-muted-foreground"
                           )}
-                          initial={prefersReducedMotion ? {} : { scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.9 + index * 0.1, type: 'spring' as const }}
                         >
                           <Icon className="h-4 w-4" />
-                        </motion.div>
+                        </div>
 
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <h4 className={cn(
-                              "font-medium text-sm",
-                              feature.available ? "text-green-900 dark:text-green-100" : "text-stone-800 dark:text-stone-300"
-                            )}>
+                            <h4 className="font-medium text-sm text-foreground">
                               {feature.title}
                             </h4>
-                            <motion.div
-                              initial={prefersReducedMotion ? {} : { scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={{ delay: 1 + index * 0.1, type: 'spring' as const }}
-                            >
-                              {feature.available ? (
-                                <CheckCircle className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <AlertCircle className="h-4 w-4 text-stone-700 dark:text-stone-400" />
-                              )}
-                            </motion.div>
+                            {feature.available ? (
+                              <CheckCircle className="h-4 w-4 text-primary" />
+                            ) : (
+                              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                            )}
                           </div>
-                          <p className={cn(
-                            "text-sm",
-                            feature.available ? "text-green-700 dark:text-green-300" : "text-stone-800 dark:text-stone-300"
-                          )}>
+                          <p className="text-sm text-muted-foreground">
                             {feature.description}
                           </p>
                         </div>
-                      </motion.div>
+                      </div>
                     )
                   })}
                 </div>
-              </motion.div>
+              </div>
 
               {/* Tips */}
-              <motion.div
-                className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg p-4"
-                initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2 }}
-              >
-                <h3 className="font-semibold text-olive-900 dark:text-olive-100 mb-2">Tips while offline:</h3>
-                <ul className="text-sm text-olive-800 dark:text-olive-200 space-y-1">
+              <div className="rounded-xl bg-muted/50 p-4">
+                <h3 className="font-heading text-base font-semibold text-foreground mb-2">Tips while offline:</h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
                   {[
                     'Your data will automatically sync when reconnected',
                     'Previously viewed content may still be accessible',
                     'Try moving to a different location for better signal',
                     'Check your Wi-Fi or mobile data settings'
                   ].map((tip, i) => (
-                    <motion.li
-                      key={i}
-                      initial={prefersReducedMotion ? {} : { opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 1.3 + i * 0.05 }}
-                    >
-                      • {tip}
-                    </motion.li>
+                    <li key={i}>• {tip}</li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
 
               {/* Navigation */}
-              <motion.div
-                className="flex flex-col sm:flex-row gap-3 pt-4"
-                initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.4 }}
-              >
-                <motion.div
-                  className="flex-1"
-                  whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => router.back()}
+                  className="cursor-pointer flex-1"
                 >
-                  <Button
-                    variant="outline"
-                    onClick={() => router.back()}
-                    className="cursor-pointer w-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
-                  >
-                    Go Back
-                  </Button>
-                </motion.div>
-                <motion.div
-                  className="flex-1"
-                  whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                  Go Back
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/profile')}
+                  className="cursor-pointer flex-1"
                 >
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push('/profile')}
-                    className="cursor-pointer w-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
-                  >
-                    Try Dashboard
-                  </Button>
-                </motion.div>
-              </motion.div>
+                  Try Dashboard
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
 
         {/* Connection Help */}
         <motion.div variants={prefersReducedMotion ? {} : itemVariants}>
-          <Card className="bg-white/60 dark:bg-[#111111]/60 backdrop-blur-sm border-0 dark:border dark:border-white/[0.1]">
+          <Card>
             <CardContent className="p-4">
-              <h4 className="font-medium text-stone-900 dark:text-white mb-2">Need help getting back online?</h4>
-              <div className="text-sm text-stone-800 dark:text-stone-300 space-y-1">
+              <h4 className="font-heading text-base font-semibold text-foreground mb-2">Need help getting back online?</h4>
+              <div className="text-sm text-muted-foreground space-y-1">
                 {[
                   'Check your internet connection',
                   'Restart your router or mobile data',
                   'Move to an area with better signal strength',
                   'Contact your internet service provider if issues persist'
                 ].map((help, i) => (
-                  <motion.p
-                    key={i}
-                    initial={prefersReducedMotion ? {} : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.5 + i * 0.05 }}
-                  >
-                    • {help}
-                  </motion.p>
+                  <p key={i}>• {help}</p>
                 ))}
               </div>
             </CardContent>

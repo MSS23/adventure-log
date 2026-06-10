@@ -21,7 +21,7 @@ export function Shimmer({
   return (
     <div
       className={cn(
-        'bg-stone-200 dark:bg-white/[0.08] rounded-md',
+        'bg-muted rounded-md',
         shimmerClass,
         className
       )}
@@ -107,7 +107,7 @@ export function FeedShimmer({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonItem
           key={i}
-          className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] shadow-sm overflow-hidden"
+          className="bg-card rounded-xl border border-border overflow-hidden"
         >
           {/* Header */}
           <div className="p-4 flex items-center gap-3">
@@ -148,7 +148,7 @@ export function ProfileHeaderShimmer() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-white dark:bg-[#1B170E] rounded-2xl border border-stone-100 dark:border-white/[0.08] shadow-sm p-6"
+      className="bg-card rounded-2xl border border-border p-6"
     >
       <div className="flex flex-col md:flex-row items-start gap-6">
         <Shimmer className="h-24 w-24 rounded-full flex-shrink-0" />
@@ -177,7 +177,7 @@ export function DashboardStatsShimmer() {
       {Array.from({ length: 4 }).map((_, i) => (
         <SkeletonItem
           key={i}
-          className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] shadow-sm p-5"
+          className="bg-card rounded-xl border border-border p-5"
         >
           <div className="flex flex-col items-center space-y-3">
             <Shimmer className="h-10 w-10 rounded-lg" />
@@ -197,7 +197,7 @@ export function GlobeShimmer() {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="relative w-full h-[600px] bg-gradient-to-b from-stone-900 via-slate-800 to-stone-900 rounded-2xl flex items-center justify-center overflow-hidden"
+      className="relative w-full h-[600px] bg-gradient-to-b from-[#1F1C12] via-[#2C2619] to-[#1F1C12] rounded-2xl flex items-center justify-center overflow-hidden"
     >
       {/* Animated globe placeholder */}
       <motion.div
@@ -235,7 +235,7 @@ export function SearchResultsShimmer({ count = 6 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonItem
           key={i}
-          className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] shadow-sm overflow-hidden"
+          className="bg-card rounded-xl border border-border overflow-hidden"
         >
           <Shimmer className="aspect-[4/3]" />
           <div className="p-4 space-y-3">
@@ -258,7 +258,7 @@ export function CardShimmer({ className }: { className?: string }) {
   return (
     <motion.div
       className={cn(
-        'bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] shadow-sm overflow-hidden',
+        'bg-card rounded-xl border border-border overflow-hidden',
         className
       )}
       initial={{ opacity: 0 }}

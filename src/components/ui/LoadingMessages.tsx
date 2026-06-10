@@ -100,7 +100,7 @@ export function LoadingMessage({
 
   if (prefersReducedMotion || !animate) {
     return (
-      <div className={cn('flex items-center gap-2 text-stone-600 dark:text-stone-400', sizeClasses[size], className)}>
+      <div className={cn('flex items-center gap-2 text-muted-foreground', sizeClasses[size], className)}>
         {showIcon && <CurrentIcon className={cn(iconSizes[size], 'text-olive-500')} />}
         <span>{currentMessage}</span>
       </div>
@@ -126,7 +126,7 @@ export function LoadingMessage({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="text-stone-600 dark:text-stone-400"
+          className="text-muted-foreground"
         >
           {currentMessage}
         </motion.span>
@@ -262,7 +262,7 @@ export function TravelLoadingOverlay({
             )}
 
             {message ? (
-              <p className="text-lg text-stone-600 dark:text-stone-400">{message}</p>
+              <p className="text-lg text-muted-foreground">{message}</p>
             ) : (
               <LoadingMessage context={context} size="lg" />
             )}

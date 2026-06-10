@@ -124,10 +124,10 @@ export function EnhancedPhotoCarousel({
 
   if (!photos || photos.length === 0) {
     return (
-      <div className={cn('relative aspect-[4/5] bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-200 dark:to-white/[0.08] rounded-lg overflow-hidden', className)}>
+      <div className={cn('relative aspect-[4/5] bg-muted rounded-2xl overflow-hidden', className)}>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <Camera className="h-16 w-16 text-stone-300 dark:text-stone-600 mb-3" />
-          <p className="text-sm text-stone-400 dark:text-stone-500 font-medium">No photos</p>
+          <Camera className="h-12 w-12 text-primary/40 mb-3" />
+          <p className="text-sm text-muted-foreground font-medium">No photos</p>
         </div>
       </div>
     )
@@ -158,10 +158,10 @@ export function EnhancedPhotoCarousel({
   }
 
   return (
-    <div className={cn('relative group rounded-lg overflow-hidden', className)}>
+    <div className={cn('relative group rounded-2xl overflow-hidden', className)}>
       {/* Main photo area */}
       <div
-        className="relative aspect-[4/5] bg-stone-900 overflow-hidden"
+        className="relative aspect-[4/5] bg-muted overflow-hidden"
         onClick={handleTap}
       >
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
@@ -200,9 +200,9 @@ export function EnhancedPhotoCarousel({
                 draggable={false}
               />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-200 dark:to-white/[0.08]">
-                <Camera className="h-16 w-16 text-stone-300 dark:text-stone-600 mb-3" />
-                <p className="text-sm text-stone-400 dark:text-stone-500 font-medium">No image</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted">
+                <Camera className="h-12 w-12 text-primary/40 mb-3" />
+                <p className="text-sm text-muted-foreground font-medium">No image</p>
               </div>
             )}
           </motion.div>
@@ -254,7 +254,7 @@ export function EnhancedPhotoCarousel({
               e.stopPropagation()
               prevPhoto()
             }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 dark:bg-[#1B170E] shadow-lg hover:bg-white dark:hover:bg-white/[0.08] text-stone-800 dark:text-stone-200 flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/55 hover:bg-black/70 text-white flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
             aria-label="Previous photo"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -274,7 +274,7 @@ export function EnhancedPhotoCarousel({
               e.stopPropagation()
               nextPhoto()
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 dark:bg-[#1B170E] shadow-lg hover:bg-white dark:hover:bg-white/[0.08] text-stone-800 dark:text-stone-200 flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/55 hover:bg-black/70 text-white flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
             aria-label="Next photo"
           >
             <ChevronRight className="h-5 w-5" />
@@ -309,7 +309,7 @@ export function EnhancedPhotoCarousel({
       {/* Caption (if available) */}
       {currentPhoto.caption && (
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 pt-12"
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent p-4 pt-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}

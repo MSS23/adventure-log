@@ -65,7 +65,7 @@ export function PhotoUploadSection({
             onClick={onTakePhoto}
           >
             <div className="flex flex-col items-center gap-2">
-              <Camera className="h-6 w-6 text-olive-600" />
+              <Camera className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Take Photo</span>
             </div>
           </EnhancedButton>
@@ -76,7 +76,7 @@ export function PhotoUploadSection({
             onClick={onSelectFromGallery}
           >
             <div className="flex flex-col items-center gap-2">
-              <Plus className="h-6 w-6 text-olive-600" />
+              <Plus className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">Gallery</span>
             </div>
           </EnhancedButton>
@@ -90,9 +90,9 @@ export function PhotoUploadSection({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2 px-3 py-2 bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800/40 rounded-lg text-sm text-olive-700 dark:text-olive-300"
+            className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 rounded-xl text-sm text-primary"
           >
-            <div className="h-4 w-4 border-2 border-olive-500 border-t-transparent rounded-full animate-spin" />
+            <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
             Extracting location from photo GPS data...
           </motion.div>
         )}
@@ -105,7 +105,7 @@ export function PhotoUploadSection({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 rounded-lg text-sm text-emerald-700 dark:text-emerald-300"
+            className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/20 rounded-xl text-sm text-primary"
           >
             <MapPin className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">Location detected: {albumLocation.display_name?.split(',').slice(0, 2).join(',')}</span>
@@ -120,12 +120,12 @@ export function PhotoUploadSection({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-lg p-3 text-sm"
+            className="bg-[color:var(--color-gold)]/15 border border-[color:var(--color-gold)]/25 rounded-xl p-3 text-sm"
           >
-            <p className="font-medium text-amber-800 dark:text-amber-300 mb-1">
+            <p className="font-medium text-[color:var(--color-gold)] mb-1">
               A few photos couldn&apos;t be added:
             </p>
-            <ul className="text-amber-700 dark:text-amber-400 text-xs space-y-0.5">
+            <ul className="text-[color:var(--color-gold)] text-xs space-y-0.5">
               {fileErrors.slice(0, 3).map((err, i) => (
                 <li key={i}>{err}</li>
               ))}
@@ -133,13 +133,13 @@ export function PhotoUploadSection({
                 <li>…and {fileErrors.length - 3} more</li>
               )}
             </ul>
-            <p className="text-amber-700/80 dark:text-amber-400/80 text-xs mt-1.5">
+            <p className="text-[color:var(--color-gold)]/80 text-xs mt-1.5">
               Photos must be JPEG, PNG, WebP or GIF and under 10&nbsp;MB.
             </p>
             <button
               type="button"
               onClick={onClearFileErrors}
-              className="text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-200 text-xs mt-2 underline cursor-pointer transition-all duration-200"
+              className="text-[color:var(--color-gold)] hover:opacity-80 text-xs mt-2 underline cursor-pointer transition-all duration-200"
             >
               Dismiss
             </button>
@@ -156,7 +156,7 @@ export function PhotoUploadSection({
             exit={{ opacity: 0 }}
           >
             {photos.length > 1 && (
-              <p className="text-sm text-stone-600 dark:text-stone-400 mb-3">
+              <p className="text-sm text-muted-foreground mb-3">
                 Tap a photo to make it your cover. The cover shows on your album and the globe.
               </p>
             )}
@@ -174,7 +174,7 @@ export function PhotoUploadSection({
                   className={cn(
                     "relative aspect-square group cursor-pointer rounded-xl overflow-hidden transition-all",
                     selectedCoverIndex === index
-                      ? "ring-2 ring-olive-500 ring-offset-2"
+                      ? "ring-2 ring-ring ring-offset-2 ring-offset-background"
                       : "hover:opacity-90"
                   )}
                   onClick={() => onSelectCover(index)}
@@ -194,7 +194,7 @@ export function PhotoUploadSection({
                         <motion.div
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="absolute top-1.5 left-1.5 bg-olive-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg"
+                          className="absolute top-1.5 left-1.5 bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full shadow-sm"
                         >
                           Cover
                         </motion.div>

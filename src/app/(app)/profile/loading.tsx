@@ -2,7 +2,7 @@ import { ProfileHeaderSkeleton, AlbumGridSkeleton } from '@/components/ui/skelet
 
 export default function ProfileLoading() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-8">
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
       <ProfileHeaderSkeleton />
       <AlbumGridSkeleton />
     </div>

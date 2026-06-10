@@ -94,18 +94,18 @@ export function FeedFilters({
               key={option.id}
               onClick={() => handleFilterClick(option.id)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
-                'border shadow-sm',
+                'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
+                'border',
                 isActive
-                  ? 'bg-olive-500 text-white border-olive-500 shadow-olive-500/25'
-                  : 'bg-white dark:bg-[#1B170E] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-white/[0.10] hover:border-olive-300 dark:hover:border-white/[0.12] hover:bg-olive-50 dark:hover:bg-white/[0.06]'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card text-muted-foreground border-border hover:border-primary/30 hover:bg-muted hover:text-foreground'
               )}
               whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               aria-pressed={isActive}
               title={option.description}
             >
-              <Icon className={cn('h-4 w-4', isActive ? 'text-white' : 'text-stone-500 dark:text-stone-400')} />
+              <Icon className={cn('h-4 w-4', isActive ? 'text-primary-foreground' : 'text-muted-foreground')} />
               <span>{option.label}</span>
             </motion.button>
           )
@@ -117,9 +117,9 @@ export function FeedFilters({
             <motion.button
               onClick={() => setShowSortMenu(!showSortMenu)}
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium',
-                'border border-stone-200 dark:border-white/[0.10] bg-white dark:bg-[#1B170E] hover:bg-stone-50 dark:hover:bg-white/[0.06] text-stone-600 dark:text-stone-400',
-                showSortMenu && 'bg-stone-100 dark:bg-white/[0.06]'
+                'flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors duration-200',
+                'border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground',
+                showSortMenu && 'bg-muted text-foreground'
               )}
               whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
             >
@@ -135,7 +135,7 @@ export function FeedFilters({
                   onClick={() => setShowSortMenu(false)}
                 />
                 <motion.div
-                  className="absolute right-0 top-full mt-2 bg-white dark:bg-[#1B170E] rounded-xl shadow-lg border border-stone-200 dark:border-white/[0.10] py-2 z-20 min-w-[160px]"
+                  className="absolute right-0 top-full mt-2 bg-card rounded-xl shadow-lg border border-border py-2 z-20 min-w-[160px]"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.15 }}
@@ -147,8 +147,8 @@ export function FeedFilters({
                       className={cn(
                         'w-full px-4 py-2 text-left text-sm transition-colors',
                         activeSort === option.id
-                          ? 'bg-olive-50 dark:bg-olive-950/30 text-olive-700 font-medium'
-                          : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/[0.06]'
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'text-foreground hover:bg-muted'
                       )}
                     >
                       {option.label}
@@ -166,17 +166,17 @@ export function FeedFilters({
         <motion.div
           initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-3 py-2 bg-olive-50 dark:bg-olive-950/20 rounded-lg border border-olive-100 dark:border-white/[0.08]"
+          className="flex items-center justify-between px-3 py-2 bg-primary/10 rounded-xl border border-primary/20"
         >
-          <span className="text-sm text-olive-700">
+          <span className="text-sm text-primary">
             {filterOptions.find((f) => f.id === activeFilter)?.description}
           </span>
           <button
             onClick={() => onFilterChange('all')}
-            className="p-1 hover:bg-olive-100 dark:hover:bg-white/[0.06] rounded-full transition-colors"
+            className="p-1 hover:bg-primary/15 rounded-full transition-colors"
             aria-label="Clear filter"
           >
-            <X className="h-4 w-4 text-olive-600" />
+            <X className="h-4 w-4 text-primary" />
           </button>
         </motion.div>
       )}
@@ -211,10 +211,10 @@ export function FeedFiltersMobile({
               onFilterChange(option.id)
             }}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap',
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors duration-200',
               isActive
-                ? 'bg-olive-500 text-white'
-                : 'bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-white/[0.08]'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground'
             )}
             whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
           >

@@ -1,22 +1,29 @@
+import { Skeleton } from '@/components/ui/skeleton'
+
 export default function TripsLoading() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="h-8 w-32 bg-olive-100 dark:bg-white/[0.05] rounded animate-pulse" />
-        <div className="h-10 w-28 bg-olive-100 dark:bg-white/[0.05] rounded-lg animate-pulse" />
+    <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-10 w-28 rounded-full" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-white dark:bg-[#111111] rounded-2xl overflow-hidden shadow-sm">
-            <div className="aspect-[16/9] bg-olive-100 dark:bg-white/[0.05] animate-pulse" />
-            <div className="p-4 space-y-2">
-              <div className="h-4 w-3/4 bg-olive-100 dark:bg-white/[0.05] rounded animate-pulse" />
-              <div className="h-3 w-1/2 bg-olive-100 dark:bg-white/[0.05] rounded animate-pulse" />
-              <div className="flex items-center gap-2 pt-1">
-                <div className="h-3 w-3 bg-olive-100 dark:bg-white/[0.05] rounded-full animate-pulse" />
-                <div className="h-3 w-16 bg-olive-100 dark:bg-white/[0.05] rounded animate-pulse" />
-              </div>
+          <div key={i} className="rounded-2xl border border-border bg-card p-5 space-y-4">
+            <div className="flex items-start justify-between">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <Skeleton className="h-5 w-14 rounded-full" />
+            </div>
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <div className="flex items-center gap-3 pt-3 border-t border-border">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-3 w-12" />
             </div>
           </div>
         ))}

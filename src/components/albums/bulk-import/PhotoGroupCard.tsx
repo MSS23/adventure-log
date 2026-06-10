@@ -39,14 +39,14 @@ export function PhotoGroupCard({
   onMerge,
 }: PhotoGroupCardProps) {
   return (
-    <Card className="bg-white dark:bg-[#111111] border-stone-200/50 dark:border-stone-800/50 overflow-hidden">
+    <Card className="overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <Badge
                 variant="secondary"
-                className="bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-300 text-xs"
+                className="bg-primary/10 text-primary border border-primary/20 text-xs"
               >
                 {group.photos.length} photo{group.photos.length !== 1 ? 's' : ''}
               </Badge>
@@ -61,10 +61,10 @@ export function PhotoGroupCard({
               type="text"
               value={group.name}
               onChange={(e) => onRename(group.id, e.target.value)}
-              className="text-lg font-semibold text-stone-900 dark:text-stone-100 bg-transparent border-none outline-none w-full focus:ring-0 p-0 placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="font-heading text-lg font-semibold text-foreground bg-transparent border-none outline-none w-full focus:ring-0 p-0 placeholder:text-muted-foreground"
               placeholder="Album name..."
             />
-            <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-stone-500 dark:text-stone-400">
+            <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
               {group.locationName !== 'No location data' && group.locationName !== 'Loading...' && (
                 <span className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
@@ -108,7 +108,7 @@ export function PhotoGroupCard({
                   onMerge(mergeTarget, group.id)
                   onSetMergeTarget(null)
                 }}
-                className="h-8 text-xs bg-olive-600 hover:bg-olive-700 cursor-pointer transition-all duration-200 active:scale-[0.97]"
+                className="h-8 text-xs cursor-pointer"
               >
                 Merge here
               </Button>
@@ -122,7 +122,7 @@ export function PhotoGroupCard({
                   onRemoveGroup(group.id)
                 }
               }}
-              className="h-8 w-8 p-0 text-red-500 hover:text-red-600 cursor-pointer transition-all duration-200 active:scale-[0.90]"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive cursor-pointer transition-all duration-200 active:scale-[0.90]"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

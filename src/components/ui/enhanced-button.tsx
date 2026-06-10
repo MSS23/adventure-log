@@ -8,25 +8,25 @@ import { cn } from '@/lib/utils'
 import { transitions } from '@/lib/animations/spring-configs'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-base font-medium transition-colors duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-offset-2',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-base font-medium transition-colors duration-200 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:ring-offset-2',
   {
     variants: {
       variant: {
-        default: 'bg-olive-600 text-white hover:bg-olive-700 shadow-sm hover:shadow-md',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md',
         destructive:
-          'bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow-md focus-visible:ring-red-500/20',
+          'bg-destructive text-white hover:bg-destructive/90 shadow-sm hover:shadow-md focus-visible:ring-destructive/40',
         outline:
-          'border border-stone-300 dark:border-white/[0.14] bg-white dark:bg-[#1B170E] shadow-sm hover:bg-stone-50 dark:hover:bg-white/[0.06] hover:border-stone-400 dark:hover:border-white/[0.12] text-stone-700 dark:text-stone-300',
+          'border border-border bg-card text-foreground hover:bg-muted hover:border-primary/30',
         secondary:
-          'bg-stone-100 dark:bg-white/[0.06] text-stone-900 dark:text-stone-100 hover:bg-stone-200 dark:hover:bg-white/[0.06] border border-stone-200 dark:border-white/[0.10]',
-        ghost: 'hover:bg-stone-100 dark:hover:bg-white/[0.06] hover:text-stone-900 dark:hover:text-stone-100 text-stone-700 dark:text-stone-300',
-        link: 'text-olive-600 underline-offset-4 hover:underline hover:text-olive-700',
-        glow: 'bg-gradient-to-r from-olive-500 to-olive-500 text-white shadow-lg shadow-olive-500/25 hover:shadow-xl hover:shadow-olive-500/30',
+          'bg-secondary text-secondary-foreground border border-border hover:bg-muted',
+        ghost: 'text-muted-foreground hover:text-foreground hover:bg-muted',
+        link: 'text-primary underline-offset-4 hover:underline',
+        glow: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md',
       },
       size: {
         default: 'h-11 px-4 py-2 has-[>svg]:px-3',
-        sm: 'h-10 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
-        lg: 'h-12 rounded-md px-6 has-[>svg]:px-4',
+        sm: 'h-10 rounded-lg gap-1.5 px-3 has-[>svg]:px-2.5',
+        lg: 'h-12 rounded-xl px-6 has-[>svg]:px-4',
         icon: 'size-11',
       },
     },
@@ -178,9 +178,9 @@ export function FAB({
   return (
     <motion.button
       className={cn(
-        'fixed bottom-6 right-6 z-50 rounded-full bg-olive-600 text-white shadow-lg shadow-olive-600/30',
+        'fixed bottom-6 right-6 z-50 rounded-full bg-primary text-primary-foreground shadow-lg',
         'flex items-center justify-center gap-2',
-        'hover:bg-olive-700 hover:shadow-xl hover:shadow-olive-600/40',
+        'hover:bg-primary/90 hover:shadow-xl',
         'active:scale-95 transition-colors',
         extended ? 'h-14 px-6' : 'size-14',
         className
@@ -209,9 +209,9 @@ export function ButtonGroup({
   return (
     <div
       className={cn(
-        'inline-flex rounded-lg overflow-hidden border border-stone-200 dark:border-white/[0.10]',
+        'inline-flex rounded-xl overflow-hidden border border-border',
         '[&>button]:rounded-none [&>button]:border-0',
-        '[&>button:not(:last-child)]:border-r [&>button:not(:last-child)]:border-stone-200 dark:[&>button:not(:last-child)]:border-white/[0.10]',
+        '[&>button:not(:last-child)]:border-r [&>button:not(:last-child)]:border-border',
         className
       )}
     >

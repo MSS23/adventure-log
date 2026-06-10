@@ -98,10 +98,10 @@ export function PhotoCarousel({
 
   if (!photos || photos.length === 0) {
     return (
-      <div className={cn("relative aspect-[4/3] min-h-0", className)} style={{ background: 'var(--color-ivory-alt)' }}>
-        <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
-          <Camera className="h-16 w-16 sm:h-20 sm:w-20 mb-2 sm:mb-3" style={{ color: 'var(--color-forest-soft)' }} />
-          <p className="text-xs sm:text-sm font-medium text-[color:var(--color-muted-warm)]">No photos</p>
+      <div className={cn("relative aspect-[4/3] min-h-0 bg-muted", className)}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <Camera className="h-12 w-12 sm:h-14 sm:w-14 mb-2 sm:mb-3 text-primary/40" />
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground">No photos</p>
         </div>
       </div>
     )
@@ -114,8 +114,7 @@ export function PhotoCarousel({
 
     return (
       <div
-        className={cn("relative aspect-[4/3] min-h-0", className)}
-        style={{ background: 'var(--color-ivory-alt)' }}
+        className={cn("relative aspect-[4/3] min-h-0 bg-muted", className)}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onDoubleClick={handleDoubleTapLike}
@@ -141,9 +140,9 @@ export function PhotoCarousel({
             />
           </>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
-            <Camera className="h-16 w-16 sm:h-20 sm:w-20 mb-2 sm:mb-3" style={{ color: 'var(--color-forest-soft)' }} />
-            <p className="text-xs sm:text-sm font-medium text-[color:var(--color-muted-warm)]">No image</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <Camera className="h-12 w-12 sm:h-14 sm:w-14 mb-2 sm:mb-3 text-primary/40" />
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">No image</p>
           </div>
         )}
       </div>
@@ -167,8 +166,7 @@ export function PhotoCarousel({
             return (
               <div
                 key={photo.id}
-                className="flex-[0_0_100%] min-w-0 relative aspect-[4/3]"
-                style={{ background: 'var(--color-ivory-alt)' }}
+                className="flex-[0_0_100%] min-w-0 relative aspect-[4/3] bg-muted"
               >
                 {photoUrl ? (
                   <Image
@@ -187,9 +185,9 @@ export function PhotoCarousel({
                     priority={index === 0 && priority}
                   />
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
-                    <Camera className="h-16 w-16 sm:h-20 sm:w-20 mb-2 sm:mb-3" style={{ color: 'var(--color-forest-soft)' }} />
-                    <p className="text-xs sm:text-sm font-medium text-[color:var(--color-muted-warm)]">No image</p>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <Camera className="h-12 w-12 sm:h-14 sm:w-14 mb-2 sm:mb-3 text-primary/40" />
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">No image</p>
                   </div>
                 )}
               </div>

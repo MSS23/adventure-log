@@ -55,32 +55,32 @@ const thicknessConfig = {
   thick: 12,
 }
 
-// Color variants
+// Color variants — semantic tokens (auto-adapt to both themes)
 const colorVariants = {
   teal: {
-    stroke: 'stroke-olive-500',
-    bg: 'stroke-olive-100',
-    glow: 'drop-shadow-[0_0_8px_rgba(20,184,166,0.5)]',
+    stroke: 'stroke-primary',
+    bg: 'stroke-muted',
+    glow: '',
   },
   purple: {
-    stroke: 'stroke-olive-500',
-    bg: 'stroke-olive-100',
-    glow: 'drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]',
+    stroke: 'stroke-primary',
+    bg: 'stroke-muted',
+    glow: '',
   },
   orange: {
-    stroke: 'stroke-olive-500',
-    bg: 'stroke-olive-100',
-    glow: 'drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]',
+    stroke: 'stroke-accent',
+    bg: 'stroke-muted',
+    glow: '',
   },
   blue: {
-    stroke: 'stroke-olive-500',
-    bg: 'stroke-olive-100',
-    glow: 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]',
+    stroke: 'stroke-primary',
+    bg: 'stroke-muted',
+    glow: '',
   },
   gradient: {
     stroke: '', // Uses gradient instead
-    bg: 'stroke-stone-100',
-    glow: 'drop-shadow-[0_0_12px_rgba(20,184,166,0.4)]',
+    bg: 'stroke-muted',
+    glow: '',
   },
 }
 
@@ -183,9 +183,8 @@ export function ProgressRing({
         {variant === 'gradient' && (
           <defs>
             <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#D97706" />
-              <stop offset="50%" stopColor="#EA580C" />
-              <stop offset="100%" stopColor="#8b5cf6" />
+              <stop offset="0%" stopColor="var(--color-gold)" />
+              <stop offset="100%" stopColor="var(--color-coral)" />
             </linearGradient>
           </defs>
         )}
@@ -229,10 +228,10 @@ export function ProgressRing({
               cy={y}
               r={3}
               className={cn(
-                progress >= milestone ? 'fill-current' : 'fill-stone-300 dark:fill-stone-600',
+                progress >= milestone ? 'fill-current' : 'fill-border',
                 variant !== 'gradient' && colors.stroke.replace('stroke-', 'text-')
               )}
-              style={variant === 'gradient' && progress >= milestone ? { fill: '#D97706' } : undefined}
+              style={variant === 'gradient' && progress >= milestone ? { fill: 'var(--color-gold)' } : undefined}
             />
           )
         })}
@@ -244,7 +243,7 @@ export function ProgressRing({
           <motion.div
             className={cn(
               config.labelSize,
-              'font-bold text-stone-900 dark:text-stone-100'
+              'font-bold text-foreground'
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -275,7 +274,7 @@ function AnimatedCelebration({ show }: { show: boolean }) {
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          className="absolute inset-0 rounded-full border-2 border-olive-400"
+          className="absolute inset-0 rounded-full border border-primary/60"
           initial={{ scale: 1, opacity: 0.8 }}
           animate={{ scale: 1.5 + i * 0.3, opacity: 0 }}
           transition={{
@@ -317,11 +316,11 @@ export function StatProgressRing({
         label={
           <div className="flex flex-col items-center">
             <span className="font-bold">{current}</span>
-            <span className="text-xs text-stone-500 dark:text-stone-400">/ {target}{unit}</span>
+            <span className="text-xs text-muted-foreground">/ {target}{unit}</span>
           </div>
         }
       />
-      <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{title}</span>
+      <span className="text-sm font-medium text-foreground">{title}</span>
     </div>
   )
 }
@@ -405,7 +404,7 @@ export function MultiProgressRing({
                 'w-2 h-2 rounded-full',
                 colorVariants[ring.variant].stroke.replace('stroke-', 'bg-')
               )} />
-              <span className="text-stone-600 dark:text-stone-400">{ring.label || `${Math.round(ring.progress)}%`}</span>
+              <span className="text-muted-foreground">{ring.label || `${Math.round(ring.progress)}%`}</span>
             </div>
           ))}
         </div>
@@ -435,11 +434,11 @@ const barSizes = {
 }
 
 const barColors = {
-  teal: 'bg-olive-500',
-  purple: 'bg-olive-500',
-  orange: 'bg-olive-500',
-  blue: 'bg-olive-500',
-  gradient: 'bg-gradient-to-r from-olive-500 via-olive-500 to-olive-500',
+  teal: 'bg-primary',
+  purple: 'bg-primary',
+  orange: 'bg-accent',
+  blue: 'bg-primary',
+  gradient: 'bg-primary',
 }
 
 export function ProgressBar({
@@ -465,12 +464,12 @@ export function ProgressBar({
     <div ref={barRef} className={cn('w-full', className)}>
       {showLabel && (
         <div className="flex justify-between items-center mb-1">
-          <span className="text-sm text-stone-600 dark:text-stone-400">{label}</span>
-          <span className="text-sm font-medium text-stone-900 dark:text-stone-100">{Math.round(progress)}%</span>
+          <span className="text-sm text-muted-foreground">{label}</span>
+          <span className="text-sm font-medium text-foreground">{Math.round(progress)}%</span>
         </div>
       )}
 
-      <div className={cn('relative w-full bg-stone-100 dark:bg-white/[0.06] rounded-full overflow-hidden', barSizes[size])}>
+      <div className={cn('relative w-full bg-muted rounded-full overflow-hidden', barSizes[size])}>
         {/* Progress fill */}
         <motion.div
           className={cn('h-full rounded-full', barColors[variant])}

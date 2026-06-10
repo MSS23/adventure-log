@@ -71,8 +71,8 @@ export function LikeButton({
         <motion.button
           onClick={handleClick}
           className={cn(
-            "min-w-[44px] min-h-[44px] p-2.5 sm:p-2 -m-2 rounded-full transition-colors touch-manipulation flex items-center justify-center",
-            isLiked ? "hover:bg-red-100 active:bg-red-200" : "hover:bg-stone-100 dark:hover:bg-white/[0.06] active:bg-stone-200",
+            "min-w-[44px] min-h-[44px] p-2.5 sm:p-2 -m-2 rounded-full transition-colors duration-200 touch-manipulation flex items-center justify-center",
+            isLiked ? "hover:bg-accent/10 active:bg-accent/20" : "hover:bg-muted active:bg-muted/80",
             className
           )}
           whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
@@ -90,8 +90,8 @@ export function LikeButton({
                 className={cn(
                   "h-5 w-5 sm:h-6 sm:w-6 transition-colors duration-200",
                   isLiked
-                    ? "fill-red-500 text-red-500"
-                    : "text-stone-900 dark:text-stone-100"
+                    ? "fill-accent text-accent"
+                    : "text-muted-foreground"
                 )}
                 strokeWidth={1.5}
               />
@@ -102,7 +102,7 @@ export function LikeButton({
         {/* Particle burst effect */}
         <ParticleBurst
           isActive={showBurst}
-          colors={['#ef4444', '#f97316', '#ec4899', '#f43f5e']}
+          colors={['#C75B3A', '#F38162', '#D4A54A', '#F2A179']}
           particleCount={8}
           spread={35}
           size="sm"
@@ -122,8 +122,10 @@ export function LikeButton({
           variant={isLiked ? "default" : "outline"}
           size="sm"
           className={cn(
-            "rounded-lg transition-all duration-200",
-            isLiked ? "bg-red-500 hover:bg-red-600 text-white" : "hover:bg-red-50 hover:text-red-600",
+            "rounded-xl transition-all duration-200",
+            isLiked
+              ? "bg-accent hover:bg-accent/90 text-accent-foreground border-transparent"
+              : "hover:bg-accent/10 hover:text-accent hover:border-accent/30",
             className
           )}
           onClick={handleClick}
@@ -160,7 +162,7 @@ export function LikeButton({
       {/* Particle burst effect */}
       <ParticleBurst
         isActive={showBurst}
-        colors={['#ef4444', '#f97316', '#ec4899', '#f43f5e']}
+        colors={['#C75B3A', '#F38162', '#D4A54A', '#F2A179']}
         particleCount={10}
         spread={40}
         size="md"

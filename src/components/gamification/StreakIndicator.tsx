@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Flame } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 
 /**
@@ -57,35 +56,35 @@ function getFlameIntensity(streak: number): 'cool' | 'warm' | 'hot' | 'blazing' 
   return 'cool'
 }
 
-// Flame colors for different intensities
+// Flame colors for different intensities — semantic tokens, both themes
 const flameColors = {
   cool: {
-    primary: 'text-olive-400',
-    secondary: 'text-yellow-400',
-    glow: 'shadow-olive-400/30',
-    bg: 'bg-olive-50 dark:bg-olive-950/20',
-    border: 'border-olive-200 dark:border-white/[0.08]',
+    primary: 'text-[color:var(--color-gold)]',
+    secondary: 'text-[color:var(--color-gold-soft)]',
+    glow: '',
+    bg: 'bg-[color:var(--color-gold)]/10',
+    border: 'border-[color:var(--color-gold)]/25',
   },
   warm: {
-    primary: 'text-olive-500',
-    secondary: 'text-yellow-500',
-    glow: 'shadow-olive-500/40',
-    bg: 'bg-olive-100 dark:bg-olive-950/30',
-    border: 'border-olive-300 dark:border-white/[0.10]',
+    primary: 'text-accent',
+    secondary: 'text-[color:var(--color-gold)]',
+    glow: '',
+    bg: 'bg-accent/10',
+    border: 'border-accent/20',
   },
   hot: {
-    primary: 'text-red-500',
-    secondary: 'text-olive-500',
-    glow: 'shadow-red-500/50',
-    bg: 'bg-red-50 dark:bg-red-950/30',
-    border: 'border-red-200 dark:border-red-900/40',
+    primary: 'text-accent',
+    secondary: 'text-[color:var(--color-gold)]',
+    glow: '',
+    bg: 'bg-accent/15',
+    border: 'border-accent/30',
   },
   blazing: {
-    primary: 'text-red-600',
-    secondary: 'text-olive-400',
-    glow: 'shadow-red-600/60',
-    bg: 'bg-gradient-to-r from-red-50 dark:from-red-950/30 to-olive-50 dark:to-olive-950/20',
-    border: 'border-red-300 dark:border-red-900/40',
+    primary: 'text-accent',
+    secondary: 'text-[color:var(--color-gold)]',
+    glow: '',
+    bg: 'bg-accent/20',
+    border: 'border-accent/40',
   },
 }
 
@@ -97,7 +96,6 @@ export function StreakIndicator({
   onMilestone,
   className,
 }: StreakIndicatorProps) {
-  const prefersReducedMotion = useReducedMotion()
   const { triggerStreak } = useHaptics()
   const [showMilestoneEffect, setShowMilestoneEffect] = useState(false)
   const [prevStreak, setPrevStreak] = useState(streak)
@@ -123,12 +121,12 @@ export function StreakIndicator({
   if (streak === 0) {
     return (
       <div className={cn(
-        'inline-flex items-center rounded-full border bg-stone-50 dark:bg-white/[0.04] border-stone-200 dark:border-white/[0.10]',
+        'inline-flex items-center rounded-full border bg-muted/60 border-border',
         config.container,
         className
       )}>
-        <Flame className={cn(config.icon, 'text-stone-300 dark:text-stone-600')} />
-        <span className={cn(config.text, 'text-stone-400 dark:text-stone-500')}>0</span>
+        <Flame className={cn(config.icon, 'text-muted-foreground/60')} />
+        <span className={cn(config.text, 'text-muted-foreground')}>0</span>
       </div>
     )
   }
@@ -147,53 +145,15 @@ export function StreakIndicator({
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
-      {/* Animated flame */}
-      <div className="relative">
-        <motion.div
-          className={cn(colors.primary)}
-          animate={
-            prefersReducedMotion
-              ? undefined
-              : {
-                  scale: [1, 1.1, 1],
-                  rotate: [0, 3, -3, 0],
-                }
-          }
-          transition={{
-            duration: intensity === 'blazing' ? 0.3 : intensity === 'hot' ? 0.5 : 0.8,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        >
-          <Flame className={cn(config.icon, 'fill-current')} />
-        </motion.div>
-
-        {/* Glow effect for high streaks */}
-        {(intensity === 'hot' || intensity === 'blazing') && !prefersReducedMotion && (
-          <motion.div
-            className={cn(
-              'absolute inset-0 blur-sm',
-              colors.primary
-            )}
-            animate={{
-              opacity: [0.3, 0.6, 0.3],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 0.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            <Flame className={cn(config.icon, 'fill-current')} />
-          </motion.div>
-        )}
+      {/* Flame */}
+      <div className={cn('relative', colors.primary)}>
+        <Flame className={cn(config.icon, 'fill-current')} />
       </div>
 
       {/* Streak count */}
       <motion.span
         key={streak}
-        className={cn(config.text, 'text-stone-900 dark:text-stone-100')}
+        className={cn(config.text, 'text-foreground')}
         initial={{ scale: 1.3, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 500, damping: 20 }}
@@ -215,7 +175,7 @@ export function StreakIndicator({
               <motion.div
                 key={i}
                 className={cn(
-                  'absolute inset-0 rounded-full border-2',
+                  'absolute inset-0 rounded-full border',
                   colors.border
                 )}
                 initial={{ scale: 1, opacity: 1 }}
@@ -250,7 +210,6 @@ export function StreakCard({
   lastActiveDate,
   className,
 }: StreakCardProps) {
-  const prefersReducedMotion = useReducedMotion()
   const intensity = getFlameIntensity(streak)
   const colors = flameColors[intensity]
 
@@ -265,9 +224,7 @@ export function StreakCard({
   return (
     <motion.div
       className={cn(
-        'rounded-2xl p-4 border',
-        colors.bg,
-        colors.border,
+        'rounded-2xl border border-border bg-card p-4',
         className
       )}
       initial={{ opacity: 0, y: 20 }}
@@ -275,55 +232,25 @@ export function StreakCard({
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          {/* Large animated flame */}
-          <motion.div
-            className={cn(colors.primary, 'relative')}
-            animate={
-              prefersReducedMotion
-                ? undefined
-                : {
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0],
-                  }
-            }
-            transition={{
-              duration: 0.6,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
+          {/* Large flame */}
+          <div className={cn(colors.primary, 'relative')}>
             <Flame className="w-12 h-12 fill-current" />
-            {(intensity === 'hot' || intensity === 'blazing') && !prefersReducedMotion && (
-              <motion.div
-                className="absolute inset-0 blur-md"
-                animate={{
-                  opacity: [0.4, 0.7, 0.4],
-                  scale: [1, 1.3, 1],
-                }}
-                transition={{
-                  duration: 0.5,
-                  repeat: Infinity,
-                }}
-              >
-                <Flame className={cn('w-12 h-12 fill-current', colors.secondary)} />
-              </motion.div>
-            )}
-          </motion.div>
+          </div>
 
           <div>
             <div className="flex items-baseline gap-2">
               <motion.span
                 key={streak}
-                className="text-3xl font-bold text-stone-900 dark:text-stone-100"
+                className="al-stat-value text-3xl"
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
               >
                 {streak}
               </motion.span>
-              <span className="text-stone-600 dark:text-stone-400 font-medium">day streak</span>
+              <span className="text-muted-foreground font-medium">day streak</span>
             </div>
             {maxStreak > streak && (
-              <p className="text-sm text-stone-500 dark:text-stone-400">
+              <p className="text-sm text-muted-foreground">
                 Best: {maxStreak} days
               </p>
             )}
@@ -332,37 +259,21 @@ export function StreakCard({
 
         {/* Status indicator */}
         {isAtRisk && (
-          <motion.div
-            className="px-3 py-1 bg-olive-100 dark:bg-olive-950/30 text-olive-700 rounded-full text-sm font-medium"
-            animate={{
-              scale: [1, 1.05, 1],
-            }}
-            transition={{
-              duration: 1,
-              repeat: Infinity,
-            }}
-          >
+          <div className="inline-flex items-center rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-sm font-medium text-accent">
             Keep it going!
-          </motion.div>
+          </div>
         )}
       </div>
 
       {/* Progress to next milestone */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-stone-600 dark:text-stone-400">Next milestone</span>
-          <span className="font-medium text-stone-900 dark:text-stone-100">{nextMilestone} days</span>
+          <span className="text-muted-foreground">Next milestone</span>
+          <span className="font-medium text-foreground">{nextMilestone} days</span>
         </div>
-        <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
           <motion.div
-            className={cn(
-              'h-full rounded-full bg-gradient-to-r',
-              intensity === 'blazing'
-                ? 'from-red-400 via-olive-400 to-yellow-400'
-                : intensity === 'hot'
-                ? 'from-red-400 to-olive-400'
-                : 'from-olive-400 to-yellow-400'
-            )}
+            className="h-full rounded-full bg-accent"
             initial={{ width: 0 }}
             animate={{
               width: `${(streak / nextMilestone) * 100}%`,
@@ -370,7 +281,7 @@ export function StreakCard({
             transition={{ duration: 1, ease: 'easeOut' }}
           />
         </div>
-        <p className="text-xs text-stone-500 dark:text-stone-400">
+        <p className="text-xs text-muted-foreground">
           {nextMilestone - streak} more {nextMilestone - streak === 1 ? 'day' : 'days'} to go
         </p>
       </div>
@@ -395,7 +306,7 @@ export function StreakLost({
   return (
     <motion.div
       className={cn(
-        'rounded-2xl p-6 bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/[0.10] text-center',
+        'rounded-2xl border border-border bg-card p-6 text-center',
         className
       )}
       initial={{ opacity: 0, scale: 0.9 }}
@@ -404,7 +315,7 @@ export function StreakLost({
     >
       {/* Broken flame icon */}
       <motion.div
-        className="mx-auto mb-4 text-stone-300 dark:text-stone-600"
+        className="mx-auto mb-4 text-muted-foreground/50"
         initial={{ rotate: 0 }}
         animate={{ rotate: [0, -10, 10, 0] }}
         transition={{ duration: 0.5 }}
@@ -412,10 +323,10 @@ export function StreakLost({
         <Flame className="w-16 h-16" />
       </motion.div>
 
-      <h3 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-2">
+      <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
         Streak Lost
       </h3>
-      <p className="text-stone-600 dark:text-stone-400 mb-4">
+      <p className="text-muted-foreground mb-4">
         Your {previousStreak}-day streak has ended.
         <br />
         Start a new one today!
@@ -423,9 +334,8 @@ export function StreakLost({
 
       <motion.button
         onClick={onDismiss}
-        className="px-6 py-2 bg-olive-500 text-white font-semibold rounded-full hover:bg-olive-600 transition-colors"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        className="px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-full hover:bg-primary/90 transition-colors"
+        whileTap={{ scale: 0.97 }}
       >
         Start Fresh
       </motion.button>

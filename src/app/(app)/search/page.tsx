@@ -19,7 +19,7 @@ export default function SearchPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <p className="text-stone-600 dark:text-stone-300">Redirecting to explore...</p>
+      <p className="text-sm text-muted-foreground">Redirecting to explore...</p>
     </div>
   )
 }

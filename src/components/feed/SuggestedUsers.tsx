@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { UserPlus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -185,18 +186,18 @@ export function SuggestedUsers() {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] p-4">
+      <div className="rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Users className="h-5 w-5 text-olive-600 animate-pulse" />
-          <h3 className="font-semibold text-stone-900 dark:text-stone-100">Suggested for you</h3>
+          <Users className="h-5 w-5 text-primary" />
+          <h3 className="font-heading text-base font-semibold text-foreground">Suggested for you</h3>
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-center gap-3 animate-pulse">
-              <div className="h-10 w-10 rounded-full bg-stone-200 dark:bg-white/[0.08]" />
+            <div key={i} className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-full" />
               <div className="flex-1">
-                <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-2/3 mb-1" />
-                <div className="h-3 bg-stone-100 dark:bg-white/[0.06] rounded w-1/2" />
+                <Skeleton className="h-4 w-2/3 mb-1" />
+                <Skeleton className="h-3 w-1/2" />
               </div>
             </div>
           ))}
@@ -210,10 +211,10 @@ export function SuggestedUsers() {
   }
 
   return (
-    <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+    <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Users className="h-5 w-5 text-olive-600" />
-        <h3 className="font-semibold text-stone-900 dark:text-stone-100">Suggested for you</h3>
+        <Users className="h-5 w-5 text-primary" />
+        <h3 className="font-heading text-base font-semibold text-foreground">Suggested for you</h3>
       </div>
 
       <div className="space-y-4 max-h-[400px] overflow-y-auto">
@@ -224,9 +225,9 @@ export function SuggestedUsers() {
           return (
             <div key={suggestedUser.id} className="flex items-center justify-center gap-3 group">
               <Link href={`/profile/${suggestedUser.username}`}>
-                <Avatar className="h-10 w-10 ring-2 ring-stone-100 dark:ring-white/[0.08] group-hover:ring-olive-100 transition-all duration-200">
+                <Avatar className="h-10 w-10 ring-2 ring-background group-hover:ring-primary/20 transition-all duration-200">
                   <AvatarImage src={getAvatarUrl(suggestedUser.avatar_url, suggestedUser.username)} />
-                  <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-sm">
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
                     {(suggestedUser.display_name || suggestedUser.username)[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -237,14 +238,14 @@ export function SuggestedUsers() {
                   href={`/profile/${suggestedUser.username}`}
                   className="block hover:underline"
                 >
-                  <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm truncate">
+                  <p className="font-semibold text-foreground text-sm truncate">
                     {suggestedUser.display_name || suggestedUser.username}
                   </p>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     @{suggestedUser.username}
                   </p>
                 </Link>
-                <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {suggestedUser.album_count || 0} {suggestedUser.album_count === 1 ? 'album' : 'albums'}
                   {suggestedUser.follower_count ? ` • ${suggestedUser.follower_count} ${suggestedUser.follower_count === 1 ? 'follower' : 'followers'}` : ''}
                 </p>
@@ -274,10 +275,10 @@ export function SuggestedUsers() {
       </div>
 
       {suggestedUsers.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-stone-100 dark:border-white/[0.08]">
+        <div className="mt-4 pt-4 border-t border-border">
           <Link
             href="/search?tab=users"
-            className="text-sm text-olive-600 hover:text-olive-700 font-medium flex items-center justify-center gap-1 transition-colors duration-200"
+            className="text-sm text-primary hover:underline font-medium flex items-center justify-center gap-1 transition-colors duration-200"
           >
             See all users →
           </Link>

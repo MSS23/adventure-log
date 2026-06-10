@@ -73,8 +73,8 @@ export function EnhancedLikeButton({
       <motion.button
         onClick={handleClick}
         className={cn(
-          'relative p-2 rounded-full transition-colors touch-manipulation',
-          isLiked ? 'hover:bg-red-100 dark:hover:bg-red-950/30 active:bg-red-200' : 'hover:bg-stone-100 dark:hover:bg-white/[0.06] active:bg-stone-200',
+          'relative p-2 rounded-full transition-colors duration-200 touch-manipulation',
+          isLiked ? 'hover:bg-accent/10 active:bg-accent/20' : 'hover:bg-muted active:bg-muted/80',
           className
         )}
         whileTap={{ scale: 0.85 }}
@@ -85,7 +85,7 @@ export function EnhancedLikeButton({
           {particles.map((i) => (
             <motion.span
               key={i}
-              className="absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full bg-red-400"
+              className="absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full bg-accent"
               initial={{ x: '-50%', y: '-50%', scale: 0, opacity: 1 }}
               animate={{
                 x: `${Math.cos((i / 6) * Math.PI * 2) * 25 - 50}%`,
@@ -107,7 +107,7 @@ export function EnhancedLikeButton({
             className={cn(
               sizeConfig.icon,
               'transition-all duration-200',
-              isLiked ? 'fill-red-500 text-red-500' : 'text-stone-700 dark:text-stone-300'
+              isLiked ? 'fill-accent text-accent' : 'text-muted-foreground'
             )}
             strokeWidth={1.5}
           />
@@ -124,8 +124,8 @@ export function EnhancedLikeButton({
         className={cn(
           'relative flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200',
           isLiked
-            ? 'bg-red-50 dark:bg-red-950/30 text-red-600 hover:bg-red-100 dark:hover:bg-red-950/30'
-            : 'bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.08]',
+            ? 'bg-accent/10 text-accent hover:bg-accent/15'
+            : 'bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground',
           className
         )}
         whileTap={{ scale: 0.95 }}
@@ -160,12 +160,12 @@ export function EnhancedLikeButton({
     <motion.button
       onClick={handleClick}
       className={cn(
-        'relative flex items-center justify-center gap-1.5 rounded-lg transition-all duration-200',
+        'relative flex items-center justify-center gap-1.5 rounded-xl transition-all duration-200',
         sizeConfig.button,
         showCount && 'px-3',
         isLiked
-          ? 'bg-red-500 text-white hover:bg-red-600 shadow-md shadow-red-500/25'
-          : 'bg-white dark:bg-[#1B170E] border border-stone-200 dark:border-white/[0.10] text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/[0.06] hover:border-stone-300 dark:hover:border-white/[0.12]',
+          ? 'bg-accent text-accent-foreground hover:bg-accent/90'
+          : 'bg-card border border-border text-muted-foreground hover:bg-muted hover:text-foreground hover:border-primary/30',
         className
       )}
       whileHover={{ scale: 1.02 }}
@@ -197,7 +197,7 @@ export function EnhancedLikeButton({
                 }}
                 transition={{ duration: 0.5, delay: i * 0.05 }}
               >
-                <Sparkles className="h-3 w-3 text-yellow-400" />
+                <Sparkles className="h-3 w-3 text-[color:var(--color-gold)]" />
               </motion.div>
             ))}
           </motion.div>
@@ -277,7 +277,7 @@ export function LikeButtonWithBadge({
         <motion.span
           className={cn(
             'absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold px-1',
-            isLiked ? 'bg-red-500 text-white' : 'bg-stone-200 dark:bg-white/[0.08] text-stone-700 dark:text-stone-300'
+            isLiked ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'
           )}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}

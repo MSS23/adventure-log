@@ -57,34 +57,34 @@ export function BlockUserDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <ShieldAlert className="h-5 w-5 text-red-600 dark:text-red-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+              <ShieldAlert className="h-5 w-5 text-destructive" />
             </div>
-            <DialogTitle className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+            <DialogTitle className="font-heading text-lg font-semibold text-foreground">
               Block @{username}?
             </DialogTitle>
           </div>
-          <DialogDescription className="pt-2 text-sm text-stone-600 dark:text-stone-400">
+          <DialogDescription className="pt-2 text-sm text-muted-foreground">
             Blocking this user will:
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <ul className="space-y-2 text-sm text-stone-700 dark:text-stone-300">
+          <ul className="space-y-2 text-sm text-foreground">
             <li className="flex items-start gap-2">
-              <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-400" />
+              <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-destructive/60" />
               Remove them from your followers and following lists
             </li>
             <li className="flex items-start gap-2">
-              <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-400" />
+              <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-destructive/60" />
               Prevent them from viewing your profile and albums
             </li>
             <li className="flex items-start gap-2">
-              <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-400" />
+              <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-destructive/60" />
               Hide their content from your feed and search results
             </li>
             <li className="flex items-start gap-2">
-              <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-400" />
+              <span className="mt-1 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-destructive/60" />
               They will not be notified that you blocked them
             </li>
           </ul>
@@ -92,7 +92,7 @@ export function BlockUserDialog({
           <div>
             <label
               htmlFor="block-reason"
-              className="mb-1.5 block text-sm font-medium text-stone-700 dark:text-stone-300"
+              className="mb-1.5 block text-sm font-medium text-foreground"
             >
               Reason (optional)
             </label>
@@ -103,7 +103,7 @@ export function BlockUserDialog({
               placeholder="Why are you blocking this user?"
               maxLength={500}
               rows={2}
-              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-olive-500 focus:outline-none focus:ring-2 focus:ring-olive-500/20 dark:border-stone-600 dark:bg-[#1A1A1A] dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-olive-400 dark:focus:ring-olive-400/20"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
@@ -113,7 +113,7 @@ export function BlockUserDialog({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="text-sm text-red-600 dark:text-red-400"
+                className="text-sm text-destructive"
               >
                 {blockUser.error?.message || 'Failed to block user. Please try again.'}
               </motion.p>
@@ -126,7 +126,7 @@ export function BlockUserDialog({
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={blockUser.isPending}
-            className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 disabled:opacity-50 dark:border-stone-600 dark:bg-[#1A1A1A] dark:text-stone-300 dark:hover:bg-stone-700"
+            className="rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
           >
             Cancel
           </button>
@@ -134,7 +134,7 @@ export function BlockUserDialog({
             type="button"
             onClick={handleBlock}
             disabled={blockUser.isPending}
-            className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-600"
+            className="inline-flex items-center gap-2 rounded-xl bg-destructive px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-destructive/90 disabled:opacity-50"
           >
             {blockUser.isPending ? (
               <>

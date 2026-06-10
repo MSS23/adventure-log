@@ -80,9 +80,9 @@ export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightR
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           className="pointer-events-auto w-full max-w-md"
         >
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/55 shadow-2xl backdrop-blur-xl">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/55 shadow-lg backdrop-blur-xl">
             {/* Cover image (or fallback gradient). 16:10 keeps it filmic. */}
-            <div className="relative aspect-[16/10] bg-gradient-to-br from-olive-700/30 via-stone-900 to-coral-700/30">
+            <div className="relative aspect-[16/10] bg-gradient-to-br from-olive-700/40 via-black to-coral-700/30">
               {active.coverUrl ? (
                 <Image
                   src={active.coverUrl}
@@ -133,7 +133,7 @@ export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightR
                   </span>
                 )}
               </div>
-              <div className="mt-1 flex items-center gap-3 text-xs text-white/60">
+              <div className="mt-1 flex items-center gap-3 text-xs text-white/80">
                 <span className="inline-flex items-center gap-1">
                   <MapPin className="h-3 w-3" aria-hidden />
                   {active.name}

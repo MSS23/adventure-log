@@ -37,17 +37,14 @@ export function OptimizedAvatar({
   const sizeConfig = sizeMap[size]
   const avatarUrl = src ? getPhotoUrl(src, 'avatars') : null
 
-  // Generate a consistent gradient based on the fallback text
+  // Consistent warm brand tint based on the fallback text — calm, on-palette
   const getGradientClass = (text: string) => {
+    // Static brand hexes (not theme vars) so white initials stay legible in both themes
     const gradients = [
-      'from-olive-500 to-pink-500',
-      'from-olive-500 to-olive-500',
-      'from-[#E2553A] to-[#F2A179]',
-      'from-olive-500 to-red-500',
-      'from-olive-500 to-olive-500',
-      'from-pink-500 to-rose-500',
-      'from-olive-500 to-green-500',
-      'from-olive-500 to-olive-500'
+      'from-[#4A5D23] to-[#7A9248]',
+      'from-[#C75B3A] to-[#E2553A]',
+      'from-[#9C7A2E] to-[#C2983E]',
+      'from-[#3B4A1C] to-[#5A6F2B]',
     ]
     const index = text.charCodeAt(0) % gradients.length
     return gradients[index]
@@ -55,7 +52,7 @@ export function OptimizedAvatar({
 
   if (!avatarUrl || hasError) {
     return (
-      <Avatar className={cn(sizeConfig.className, 'ring-1 ring-stone-200', className)}>
+      <Avatar className={cn(sizeConfig.className, 'ring-1 ring-border', className)}>
         <AvatarFallback
           className={cn(
             'bg-gradient-to-br text-white font-bold',
@@ -74,7 +71,7 @@ export function OptimizedAvatar({
   }
 
   return (
-    <Avatar className={cn(sizeConfig.className, 'ring-1 ring-stone-200 relative overflow-hidden', className)}>
+    <Avatar className={cn(sizeConfig.className, 'ring-1 ring-border relative overflow-hidden', className)}>
       {isLoading && (
         <Skeleton className="absolute inset-0 z-10" />
       )}
@@ -125,7 +122,7 @@ export function LazyAvatar(props: OptimizedAvatarProps) {
       {isInView ? (
         <OptimizedAvatar {...props} />
       ) : (
-        <Avatar className={cn(sizeMap[props.size || 'md'].className, 'ring-1 ring-stone-200', props.className)}>
+        <Avatar className={cn(sizeMap[props.size || 'md'].className, 'ring-1 ring-border', props.className)}>
           <Skeleton className="w-full h-full" />
         </Avatar>
       )}

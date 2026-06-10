@@ -116,25 +116,25 @@ export default function TripsPage() {
   if (!user) {
     return (
       <div className="flex-1 flex items-center justify-center p-6">
-        <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pt-4 sm:pt-6 pb-24 md:pb-8">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-        <div className="min-w-0">
-          <p className="al-eyebrow mb-2">Plan · Together</p>
+    <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-24 md:pb-8 space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <header className="min-w-0 space-y-1">
+          <p className="al-eyebrow">Plan · Together</p>
           <h1 className="al-display text-3xl md:text-4xl">Trip Planner</h1>
-          <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+          <p className="text-sm text-muted-foreground max-w-xl">
             Collaborate on trips — paste Google Maps links, each person pins in their own color.
           </p>
-        </div>
+        </header>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="al-btn-coral h-10 px-5 font-semibold shrink-0 w-full sm:w-auto">
+            <Button variant="coral" size="pill" className="shrink-0 w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               New Trip
             </Button>
@@ -174,14 +174,7 @@ export default function TripsPage() {
               </div>
             </div>
             {createError && (
-              <div
-                className="mt-3 p-3 rounded-lg text-xs leading-relaxed"
-                style={{
-                  background: 'var(--color-coral-tint)',
-                  color: 'var(--color-stamp)',
-                  border: '1px solid var(--color-coral)',
-                }}
-              >
+              <div className="mt-3 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs leading-relaxed text-destructive">
                 {createError}
               </div>
             )}
@@ -190,7 +183,6 @@ export default function TripsPage() {
                 Cancel
               </Button>
               <Button
-                className="al-btn-coral text-white"
                 onClick={handleCreate}
                 disabled={creating || !title.trim()}
               >
@@ -204,78 +196,83 @@ export default function TripsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : unavailable ? (
-        <div className="text-center py-20">
-          <div className="w-16 h-16 bg-olive-100 dark:bg-olive-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <MapIcon className="h-7 w-7 text-olive-600" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+            <MapIcon className="h-6 w-6" />
           </div>
-          <h3 className="text-lg font-semibold text-olive-950 dark:text-olive-50 mb-2">
+          <h3 className="font-heading text-lg font-semibold text-foreground">
             Trip Planner is launching soon
           </h3>
-          <p className="text-sm text-olive-600 dark:text-olive-300 mb-6 max-w-md mx-auto">
+          <p className="mt-1 max-w-md text-sm text-muted-foreground">
             We&apos;re putting the finishing touches on collaborative trip
             planning. In the meantime, you can still build albums and
             wishlists from your dashboard.
           </p>
-          <Link href="/dashboard">
-            <Button className="bg-olive-700 hover:bg-olive-800 text-white rounded-xl">
-              Back to dashboard
-            </Button>
-          </Link>
+          <div className="mt-5">
+            <Link href="/dashboard">
+              <Button>
+                Back to dashboard
+              </Button>
+            </Link>
+          </div>
         </div>
       ) : trips.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="w-16 h-16 bg-olive-100 dark:bg-olive-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <MapIcon className="h-7 w-7 text-olive-600" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+            <MapIcon className="h-6 w-6" />
           </div>
-          <h3 className="text-lg font-semibold text-olive-950 dark:text-olive-50 mb-2">
+          <h3 className="font-heading text-lg font-semibold text-foreground">
             No trips yet
           </h3>
-          <p className="text-sm text-olive-600 dark:text-olive-400 mb-6 max-w-md mx-auto">
+          <p className="mt-1 max-w-md text-sm text-muted-foreground">
             Create a trip, invite friends, and paste Google Maps links to see everyone&apos;s picks on one map.
           </p>
-          <Button
-            className="bg-olive-700 hover:bg-olive-800 text-white rounded-xl"
-            onClick={() => setDialogOpen(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create your first trip
-          </Button>
+          <div className="mt-5">
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create your first trip
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {trips.map((trip) => (
-            <Link key={trip.id} href={`/trips/${trip.id}`}>
-              <div className="al-card p-6 h-full hover:shadow-[0_4px_8px_rgba(26,20,14,0.06),0_16px_40px_rgba(26,20,14,0.10)] transition-shadow cursor-pointer">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="text-4xl">{trip.cover_emoji || '🗺️'}</div>
-                  <span className="al-badge">{trip.my_role}</span>
-                </div>
-                <h3 className="font-heading text-xl font-semibold text-[color:var(--color-ink)] line-clamp-1 tracking-tight">
-                  {trip.title}
-                </h3>
-                {trip.description && (
-                  <p className="text-sm text-[color:var(--color-muted-warm)] line-clamp-2 mt-1.5 leading-relaxed">
-                    {trip.description}
-                  </p>
-                )}
-                <div className="flex items-center gap-4 mt-5 pt-4 border-t border-[color:var(--color-line-warm)] text-xs text-[color:var(--color-muted-warm)]">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    <MapIcon className="h-3.5 w-3.5" />
-                    {trip.pin_count} {trip.pin_count === 1 ? 'pin' : 'pins'}
+            <Link
+              key={trip.id}
+              href={`/trips/${trip.id}`}
+              className="group block h-full rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="text-4xl">{trip.cover_emoji || '🗺️'}</div>
+                <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                  {trip.my_role}
+                </span>
+              </div>
+              <h3 className="font-heading text-base md:text-lg font-semibold text-foreground line-clamp-1 tracking-tight">
+                {trip.title}
+              </h3>
+              {trip.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed">
+                  {trip.description}
+                </p>
+              )}
+              <div className="flex items-center gap-4 mt-5 pt-4 border-t border-border text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <MapIcon className="h-3.5 w-3.5" />
+                  {trip.pin_count} {trip.pin_count === 1 ? 'pin' : 'pins'}
+                </span>
+                {trip.start_date && (
+                  <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(trip.start_date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
                   </span>
-                  {trip.start_date && (
-                    <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(trip.start_date).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
             </Link>
           ))}

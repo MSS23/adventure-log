@@ -13,7 +13,7 @@ function Shimmer({
   return (
     <div
       className={cn(
-        'animate-pulse bg-stone-200 dark:bg-stone-800 rounded-lg',
+        'animate-pulse bg-muted rounded-lg',
         className,
       )}
       {...props}
@@ -26,7 +26,7 @@ function Shimmer({
 /* -------------------------------------------------------------------------- */
 
 const cardClass =
-  'rounded-2xl border border-stone-200 dark:border-white/[0.06] bg-white dark:bg-[#111111] overflow-hidden'
+  'rounded-2xl border border-border bg-card overflow-hidden'
 
 /* -------------------------------------------------------------------------- */
 /*  1. AlbumCardSkeleton                                                       */
@@ -104,7 +104,7 @@ export function ProfileHeaderSkeleton() {
       <div className="px-6 pb-6">
         {/* Avatar (overlapping cover) */}
         <div className="-mt-12 mb-4">
-          <Shimmer className="h-24 w-24 rounded-full ring-4 ring-white dark:ring-[#111111]" />
+          <Shimmer className="h-24 w-24 rounded-full ring-4 ring-card" />
         </div>
 
         {/* Name + username */}

@@ -13,7 +13,7 @@ import Image from 'next/image'
 import { Album } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { MissingLocationBanner } from '@/components/notifications/MissingLocationNotification'
-import { instagramStyles } from '@/lib/design-tokens'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -252,21 +252,19 @@ function AlbumsPageContent() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-stone-200 dark:bg-stone-700 animate-pulse"></div>
-            <div>
-              <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded w-24 mb-1 animate-pulse"></div>
-              <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded w-16 animate-pulse"></div>
-            </div>
+      <div className="space-y-8">
+        <div className="flex items-end justify-between gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-9 w-40" />
+            <Skeleton className="h-4 w-24" />
           </div>
-          <div className="h-9 bg-stone-200 dark:bg-stone-700 rounded w-20 animate-pulse"></div>
+          <Skeleton className="h-10 w-24 rounded-xl" />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square bg-stone-200 dark:bg-stone-700 rounded-lg animate-pulse"></div>
+            <Skeleton key={i} className="aspect-square rounded-2xl" />
           ))}
         </div>
       </div>
@@ -275,30 +273,25 @@ function AlbumsPageContent() {
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-olive-700 flex items-center justify-center shadow-sm">
-              <Camera className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="al-eyebrow mb-0.5">Library</p>
-              <h1 className="al-display text-2xl md:text-3xl">Albums</h1>
-              <p className="text-xs text-[color:var(--color-muted-warm)] font-mono tracking-wide mt-1">Organize your travel memories</p>
-            </div>
-          </div>
+      <div className="space-y-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <header className="space-y-1">
+            <p className="al-eyebrow">Library</p>
+            <h1 className="al-display text-3xl md:text-4xl">Albums</h1>
+            <p className="text-sm text-muted-foreground">Organize your travel memories</p>
+          </header>
           <Link href="/albums/new">
-            <Button size="sm" className={instagramStyles.button.primary}>
+            <Button size="sm">
               <Plus className="h-4 w-4 mr-1" />
               New
             </Button>
           </Link>
         </div>
 
-        <div className={cn("al-card", "border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 p-6")}>
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-6">
           <div className="text-center">
-            <p className="text-red-600 dark:text-red-400 font-medium">Failed to load albums</p>
-            <p className="text-red-500 dark:text-red-400 text-sm mt-1">{error}</p>
+            <p className="font-medium text-destructive">Failed to load albums</p>
+            <p className="mt-1 text-sm text-destructive">{error}</p>
             <Button
               variant="outline"
               onClick={fetchAlbums}
@@ -315,26 +308,21 @@ function AlbumsPageContent() {
   const isViewingOtherUser = !!filterUserId && filterUserId !== user?.id
 
   return (
-    <div className="space-y-6">
-      {/* Instagram-style Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-olive-500 to-olive-700 flex items-center justify-center shadow-sm">
-            <Camera className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <p className="al-eyebrow mb-0.5">Library</p>
-            <h1 className="al-display text-2xl md:text-3xl">
-              {isViewingOtherUser ? "User's Albums" : 'Albums'}
-            </h1>
-            <p className="text-xs text-[color:var(--color-muted-warm)] font-mono tracking-wide mt-1">
-              {albums.length === 0
-                ? 'Start creating albums'
-                : `${albums.length} album${albums.length === 1 ? '' : 's'}`
-              }
-            </p>
-          </div>
-        </div>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <header className="space-y-1">
+          <p className="al-eyebrow">Library</p>
+          <h1 className="al-display text-3xl md:text-4xl">
+            {isViewingOtherUser ? "User's Albums" : 'Albums'}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {albums.length === 0
+              ? 'Start creating albums'
+              : `${albums.length} album${albums.length === 1 ? '' : 's'}`
+            }
+          </p>
+        </header>
 
         <div className="flex items-center gap-2">
           {!isViewingOtherUser && (albums.length > 0 || drafts.length > 0) && !selectionMode && (
@@ -342,7 +330,7 @@ function AlbumsPageContent() {
               size="sm"
               variant="outline"
               onClick={() => setSelectionMode(true)}
-              className="cursor-pointer active:scale-[0.97] transition-all duration-200"
+              className="cursor-pointer"
             >
               <CheckSquare className="h-4 w-4 mr-1" />
               Select
@@ -350,7 +338,7 @@ function AlbumsPageContent() {
           )}
           {!isViewingOtherUser && (
             <Link href="/albums/new">
-              <Button size="sm" className={cn(instagramStyles.button.primary, "cursor-pointer active:scale-[0.97] transition-all duration-200")}>
+              <Button size="sm" className="cursor-pointer">
                 <Plus className="h-4 w-4 mr-1" />
                 New
               </Button>
@@ -363,20 +351,16 @@ function AlbumsPageContent() {
       {albums.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search albums..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={cn(
-                "pl-10 h-9",
-                "bg-stone-50/50 dark:bg-[#1A1A1A]/50 border-stone-200/50 dark:border-white/[0.1]/50",
-                "focus:bg-white dark:focus:bg-stone-800 transition-all duration-200"
-              )}
+              className="pl-10 h-10 rounded-xl"
             />
           </div>
           <Select value={sortBy} onValueChange={(value: typeof sortBy) => setSortBy(value)}>
-            <SelectTrigger className="w-full sm:w-[180px] h-9 cursor-pointer transition-all duration-200">
+            <SelectTrigger className="w-full sm:w-[180px] h-10 cursor-pointer transition-all duration-200">
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4" />
                 <SelectValue placeholder="Sort by" />
@@ -399,13 +383,13 @@ function AlbumsPageContent() {
       {/* Drafts Section */}
       {drafts.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-end justify-between gap-4">
             <div>
               <p className="al-eyebrow mb-0.5">Work in progress</p>
-              <h2 className="al-display text-lg md:text-xl">
+              <h2 className="al-display text-xl md:text-2xl">
                 Drafts
               </h2>
-              <p className={cn(instagramStyles.text.caption, "mt-0.5")}>
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 {drafts.length} album{drafts.length === 1 ? '' : 's'} waiting for photos
               </p>
             </div>
@@ -416,11 +400,10 @@ function AlbumsPageContent() {
               <div
                 key={draft.id}
                 className={cn(
-                  "relative group",
-                  instagramStyles.card,
-                  "p-4 hover:shadow-md transition-all duration-200",
+                  "relative group rounded-2xl border border-border bg-card p-4",
+                  "transition-all duration-200 hover:border-primary/30 hover:shadow-md",
                   selectionMode ? "cursor-pointer" : "cursor-pointer",
-                  selectedAlbums.has(draft.id) && "ring-2 ring-olive-500"
+                  selectedAlbums.has(draft.id) && "ring-2 ring-ring"
                 )}
                 onClick={(e) => {
                   if (selectionMode) {
@@ -432,9 +415,9 @@ function AlbumsPageContent() {
                 {selectionMode && (
                   <div className="absolute top-2 right-2 z-10">
                     {selectedAlbums.has(draft.id) ? (
-                      <CheckSquare className="h-6 w-6 text-olive-500" />
+                      <CheckSquare className="h-6 w-6 text-primary" />
                     ) : (
-                      <Square className="h-6 w-6 text-stone-400 dark:text-stone-500" />
+                      <Square className="h-6 w-6 text-muted-foreground" />
                     )}
                   </div>
                 )}
@@ -442,18 +425,18 @@ function AlbumsPageContent() {
                   <div>
                     <Link href={`/albums/${draft.id}/edit`} className="block cursor-pointer">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
-                          <Camera className="h-6 w-6 text-stone-400 dark:text-stone-500" />
+                        <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+                          <Camera className="h-6 w-6 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
+                          <h3 className="font-heading text-sm font-semibold text-foreground truncate">
                             {draft.title}
                           </h3>
                           <span className="al-badge mt-1">Draft</span>
                         </div>
                       </div>
                       {draft.description && (
-                        <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                           {draft.description}
                         </p>
                       )}
@@ -471,7 +454,7 @@ function AlbumsPageContent() {
                           e.stopPropagation()
                           setQuickDeleteAlbum(draft)
                         }}
-                        className="p-2 text-stone-400 dark:text-stone-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
+                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         title="Delete draft"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -481,18 +464,18 @@ function AlbumsPageContent() {
                 ) : (
                   <>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-[#1A1A1A] flex items-center justify-center">
-                        <Camera className="h-6 w-6 text-stone-400 dark:text-stone-500" />
+                      <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className={cn(instagramStyles.text.heading, "text-sm truncate")}>
+                        <h3 className="font-heading text-sm font-semibold text-foreground truncate">
                           {draft.title}
                         </h3>
                         <span className="al-badge mt-1">Draft</span>
                       </div>
                     </div>
                     {draft.description && (
-                      <p className={cn(instagramStyles.text.muted, "text-xs line-clamp-2 mb-3")}>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                         {draft.description}
                       </p>
                     )}
@@ -513,10 +496,7 @@ function AlbumsPageContent() {
         <>
           {/* Grid Header / Selection Bar */}
           {selectionMode ? (
-            <div className={cn(
-              instagramStyles.card,
-              "p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 bg-white dark:bg-[#111111] border-b-2 border-olive-500"
-            )}>
+            <div className="p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 rounded-2xl border border-border bg-card">
               <div className="flex items-center gap-2 sm:gap-4">
                 <Button
                   size="sm"
@@ -565,7 +545,7 @@ function AlbumsPageContent() {
                       <AlertDialogAction
                         onClick={handleDeleteSelected}
                         disabled={deleting}
-                        className="bg-red-600 hover:bg-red-700 rounded-xl"
+                        className="bg-destructive hover:bg-destructive/90 text-white rounded-xl"
                       >
                         {deleting ? 'Deleting...' : 'Delete'}
                       </AlertDialogAction>
@@ -583,9 +563,9 @@ function AlbumsPageContent() {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Grid3x3 className="h-4 w-4 text-stone-600 dark:text-stone-400" />
-                <span className={instagramStyles.text.caption}>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Grid3x3 className="h-4 w-4" />
+                <span className="text-xs font-mono tracking-wide">
                   {sortedAlbums.length} album{sortedAlbums.length === 1 ? '' : 's'}
                 </span>
               </div>
@@ -609,16 +589,12 @@ function AlbumsPageContent() {
                     key={album.id}
                     variants={cardVariants}
                     onClick={() => handleToggleSelection(album.id)}
-                    className={cn(
-                      "relative group touch-manipulation cursor-pointer",
-                      instagramStyles.interactive.hover,
-                      instagramStyles.interactive.active
-                    )}
+                    className="relative group touch-manipulation cursor-pointer transition-all duration-200 active:scale-[0.97]"
                   >
                     {/* Square Album Cover */}
                     <div className={cn(
-                      "relative aspect-square overflow-hidden rounded-lg transition-all duration-200",
-                      isSelected && "ring-4 ring-olive-500 scale-95"
+                      "relative aspect-square overflow-hidden rounded-2xl bg-muted transition-all duration-200",
+                      isSelected && "ring-2 ring-ring scale-95"
                     )}>
                       {album.cover_photo_url ? (
                         <Image
@@ -627,15 +603,12 @@ function AlbumsPageContent() {
                           fill
                           quality={90}
                           sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                          className={cn(
-                            instagramStyles.photoGrid,
-                            "group-hover:scale-105 transition-transform duration-300"
-                          )}
+                          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                           style={{ objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%` }}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
-                          <Camera className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                          <Camera className="h-8 w-8 text-muted-foreground" />
                         </div>
                       )}
 
@@ -651,7 +624,7 @@ function AlbumsPageContent() {
                           <motion.div
                             className={cn(
                               "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                              isSelected ? "bg-olive-500" : "bg-white/80 backdrop-blur-sm"
+                              isSelected ? "bg-primary" : "bg-white/80 backdrop-blur-sm"
                             )}
                             animate={isSelected ? { scale: [1, 1.2, 1] } : { scale: 1 }}
                             transition={{ duration: 0.2 }}
@@ -662,10 +635,10 @@ function AlbumsPageContent() {
                                 animate={{ scale: 1 }}
                                 transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                               >
-                                <CheckSquare className="h-4 w-4 text-white" />
+                                <CheckSquare className="h-4 w-4 text-primary-foreground" />
                               </motion.div>
                             ) : (
-                              <Square className="h-4 w-4 text-stone-600 dark:text-stone-400" />
+                              <Square className="h-4 w-4 text-black/60" />
                             )}
                           </motion.div>
                         </motion.div>
@@ -676,7 +649,7 @@ function AlbumsPageContent() {
                   <motion.div
                     key={album.id}
                     variants={cardVariants}
-                    whileHover={prefersReducedMotion ? {} : { scale: 1.03, y: -4 }}
+                    whileHover={prefersReducedMotion ? {} : { y: -2 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     className="group"
@@ -684,31 +657,28 @@ function AlbumsPageContent() {
                     <Link href={`/albums/${album.id}`} className="cursor-pointer">
                       <div className={cn(
                         "relative touch-manipulation",
-                        "rounded-lg overflow-hidden"
+                        "rounded-2xl overflow-hidden"
                       )}>
                         {/* Square Album Cover */}
-                        <div className="relative aspect-square overflow-hidden rounded-lg shadow-sm group-hover:shadow-xl group-hover:shadow-black/20 transition-shadow duration-300">
+                        <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted transition-shadow duration-200 group-hover:shadow-md">
                           {album.cover_photo_url ? (
                             <Image
                               src={album.cover_photo_url}
                               alt={album.title}
                               fill
                               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                              className={cn(
-                                instagramStyles.photoGrid,
-                                "transition-transform duration-500 group-hover:scale-110"
-                              )}
+                              className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                               style={{ objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%` }}
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center">
-                              <Camera className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <Camera className="h-8 w-8 text-muted-foreground" />
                             </div>
                           )}
 
                           {/* Mobile: Bottom gradient with title always visible */}
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-2 pt-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 md:from-black/80">
-                            <h3 className="text-white font-semibold text-xs sm:text-sm truncate drop-shadow-md">
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent p-2 pt-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 md:from-black/75">
+                            <h3 className="text-white font-heading font-semibold text-xs sm:text-sm truncate drop-shadow-sm">
                               {album.title}
                             </h3>
                             {album.location_name && (
@@ -732,7 +702,7 @@ function AlbumsPageContent() {
                                     e.stopPropagation()
                                     setQuickDeleteAlbum(album)
                                   }}
-                                  className="bg-red-600/80 hover:bg-red-600 backdrop-blur-sm text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                                  className="bg-destructive/80 hover:bg-destructive backdrop-blur-sm text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                                   title="Delete album"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
@@ -749,7 +719,7 @@ function AlbumsPageContent() {
                                 e.stopPropagation()
                                 setQuickDeleteAlbum(album)
                               }}
-                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/40 active:bg-red-600 backdrop-blur-sm text-white/70 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10"
+                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/50 active:bg-destructive backdrop-blur-sm text-white/90 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10"
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>
@@ -789,7 +759,7 @@ function AlbumsPageContent() {
             <AlertDialogAction
               onClick={() => quickDeleteAlbum && handleQuickDelete(quickDeleteAlbum)}
               disabled={quickDeleting}
-              className="bg-red-600 hover:bg-red-700 rounded-xl"
+              className="bg-destructive hover:bg-destructive/90 text-white rounded-xl"
             >
               {quickDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
@@ -803,10 +773,10 @@ function AlbumsPageContent() {
 export default function AlbumsPage() {
   return (
     <Suspense fallback={
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square bg-stone-200 dark:bg-stone-700 rounded-lg animate-pulse"></div>
+            <Skeleton key={i} className="aspect-square rounded-2xl" />
           ))}
         </div>
       </div>

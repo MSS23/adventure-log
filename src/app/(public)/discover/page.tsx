@@ -33,7 +33,7 @@ const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center">
-      <div className="w-12 h-12 rounded-full border-2 border-olive-400/40 border-t-olive-400 animate-spin" />
+      <div className="w-12 h-12 rounded-full border-2 border-primary/40 border-t-primary animate-spin" />
     </div>
   ),
 })
@@ -145,7 +145,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="dark">
-      <div className="min-h-screen bg-[#060a03] text-stone-100 overflow-x-hidden selection:bg-olive-500/30 selection:text-white">
+      <div className="min-h-screen bg-[#060a03] text-foreground overflow-x-hidden selection:bg-olive-500/30 selection:text-white">
         {/* Header */}
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#060a03]/85 backdrop-blur-2xl border-b border-white/[0.05]">
           <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
@@ -161,13 +161,13 @@ export default function DiscoverPage() {
               <Link href="/sign-in">
                 <Button
                   variant="ghost"
-                  className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200"
+                  className="cursor-pointer text-white/70 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200"
                 >
                   Sign in
                 </Button>
               </Link>
               <Link href="/sign-up">
-                <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 text-white font-medium px-5 rounded-xl text-sm h-9 shadow-lg shadow-olive-900/30 transition-all duration-200 active:scale-[0.97]">
+                <Button className="cursor-pointer font-medium px-5 rounded-xl text-sm h-9">
                   Get started
                 </Button>
               </Link>
@@ -234,7 +234,7 @@ export default function DiscoverPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-5 max-w-xl text-base sm:text-lg text-stone-300"
+              className="mt-5 max-w-xl text-base sm:text-lg text-white/90"
             >
               Every coral pin is a real traveler&apos;s public album. Spin the
               globe, pick somewhere they went, then start building your own
@@ -250,7 +250,8 @@ export default function DiscoverPage() {
               <Link href="/sign-up" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="group w-full sm:w-auto cursor-pointer bg-olive-700 hover:bg-olive-800 text-white font-semibold px-7 py-6 rounded-xl text-base shadow-xl shadow-olive-700/30 transition-all duration-200 active:scale-[0.98]"
+                  variant="coral"
+                  className="group w-full sm:w-auto cursor-pointer font-semibold px-8 py-6 text-base"
                 >
                   Start your travel log
                   <ArrowRight
@@ -263,7 +264,7 @@ export default function DiscoverPage() {
                 <Button
                   size="lg"
                   variant="ghost"
-                  className="w-full sm:w-auto cursor-pointer text-stone-300 hover:text-white hover:bg-white/[0.06] font-medium px-7 py-6 rounded-xl text-base"
+                  className="w-full sm:w-auto cursor-pointer text-white/80 hover:text-white hover:bg-white/[0.06] font-medium px-7 py-6 rounded-xl text-base"
                 >
                   I already have one
                 </Button>
@@ -274,7 +275,7 @@ export default function DiscoverPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-4 text-xs text-stone-500"
+              className="mt-4 text-xs text-white/70"
             >
               Free forever for personal travel logs · No credit card
             </motion.p>
@@ -307,7 +308,7 @@ export default function DiscoverPage() {
                 loading={pinsLoading}
               />
             </div>
-            <p className="mt-3 text-center text-xs text-stone-400">
+            <p className="mt-3 text-center text-xs text-white/75">
               Coordinates only — no usernames, photos, or trip details until
               you&apos;re a member.
             </p>
@@ -339,7 +340,7 @@ function StatCell({
           <NumberCountUp value={count} durationMs={1400} />
         )}
       </span>
-      <span className="text-[10px] uppercase tracking-[0.14em] text-stone-500">
+      <span className="text-[10px] uppercase tracking-[0.14em] text-white/70">
         {label}
       </span>
     </div>

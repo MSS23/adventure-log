@@ -21,12 +21,12 @@ export default async function DashboardPage() {
 
   if (!profile) {
     return (
-      <div className="max-w-2xl mx-auto py-12">
-        <div className="bg-olive-50/50 dark:bg-olive-950/20 border border-olive-200/50 dark:border-olive-800/30 rounded-2xl p-8 text-center">
-          <p className="text-olive-700 dark:text-olive-300 font-medium">Profile not found</p>
-          <p className="text-olive-600/70 dark:text-olive-400/70 text-sm mt-1">Please complete your profile setup</p>
+      <div className="mx-auto w-full max-w-2xl px-4 py-12">
+        <div className="rounded-2xl border border-border bg-card p-8 text-center">
+          <p className="font-heading text-base md:text-lg font-semibold text-foreground">Profile not found</p>
+          <p className="mt-1 text-sm text-muted-foreground">Please complete your profile setup</p>
           <Link href="/setup" className="mt-5 inline-block cursor-pointer">
-            <Button className="cursor-pointer active:scale-[0.97] transition-all duration-200">Complete Profile Setup</Button>
+            <Button className="cursor-pointer">Complete Profile Setup</Button>
           </Link>
         </div>
       </div>

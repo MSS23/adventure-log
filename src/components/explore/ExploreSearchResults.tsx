@@ -120,19 +120,19 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin" style={{ color: 'var(--color-forest)' }} />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[color:var(--color-coral-tint)]">
-          <MapPin className="h-8 w-8" style={{ color: 'var(--color-coral)' }} />
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4">
+          <MapPin className="h-6 w-6" />
         </div>
-        <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">Search failed</h3>
-        <p className="text-[color:var(--color-ink-soft)]">{error}</p>
+        <h3 className="font-heading text-lg font-semibold text-foreground">Search failed</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{error}</p>
       </div>
     )
   }
@@ -141,14 +141,14 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
 
   if (!hasResults) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[color:var(--color-forest-tint)]">
-          <MapPin className="h-8 w-8" style={{ color: 'var(--color-forest)' }} />
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+          <MapPin className="h-6 w-6" />
         </div>
-        <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">
+        <h3 className="font-heading text-lg font-semibold text-foreground">
           No matches for &ldquo;{query.trim()}&rdquo;
         </h3>
-        <p className="text-[color:var(--color-ink-soft)]">
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
           Try a different place, person, or username — or check your spelling.
         </p>
       </div>
@@ -156,32 +156,33 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       {/* Users Results */}
       {users.length > 0 && (
         <section>
-          <p className="al-eyebrow mb-1">People</p>
-          <h2 className="font-heading text-xl font-semibold text-[color:var(--color-ink)] mb-4" style={{ letterSpacing: '-0.02em' }}>
-            {users.length} {users.length === 1 ? 'person' : 'people'}
-          </h2>
+          <div className="mb-4">
+            <p className="al-eyebrow mb-0.5">People</p>
+            <h2 className="al-display text-xl md:text-2xl">
+              {users.length} {users.length === 1 ? 'person' : 'people'}
+            </h2>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {users.map((user) => (
               <Link
                 key={user.id}
                 href={`/profile/${user.username}`}
-                className="group flex flex-col items-center p-4 rounded-2xl border border-[color:var(--color-line-warm)] hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-16px_rgba(26,20,14,0.25)] transition-all"
-                style={{ background: 'var(--card)' }}
+                className="group flex flex-col items-center rounded-2xl border border-border bg-card p-4 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Avatar className="h-16 w-16 mb-3">
                   <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={user.display_name || user.username} />
-                  <AvatarFallback className="text-xl font-bold" style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}>
+                  <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
                     {user.display_name?.[0] || user.username?.[0] || 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <p className="font-heading font-semibold text-[color:var(--color-ink)] group-hover:text-[color:var(--color-forest)] transition-colors text-sm text-center truncate w-full">
+                <p className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors text-sm text-center truncate w-full">
                   {user.display_name}
                 </p>
-                <p className="font-mono text-[11px] tracking-[0.04em] text-[color:var(--color-muted-warm)] truncate w-full text-center">
+                <p className="font-mono text-[11px] tracking-wide text-muted-foreground truncate w-full text-center">
                   @{user.username}
                 </p>
               </Link>
@@ -193,47 +194,48 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
       {/* Albums Results */}
       {albums.length > 0 && (
         <section>
-          <p className="al-eyebrow mb-1">Albums</p>
-          <h2 className="font-heading text-xl font-semibold text-[color:var(--color-ink)] mb-4" style={{ letterSpacing: '-0.02em' }}>
-            {albums.length} {albums.length === 1 ? 'album' : 'albums'}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+          <div className="mb-4">
+            <p className="al-eyebrow mb-0.5">Albums</p>
+            <h2 className="al-display text-xl md:text-2xl">
+              {albums.length} {albums.length === 1 ? 'album' : 'albums'}
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {albums.map((album) => {
               const albumUser = album.users
               return (
                 <div
                   key={album.id}
-                  className="group rounded-2xl overflow-hidden border border-[color:var(--color-line-warm)] hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-20px_rgba(26,20,14,0.25)] transition-all"
-                  style={{ background: 'var(--card)' }}
+                  className="group rounded-2xl overflow-hidden border border-border bg-card transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5"
                 >
                   <Link href={`/albums/${album.id}`} className="block">
-                    <div className="relative aspect-[4/3]" style={{ background: 'var(--color-ivory-alt)' }}>
+                    <div className="relative aspect-[4/3] bg-muted">
                       {album.cover_photo_url ? (
                         <>
                           <Image
                             src={album.cover_photo_url.startsWith('http') ? album.cover_photo_url : (getPhotoUrl(album.cover_photo_url) || '')}
                             alt={album.title}
                             fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                             sizes="(max-width: 768px) 100vw, 33vw"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
-                          <MapPin className="h-12 w-12" style={{ color: 'var(--color-forest-soft)' }} />
+                        <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                          <MapPin className="h-12 w-12 text-primary" />
                         </div>
                       )}
                     </div>
                   </Link>
                   <div className="p-4">
                     <Link href={`/albums/${album.id}`}>
-                      <h3 className="font-heading font-semibold text-[color:var(--color-ink)] mb-1 group-hover:text-[color:var(--color-forest)] transition-colors line-clamp-1">
+                      <h3 className="font-heading font-semibold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
                         {album.title}
                       </h3>
                     </Link>
                     {album.location_name && (
-                      <p className="text-sm text-[color:var(--color-muted-warm)] mb-3 flex items-center gap-1">
+                      <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         {album.location_name}
                       </p>
@@ -243,11 +245,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={getAvatarUrl(albumUser.avatar_url, albumUser.username)} alt={albumUser.display_name || albumUser.username} />
-                            <AvatarFallback className="text-xs font-bold" style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}>
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                               {albumUser.display_name?.[0] || 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-xs text-[color:var(--color-ink-soft)]">
+                          <span className="text-xs text-muted-foreground">
                             by {albumUser.display_name}
                           </span>
                         </div>

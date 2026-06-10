@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Heart, Camera, UserPlus, Trophy, Flame } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
@@ -105,15 +106,15 @@ export function ActivityFeed() {
   const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
       case 'album':
-        return <Camera className="h-4 w-4 text-olive-600" />
+        return <Camera className="h-4 w-4 text-primary" />
       case 'like':
-        return <Heart className="h-4 w-4 text-red-500" />
+        return <Heart className="h-4 w-4 text-accent" />
       case 'follow':
-        return <UserPlus className="h-4 w-4 text-olive-600" />
+        return <UserPlus className="h-4 w-4 text-primary" />
       case 'achievement':
-        return <Trophy className="h-4 w-4 text-yellow-600" />
+        return <Trophy className="h-4 w-4 text-[color:var(--color-gold)]" />
       case 'milestone':
-        return <Flame className="h-4 w-4 text-olive-600" />
+        return <Flame className="h-4 w-4 text-primary" />
     }
   }
 
@@ -124,7 +125,7 @@ export function ActivityFeed() {
           <>
             <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
             {' visited '}
-            <span className="font-semibold text-olive-600">{activity.target?.location || activity.target?.title}</span>
+            <span className="font-semibold text-primary">{activity.target?.location || activity.target?.title}</span>
           </>
         )
       case 'like':
@@ -146,7 +147,7 @@ export function ActivityFeed() {
           <>
             <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
             {' unlocked '}
-            <span className="font-semibold text-yellow-600">{activity.metadata?.achievement_name}</span>
+            <span className="font-semibold text-[color:var(--color-gold)]">{activity.metadata?.achievement_name}</span>
           </>
         )
       case 'milestone':
@@ -154,7 +155,7 @@ export function ActivityFeed() {
           <>
             <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
             {' reached '}
-            <span className="font-semibold text-olive-600">{activity.metadata?.count} countries!</span>
+            <span className="font-semibold text-primary">{activity.metadata?.count} countries!</span>
           </>
         )
     }
@@ -162,18 +163,18 @@ export function ActivityFeed() {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] p-4">
+      <div className="rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Flame className="h-5 w-5 text-olive-500 animate-pulse" />
-          <h3 className="font-semibold text-stone-900 dark:text-stone-100">Live Activity</h3>
+          <Flame className="h-5 w-5 text-primary" />
+          <h3 className="font-heading text-base font-semibold text-foreground">Live Activity</h3>
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-start gap-3 animate-pulse">
-              <div className="h-8 w-8 rounded-full bg-stone-200 dark:bg-white/[0.08]" />
+            <div key={i} className="flex items-start gap-3">
+              <Skeleton className="h-8 w-8 rounded-full" />
               <div className="flex-1">
-                <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-3/4 mb-2" />
-                <div className="h-3 bg-stone-100 dark:bg-white/[0.06] rounded w-1/2" />
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-3 w-1/2" />
               </div>
             </div>
           ))}
@@ -184,16 +185,16 @@ export function ActivityFeed() {
 
   if (error) {
     return (
-      <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] p-4">
+      <div className="rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Flame className="h-5 w-5 text-stone-400 dark:text-stone-500" />
-          <h3 className="font-semibold text-stone-900 dark:text-stone-100">Live Activity</h3>
+          <Flame className="h-5 w-5 text-muted-foreground" />
+          <h3 className="font-heading text-base font-semibold text-foreground">Live Activity</h3>
         </div>
         <div className="text-center py-4">
-          <p className="text-sm text-stone-500 dark:text-stone-400 mb-3">{error}</p>
+          <p className="text-sm text-muted-foreground mb-3">{error}</p>
           <button
             onClick={() => fetchActivities()}
-            className="text-sm text-olive-600 hover:text-olive-700 font-medium"
+            className="text-sm text-primary hover:underline font-medium"
           >
             Try again
           </button>
@@ -203,23 +204,23 @@ export function ActivityFeed() {
   }
 
   return (
-    <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10] shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+    <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Flame className="h-5 w-5 text-olive-500" />
-        <h3 className="font-semibold text-stone-900 dark:text-stone-100">Live Activity</h3>
-        <span className="ml-auto text-xs text-stone-500 dark:text-stone-400">Last 24h</span>
+        <Flame className="h-5 w-5 text-primary" />
+        <h3 className="font-heading text-base font-semibold text-foreground">Live Activity</h3>
+        <span className="ml-auto font-mono text-xs tracking-wide text-muted-foreground">Last 24h</span>
       </div>
 
       <div className="space-y-4 max-h-[400px] overflow-y-auto">
         {activities.length === 0 ? (
-          <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-4">No recent activity</p>
+          <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
         ) : (
           activities.map(activity => (
             <div key={activity.id} className="flex items-start gap-3 group">
               <Link href={`/profile/${activity.user.username}`}>
-                <Avatar className="h-8 w-8 ring-2 ring-stone-100 dark:ring-white/[0.08] group-hover:ring-olive-100 transition-all duration-200">
+                <Avatar className="h-8 w-8 ring-2 ring-background group-hover:ring-primary/20 transition-all duration-200">
                   <AvatarImage src={activity.user.avatar_url || undefined} />
-                  <AvatarFallback className="bg-gradient-to-br from-olive-100 to-olive-100 text-olive-700 text-xs">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
                     {(activity.user.display_name || activity.user.username)[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -230,11 +231,11 @@ export function ActivityFeed() {
                   <div className="flex-shrink-0 mt-0.5">
                     {getActivityIcon(activity.type)}
                   </div>
-                  <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
+                  <p className="text-sm text-foreground leading-relaxed">
                     {getActivityText(activity)}
                   </p>
                 </div>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
                 </p>
               </div>
@@ -242,7 +243,7 @@ export function ActivityFeed() {
               {activity.target && activity.type === 'album' && (
                 <Link
                   href={`/albums/${activity.target.id}`}
-                  className="text-xs text-olive-600 hover:text-olive-700 font-medium whitespace-nowrap"
+                  className="text-xs text-primary hover:underline font-medium whitespace-nowrap"
                 >
                   View →
                 </Link>
@@ -253,10 +254,10 @@ export function ActivityFeed() {
       </div>
 
       {activities.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-stone-100 dark:border-white/[0.08]">
+        <div className="mt-4 pt-4 border-t border-border">
           <Link
             href="/feed"
-            className="text-sm text-olive-600 hover:text-olive-700 font-medium flex items-center justify-center gap-1 transition-colors duration-200"
+            className="text-sm text-primary hover:underline font-medium flex items-center justify-center gap-1 transition-colors duration-200"
           >
             See all activity →
           </Link>

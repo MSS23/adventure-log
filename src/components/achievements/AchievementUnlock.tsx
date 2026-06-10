@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Share2, Trophy, MapPin, Camera, Users, Globe, Star, Flame, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { ConfettiCelebration } from '@/components/animations/ConfettiCelebration'
 import { Button } from '@/components/ui/button'
@@ -83,31 +82,31 @@ const achievementIcons: Record<string, React.ReactNode> = {
   storyteller: <Star className="w-10 h-10" />,
 }
 
-// Rarity colors and effects
+// Rarity colors — flat, token-based fills that work in both themes
 const rarityStyles = {
   common: {
-    gradient: 'from-stone-400 via-stone-500 to-stone-600',
-    glow: 'shadow-stone-400/50',
-    badge: 'bg-gradient-to-br from-stone-100 to-stone-300',
-    text: 'text-stone-700',
+    gradient: 'bg-muted-foreground/60',
+    glow: '',
+    badge: 'bg-muted',
+    text: 'text-muted-foreground',
   },
   rare: {
-    gradient: 'from-olive-400 via-olive-500 to-olive-500',
-    glow: 'shadow-olive-400/50',
-    badge: 'bg-gradient-to-br from-olive-100 to-olive-200',
-    text: 'text-olive-700',
+    gradient: 'bg-primary',
+    glow: '',
+    badge: 'bg-primary/15',
+    text: 'text-primary',
   },
   epic: {
-    gradient: 'from-olive-400 via-olive-500 to-olive-600',
-    glow: 'shadow-olive-400/50',
-    badge: 'bg-gradient-to-br from-olive-100 to-olive-200',
-    text: 'text-olive-700',
+    gradient: 'bg-accent',
+    glow: '',
+    badge: 'bg-accent/15',
+    text: 'text-accent',
   },
   legendary: {
-    gradient: 'from-yellow-400 via-olive-500 to-red-500',
-    glow: 'shadow-olive-400/50',
-    badge: 'bg-gradient-to-br from-yellow-100 to-olive-200',
-    text: 'text-olive-700',
+    gradient: 'bg-[color:var(--color-gold)]',
+    glow: '',
+    badge: 'bg-[color:var(--color-gold)]/20',
+    text: 'text-[color:var(--color-gold)]',
   },
 }
 
@@ -118,7 +117,6 @@ export function AchievementUnlock({
   onShare,
   autoClose = 5000,
 }: AchievementUnlockProps) {
-  const prefersReducedMotion = useReducedMotion()
   const { triggerAchievement, triggerCelebrate } = useHaptics()
   const [showConfetti, setShowConfetti] = useState(false)
 
@@ -181,11 +179,7 @@ export function AchievementUnlock({
         >
           {/* Backdrop */}
           <motion.div
-            className={cn(
-              'absolute inset-0 bg-gradient-to-br',
-              styles.gradient,
-              'bg-opacity-95'
-            )}
+            className="absolute inset-0 bg-black/80"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -231,8 +225,8 @@ export function AchievementUnlock({
               transition={{ delay: 0.2 }}
             >
               <span className={cn(
-                'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider',
-                'bg-white/20 text-white backdrop-blur-sm'
+                'px-3 py-1 rounded-full font-mono text-xs font-bold uppercase tracking-wider',
+                'bg-white/15 text-white'
               )}>
                 {rarity} Achievement
               </span>
@@ -250,71 +244,20 @@ export function AchievementUnlock({
                 delay: 0.3,
               }}
             >
-              {/* Animated glow ring */}
-              {!prefersReducedMotion && (
-                <motion.div
-                  className={cn(
-                    'absolute inset-0 rounded-full blur-xl',
-                    styles.badge
-                  )}
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    opacity: [0.5, 0.8, 0.5],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                />
-              )}
-
               {/* Badge */}
               <motion.div
-                className={cn(
-                  'relative w-28 h-28 rounded-full flex items-center justify-center',
-                  styles.badge,
-                  'shadow-2xl',
-                  styles.glow
-                )}
-                whileHover={{ scale: 1.05 }}
+                className="relative w-28 h-28 rounded-full flex items-center justify-center bg-card ring-2 ring-white/30"
+                whileHover={{ scale: 1.03 }}
               >
                 <div className={styles.text}>
                   {icon}
                 </div>
               </motion.div>
-
-              {/* Sparkles around badge */}
-              {!prefersReducedMotion && (
-                <>
-                  {[0, 60, 120, 180, 240, 300].map((angle, i) => (
-                    <motion.div
-                      key={angle}
-                      className="absolute w-2 h-2 bg-white rounded-full"
-                      style={{
-                        left: `calc(50% + ${Math.cos((angle * Math.PI) / 180) * 70}px)`,
-                        top: `calc(50% + ${Math.sin((angle * Math.PI) / 180) * 70}px)`,
-                      }}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{
-                        scale: [0, 1, 0],
-                        opacity: [0, 1, 0],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        delay: 0.5 + i * 0.1,
-                        repeat: Infinity,
-                        repeatDelay: 1,
-                      }}
-                    />
-                  ))}
-                </>
-              )}
             </motion.div>
 
             {/* Title */}
             <motion.h2
-              className="text-3xl font-bold text-white mb-2"
+              className="font-heading text-3xl font-semibold text-white mb-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -324,7 +267,7 @@ export function AchievementUnlock({
 
             {/* Description */}
             <motion.p
-              className="text-lg text-white/80 mb-8"
+              className="text-lg text-white/90 mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
@@ -341,7 +284,7 @@ export function AchievementUnlock({
             >
               <Button
                 onClick={handleShare}
-                className="bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100 hover:bg-white/90 font-semibold px-6"
+                className="bg-card text-foreground hover:bg-card/90 font-semibold px-6"
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
@@ -349,7 +292,7 @@ export function AchievementUnlock({
               <Button
                 onClick={onClose}
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 font-semibold px-6"
+                className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white font-semibold px-6"
               >
                 Continue
               </Button>
@@ -357,7 +300,7 @@ export function AchievementUnlock({
 
             {/* Tap to dismiss hint */}
             <motion.p
-              className="mt-6 text-sm text-white/50"
+              className="mt-6 text-sm text-white/70"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
@@ -414,10 +357,9 @@ export function AchievementBadge({
       <button
         onClick={onClick}
         className={cn(
-          'rounded-full flex items-center justify-center',
+          'rounded-full flex items-center justify-center transition-colors duration-200',
           badgeSizes[size],
           styles.badge,
-          'shadow-md hover:shadow-lg transition-shadow',
           onClick && 'cursor-pointer'
         )}
       >
@@ -426,7 +368,7 @@ export function AchievementBadge({
         </div>
       </button>
       {showLabel && (
-        <span className="text-xs text-stone-600 dark:text-stone-400 font-medium text-center line-clamp-1 max-w-[80px]">
+        <span className="text-xs text-muted-foreground font-medium text-center line-clamp-1 max-w-[80px]">
           {achievement.title}
         </span>
       )}
@@ -456,14 +398,14 @@ export function AchievementProgress({
   const icon = achievement.icon || achievementIcons[achievement.type] || <Trophy />
 
   return (
-    <div className={cn('flex items-center gap-3 p-3 rounded-xl bg-stone-50 dark:bg-white/[0.04]', className)}>
+    <div className={cn('flex items-center gap-3 p-3 rounded-xl bg-muted/50', className)}>
       {/* Icon */}
       <div className={cn(
         'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0',
-        progress >= 100 ? styles.badge : 'bg-stone-200 dark:bg-white/[0.08]'
+        progress >= 100 ? styles.badge : 'bg-muted'
       )}>
         <div className={cn(
-          progress >= 100 ? styles.text : 'text-stone-400 dark:text-stone-500',
+          progress >= 100 ? styles.text : 'text-muted-foreground',
           'w-6 h-6'
         )}>
           {icon}
@@ -473,19 +415,19 @@ export function AchievementProgress({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm truncate">
+          <h4 className="font-semibold text-foreground text-sm truncate">
             {achievement.title}
           </h4>
-          <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0 ml-2">
+          <span className="font-mono text-xs tracking-wide text-muted-foreground flex-shrink-0 ml-2">
             {current}/{target}
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="h-2 bg-stone-200 dark:bg-white/[0.08] rounded-full overflow-hidden">
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
           <motion.div
             className={cn(
-              'h-full rounded-full bg-gradient-to-r',
+              'h-full rounded-full',
               styles.gradient
             )}
             initial={{ width: 0 }}

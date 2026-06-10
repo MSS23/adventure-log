@@ -50,18 +50,18 @@ export default async function PublicTripPage({ params }: { params: Promise<{ slu
   ])
 
   return (
-    <div className="min-h-screen bg-[color:var(--background)]">
-      <header className="sticky top-0 z-30 border-b border-[color:var(--color-line-warm)] bg-[color:var(--card)]/85 backdrop-blur-md">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-30 border-b border-border bg-card/85 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link
             href="/"
-            className="text-lg font-bold text-olive-700 dark:text-olive-300 tracking-tight hover:opacity-80 transition-opacity"
+            className="text-lg font-heading font-bold text-primary tracking-tight hover:opacity-80 transition-opacity"
           >
             Adventure Log
           </Link>
           <Link
             href="/sign-up"
-            className="al-btn-coral text-sm px-5 py-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] focus-visible:ring-offset-2"
+            className="al-btn-coral text-sm px-5 py-2 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             Sign up free
           </Link>

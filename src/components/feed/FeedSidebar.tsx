@@ -11,15 +11,15 @@ export function FeedSidebar() {
   if (!user) return null
 
   return (
-    <aside className="hidden lg:flex lg:w-[280px] xl:w-[320px] flex-col fixed right-0 top-0 bottom-0 bg-white dark:bg-[#1B170E] z-30 border-l border-stone-100 dark:border-white/[0.08]">
+    <aside className="hidden lg:flex lg:w-[280px] xl:w-[320px] flex-col fixed right-0 top-0 bottom-0 bg-card z-30 border-l border-border">
       <div className="flex flex-col h-full overflow-y-auto scrollbar-hide">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-stone-100 dark:border-white/[0.08]">
-          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">Discover</h2>
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="font-heading text-base font-semibold text-foreground">Discover</h2>
         </div>
 
         {/* Content */}
-        <div className="flex flex-col flex-1 p-5 space-y-5">
+        <div className="flex flex-col flex-1 p-5 space-y-6">
           {/* Streak Tracker */}
           <StreakTracker />
 

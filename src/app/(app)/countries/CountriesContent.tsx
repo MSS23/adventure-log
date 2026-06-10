@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { Album } from '@/types/database'
 import { CountrySection } from '@/components/countries/CountrySection'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
 import { Search, Globe, Plus } from 'lucide-react'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
@@ -62,50 +63,45 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
   }, [albumsByCountry, searchQuery])
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="min-w-0">
-          <p className="al-eyebrow mb-1">Atlas</p>
-          <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
-            <Globe className="h-7 w-7" style={{ color: 'var(--color-coral)' }} />
-            Countries
-          </h1>
-          <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <header className="min-w-0 space-y-1">
+          <p className="al-eyebrow">Atlas</p>
+          <h1 className="al-display text-3xl md:text-4xl">Countries</h1>
+          <p className="text-sm text-muted-foreground">
             {albums.length > 0
               ? `${albums.length} album${albums.length === 1 ? '' : 's'} across ${albumsByCountry.length} countries`
               : 'Start your journey, one country at a time.'}
           </p>
-        </div>
-        <Link href="/albums/new" className="shrink-0">
-          <Button className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 w-full sm:w-auto">
+        </header>
+        <Button asChild className="w-full sm:w-auto">
+          <Link href="/albums/new">
             <Plus className="h-4 w-4 mr-2" />
             New Album
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
-      {/* Search Section */}
+      {/* Search */}
       {albums.length > 0 && (
-        <div className="bg-white dark:bg-[#111111] rounded-2xl border border-stone-200/60 dark:border-white/[0.06] p-4 sm:p-5">
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500 pointer-events-none" />
-            <input
-              type="text"
-              placeholder={`Search ${albumsByCountry.length} countries...`}
-              className="w-full pl-10 pr-24 py-2.5 bg-stone-50 dark:bg-[#1A1A1A] border border-stone-200 dark:border-white/[0.1] rounded-xl text-sm text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent transition-all duration-200"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-olive-600 dark:text-olive-400 hover:text-olive-700 dark:hover:text-olive-300 font-medium cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded px-2 py-1"
-              >
-                Clear
-              </button>
-            )}
-          </div>
+        <div className="relative max-w-md">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder={`Search ${albumsByCountry.length} countries...`}
+            className="h-10 rounded-xl pl-10 pr-20"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs font-medium text-primary hover:text-primary/80 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Clear
+            </button>
+          )}
         </div>
       )}
 
@@ -129,21 +125,21 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
           })}
         </div>
       ) : searchQuery.trim() ? (
-        <div className="bg-white dark:bg-[#111111] rounded-2xl border border-stone-200/60 dark:border-white/[0.06] p-10 sm:p-12 text-center">
-          <div className="w-16 h-16 bg-stone-100 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Search className="h-6 w-6" />
           </div>
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">
+          <h3 className="font-heading text-lg font-semibold text-foreground">
             No matches found
           </h3>
-          <p className="text-sm text-stone-500 dark:text-stone-400 mb-5 max-w-md mx-auto">
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
             We couldn&apos;t find any countries matching &quot;{searchQuery}&quot;
           </p>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setSearchQuery('')}
-            className="cursor-pointer active:scale-[0.97] transition-all duration-200"
+            className="mt-5 cursor-pointer"
           >
             Clear search
           </Button>
@@ -156,14 +152,14 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
           action={{ label: 'Create Album', onClick: () => window.location.href = '/albums/new' }}
         />
       ) : (
-        <div className="bg-white dark:bg-[#111111] rounded-2xl border border-stone-200/60 dark:border-white/[0.06] p-10 sm:p-12 text-center">
-          <div className="w-16 h-16 bg-olive-100 dark:bg-olive-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Globe className="h-8 w-8 text-olive-600 dark:text-olive-400" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Globe className="h-6 w-6" />
           </div>
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">
+          <h3 className="font-heading text-lg font-semibold text-foreground">
             Location Data Missing
           </h3>
-          <p className="text-sm text-stone-500 dark:text-stone-400 max-w-md mx-auto">
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
             Your albums don&apos;t have country information yet. Add location details to see them organized here.
           </p>
         </div>

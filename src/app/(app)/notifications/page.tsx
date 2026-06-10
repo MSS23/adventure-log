@@ -23,6 +23,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { UserAvatarLink } from '@/components/social/UserLink'
 import Link from 'next/link'
 import { getAvatarUrl } from '@/lib/utils/avatar'
+import { cn } from '@/lib/utils'
 
 interface Notification {
   id: string
@@ -170,62 +171,59 @@ export default function NotificationsPage() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'like':
-        return <Heart className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
+        return <Heart className="h-5 w-5 text-accent" />
       case 'comment':
-        return <MessageCircle className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
+        return <MessageCircle className="h-5 w-5 text-primary" />
       case 'follow':
-        return <UserPlus className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
+        return <UserPlus className="h-5 w-5 text-primary" />
       case 'album_invite':
       case 'collaboration':
-        return <Users className="h-5 w-5" style={{ color: 'var(--color-sky)' }} />
+        return <Users className="h-5 w-5 text-primary" />
       case 'photo':
-        return <Camera className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
+        return <Camera className="h-5 w-5 text-accent" />
       case 'location':
-        return <MapPin className="h-5 w-5" style={{ color: 'var(--color-sky)' }} />
+        return <MapPin className="h-5 w-5 text-primary" />
       case 'achievement':
-        return <Award className="h-5 w-5" style={{ color: 'var(--color-gold)' }} />
+        return <Award className="h-5 w-5 text-[color:var(--color-gold)]" />
       default:
-        return <Bell className="h-5 w-5" style={{ color: 'var(--color-muted-warm)' }} />
+        return <Bell className="h-5 w-5 text-muted-foreground" />
     }
   }
 
   const unreadCount = notifications.filter(n => !n.is_read).length
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 p-4">
+    <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 py-6 md:py-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex items-center gap-4 min-w-0">
-          <Button variant="ghost" onClick={() => window.history.back()} size="sm" className="cursor-pointer rounded-full active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
+          <Button variant="ghost" onClick={() => window.history.back()} size="sm" className="cursor-pointer rounded-full">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <div className="min-w-0">
-            <p className="al-eyebrow mb-0.5">Inbox</p>
+          <header className="min-w-0 space-y-1">
+            <p className="al-eyebrow">Inbox</p>
             <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
               Notifications
               {unreadCount > 0 && (
-                <span
-                  className="inline-flex items-center justify-center min-w-6 h-6 px-2 text-[11px] font-bold text-white rounded-full"
-                  style={{ background: 'var(--color-coral)' }}
-                >
+                <span className="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full bg-accent text-accent-foreground text-[11px] font-bold">
                   {unreadCount}
                 </span>
               )}
             </h1>
             {unreadCount > 0 && (
-              <p className="text-[color:var(--color-muted-warm)] text-sm mt-1 font-mono tracking-wide">
+              <p className="text-xs font-mono tracking-wide text-muted-foreground">
                 {unreadCount} unread
               </p>
             )}
-          </div>
+          </header>
         </div>
         {unreadCount > 0 && (
           <Button
             variant="outline"
             size="sm"
             onClick={markAllAsRead}
-            className="shrink-0 rounded-full text-xs font-semibold cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
+            className="shrink-0 rounded-full text-xs font-semibold cursor-pointer"
           >
             <Check className="h-4 w-4 mr-2" />
             Mark all read
@@ -237,44 +235,37 @@ export default function NotificationsPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
           <div
-            className="h-8 w-8 rounded-full border-[3px] animate-spin"
-            style={{ borderColor: 'var(--color-coral-tint)', borderTopColor: 'var(--color-coral)' }}
+            className="h-8 w-8 rounded-full border-[3px] border-muted border-t-primary animate-spin"
+            aria-hidden
           />
-          <p className="text-sm text-[color:var(--color-muted-warm)]">Loading...</p>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       ) : notifications.length === 0 ? (
-        <div className="al-card py-16">
-          <div className="text-center">
-            <div
-              className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"
-              style={{ background: 'var(--color-ivory-alt)' }}
-            >
-              <Bell className="h-8 w-8" style={{ color: 'var(--color-muted-warm)' }} />
-            </div>
-            <h3 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-2">
-              No notifications yet
-            </h3>
-            <p className="text-sm text-[color:var(--color-muted-warm)]">
-              We&apos;ll let you know when something happens.
-            </p>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+            <Bell className="h-6 w-6" />
           </div>
+          <h3 className="font-heading text-lg font-semibold text-foreground">
+            No notifications yet
+          </h3>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            We&apos;ll let you know when something happens.
+          </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              className="group relative rounded-2xl transition-all duration-200 hover:shadow-md cursor-pointer overflow-hidden"
-              style={{
-                background: notification.is_read ? 'var(--card)' : 'var(--color-coral-tint)',
-                border: '1px solid var(--color-line-warm)',
-              }}
+              className={cn(
+                'group relative transition-colors duration-200 hover:bg-muted/60 cursor-pointer',
+                !notification.is_read && 'bg-accent/5'
+              )}
             >
               {/* Unread accent rail */}
               {!notification.is_read && (
                 <span
-                  className="absolute left-0 top-0 bottom-0 w-1"
-                  style={{ background: 'var(--color-coral)' }}
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-accent"
                   aria-hidden
                 />
               )}
@@ -298,11 +289,11 @@ export default function NotificationsPage() {
                     e.preventDefault()
                     deleteNotification(notification.id)
                   }}
-                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 p-2 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:opacity-100 active:scale-[0.9]"
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 p-2 hover:bg-destructive/10 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:opacity-100 active:scale-[0.9]"
                   title="Delete notification"
                   aria-label="Delete notification"
                 >
-                  <Trash2 className="h-4 w-4 text-red-500" />
+                  <Trash2 className="h-4 w-4 text-destructive" />
                 </button>
               </div>
             </div>
@@ -327,26 +318,23 @@ function NotificationItem({
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-12 w-12 flex-shrink-0">
             <AvatarImage src={getAvatarUrl(notification.sender.avatar_url, notification.sender.username)} />
-            <AvatarFallback className="text-white font-semibold" style={{ background: 'var(--color-coral)' }}>
+            <AvatarFallback className="bg-accent text-accent-foreground font-semibold">
               {notification.sender.display_name[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>
       ) : (
-        <div
-          className="h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ background: 'var(--color-ivory-alt)' }}
-        >
+        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
           {getIcon(notification.type)}
         </div>
       )}
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-[color:var(--color-ink)] mb-1 leading-snug">
+        <p className="text-sm text-foreground mb-1 leading-snug">
           {notification.message}
         </p>
-        <p className="text-xs font-mono tracking-wide text-[color:var(--color-muted-warm)]">
+        <p className="text-xs font-mono tracking-wide text-muted-foreground">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
       </div>

@@ -5,7 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ArrowLeft, Users, Loader2, UserPlus, Check, X, Sparkles } from 'lucide-react'
+import { ArrowLeft, Users, Loader2, UserPlus, Check, X } from 'lucide-react'
 import Link from 'next/link'
 import { FollowButton } from '@/components/social/FollowButton'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -107,16 +107,16 @@ export default function FollowersPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div
-          className="h-10 w-10 rounded-full border-4 animate-spin"
-          style={{ borderColor: 'var(--color-coral-tint)', borderTopColor: 'var(--color-coral)' }}
+          className="h-10 w-10 rounded-full border-4 border-muted border-t-primary animate-spin"
+          aria-hidden
         />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-      <div className="max-w-4xl mx-auto space-y-6 p-4">
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 py-6 md:py-8 space-y-8">
         {/* Header */}
         <motion.div
           className="flex items-center gap-4"
@@ -124,38 +124,22 @@ export default function FollowersPage() {
           animate="visible"
           variants={headerVariants}
         >
-          <motion.div
-            whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-            whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+          <Button
+            variant="ghost"
+            onClick={() => window.history.back()}
+            size="sm"
+            className="cursor-pointer rounded-full"
           >
-            <Button
-              variant="ghost"
-              onClick={() => window.history.back()}
-              size="sm"
-              className="cursor-pointer hover:bg-[color:var(--color-ivory-alt)] border border-transparent hover:border-[color:var(--color-line-warm)] hover:shadow-sm transition-all duration-200 rounded-full active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </motion.div>
-          <div>
-            <p className="al-eyebrow mb-1">Your audience</p>
-            <h1 className="al-display text-3xl md:text-4xl flex items-center gap-2">
-              Followers
-              {stats.followersCount > 0 && !prefersReducedMotion && (
-                <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.3 }}
-                >
-                  <Sparkles className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
-                </motion.div>
-              )}
-            </h1>
-            <p className="text-sm text-[color:var(--color-muted-warm)] mt-1">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <header className="space-y-1">
+            <p className="al-eyebrow">Your audience</p>
+            <h1 className="al-display text-3xl md:text-4xl">Followers</h1>
+            <p className="text-sm text-muted-foreground">
               People following you.
             </p>
-          </div>
+          </header>
         </motion.div>
 
         {/* Stats */}
@@ -166,53 +150,31 @@ export default function FollowersPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <div
-              className="rounded-2xl p-6 text-center transition-shadow duration-300 hover:shadow-md"
-              style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
-            >
-              <motion.div
-                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-                style={{ background: 'var(--color-forest-tint)' }}
-                whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-              >
-                <Users className="h-7 w-7" style={{ color: 'var(--color-forest)' }} />
-              </motion.div>
-              <div className="al-stat-value text-3xl">
+            <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+              <p className="al-eyebrow flex items-center gap-1.5">
+                <Users className="h-3.5 w-3.5 text-primary" aria-hidden />
+                Followers
+              </p>
+              <p className="al-stat-value text-3xl md:text-4xl mt-1">
                 <AnimatedCounter value={stats.followersCount} />
-              </div>
-              <div className="al-eyebrow mt-1">Followers</div>
+              </p>
             </div>
           </motion.div>
           <motion.div variants={itemVariants}>
-            <div
-              className="rounded-2xl p-6 text-center relative overflow-hidden transition-shadow duration-300 hover:shadow-md"
-              style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
-            >
-              {stats.pendingRequestsCount > 0 && !prefersReducedMotion && (
-                <motion.div
-                  className="absolute top-3 right-3"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <span className="flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: 'var(--color-coral-soft)' }}></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3" style={{ background: 'var(--color-coral)' }}></span>
-                  </span>
-                </motion.div>
+            <div className="relative rounded-2xl border border-border bg-card p-4 sm:p-5">
+              {stats.pendingRequestsCount > 0 && (
+                <span
+                  className="absolute top-3 right-3 inline-flex h-2.5 w-2.5 rounded-full bg-accent"
+                  aria-hidden
+                />
               )}
-              <motion.div
-                className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-                style={{ background: 'var(--color-coral-tint)' }}
-                whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: -5 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-              >
-                <UserPlus className="h-7 w-7" style={{ color: 'var(--color-coral)' }} />
-              </motion.div>
-              <div className="al-stat-value text-3xl">
+              <p className="al-eyebrow flex items-center gap-1.5">
+                <UserPlus className="h-3.5 w-3.5 text-accent" aria-hidden />
+                Pending Requests
+              </p>
+              <p className="al-stat-value text-3xl md:text-4xl mt-1">
                 <AnimatedCounter value={stats.pendingRequestsCount} />
-              </div>
-              <div className="al-eyebrow mt-1">Pending Requests</div>
+              </p>
             </div>
           </motion.div>
         </motion.div>
@@ -225,137 +187,102 @@ export default function FollowersPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="rounded-2xl overflow-hidden"
-              style={{
-                background: 'var(--color-coral-tint)',
-                border: '1px solid var(--color-line-warm)',
-              }}
+              className="rounded-2xl border border-border bg-card overflow-hidden"
             >
-              <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--color-line-warm)' }}>
+              <div className="px-5 py-4 border-b border-border">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <motion.div
-                      animate={prefersReducedMotion ? {} : { rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    >
-                      <UserPlus className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
-                    </motion.div>
-                    <span className="font-heading font-semibold text-[color:var(--color-ink)]">Follow Requests</span>
-                    <motion.span
-                      className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white rounded-full"
-                      style={{ background: 'var(--color-coral)' }}
-                      initial={prefersReducedMotion ? {} : { scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 25, delay: 0.2 }}
-                    >
+                    <UserPlus className="h-5 w-5 text-accent" aria-hidden />
+                    <span className="font-heading font-semibold text-foreground">Follow Requests</span>
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-xs font-bold">
                       {pendingRequests.length}
-                    </motion.span>
+                    </span>
                   </div>
-                  <p className="hidden sm:block text-sm text-[color:var(--color-muted-warm)]">
+                  <p className="hidden sm:block text-sm text-muted-foreground">
                     Approve or decline follow requests
                   </p>
                 </div>
               </div>
-              <div className="p-4">
-                <motion.div
-                  className="space-y-3"
-                  initial="hidden"
-                  animate="visible"
-                  variants={containerVariants}
-                >
-                  <AnimatePresence mode="popLayout">
-                    {pendingRequests.map((request) => {
-                      const requester = request.follower
-                      if (!requester) return null
+              <motion.div
+                className="divide-y divide-border"
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+              >
+                <AnimatePresence mode="popLayout">
+                  {pendingRequests.map((request) => {
+                    const requester = request.follower
+                    if (!requester) return null
 
-                      return (
-                        <motion.div
-                          key={request.id}
-                          variants={itemVariants}
-                          layout={!prefersReducedMotion}
-                          className="flex items-center justify-between p-4 rounded-xl hover:shadow-md transition-all duration-300"
-                          style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
-                          whileHover={prefersReducedMotion ? {} : { y: -2 }}
+                    return (
+                      <motion.div
+                        key={request.id}
+                        variants={itemVariants}
+                        layout={!prefersReducedMotion}
+                        className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/60"
+                      >
+                        <Link
+                          href={`/globe?user=${requester.id}`}
+                          className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer"
                         >
-                          <Link
-                            href={`/globe?user=${requester.id}`}
-                            className="flex items-center gap-3 flex-1 min-w-0 group cursor-pointer"
-                          >
-                            <Avatar className="h-11 w-11 ring-2 ring-[color:var(--color-line-warm)] transition-all">
-                              <AvatarImage
-                                src={getPhotoUrl(requester.avatar_url, 'avatars') || ''}
-                                alt={requester.display_name || requester.username || 'User'}
-                              />
-                              <AvatarFallback className="text-white font-semibold" style={{ background: 'var(--color-coral)' }}>
-                                {(requester.display_name || requester.username || 'U').charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-[color:var(--color-ink)] truncate group-hover:text-[color:var(--color-coral)] transition-colors">
-                                {requester.display_name || requester.username}
-                              </p>
-                              <p className="text-xs text-[color:var(--color-muted-warm)] truncate">
-                                @{requester.username}
-                              </p>
-                            </div>
-                          </Link>
-
-                          <div className="flex items-center gap-2 ml-4">
-                            <motion.div
-                              whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
-                              whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
-                            >
-                              <Button
-                                size="icon"
-                                variant="default"
-                                className="cursor-pointer h-9 w-9 rounded-full text-white shadow-md active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] transition-all duration-200"
-                                style={{ background: 'var(--color-forest)' }}
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  e.stopPropagation()
-                                  handleAccept(requester.id)
-                                }}
-                                disabled={actionLoading === requester.id}
-                                title="Accept"
-                              >
-                                {actionLoading === requester.id ? (
-                                  <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                  >
-                                    <Loader2 className="h-4 w-4" />
-                                  </motion.div>
-                                ) : (
-                                  <Check className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </motion.div>
-                            <motion.div
-                              whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
-                              whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
-                            >
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="cursor-pointer border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-300 h-9 w-9 rounded-full active:scale-[0.93] focus-visible:ring-2 focus-visible:ring-red-500 transition-all duration-200"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  e.stopPropagation()
-                                  handleReject(requester.id)
-                                }}
-                                disabled={actionLoading === requester.id}
-                                title="Reject"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </motion.div>
+                          <Avatar className="h-11 w-11">
+                            <AvatarImage
+                              src={getPhotoUrl(requester.avatar_url, 'avatars') || ''}
+                              alt={requester.display_name || requester.username || 'User'}
+                            />
+                            <AvatarFallback className="bg-accent text-accent-foreground font-semibold">
+                              {(requester.display_name || requester.username || 'U').charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                              {requester.display_name || requester.username}
+                            </p>
+                            <p className="text-xs font-mono tracking-wide text-muted-foreground truncate">
+                              @{requester.username}
+                            </p>
                           </div>
-                        </motion.div>
-                      )
-                    })}
-                  </AnimatePresence>
-                </motion.div>
-              </div>
+                        </Link>
+
+                        <div className="flex items-center gap-2 ml-4">
+                          <Button
+                            size="icon"
+                            variant="default"
+                            className="cursor-pointer h-9 w-9 rounded-full"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleAccept(requester.id)
+                            }}
+                            disabled={actionLoading === requester.id}
+                            title="Accept"
+                          >
+                            {actionLoading === requester.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="cursor-pointer h-9 w-9 rounded-full text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive/40 focus-visible:ring-destructive/40"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleReject(requester.id)
+                            }}
+                            disabled={actionLoading === requester.id}
+                            title="Reject"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </AnimatePresence>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -365,113 +292,89 @@ export default function FollowersPage() {
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
-          className="rounded-2xl overflow-hidden"
-          style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
+          className="rounded-2xl border border-border bg-card overflow-hidden"
         >
-          <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--color-line-warm)' }}>
-            <h2 className="font-heading text-lg font-bold text-[color:var(--color-ink)] flex items-center gap-2">
-              <Users className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-heading text-base md:text-lg font-semibold text-foreground flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" aria-hidden />
               Your Followers
-              <span className="text-sm font-normal text-[color:var(--color-muted-warm)]">({followers.length})</span>
+              <span className="text-xs font-mono tracking-wide font-normal text-muted-foreground">({followers.length})</span>
             </h2>
           </div>
-          <div className="p-4">
-            {followers.length === 0 ? (
-              <motion.div
-                className="text-center py-12"
-                initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              >
-                <motion.div
-                  className="relative inline-block"
-                  animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <div
-                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
-                    style={{ background: 'var(--color-forest-tint)' }}
-                  >
-                    <Users className="h-10 w-10" style={{ color: 'var(--color-forest)' }} />
-                  </div>
-                </motion.div>
-                <p className="font-heading text-[color:var(--color-ink)] font-semibold">No followers yet</p>
-                <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
-                  Share your profile to gain followers.
-                </p>
-                <Link href="/explore">
-                  <motion.div
-                    whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
-                    whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-                  >
-                    <Button className="al-btn-coral mt-6 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
-                      Explore &amp; Connect
-                    </Button>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            ) : (
-              <motion.div
-                className="space-y-3"
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
-              >
-                <AnimatePresence mode="popLayout">
-                  {followers.map((follow) => {
-                    const followerUser = follow.follower
-                    if (!followerUser) return null
+          {followers.length === 0 ? (
+            <motion.div
+              className="flex flex-col items-center justify-center px-6 py-14 text-center"
+              initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                <Users className="h-6 w-6" />
+              </div>
+              <p className="font-heading text-lg font-semibold text-foreground">No followers yet</p>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                Share your profile to gain followers.
+              </p>
+              <Link href="/explore">
+                <Button variant="coral" className="mt-5 cursor-pointer">
+                  Explore &amp; Connect
+                </Button>
+              </Link>
+            </motion.div>
+          ) : (
+            <motion.div
+              className="divide-y divide-border"
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
+              <AnimatePresence mode="popLayout">
+                {followers.map((follow) => {
+                  const followerUser = follow.follower
+                  if (!followerUser) return null
 
-                    return (
-                      <motion.div
-                        key={follow.id}
-                        variants={itemVariants}
-                        layout={!prefersReducedMotion}
-                        className="group flex items-center justify-between p-4 rounded-xl hover:shadow-md transition-all duration-300"
-                        style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
-                        whileHover={prefersReducedMotion ? {} : { y: -2 }}
+                  return (
+                    <motion.div
+                      key={follow.id}
+                      variants={itemVariants}
+                      layout={!prefersReducedMotion}
+                      className="group flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/60"
+                    >
+                      <Link
+                        href={`/globe?user=${followerUser.id}`}
+                        className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                       >
-                        <Link
-                          href={`/globe?user=${followerUser.id}`}
-                          className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
-                        >
-                          <motion.div
-                            whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                          >
-                            <Avatar className="h-11 w-11 ring-2 ring-[color:var(--color-line-warm)] transition-all">
-                              <AvatarImage
-                                src={getPhotoUrl(followerUser.avatar_url, 'avatars') || ''}
-                                alt={followerUser.display_name || followerUser.username || 'User'}
-                              />
-                              <AvatarFallback className="text-white font-semibold" style={{ background: 'var(--color-forest)' }}>
-                                {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                          </motion.div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-[color:var(--color-ink)] truncate group-hover:text-[color:var(--color-coral)] transition-colors">
-                              {followerUser.display_name || followerUser.username}
-                            </p>
-                            <p className="text-xs text-[color:var(--color-muted-warm)] truncate">
-                              @{followerUser.username}
-                            </p>
-                          </div>
-                        </Link>
+                        <Avatar className="h-11 w-11">
+                          <AvatarImage
+                            src={getPhotoUrl(followerUser.avatar_url, 'avatars') || ''}
+                            alt={followerUser.display_name || followerUser.username || 'User'}
+                          />
+                          <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                            {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                            {followerUser.display_name || followerUser.username}
+                          </p>
+                          <p className="text-xs font-mono tracking-wide text-muted-foreground truncate">
+                            @{followerUser.username}
+                          </p>
+                        </div>
+                      </Link>
 
-                        <FollowButton
-                          userId={followerUser.id}
-                          size="sm"
-                          showText={true}
-                          className="ml-4"
-                        />
-                      </motion.div>
-                    )
-                  })}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </div>
+                      <FollowButton
+                        userId={followerUser.id}
+                        size="sm"
+                        showText={true}
+                        className="ml-4"
+                      />
+                    </motion.div>
+                  )
+                })}
+              </AnimatePresence>
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </div>

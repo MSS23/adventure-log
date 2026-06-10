@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
 import { YearSeasonSelector, type Season } from '@/components/albums/YearSeasonSelector'
 import { FloatingInput, FloatingTextarea } from '@/components/ui/floating-input'
-import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardContent } from '@/components/ui/glass-card'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { transitions } from '@/lib/animations/spring-configs'
 import { type LocationData } from '@/lib/utils/locationUtils'
@@ -90,21 +90,14 @@ export function AlbumDetailsForm({
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
           {/* Left Column - Photo Upload */}
           <div className="lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
-            <GlassCard
-              variant="featured"
-              animate
-              staggerIndex={0}
-              hover="lift"
-              glow="subtle"
-              className="overflow-visible"
-            >
-              <GlassCardHeader>
-                <GlassCardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-olive-500" />
+            <Card className="overflow-visible">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
                   Photos
-                </GlassCardTitle>
-              </GlassCardHeader>
-              <GlassCardContent className="space-y-4">
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <PhotoUploadSection
                   photos={photos}
                   selectedCoverIndex={selectedCoverIndex}
@@ -122,21 +115,21 @@ export function AlbumDetailsForm({
                   onOpenPositionEditor={onOpenPositionEditor}
                   onClearFileErrors={onClearFileErrors}
                 />
-              </GlassCardContent>
-            </GlassCard>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Form Fields */}
           <div className="lg:col-span-3 space-y-6">
             {/* Album Details Section */}
-            <GlassCard animate staggerIndex={1} hover="lift" glow="subtle">
-              <GlassCardHeader>
-                <GlassCardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-olive-500" />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
                   Album Details
-                </GlassCardTitle>
-              </GlassCardHeader>
-              <GlassCardContent className="space-y-5">
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-5">
                 {/* Album Title */}
                 <FloatingInput
                   label="Album Title"
@@ -158,7 +151,7 @@ export function AlbumDetailsForm({
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     onClick={() => setValue('title', suggestedTitle)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-olive-50 dark:bg-olive-950/20 hover:bg-olive-100 dark:hover:bg-olive-950/30 border border-olive-200 dark:border-olive-900/40 rounded-full text-sm text-olive-700 dark:text-olive-400 transition-all duration-200 cursor-pointer active:scale-[0.97]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/15 border border-primary/20 rounded-full text-sm text-primary transition-all duration-200 cursor-pointer active:scale-[0.97]"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
                     Use &ldquo;{suggestedTitle}&rdquo;
@@ -185,7 +178,7 @@ export function AlbumDetailsForm({
 
                 {/* Visibility */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">Who can see this?</label>
+                  <label className="block text-sm font-medium text-foreground">Who can see this?</label>
                   <div className="flex flex-wrap gap-2">
                     {visibilityOptions.map((option) => {
                       const isSelected = watch('visibility') === option.value
@@ -195,10 +188,10 @@ export function AlbumDetailsForm({
                           type="button"
                           onClick={() => setValue('visibility', option.value as 'public' | 'friends' | 'private')}
                           className={cn(
-                            'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
+                            'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                             isSelected
-                              ? 'bg-olive-50 dark:bg-olive-950/20 border-olive-500 text-olive-700 dark:text-olive-400'
-                              : 'bg-white dark:bg-[#1B170E] border-stone-200 dark:border-white/[0.10] text-stone-600 dark:text-stone-400 hover:border-stone-300 dark:hover:border-white/[0.12]'
+                              ? 'bg-primary/10 border-primary/40 text-primary'
+                              : 'bg-card border-border text-muted-foreground hover:border-primary/30'
                           )}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
@@ -209,18 +202,18 @@ export function AlbumDetailsForm({
                     })}
                   </div>
                 </div>
-              </GlassCardContent>
-            </GlassCard>
+              </CardContent>
+            </Card>
 
             {/* When & Where Section */}
-            <GlassCard animate staggerIndex={2} hover="lift" glow="subtle">
-              <GlassCardHeader>
-                <GlassCardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-olive-500" />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
                   When & Where
-                </GlassCardTitle>
-              </GlassCardHeader>
-              <GlassCardContent className="space-y-6">
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 {/* Year & Season */}
                 <YearSeasonSelector
                   year={selectedYear}
@@ -231,8 +224,8 @@ export function AlbumDetailsForm({
 
                 {/* Location */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-stone-700 dark:text-stone-300">
-                    Location <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-foreground">
+                    Location <span className="text-destructive">*</span>
                   </label>
                   <LocationSearchInput
                     value={albumLocation}
@@ -248,8 +241,8 @@ export function AlbumDetailsForm({
                     isAutoFilling={isExtractingLocation}
                   />
                 </div>
-              </GlassCardContent>
-            </GlassCard>
+              </CardContent>
+            </Card>
 
             {/* Action Buttons */}
             <motion.div
@@ -263,7 +256,7 @@ export function AlbumDetailsForm({
                   saves as a draft you can finish later. */}
               <EnhancedButton
                 type="submit"
-                variant="glow"
+                variant="default"
                 disabled={isSubmitting || !albumLocation}
                 loading={isSubmitting}
                 loadingText={photos.length === 0 ? 'Saving…' : 'Creating…'}
@@ -279,12 +272,12 @@ export function AlbumDetailsForm({
 
               {/* Forgiving guidance instead of a silently-disabled button */}
               {!albumLocation && (
-                <p className="text-xs text-[color:var(--color-muted-warm)] sm:text-right">
+                <p className="text-xs text-muted-foreground sm:text-right">
                   Add a location to {photos.length === 0 ? 'save your draft' : 'create your album'}.
                 </p>
               )}
               {albumLocation && photos.length === 0 && (
-                <p className="text-xs text-[color:var(--color-muted-warm)] sm:text-right">
+                <p className="text-xs text-muted-foreground sm:text-right">
                   No photos yet — we&apos;ll save this as a draft so you can add them later.
                 </p>
               )}

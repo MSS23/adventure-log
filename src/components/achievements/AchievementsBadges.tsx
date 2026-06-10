@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Trophy, Award, Star, Globe, Camera, Users } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface Achievement {
   id: string
@@ -33,12 +34,12 @@ const ACHIEVEMENT_ICONS: Record<string, typeof Trophy> = {
 }
 
 const ACHIEVEMENT_COLORS: Record<string, string> = {
-  globe_trotter: 'from-olive-500 to-olive-500',
-  photographer: 'from-olive-500 to-pink-500',
-  travel_enthusiast: 'from-olive-500 to-yellow-500',
-  explorer: 'from-[#E2553A] to-[#A2322B]',
-  social_butterfly: 'from-red-500 to-pink-500',
-  default: 'from-stone-500 to-stone-600'
+  globe_trotter: 'bg-primary/10 text-primary',
+  photographer: 'bg-primary/10 text-primary',
+  travel_enthusiast: 'bg-[color:var(--color-gold)]/15 text-[color:var(--color-gold)]',
+  explorer: 'bg-accent/10 text-accent',
+  social_butterfly: 'bg-accent/10 text-accent',
+  default: 'bg-muted text-muted-foreground'
 }
 
 export function AchievementsBadges({ userId, limit, showAll = false, className }: AchievementsBadgesProps) {
@@ -96,12 +97,12 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
     return (
       <div className={cn("grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4", className)}>
         {Array.from({ length: limit || 4 }).map((_, i) => (
-          <div key={i} className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] p-4 animate-pulse">
+          <div key={i} className="rounded-2xl border border-border bg-card p-4">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-16 w-16 rounded-full bg-stone-200 dark:bg-white/[0.08]" />
+              <Skeleton className="h-16 w-16 rounded-full" />
               <div className="space-y-2 w-full">
-                <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded mx-auto w-3/4" />
-                <div className="h-3 bg-stone-100 dark:bg-white/[0.06] rounded mx-auto w-full" />
+                <Skeleton className="h-4 mx-auto w-3/4" />
+                <Skeleton className="h-3 mx-auto w-full" />
               </div>
             </div>
           </div>
@@ -113,20 +114,20 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-8 px-4">
-        <Trophy className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-2" />
-        <p className="text-sm text-stone-500 dark:text-stone-400">{error}</p>
+        <Trophy className="h-8 w-8 text-muted-foreground mb-2" />
+        <p className="text-sm text-muted-foreground">{error}</p>
       </div>
     )
   }
 
   if (achievements.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 bg-stone-50 dark:bg-white/[0.04] rounded-xl border border-stone-100 dark:border-white/[0.08]">
-        <div className="p-4 bg-stone-100 dark:bg-white/[0.06] rounded-full mb-4">
-          <Trophy className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Trophy className="h-6 w-6" />
         </div>
-        <p className="text-stone-700 dark:text-stone-300 font-medium mb-1">No achievements yet</p>
-        <p className="text-sm text-stone-500 dark:text-stone-400 text-center max-w-sm">
+        <p className="font-heading font-semibold text-foreground mb-1">No achievements yet</p>
+        <p className="text-sm text-muted-foreground text-center max-w-sm">
           Start exploring and sharing your adventures to earn badges!
         </p>
       </div>
@@ -147,35 +148,32 @@ export function AchievementsBadges({ userId, limit, showAll = false, className }
         return (
           <div
             key={achievement.id}
-            className="group bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] hover:border-stone-200 dark:hover:border-white/[0.12] hover:shadow-lg transition-all duration-300 p-4"
+            className="rounded-2xl border border-border bg-card p-4 transition-colors duration-200 hover:border-primary/30"
           >
             <div className="flex flex-col items-center gap-3 text-center">
               {/* Icon */}
               <div className={cn(
-                "relative h-16 w-16 rounded-full bg-gradient-to-br flex items-center justify-center",
-                "ring-4 ring-white dark:ring-white/[0.08] shadow-lg group-hover:scale-110 transition-transform duration-300",
+                "relative flex h-16 w-16 items-center justify-center rounded-full",
                 gradientColor
               )}>
                 {achievement.icon_emoji ? (
                   <span className="text-2xl">{achievement.icon_emoji}</span>
                 ) : (
-                  <IconComponent className="h-8 w-8 text-white" />
+                  <IconComponent className="h-8 w-8" />
                 )}
-                {/* Shine effect */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
 
               {/* Achievement Info */}
               <div className="space-y-1 w-full">
-                <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm line-clamp-1">
+                <h3 className="font-heading font-semibold text-foreground text-sm line-clamp-1">
                   {achievement.achievement_name}
                 </h3>
                 {achievement.description && (
-                  <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 min-h-[2rem]">
+                  <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2rem]">
                     {achievement.description}
                   </p>
                 )}
-                <p className="text-xs text-stone-400 dark:text-stone-500 pt-1 border-t border-stone-100 dark:border-white/[0.08]">
+                <p className="font-mono text-xs tracking-wide text-muted-foreground pt-1 border-t border-border">
                   Earned {earnedDate}
                 </p>
               </div>

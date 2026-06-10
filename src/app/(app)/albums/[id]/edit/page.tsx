@@ -31,6 +31,7 @@ import {
   Calendar as CalendarIcon
 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
+import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { albumSchema, AlbumFormData } from '@/lib/validations/album'
 import { Album } from '@/types/database'
@@ -326,13 +327,13 @@ export default function EditAlbumPage() {
   const getVisibilityIcon = (visibility: string) => {
     switch (visibility) {
       case 'public':
-        return <Globe className="h-4 w-4 text-olive-700 dark:text-olive-400" />
+        return <Globe className="h-4 w-4 text-primary" />
       case 'friends':
-        return <Users className="h-4 w-4 text-olive-600" />
+        return <Users className="h-4 w-4 text-primary" />
       case 'private':
-        return <Lock className="h-4 w-4 text-stone-800 dark:text-stone-300" />
+        return <Lock className="h-4 w-4 text-muted-foreground" />
       default:
-        return <Globe className="h-4 w-4 text-stone-800 dark:text-stone-300" />
+        return <Globe className="h-4 w-4 text-muted-foreground" />
     }
   }
 
@@ -352,10 +353,10 @@ export default function EditAlbumPage() {
   if (loading) {
     return (
       <div className="space-y-8">
-        <div className="animate-pulse">
-          <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-32 mb-4"></div>
-          <div className="h-8 bg-stone-200 dark:bg-white/[0.08] rounded w-64 mb-2"></div>
-          <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-48"></div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-48" />
         </div>
 
         <Card>
@@ -363,8 +364,8 @@ export default function EditAlbumPage() {
             <div className="space-y-4">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="h-4 bg-stone-200 dark:bg-white/[0.08] rounded w-24"></div>
-                  <div className="h-10 bg-stone-200 dark:bg-white/[0.08] rounded"></div>
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
                 </div>
               ))}
             </div>
@@ -379,17 +380,17 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
         </button>
 
-        <Card className="border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30">
+        <Card className="border-destructive/20 bg-destructive/10">
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-red-600 dark:text-red-400 font-medium">Failed to load album</p>
-              <p className="text-red-500 dark:text-red-400 text-sm mt-1">{error}</p>
+              <p className="text-destructive font-medium">Failed to load album</p>
+              <p className="text-destructive text-sm mt-1">{error}</p>
               <div className="mt-4 space-x-2">
                 <Button variant="outline" onClick={fetchAlbum}>
                   Try Again
@@ -410,7 +411,7 @@ export default function EditAlbumPage() {
       <div className="space-y-8">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -419,7 +420,7 @@ export default function EditAlbumPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-stone-800 dark:text-stone-200">Album not found</p>
+              <p className="text-foreground">Album not found</p>
               <Link href="/albums" className="mt-4 inline-block">
                 <Button variant="outline">Back to Albums</Button>
               </Link>
@@ -436,7 +437,7 @@ export default function EditAlbumPage() {
       <div className="space-y-4">
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center text-sm text-stone-800 dark:text-stone-200 hover:text-stone-900 dark:hover:text-stone-100 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
@@ -464,11 +465,11 @@ export default function EditAlbumPage() {
               <Input
                 id="title"
                 {...register('title')}
-                className={errors.title ? 'border-red-500' : ''}
+                className={errors.title ? 'border-destructive' : ''}
                 placeholder="Enter album title"
               />
               {errors.title && (
-                <p className="text-sm text-red-600 dark:text-red-400">{errors.title.message}</p>
+                <p className="text-sm text-destructive">{errors.title.message}</p>
               )}
             </div>
 
@@ -477,12 +478,12 @@ export default function EditAlbumPage() {
               <Textarea
                 id="description"
                 {...register('description')}
-                className={errors.description ? 'border-red-500' : ''}
+                className={errors.description ? 'border-destructive' : ''}
                 placeholder="Describe your adventure..."
                 rows={4}
               />
               {errors.description && (
-                <p className="text-sm text-red-600 dark:text-red-400">{errors.description.message}</p>
+                <p className="text-sm text-destructive">{errors.description.message}</p>
               )}
             </div>
           </CardContent>
@@ -508,15 +509,15 @@ export default function EditAlbumPage() {
                 placeholder="Search destinations or pick a popular one..."
                 allowCurrentLocation={true}
                 showPopularDestinations={true}
-                className={errors.location_name ? 'border-red-500' : ''}
+                className={errors.location_name ? 'border-destructive' : ''}
               />
               {errors.location_name && (
-                <p className="text-sm text-red-600 dark:text-red-400">{errors.location_name.message}</p>
+                <p className="text-sm text-destructive">{errors.location_name.message}</p>
               )}
               {albumLocation && (
-                <div className="p-2 bg-olive-50 dark:bg-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded text-sm">
-                  <p className="text-olive-800 dark:text-stone-200 font-medium">Selected: {albumLocation.display_name}</p>
-                  <p className="text-olive-600 dark:text-stone-400 text-sm">
+                <div className="rounded-xl bg-muted/50 p-3 text-sm">
+                  <p className="text-foreground font-medium">Selected: {albumLocation.display_name}</p>
+                  <p className="text-muted-foreground text-sm">
                     Coordinates: {albumLocation.latitude.toFixed(6)}, {albumLocation.longitude.toFixed(6)}
                   </p>
                 </div>
@@ -531,10 +532,10 @@ export default function EditAlbumPage() {
                   type="date"
                   {...register('start_date')}
                   max={new Date().toISOString().split('T')[0]}
-                  className={errors.start_date ? 'border-red-500' : ''}
+                  className={errors.start_date ? 'border-destructive' : ''}
                 />
                 {errors.start_date && (
-                  <p className="text-sm text-red-600 dark:text-red-400">{errors.start_date.message}</p>
+                  <p className="text-sm text-destructive">{errors.start_date.message}</p>
                 )}
               </div>
 
@@ -545,10 +546,10 @@ export default function EditAlbumPage() {
                   type="date"
                   {...register('end_date')}
                   max={new Date().toISOString().split('T')[0]}
-                  className={errors.end_date ? 'border-red-500' : ''}
+                  className={errors.end_date ? 'border-destructive' : ''}
                 />
                 {errors.end_date && (
-                  <p className="text-sm text-red-600 dark:text-red-400">{errors.end_date.message}</p>
+                  <p className="text-sm text-destructive">{errors.end_date.message}</p>
                 )}
               </div>
             </div>
@@ -557,12 +558,12 @@ export default function EditAlbumPage() {
               <div className="flex items-center justify-between space-x-2">
                 <div className="space-y-0.5 flex-1">
                   <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4 text-stone-800 dark:text-stone-200" />
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                     <Label htmlFor="show_exact_dates" className="text-base font-medium">
                       Show Exact Dates
                     </Label>
                   </div>
-                  <p className="text-sm text-stone-800 dark:text-stone-300">
+                  <p className="text-sm text-muted-foreground">
                     {showExactDates
                       ? 'Full dates will be displayed (e.g., "December 12, 1999")'
                       : 'Only month and year will be shown (e.g., "December 1999")'}
@@ -575,8 +576,8 @@ export default function EditAlbumPage() {
                   className="cursor-pointer"
                 />
               </div>
-              <div className="p-3 bg-olive-50 dark:bg-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded-md">
-                <p className="text-sm text-olive-800 dark:text-stone-200">
+              <div className="rounded-xl bg-muted/50 p-3">
+                <p className="text-sm text-muted-foreground">
                   <strong>Privacy Tip:</strong> For your safety, we recommend keeping this off.
                   Sharing exact dates can reveal when you&apos;re away from home.
                 </p>
@@ -625,7 +626,7 @@ export default function EditAlbumPage() {
                 </SelectContent>
               </Select>
               {visibility && (
-                <p className="text-sm text-stone-800 dark:text-stone-300 flex items-center gap-2">
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
                   {getVisibilityIcon(visibility)}
                   {getVisibilityDescription(visibility)}
                 </p>
@@ -657,13 +658,13 @@ export default function EditAlbumPage() {
             {photosLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="aspect-square bg-stone-200 dark:bg-white/[0.08] rounded-lg animate-pulse"></div>
+                  <Skeleton key={i} className="aspect-square rounded-xl" />
                 ))}
               </div>
             ) : photos.length === 0 ? (
-              <div className="text-center py-12 bg-stone-50 dark:bg-stone-800/50 rounded-lg">
-                <Camera className="h-12 w-12 text-stone-400 mx-auto mb-4" />
-                <p className="text-stone-600 mb-4">No photos in this album yet</p>
+              <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/30">
+                <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground mb-4">No photos in this album yet</p>
                 <Link href={`/albums/${params.id}/upload`}>
                   <Button type="button" variant="outline">
                     <ImagePlus className="h-4 w-4 mr-2" />
@@ -718,7 +719,7 @@ export default function EditAlbumPage() {
                     <button
                       type="button"
                       onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-red-600 cursor-pointer transition-all duration-200 active:scale-[0.9] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm"
+                      className="ml-1 hover:text-destructive cursor-pointer transition-all duration-200 active:scale-[0.9] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-sm"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -737,7 +738,7 @@ export default function EditAlbumPage() {
             </Button>
           </Link>
 
-          <Button type="submit" disabled={saving} className="al-btn-coral text-white px-6 cursor-pointer disabled:opacity-60 active:scale-[0.97] transition-all duration-200">
+          <Button type="submit" variant="coral" disabled={saving} className="px-6 cursor-pointer disabled:opacity-60">
             {saving ? (
               <>
                 <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />

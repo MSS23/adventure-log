@@ -115,18 +115,18 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
           <div className="flex items-center gap-3">
             {online ? (
               <>
-                <Wifi className="h-5 w-5 text-green-600" />
+                <Wifi className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="font-medium text-stone-900">Online</p>
-                  <p className="text-sm text-stone-600">Connected to server</p>
+                  <p className="font-medium text-foreground">Online</p>
+                  <p className="text-sm text-muted-foreground">Connected to server</p>
                 </div>
               </>
             ) : (
               <>
-                <WifiOff className="h-5 w-5 text-olive-600" />
+                <WifiOff className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium text-stone-900">Offline Mode</p>
-                  <p className="text-sm text-stone-600">Changes will sync when online</p>
+                  <p className="font-medium text-foreground">Offline Mode</p>
+                  <p className="text-sm text-muted-foreground">Changes will sync when online</p>
                 </div>
               </>
             )}
@@ -156,21 +156,21 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
 
         {/* Offline Stats */}
         {(stats.albumCount > 0 || stats.photoCount > 0) && (
-          <div className="grid grid-cols-3 gap-3 pt-3 border-t">
+          <div className="grid grid-cols-3 gap-3 pt-3 border-t border-border">
             <div className="text-center">
-              <Database className="h-5 w-5 mx-auto mb-1 text-olive-600" />
-              <p className="text-sm font-medium text-stone-900">{stats.albumCount}</p>
-              <p className="text-xs text-stone-600">Albums</p>
+              <Database className="h-5 w-5 mx-auto mb-1 text-primary" />
+              <p className="text-sm font-medium text-foreground">{stats.albumCount}</p>
+              <p className="text-xs text-muted-foreground">Albums</p>
             </div>
             <div className="text-center">
-              <Download className="h-5 w-5 mx-auto mb-1 text-green-600" />
-              <p className="text-sm font-medium text-stone-900">{stats.photoCount}</p>
-              <p className="text-xs text-stone-600">Photos</p>
+              <Download className="h-5 w-5 mx-auto mb-1 text-primary" />
+              <p className="text-sm font-medium text-foreground">{stats.photoCount}</p>
+              <p className="text-xs text-muted-foreground">Photos</p>
             </div>
             <div className="text-center">
-              <RefreshCw className="h-5 w-5 mx-auto mb-1 text-olive-600" />
-              <p className="text-sm font-medium text-stone-900">{stats.syncQueueCount}</p>
-              <p className="text-xs text-stone-600">Pending</p>
+              <RefreshCw className="h-5 w-5 mx-auto mb-1 text-primary" />
+              <p className="text-sm font-medium text-foreground">{stats.syncQueueCount}</p>
+              <p className="text-xs text-muted-foreground">Pending</p>
             </div>
           </div>
         )}

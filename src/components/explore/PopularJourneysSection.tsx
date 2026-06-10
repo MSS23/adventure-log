@@ -9,6 +9,7 @@ import { Album } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { MapPin } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
@@ -73,21 +74,19 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
     return (
       <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div key={i} className="group">
-            <div className="bg-white dark:bg-[#1B170E] rounded-2xl overflow-hidden border border-stone-100 dark:border-white/[0.08] shadow-sm">
-              <div className="aspect-[4/3] bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-200 dark:to-white/[0.08] animate-pulse" />
-              <div className="p-5 space-y-4">
-                <div>
-                  <div className="h-5 bg-stone-200 dark:bg-white/[0.08] rounded-md animate-pulse w-3/4" />
-                  <div className="h-4 bg-stone-100 dark:bg-white/[0.06] rounded-md w-1/2 animate-pulse mt-2" />
+          <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
+            <Skeleton className="aspect-[4/3] w-full rounded-none" />
+            <div className="p-5 space-y-4">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-4 w-24" />
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-full bg-stone-200 dark:bg-white/[0.08] animate-pulse" />
-                    <div className="h-4 bg-stone-100 dark:bg-white/[0.06] rounded-md w-24 animate-pulse" />
-                  </div>
-                  <div className="h-9 w-24 bg-gradient-to-r from-stone-200 dark:from-white/[0.08] to-stone-100 dark:to-white/[0.06] rounded-lg animate-pulse" />
-                </div>
+                <Skeleton className="h-9 w-20 rounded-xl" />
               </div>
             </div>
           </div>
@@ -98,17 +97,17 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-        <div className="p-4 rounded-full mb-4 bg-[color:var(--color-coral-tint)]">
-          <MapPin className="h-8 w-8" style={{ color: 'var(--color-coral)' }} />
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4">
+          <MapPin className="h-6 w-6" />
         </div>
-        <p className="text-[color:var(--color-ink)] font-semibold mb-2">Oops, something went wrong</p>
-        <p className="text-[color:var(--color-ink-soft)] text-sm mb-4">{error}</p>
+        <p className="font-heading text-lg font-semibold text-foreground">Oops, something went wrong</p>
+        <p className="mt-1 text-sm text-muted-foreground">{error}</p>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setRetryKey(k => k + 1)}
-          className="rounded-full"
+          className="mt-5"
         >
           Try again
         </Button>
@@ -118,19 +117,15 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
 
   if (albums.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-        <div className="p-4 rounded-full mb-4 bg-[color:var(--color-forest-tint)]">
-          <MapPin className="h-8 w-8" style={{ color: 'var(--color-forest)' }} />
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+          <MapPin className="h-6 w-6" />
         </div>
-        <p className="text-[color:var(--color-ink)] font-semibold mb-2">No journeys yet</p>
-        <p className="text-[color:var(--color-ink-soft)] text-sm mb-5">Be the first to share your adventure!</p>
-        <Link
-          href="/albums/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold transition-shadow hover:shadow-[0_10px_28px_rgba(226,85,58,0.45)]"
-          style={{ background: 'var(--color-coral)', color: '#fff' }}
-        >
-          Share your first journey
-        </Link>
+        <p className="font-heading text-lg font-semibold text-foreground">No journeys yet</p>
+        <p className="mt-1 text-sm text-muted-foreground">Be the first to share your adventure!</p>
+        <Button asChild className="mt-5">
+          <Link href="/albums/new">Share your first journey</Link>
+        </Button>
       </div>
     )
   }
@@ -145,8 +140,8 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         visible: {
           opacity: 1,
           transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.1
+            staggerChildren: 0.06,
+            delayChildren: 0.06
           }
         }
       }}
@@ -175,59 +170,33 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
             key={album.id}
             className="group"
             variants={{
-              hidden: { opacity: 0, y: 30, scale: 0.95 },
+              hidden: { opacity: 0, y: 16 },
               visible: {
                 opacity: 1,
                 y: 0,
-                scale: 1,
-                transition: {
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 24
-                }
+                transition: { duration: 0.35 }
               }
             }}
           >
-            <motion.div
-              className="rounded-2xl overflow-hidden border border-[color:var(--color-line-warm)] shadow-sm transition-shadow duration-300"
-              style={{ background: 'var(--card)' }}
-              whileHover={{
-                y: -4,
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-              }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
+            <div className="rounded-2xl overflow-hidden border border-border bg-card transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5">
               {/* Album Cover Image */}
-              <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden" style={{ background: 'var(--color-ivory-alt)' }}>
+              <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-muted">
                 {coverUrl ? (
                   <>
-                    <motion.div
-                      className="w-full h-full"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                    >
-                      <Image
-                        src={coverUrl}
-                        alt={album.title}
-                        fill
-                        priority={idx < 3}
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                    </motion.div>
+                    <Image
+                      src={coverUrl}
+                      alt={album.title}
+                      fill
+                      priority={idx < 3}
+                      className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
                     {/* Hover Overlay — scrim for legibility of any caption/affordance */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
-                    <motion.div
-                      className="p-4 rounded-full shadow-sm"
-                      style={{ background: 'var(--card)' }}
-                      whileHover={{ scale: 1.1, rotate: 10 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                    >
-                      <MapPin className="h-10 w-10" style={{ color: 'var(--color-forest)' }} />
-                    </motion.div>
+                  <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                    <MapPin className="h-10 w-10 text-primary" />
                   </div>
                 )}
               </Link>
@@ -237,12 +206,12 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                 {/* Title and Country */}
                 <div>
                   <Link href={`/albums/${album.id}`}>
-                    <h3 className="font-heading text-[17px] font-semibold text-[color:var(--color-ink)] line-clamp-1 hover:text-[color:var(--color-forest)] transition-colors duration-200">
+                    <h3 className="font-heading text-base md:text-lg font-semibold text-foreground line-clamp-1 hover:text-primary transition-colors duration-200">
                       {album.title}
                     </h3>
                   </Link>
                   {country && (
-                    <p className="text-sm text-[color:var(--color-muted-warm)] mt-1 flex items-center gap-1">
+                    <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
                       {country}
                     </p>
@@ -256,19 +225,13 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                       href={`/profile/${user.username}`}
                       className="flex items-center gap-2 group/user min-w-0 flex-1"
                     >
-                      <Avatar
-                        className="h-8 w-8 ring-2 transition-all duration-200 flex-shrink-0"
-                        style={{ '--tw-ring-color': 'var(--color-line-warm)' } as React.CSSProperties}
-                      >
+                      <Avatar className="h-8 w-8 ring-1 ring-border flex-shrink-0">
                         <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
-                        <AvatarFallback
-                          className="text-xs font-bold"
-                          style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}
-                        >
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                           {(user.display_name || user.username || 'U')[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm text-[color:var(--color-ink-soft)] group-hover/user:text-[color:var(--color-ink)] transition-colors duration-200 truncate">
+                      <span className="text-sm text-muted-foreground group-hover/user:text-foreground transition-colors duration-200 truncate">
                         <span className="hidden sm:inline">by </span><span className="font-medium">{user.display_name || user.username}</span>
                       </span>
                     </Link>
@@ -281,24 +244,15 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                         className="h-9 w-9 p-0"
                       />
                       <Link href={`/albums/${album.id}`}>
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <Button
-                            size="sm"
-                            className="font-semibold rounded-full px-4 sm:px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all duration-200 border-0"
-                            style={{ background: 'var(--color-forest)', color: 'var(--color-ivory)' }}
-                          >
-                            View
-                          </Button>
-                        </motion.div>
+                        <Button size="sm">
+                          View
+                        </Button>
                       </Link>
                     </div>
                   </div>
                 )}
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         )
       })}

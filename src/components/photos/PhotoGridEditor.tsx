@@ -136,9 +136,9 @@ export function PhotoGridEditor({
 
   if (photos.length === 0) {
     return (
-      <div className="text-center py-12 bg-stone-50 dark:bg-white/[0.04] rounded-xl border-2 border-dashed border-stone-200 dark:border-white/[0.10]">
-        <Camera className="h-12 w-12 text-stone-400 dark:text-stone-500 mx-auto mb-4" />
-        <p className="text-stone-600 dark:text-stone-400 mb-4">No photos in this album yet</p>
+      <div className="text-center py-12 bg-muted/30 rounded-2xl border border-dashed border-border">
+        <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <p className="text-muted-foreground mb-4">No photos in this album yet</p>
         <Link href={`/albums/${albumId}/upload`}>
           <Button variant="outline" className="gap-2">
             <ImagePlus className="h-4 w-4" />
@@ -153,13 +153,13 @@ export function PhotoGridEditor({
     <>
       <div className={cn('space-y-4', className)}>
         {/* Instructions */}
-        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded-xl text-sm">
-          <div className="flex-shrink-0 p-2 bg-olive-100 dark:bg-olive-950/30 rounded-lg">
-            <GripVertical className="h-4 w-4 text-olive-600" />
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 text-sm">
+          <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+            <GripVertical className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <p className="font-medium text-olive-800">Drag to reorder photos</p>
-            <p className="text-xs text-olive-600">
+            <p className="font-medium text-foreground">Drag to reorder photos</p>
+            <p className="text-xs text-muted-foreground">
               Hold and drag on mobile, or click and drag on desktop. Tap the star to set cover photo.
             </p>
           </div>
@@ -218,7 +218,7 @@ export function PhotoGridEditor({
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
               {isDeleting ? 'Deleting...' : 'Delete Photo'}
             </AlertDialogAction>
@@ -315,12 +315,12 @@ function PhotoCard({
   return (
     <motion.div
       className={cn(
-        'group relative aspect-square rounded-xl overflow-hidden bg-stone-100 dark:bg-white/[0.06]',
-        'border-2 transition-all duration-200',
-        isCover ? 'border-yellow-400 ring-2 ring-yellow-200' : 'border-transparent',
-        isDragging && 'shadow-2xl scale-105',
-        isDragOverlay && 'shadow-2xl cursor-grabbing',
-        !isDragging && !isDragOverlay && 'hover:shadow-lg'
+        'group relative aspect-square rounded-xl overflow-hidden bg-muted',
+        'transition-all duration-200',
+        isCover && 'ring-2 ring-[color:var(--color-gold)]',
+        isDragging && 'shadow-md scale-105',
+        isDragOverlay && 'shadow-md cursor-grabbing',
+        !isDragging && !isDragOverlay && 'hover:shadow-md'
       )}
       initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -329,14 +329,14 @@ function PhotoCard({
       {/* Image */}
       {imageLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-2 border-stone-300 dark:border-white/[0.14] border-t-olive-500" />
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-border border-t-primary" />
         </div>
       )}
 
       {imageError ? (
         <div className="flex flex-col items-center justify-center h-full">
-          <Camera className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-2" />
-          <p className="text-xs text-stone-500 dark:text-stone-400">Failed to load</p>
+          <Camera className="h-8 w-8 text-muted-foreground mb-2" />
+          <p className="text-xs text-muted-foreground">Failed to load</p>
         </div>
       ) : photoUrl ? (
         <Image
@@ -363,7 +363,7 @@ function PhotoCard({
             initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
-            className="absolute top-2 left-2 flex items-center gap-1 bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-semibold shadow-sm"
+            className="absolute top-2 left-2 flex items-center gap-1 bg-[color:var(--color-gold)] text-white px-2 py-1 rounded-lg text-xs font-semibold shadow-sm"
           >
             <Star className="h-3 w-3 fill-current" />
             Cover
@@ -379,7 +379,7 @@ function PhotoCard({
             'absolute top-2 bg-black/70 backdrop-blur-sm text-white p-2 rounded-lg',
             'cursor-grab active:cursor-grabbing touch-none',
             'opacity-0 group-hover:opacity-100 transition-opacity',
-            'shadow-lg',
+            'shadow-sm',
             isCover ? 'left-20' : 'left-2'
           )}
         >
@@ -401,7 +401,7 @@ function PhotoCard({
                 e.stopPropagation()
                 onSetCover()
               }}
-              className="p-2 bg-olive-500 text-white rounded-lg shadow-lg hover:bg-olive-600 transition-colors"
+              className="p-2 bg-primary text-primary-foreground rounded-lg shadow-sm hover:bg-primary/90 transition-colors"
               title="Set as cover"
             >
               <Star className="h-4 w-4" />
@@ -413,7 +413,7 @@ function PhotoCard({
                 e.stopPropagation()
                 onDelete()
               }}
-              className="p-2 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 transition-colors"
+              className="p-2 bg-destructive text-white rounded-lg shadow-sm hover:bg-destructive/90 transition-colors"
               title="Delete photo"
             >
               <Trash2 className="h-4 w-4" />

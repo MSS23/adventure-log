@@ -10,29 +10,29 @@ const buttonVariants = cva(
     "transition-all duration-200 ease-out",
     "disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed",
     "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0",
-    "outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-ivory)]",
+    "outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "aria-invalid:ring-2 aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
     "active:scale-[0.97]",
   ].join(" "),
   {
     variants: {
       variant: {
-        // Primary — ink (warm dark) for solid CTAs that aren't the hero action
+        // Primary — forest/olive, the standard action color
         default:
-          "bg-[color:var(--color-ink)] text-[color:var(--color-ivory)] hover:opacity-90 shadow-[0_1px_2px_rgba(26,20,14,0.06),0_4px_12px_rgba(26,20,14,0.08)] hover:shadow-[0_2px_4px_rgba(26,20,14,0.08),0_8px_20px_rgba(26,20,14,0.12)]",
-        // Coral — the editorial hero CTA, matches .al-btn-coral
+          "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md",
+        // Coral — the rare hero CTA moment (terracotta accent, pill shape)
         coral:
-          "bg-[color:var(--color-coral)] text-white rounded-full hover:-translate-y-px shadow-[0_6px_18px_rgba(226,85,58,0.33)] hover:shadow-[0_10px_26px_rgba(226,85,58,0.42)]",
+          "bg-accent text-accent-foreground rounded-full hover:-translate-y-px shadow-[0_6px_18px_rgba(199,91,58,0.28)] hover:shadow-[0_8px_22px_rgba(199,91,58,0.36)]",
         destructive:
-          "bg-[color:var(--destructive)] text-white hover:opacity-90 shadow-sm hover:shadow-md focus-visible:ring-red-500/40",
+          "bg-destructive text-white hover:bg-destructive/90 shadow-sm focus-visible:ring-destructive/40",
         outline:
-          "border border-[color:var(--color-line-warm)] bg-[color:var(--card)] text-[color:var(--color-ink)] shadow-[0_1px_2px_rgba(26,20,14,0.04)] hover:bg-[color:var(--color-ivory-alt)] hover:border-[color:var(--color-coral)]/30",
+          "border border-border bg-card text-foreground hover:bg-muted hover:border-primary/30",
         secondary:
-          "bg-[color:var(--color-ivory-alt)] text-[color:var(--color-ink)] border border-[color:var(--color-line-warm)] hover:bg-[color:var(--color-line-warm)]",
+          "bg-secondary text-secondary-foreground border border-border hover:bg-muted",
         ghost:
-          "text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]",
+          "text-muted-foreground hover:text-foreground hover:bg-muted",
         link:
-          "text-[color:var(--color-coral)] underline-offset-4 hover:underline hover:opacity-80",
+          "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-11 px-5 py-2 has-[>svg]:px-4",

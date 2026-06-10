@@ -196,7 +196,7 @@ export default function WrappedPage() {
         <h1 className="text-3xl font-bold mb-3">
           {mode === 'all' ? 'No Trips Yet' : `No Trips in ${currentYear}`}
         </h1>
-        <p className="text-stone-400 text-center mb-6 max-w-md">
+        <p className="text-white/75 text-center mb-6 max-w-md">
           Start logging your adventures to see your travel wrapped!
         </p>
         {mode === 'year' && (
@@ -209,7 +209,7 @@ export default function WrappedPage() {
           </Button>
         )}
         <Link href="/albums/new">
-          <Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white px-8 py-3 text-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black">
+          <Button size="lg" className="cursor-pointer px-8 focus-visible:ring-offset-black">
             Create Your First Album
           </Button>
         </Link>
@@ -238,8 +238,8 @@ export default function WrappedPage() {
             className={cn(
               'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
               mode === 'year'
-                ? 'bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100'
-                : 'text-white/60 hover:text-white'
+                ? 'bg-white text-black'
+                : 'text-white/70 hover:text-white'
             )}
           >
             <Calendar className="h-3 w-3" />
@@ -250,8 +250,8 @@ export default function WrappedPage() {
             className={cn(
               'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
               mode === 'all'
-                ? 'bg-white dark:bg-[#1B170E] text-stone-900 dark:text-stone-100'
-                : 'text-white/60 hover:text-white'
+                ? 'bg-white text-black'
+                : 'text-white/70 hover:text-white'
             )}
           >
             All Time
@@ -281,11 +281,7 @@ export default function WrappedPage() {
               <motion.div
                 className="mb-8"
                 animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatDelay: 3,
-                }}
+                transition={{ duration: 2 }}
               >
                 <Plane className="h-16 w-16 text-olive-400 mx-auto" />
               </motion.div>
@@ -306,9 +302,9 @@ export default function WrappedPage() {
                 Travel Wrapped
               </motion.h2>
               <motion.p
-                className="text-lg opacity-50 mb-12"
+                className="text-lg text-white/70 mb-12"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
                 {displayName}
@@ -328,7 +324,7 @@ export default function WrappedPage() {
                 <Button
                   onClick={startWrapped}
                   size="lg"
-                  className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white px-10 py-6 text-lg rounded-full gap-2 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                  className="cursor-pointer px-10 py-6 text-lg rounded-full gap-2 focus-visible:ring-offset-black"
                 >
                   <Plane className="h-5 w-5" />
                   Watch Your Journey
@@ -370,10 +366,7 @@ export default function WrappedPage() {
                   <div className="text-center text-white/60">
                     <GlobeIcon className="h-16 w-16 mx-auto mb-4 opacity-30" />
                     <p className="mb-4">Globe couldn&apos;t load</p>
-                    <Button
-                      onClick={() => setPhase('stats')}
-                      className="bg-olive-600 hover:bg-olive-700 text-white"
-                    >
+                    <Button onClick={() => setPhase('stats')}>
                       View Stats Instead
                     </Button>
                   </div>
@@ -393,7 +386,7 @@ export default function WrappedPage() {
             <div className="absolute top-16 left-4 right-4 z-30">
               <div className="h-1.5 bg-white/15 rounded-full overflow-hidden shadow-sm">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-olive-500 to-olive-400 rounded-full shadow-[0_0_8px_rgba(153,177,105,0.6)]"
+                  className="h-full bg-gradient-to-r from-olive-500 to-olive-400 rounded-full"
                   animate={{ width: `${flightProgress * 100}%` }}
                   transition={{ duration: 0.5 }}
                 />
@@ -493,7 +486,7 @@ export default function WrappedPage() {
 
               {/* Stat grid */}
               <motion.div
-                className="grid grid-cols-3 gap-3 sm:gap-5 max-w-lg w-full mb-8"
+                className="grid grid-cols-3 gap-3 sm:gap-4 max-w-lg w-full mb-8"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}

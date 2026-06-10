@@ -52,9 +52,9 @@ export function BulkPhotoImport() {
   const { getRootProps, getInputProps, isDragActive } = dropzone
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-olive-50/30 dark:from-black dark:via-black dark:to-black">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border-b border-stone-200/50 dark:border-stone-800/50 sticky top-0 z-40">
+      <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-40">
         <div className="flex items-center justify-between h-16 px-4 md:px-6 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <Button
@@ -70,15 +70,15 @@ export function BulkPhotoImport() {
                 }
               }}
               disabled={stage === 'processing' || stage === 'uploading'}
-              className="cursor-pointer transition-all duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+              className="cursor-pointer"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+              <h1 className="font-heading text-lg font-semibold text-foreground">
                 Bulk Photo Import
               </h1>
-              <p className="text-xs text-stone-500 dark:text-stone-400">
+              <p className="text-xs text-muted-foreground">
                 {stage === 'dropzone' && 'Drop your photos to get started'}
                 {stage === 'processing' && 'Extracting photo data...'}
                 {stage === 'review' && `${groups.length} album${groups.length !== 1 ? 's' : ''} ready for review`}
@@ -99,14 +99,14 @@ export function BulkPhotoImport() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm flex items-start gap-3"
+              className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-sm flex items-start gap-3"
             >
               <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p>{error}</p>
                 <button
                   onClick={() => setError(null)}
-                  className="text-red-500 underline text-xs mt-1 cursor-pointer hover:text-red-700 transition-colors duration-200"
+                  className="text-destructive underline text-xs mt-1 cursor-pointer hover:opacity-80 transition-opacity duration-200"
                 >
                   Dismiss
                 </button>
@@ -122,7 +122,7 @@ export function BulkPhotoImport() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-700 dark:text-amber-400 text-sm flex items-start gap-3"
+              className="mb-6 p-4 bg-[color:var(--color-gold)]/15 border border-[color:var(--color-gold)]/25 rounded-xl text-[color:var(--color-gold)] text-sm flex items-start gap-3"
             >
               <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
               <div>
@@ -153,21 +153,21 @@ export function BulkPhotoImport() {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-lg mx-auto"
           >
-            <Card className="bg-white dark:bg-[#111111] border-stone-200/50 dark:border-stone-800/50">
+            <Card>
               <CardContent className="pt-8 pb-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 text-olive-600 dark:text-olive-400 animate-spin" />
+                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 text-primary animate-spin" />
                 </div>
-                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2">
+                <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
                   Processing Photos
                 </h2>
-                <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
+                <p className="text-sm text-muted-foreground mb-6">
                   Extracting GPS coordinates and dates from EXIF data
                 </p>
 
                 <div className="space-y-3">
                   <Progress value={processingProgress} className="h-2" />
-                  <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span className="truncate max-w-[200px]">{processingFile}</span>
                     <span>{Math.round(processingProgress)}%</span>
                   </div>
@@ -175,22 +175,22 @@ export function BulkPhotoImport() {
 
                 <div className="mt-6 grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <p className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                    <p className="text-lg font-semibold text-foreground">
                       {files.length}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">Total</p>
+                    <p className="text-xs text-muted-foreground">Total</p>
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                    <p className="text-lg font-semibold text-foreground">
                       {formatFileSize(totalFileSize)}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">Size</p>
+                    <p className="text-xs text-muted-foreground">Size</p>
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                    <p className="text-lg font-semibold text-foreground">
                       {Math.round(processingProgress)}%
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">Done</p>
+                    <p className="text-xs text-muted-foreground">Done</p>
                   </div>
                 </div>
               </CardContent>
@@ -224,26 +224,26 @@ export function BulkPhotoImport() {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-lg mx-auto"
           >
-            <Card className="bg-white dark:bg-[#111111] border-stone-200/50 dark:border-stone-800/50">
+            <Card>
               <CardContent className="pt-8 pb-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center">
-                  <Upload className="h-8 w-8 text-olive-600 dark:text-olive-400 animate-pulse" />
+                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Upload className="h-8 w-8 text-primary animate-pulse" />
                 </div>
-                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2">
+                <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
                   Creating Albums
                 </h2>
-                <p className="text-sm text-stone-500 dark:text-stone-400 mb-1">
+                <p className="text-sm text-muted-foreground mb-1">
                   Uploading photos and creating album records
                 </p>
                 {uploadingGroup && (
-                  <p className="text-xs text-olive-600 dark:text-olive-400 mb-6">
+                  <p className="text-xs text-primary mb-6">
                     Current: {uploadingGroup}
                   </p>
                 )}
 
                 <div className="space-y-3">
                   <Progress value={uploadProgress} className="h-2" />
-                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                  <p className="text-xs text-muted-foreground">
                     {Math.round(uploadProgress)}% complete
                   </p>
                 </div>
@@ -259,15 +259,15 @@ export function BulkPhotoImport() {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-lg mx-auto"
           >
-            <Card className="bg-white dark:bg-[#111111] border-stone-200/50 dark:border-stone-800/50">
+            <Card>
               <CardContent className="pt-8 pb-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <CheckCircle className="h-8 w-8 text-primary" />
                 </div>
-                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2">
+                <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
                   Import Complete
                 </h2>
-                <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
+                <p className="text-sm text-muted-foreground mb-6">
                   {createdAlbumIds.length} album{createdAlbumIds.length !== 1 ? 's' : ''} created
                   with {groups.reduce((sum, g) => sum + g.photos.length, 0)} photos
                 </p>
@@ -276,7 +276,7 @@ export function BulkPhotoImport() {
                   {createdAlbumIds.length > 0 && (
                     <Button
                       onClick={() => router.push(`/albums/${createdAlbumIds[0]}`)}
-                      className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                      className="cursor-pointer"
                     >
                       <ArrowRight className="h-4 w-4 mr-2" />
                       View First Album
@@ -285,13 +285,13 @@ export function BulkPhotoImport() {
                   <Button
                     variant="outline"
                     onClick={() => router.push('/profile')}
-                    className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                    className="cursor-pointer"
                   >
                     Go to Dashboard
                   </Button>
                   <Button
                     variant="outline"
-                    className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                    className="cursor-pointer"
                     onClick={resetAll}
                   >
                     <Upload className="h-4 w-4 mr-2" />

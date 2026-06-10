@@ -418,15 +418,15 @@ function PassportQRCode({ url, size = 180 }: { url: string; size?: number }) {
     }).then(setQrDataUrl).catch(() => {})
   }, [url, size])
 
-  if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-stone-100 dark:bg-stone-800 rounded-xl animate-pulse" />
+  if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-muted rounded-xl animate-pulse" />
 
   return (
     <div className="relative">
-      <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#1B170E] p-3 shadow-xl shadow-olive-900/10 dark:shadow-black/40 border-2 border-olive-100 dark:border-olive-800/50">
-        <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
+      <div className="rounded-2xl overflow-hidden bg-card p-3 border border-border">
+        <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-xl" />
       </div>
-      <div className="absolute -bottom-2 -right-2 size-9 rounded-full bg-gradient-to-br from-olive-500 to-olive-700 flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-stone-900">
-        <Compass className="size-4 text-white" />
+      <div className="absolute -bottom-2 -right-2 size-9 rounded-full bg-primary flex items-center justify-center ring-2 ring-background">
+        <Compass className="size-4 text-primary-foreground" />
       </div>
     </div>
   )
@@ -443,30 +443,17 @@ function GlobeCoverageRing({ percentage, countriesCount }: { percentage: number;
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg width="172" height="172" viewBox="0 0 140 140" className="-rotate-90">
-        <circle cx="70" cy="70" r={radius} fill="none" strokeWidth="5" className="text-stone-200 dark:text-stone-800" stroke="currentColor" />
-        <defs>
-          <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#F2A179" />
-            <stop offset="50%" stopColor="#E2553A" />
-            <stop offset="100%" stopColor="#A2322B" />
-          </linearGradient>
-        </defs>
+        <circle cx="70" cy="70" r={radius} fill="none" strokeWidth="5" stroke="var(--muted)" />
         <circle
           cx="70" cy="70" r={radius} fill="none" strokeWidth="7"
-          stroke="url(#progressGrad)" strokeLinecap="round"
+          stroke="var(--color-coral)" strokeLinecap="round"
           strokeDasharray={circumference} strokeDashoffset={offset}
           style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)' }}
         />
-        <circle
-          cx="70" cy="70" r={radius} fill="none" strokeWidth="7"
-          stroke="url(#progressGrad)" strokeLinecap="round"
-          strokeDasharray={circumference} strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)', filter: 'blur(8px)', opacity: 0.35 }}
-        />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-olive-800 dark:text-olive-200 tabular-nums">{percentage.toFixed(1)}%</span>
-        <span className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mt-0.5">
+        <span className="al-stat-value text-3xl tabular-nums">{percentage.toFixed(1)}%</span>
+        <span className="font-mono text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.2em] mt-0.5">
           {countriesCount} / 195
         </span>
       </div>
@@ -513,8 +500,8 @@ export default function TravelPassportPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="size-7 animate-spin text-olive-600 dark:text-olive-400" />
-          <p className="text-stone-400 dark:text-stone-500 text-sm">Loading passport...</p>
+          <Loader2 className="size-7 animate-spin text-primary" />
+          <p className="text-muted-foreground text-sm">Loading passport...</p>
         </div>
       </div>
     )
@@ -523,7 +510,7 @@ export default function TravelPassportPage() {
   if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-stone-400">Unable to load passport data.</p>
+        <p className="text-muted-foreground">Unable to load passport data.</p>
       </div>
     )
   }
@@ -548,9 +535,9 @@ export default function TravelPassportPage() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="relative overflow-hidden rounded-2xl p-6 sm:p-7 mb-6"
         style={{
-          background: 'linear-gradient(135deg, #3D2416 0%, #5A3622 50%, #3D2416 100%)',
+          background: '#46301E',
           color: '#E8D4A8',
-          boxShadow: '0 4px 8px rgba(26,20,14,0.06), 0 16px 40px rgba(26,20,14,0.18)',
+          border: '1px solid rgba(232,212,168,0.14)',
         }}
       >
         <div
@@ -624,32 +611,23 @@ export default function TravelPassportPage() {
         className="grid grid-cols-4 gap-2 sm:gap-3 mb-6"
       >
         {[
-          { label: 'Countries', value: data.countryCodes.length, icon: Globe, color: 'olive' },
-          { label: 'Cities', value: data.cityCount, icon: MapPin, color: 'emerald' },
-          { label: 'Photos', value: data.photoCount, icon: Camera, color: 'sky' },
-          { label: 'km Traveled', value: data.totalDistanceKm >= 10000 ? `${(data.totalDistanceKm / 1000).toFixed(1)}k` : data.totalDistanceKm.toLocaleString(), icon: Route, color: 'amber' },
-        ].map((stat, i) => {
-          const colorMap: Record<string, { bg: string; icon: string }> = {
-            olive: { bg: 'from-olive-50 to-olive-100/80 dark:from-olive-950/50 dark:to-olive-900/30 border-olive-200/60 dark:border-olive-800/40', icon: 'text-olive-600 dark:text-olive-400' },
-            emerald: { bg: 'from-emerald-50 to-emerald-100/80 dark:from-emerald-950/50 dark:to-emerald-900/30 border-emerald-200/60 dark:border-emerald-800/40', icon: 'text-emerald-600 dark:text-emerald-400' },
-            sky: { bg: 'from-sky-50 to-sky-100/80 dark:from-sky-950/50 dark:to-sky-900/30 border-sky-200/60 dark:border-sky-800/40', icon: 'text-sky-600 dark:text-sky-400' },
-            amber: { bg: 'from-amber-50 to-amber-100/80 dark:from-amber-950/50 dark:to-amber-900/30 border-amber-200/60 dark:border-amber-800/40', icon: 'text-amber-600 dark:text-amber-400' },
-          }
-          const colors = colorMap[stat.color]
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.15 + i * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
-              className={cn('rounded-2xl bg-gradient-to-br p-3 sm:p-4 text-center border', colors.bg)}
-            >
-              <stat.icon className={cn('size-4 sm:size-5 mx-auto mb-1.5', colors.icon)} />
-              <div className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 tabular-nums">{stat.value}</div>
-              <div className="text-[10px] sm:text-xs text-stone-500 dark:text-stone-400 mt-0.5 font-medium">{stat.label}</div>
-            </motion.div>
-          )
-        })}
+          { label: 'Countries', value: data.countryCodes.length, icon: Globe },
+          { label: 'Cities', value: data.cityCount, icon: MapPin },
+          { label: 'Photos', value: data.photoCount, icon: Camera },
+          { label: 'km Traveled', value: data.totalDistanceKm >= 10000 ? `${(data.totalDistanceKm / 1000).toFixed(1)}k` : data.totalDistanceKm.toLocaleString(), icon: Route },
+        ].map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.15 + i * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
+            className="rounded-2xl border border-border bg-card p-3 sm:p-4 text-center"
+          >
+            <stat.icon className="size-4 sm:size-5 mx-auto mb-1.5 text-primary" />
+            <div className="al-stat-value text-lg sm:text-xl tabular-nums">{stat.value}</div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 font-medium">{stat.label}</div>
+          </motion.div>
+        ))}
       </motion.div>
 
       {/* ── Globe Coverage ── */}
@@ -659,13 +637,10 @@ export default function TravelPassportPage() {
         transition={{ delay: 0.2 }}
         className="mb-6"
       >
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111] overflow-hidden">
-          <div className="relative flex flex-col items-center py-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(124,154,62,0.05)_0%,_transparent_70%)]" />
-            <div className="relative">
-              <GlobeCoverageRing percentage={globePct} countriesCount={data.countryCodes.length} />
-            </div>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-4 font-medium">World Explored</p>
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="flex flex-col items-center py-8">
+            <GlobeCoverageRing percentage={globePct} countriesCount={data.countryCodes.length} />
+            <p className="text-sm text-muted-foreground mt-4 font-medium">World Explored</p>
           </div>
         </div>
       </motion.div>
@@ -677,20 +652,15 @@ export default function TravelPassportPage() {
         transition={{ delay: 0.25 }}
         className="mb-6"
       >
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 overflow-hidden">
-          <div className="relative bg-gradient-to-r from-olive-50 via-olive-50/50 to-stone-50 dark:from-olive-950/40 dark:via-olive-950/20 dark:to-[#111] px-5 sm:px-6 py-6">
-            <div className="absolute top-2 right-3 text-olive-200/20 dark:text-olive-800/20">
-              <Compass className="size-16" strokeWidth={0.8} />
+        <div className="rounded-2xl border border-border bg-card px-5 sm:px-6 py-6">
+          <p className="al-eyebrow mb-3">Travel Personality</p>
+          <div className="flex items-start gap-4">
+            <div className="size-14 sm:size-16 rounded-xl bg-muted/50 flex items-center justify-center text-3xl sm:text-4xl shrink-0">
+              {data.personality.emoji}
             </div>
-            <p className="text-[10px] font-bold text-olive-600/50 dark:text-olive-400/40 uppercase tracking-[0.25em] mb-3">Travel Personality</p>
-            <div className="flex items-start gap-4 relative z-10">
-              <div className="size-14 sm:size-16 rounded-2xl bg-white dark:bg-stone-800 shadow-lg flex items-center justify-center text-3xl sm:text-4xl shrink-0 border border-olive-100 dark:border-olive-800/40">
-                {data.personality.emoji}
-              </div>
-              <div>
-                <h3 className="text-lg sm:text-xl font-bold text-olive-800 dark:text-olive-200 font-heading">{data.personality.type}</h3>
-                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">{data.personality.description}</p>
-              </div>
+            <div>
+              <h3 className="font-heading text-base md:text-lg font-semibold text-foreground">{data.personality.type}</h3>
+              <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{data.personality.description}</p>
             </div>
           </div>
         </div>
@@ -703,8 +673,8 @@ export default function TravelPassportPage() {
         transition={{ delay: 0.3 }}
         className="mb-6"
       >
-        <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3 px-1">Continent Progress</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        <p className="al-eyebrow mb-3 px-1">Continent Progress</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {data.continentProgress.map((cont, i) => {
             const pct = cont.total > 0 ? (cont.visited / cont.total) * 100 : 0
             const visited = cont.visited > 0
@@ -715,25 +685,25 @@ export default function TravelPassportPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.35 + i * 0.04 }}
                 className={cn(
-                  'rounded-2xl border p-3.5 transition-all duration-200',
+                  'rounded-2xl border border-border bg-card p-3.5 transition-colors duration-200',
                   visited
-                    ? 'border-olive-200 dark:border-olive-800/60 bg-olive-50/50 dark:bg-olive-950/20 hover:shadow-sm hover:border-olive-300 dark:hover:border-olive-700'
-                    : 'border-stone-200 dark:border-stone-800 opacity-40 hover:opacity-60'
+                    ? 'hover:border-primary/30'
+                    : 'opacity-50'
                 )}
               >
                 <div className="flex items-center gap-2 mb-2.5">
                   <span className="text-lg">{continentEmoji[cont.name] || '🌍'}</span>
-                  <span className="text-xs font-semibold text-stone-700 dark:text-stone-300 truncate">{cont.name}</span>
+                  <span className="text-xs font-semibold text-foreground truncate">{cont.name}</span>
                 </div>
-                <div className="w-full h-1.5 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-olive-500 to-olive-400 dark:from-olive-400 dark:to-olive-500 rounded-full"
+                    className="h-full bg-primary rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.max(pct, cont.visited > 0 ? 6 : 0)}%` }}
                     transition={{ duration: 0.8, delay: 0.4 + i * 0.05, ease: 'easeOut' }}
                   />
                 </div>
-                <p className="text-[10px] text-stone-400 mt-1.5 tabular-nums font-medium">{cont.visited} of {cont.total}</p>
+                <p className="text-[10px] text-muted-foreground mt-1.5 tabular-nums font-medium">{cont.visited} of {cont.total}</p>
               </motion.div>
             )
           })}
@@ -788,7 +758,7 @@ export default function TravelPassportPage() {
                 border: '1px solid var(--color-line-warm)',
               }}
             >
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 {stamps.map((s, i) => (
                   <motion.div
                     key={s.code}
@@ -966,10 +936,10 @@ export default function TravelPassportPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.55 }}
       >
-        <div className="rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-[#111]">
+        <div className="rounded-2xl border border-border bg-card">
           <div className="py-8 sm:py-10 px-6 flex flex-col items-center text-center">
-            <h2 className="text-lg font-bold text-stone-800 dark:text-stone-200">Share with friends</h2>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 mb-6 max-w-xs">
+            <h2 className="font-heading text-base md:text-lg font-semibold text-foreground">Share with friends</h2>
+            <p className="text-sm text-muted-foreground mt-1 mb-6 max-w-xs">
               Scan to see my travel profile
             </p>
 
@@ -982,16 +952,16 @@ export default function TravelPassportPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleCopy}
-                className="gap-2 rounded-xl cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-olive-500"
+                className="gap-2 cursor-pointer"
               >
-                {copied ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4" />}
+                {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
                 {copied ? 'Copied!' : 'Copy Link'}
               </Button>
               {typeof navigator !== 'undefined' && 'share' in navigator && (
                 <Button
                   size="sm"
                   onClick={handleShare}
-                  className="gap-2 bg-olive-600 hover:bg-olive-700 text-white rounded-xl cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
+                  className="gap-2 cursor-pointer"
                 >
                   <Share2 className="size-4" /> Share
                 </Button>

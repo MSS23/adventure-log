@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
 import { YearSeasonSelector, type Season } from '@/components/albums/YearSeasonSelector'
 import { FloatingTextarea } from '@/components/ui/floating-input'
-import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import { Card, CardContent } from '@/components/ui/card'
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { transitions } from '@/lib/animations/spring-configs'
 import { type LocationData } from '@/lib/utils/locationUtils'
@@ -89,8 +89,8 @@ export function QuickPostMode({
       <form onSubmit={handleSubmitQuick(onSubmit)}>
         <div className="max-w-2xl mx-auto space-y-4">
           {/* Photo Upload - compact for quick post */}
-          <GlassCard animate staggerIndex={0} hover="lift" glow="subtle">
-            <GlassCardContent className="space-y-4 pt-5">
+          <Card>
+            <CardContent className="space-y-4">
               <PhotoUploadSection
                 photos={photos}
                 selectedCoverIndex={selectedCoverIndex}
@@ -108,12 +108,12 @@ export function QuickPostMode({
                 onOpenPositionEditor={onOpenPositionEditor}
                 onClearFileErrors={onClearFileErrors}
               />
-            </GlassCardContent>
-          </GlassCard>
+            </CardContent>
+          </Card>
 
           {/* Where & When */}
-          <GlassCard animate staggerIndex={1} hover="lift" glow="subtle">
-            <GlassCardContent className="space-y-5 pt-5">
+          <Card>
+            <CardContent className="space-y-5">
               {/* Where */}
               <LocationSearchInput
                 value={albumLocation}
@@ -151,16 +151,16 @@ export function QuickPostMode({
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="px-3 py-2 bg-olive-50/50 dark:bg-olive-900/20 border border-olive-100 dark:border-olive-800/40 rounded-lg"
+                  className="px-3 py-2 rounded-xl bg-muted/50"
                 >
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mb-0.5">Album title (auto-generated)</p>
-                  <p className="text-sm font-medium text-stone-700 dark:text-stone-200">{suggestedTitle}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Album title (auto-generated)</p>
+                  <p className="text-sm font-medium text-foreground">{suggestedTitle}</p>
                 </motion.div>
               )}
 
               {/* Visibility - inline */}
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-sm text-stone-500 dark:text-stone-400">Visible to:</span>
+                <span className="text-sm text-muted-foreground">Visible to:</span>
                 <div className="flex gap-1.5">
                   {visibilityOptions.map((option) => {
                     const isSelected = watchQuick('visibility') === option.value
@@ -170,10 +170,10 @@ export function QuickPostMode({
                         type="button"
                         onClick={() => setValueQuick('visibility', option.value as 'public' | 'friends' | 'private')}
                         className={cn(
-                          'px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none',
+                          'px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                           isSelected
-                            ? 'bg-olive-50 dark:bg-olive-900/30 border-olive-400 dark:border-olive-600 text-olive-700 dark:text-olive-300'
-                            : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600'
+                            ? 'bg-primary/10 border-primary/40 text-primary'
+                            : 'bg-card border-border text-muted-foreground hover:border-primary/30'
                         )}
                       >
                         {option.label}
@@ -182,8 +182,8 @@ export function QuickPostMode({
                   })}
                 </div>
               </div>
-            </GlassCardContent>
-          </GlassCard>
+            </CardContent>
+          </Card>
 
           {/* Submit */}
           <motion.div
@@ -195,7 +195,7 @@ export function QuickPostMode({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <EnhancedButton
                 type="submit"
-                variant="glow"
+                variant="default"
                 disabled={isSubmitting || !albumLocation || photos.length === 0}
                 loading={isSubmitting}
                 loadingText="Posting..."
@@ -208,7 +208,7 @@ export function QuickPostMode({
               <button
                 type="button"
                 onClick={onSwitchToFull}
-                className="flex items-center justify-center gap-1 text-sm text-stone-500 dark:text-stone-400 hover:text-olive-600 transition-all duration-200 py-2 cursor-pointer hover:translate-x-0.5"
+                className="flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-primary transition-all duration-200 py-2 cursor-pointer hover:translate-x-0.5"
               >
                 Need more options? Switch to Full Album
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -217,7 +217,7 @@ export function QuickPostMode({
 
             {/* Forgiving guidance when Post can't proceed yet */}
             {!isSubmitting && (photos.length === 0 || !albumLocation) && (
-              <p className="text-xs text-[color:var(--color-muted-warm)]">
+              <p className="text-xs text-muted-foreground">
                 {photos.length === 0 && !albumLocation
                   ? 'Add at least one photo and a place to post.'
                   : photos.length === 0

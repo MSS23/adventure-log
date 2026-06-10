@@ -52,15 +52,15 @@ export function MissingLocationNotification({
 
   if (compact) {
     return (
-      <div className={cn("flex items-center gap-3 p-3 bg-olive-50 dark:bg-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded-lg", className)}>
-        <AlertTriangle className="h-4 w-4 text-olive-600 dark:text-olive-400 flex-shrink-0" />
+      <div className={cn("flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-primary/10", className)}>
+        <AlertTriangle className="h-4 w-4 text-primary flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-olive-800 dark:text-olive-200">
+          <p className="text-sm text-foreground">
             {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'} missing location
           </p>
         </div>
         <Link href={recentMissingAlbums[0] ? `${recentMissingAlbums[0].albumUrl}/edit` : '/globe'}>
-          <Button variant="outline" size="sm" className="text-olive-700 dark:text-olive-300 border-olive-300 dark:border-olive-700 hover:bg-olive-100 dark:hover:bg-olive-950/40">
+          <Button variant="outline" size="sm">
             Fix Now
           </Button>
         </Link>
@@ -69,7 +69,7 @@ export function MissingLocationNotification({
             variant="ghost"
             size="sm"
             onClick={() => setDismissed(true)}
-            className="h-6 w-6 p-0 text-olive-600 dark:text-olive-400 hover:bg-olive-200 dark:hover:bg-olive-950/40"
+            className="h-6 w-6 p-0"
           >
             <X className="h-3 w-3" />
           </Button>
@@ -80,53 +80,47 @@ export function MissingLocationNotification({
 
   return (
     <Card className={cn(
-      "border-l-4",
-      severity === 'high' ? "border-l-red-500 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/40" :
-      severity === 'medium' ? "border-l-olive-500 bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-white/[0.08]" :
-      "border-l-olive-500 bg-olive-50 dark:bg-olive-950/20 border-olive-200 dark:border-white/[0.08]",
+      "relative overflow-hidden",
+      severity === 'high' ? "bg-destructive/5" : "bg-primary/5",
       className
     )}>
-      <CardContent className="p-4">
+      {/* Severity rail */}
+      <span
+        className={cn(
+          "absolute left-0 top-0 bottom-0 w-1",
+          severity === 'high' ? "bg-destructive" : "bg-primary"
+        )}
+        aria-hidden
+      />
+      <CardContent className="p-4 pl-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1">
             <div className={cn(
-              "p-2 rounded-lg flex-shrink-0",
-              severity === 'high' ? "bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400" :
-              severity === 'medium' ? "bg-olive-100 dark:bg-olive-950/30 text-olive-600 dark:text-olive-400" :
-              "bg-olive-100 dark:bg-olive-950/30 text-olive-600 dark:text-olive-400"
+              "p-2 rounded-full flex-shrink-0",
+              severity === 'high' ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
             )}>
               <MapPin className="h-4 w-4" />
             </div>
 
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center gap-2">
-                <h3 className={cn(
-                  "font-medium",
-                  severity === 'high' ? "text-red-800 dark:text-red-200" :
-                  severity === 'medium' ? "text-olive-800 dark:text-olive-200" :
-                  "text-olive-800 dark:text-olive-200"
-                )}>
+                <h3 className="font-heading font-semibold text-foreground">
                   Missing Location Data
                 </h3>
                 <Badge
                   variant="outline"
                   className={cn(
                     "text-xs",
-                    severity === 'high' ? "border-red-300 dark:border-red-800 text-red-700 dark:text-red-300" :
-                    severity === 'medium' ? "border-olive-300 dark:border-olive-700 text-olive-700 dark:text-olive-300" :
-                    "border-olive-300 dark:border-olive-700 text-olive-700 dark:text-olive-300"
+                    severity === 'high'
+                      ? "border-destructive/20 text-destructive bg-destructive/10"
+                      : "border-primary/20 text-primary bg-primary/10"
                   )}
                 >
                   {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'}
                 </Badge>
               </div>
 
-              <p className={cn(
-                "text-sm",
-                severity === 'high' ? "text-red-700 dark:text-red-300" :
-                severity === 'medium' ? "text-olive-700 dark:text-olive-300" :
-                "text-olive-700 dark:text-olive-300"
-              )}>
+              <p className="text-sm text-muted-foreground">
                 {stats.albumsWithoutLocation === 1
                   ? '1 album is missing location data and won\'t appear on the globe.'
                   : `${stats.albumsWithoutLocation} albums are missing location data and won't appear on the globe.`}
@@ -135,17 +129,15 @@ export function MissingLocationNotification({
 
               {/* Progress indicator */}
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-stone-600 dark:text-stone-400">
+                <div className="flex justify-between text-xs font-mono tracking-wide text-muted-foreground">
                   <span>Globe Coverage</span>
                   <span>{stats.percentageWithLocation}%</span>
                 </div>
-                <div className="w-full bg-stone-200 dark:bg-white/[0.08] rounded-full h-2">
+                <div className="w-full bg-muted rounded-full h-2">
                   <div
                     className={cn(
                       "h-2 rounded-full transition-all duration-500",
-                      severity === 'high' ? "bg-red-500" :
-                      severity === 'medium' ? "bg-olive-500" :
-                      "bg-olive-500"
+                      severity === 'high' ? "bg-destructive" : "bg-primary"
                     )}
                     style={{ width: `${stats.percentageWithLocation}%` }}
                   />
@@ -159,7 +151,7 @@ export function MissingLocationNotification({
                     variant="ghost"
                     size="sm"
                     onClick={() => setExpanded(!expanded)}
-                    className="p-0 h-auto font-normal text-sm text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-100"
+                    className="p-0 h-auto font-normal text-sm text-muted-foreground hover:text-foreground hover:bg-transparent"
                   >
                     <span className="flex items-center gap-1">
                       {expanded ? (
@@ -176,13 +168,13 @@ export function MissingLocationNotification({
                       {recentMissingAlbums.map((album) => (
                         <div
                           key={album.id}
-                          className="flex items-center justify-between p-2 bg-white/50 dark:bg-white/[0.04] rounded border dark:border-white/[0.08]"
+                          className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/50"
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
+                            <p className="text-sm font-medium text-foreground truncate">
                               {album.title}
                             </p>
-                            <p className="text-xs text-stone-500 dark:text-stone-400">
+                            <p className="text-xs font-mono tracking-wide text-muted-foreground">
                               {new Date(album.createdAt).toLocaleDateString()} • {album.photoCount} photos
                             </p>
                           </div>
@@ -205,12 +197,7 @@ export function MissingLocationNotification({
               variant="ghost"
               size="sm"
               onClick={() => setDismissed(true)}
-              className={cn(
-                "h-6 w-6 p-0 flex-shrink-0",
-                severity === 'high' ? "text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-950/40" :
-                severity === 'medium' ? "text-olive-600 dark:text-olive-400 hover:bg-olive-200 dark:hover:bg-olive-950/40" :
-                "text-olive-600 dark:text-olive-400 hover:bg-olive-200 dark:hover:bg-olive-950/40"
-              )}
+              className="h-6 w-6 p-0 flex-shrink-0"
             >
               <X className="h-3 w-3" />
             </Button>
@@ -222,11 +209,7 @@ export function MissingLocationNotification({
           <Link href="/globe">
             <Button
               size="sm"
-              className={cn(
-                severity === 'high' ? "bg-red-600 hover:bg-red-700 text-white" :
-                severity === 'medium' ? "bg-olive-600 hover:bg-olive-700 text-white" :
-                "bg-olive-600 hover:bg-olive-700 text-white"
-              )}
+              variant={severity === 'high' ? 'destructive' : 'default'}
             >
               <MapPin className="h-4 w-4 mr-1" />
               View Analysis

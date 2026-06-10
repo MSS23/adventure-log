@@ -81,10 +81,10 @@ export default async function PublicPassportPage({
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white mb-2">Traveler not found</h1>
-          <p className="text-stone-500">This passport doesn&apos;t exist.</p>
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="text-center space-y-1">
+          <h1 className="al-display text-2xl md:text-3xl">Traveler not found</h1>
+          <p className="text-sm text-muted-foreground">This passport doesn&apos;t exist.</p>
         </div>
       </div>
     )
@@ -92,10 +92,10 @@ export default async function PublicPassportPage({
 
   if (user.privacy_level === 'private') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F1] dark:bg-black">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-white mb-2">Private Passport</h1>
-          <p className="text-stone-500">This traveler&apos;s passport is private.</p>
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="text-center space-y-1">
+          <h1 className="al-display text-2xl md:text-3xl">Private Passport</h1>
+          <p className="text-sm text-muted-foreground">This traveler&apos;s passport is private.</p>
         </div>
       </div>
     )

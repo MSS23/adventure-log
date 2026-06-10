@@ -135,15 +135,15 @@ export function PullToRefreshWrapper({
                   animate={prefersReducedMotion ? {} : { rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
-                  <RefreshCw className="h-8 w-8 text-olive-500" />
+                  <RefreshCw className="h-8 w-8 text-primary" />
                 </motion.div>
               ) : (
                 <motion.div style={{ rotate: prefersReducedMotion ? 0 : rotation }}>
-                  <Globe className="h-8 w-8 text-olive-500" />
+                  <Globe className="h-8 w-8 text-primary" />
                 </motion.div>
               )}
               <motion.span
-                className="text-xs text-stone-500 font-medium"
+                className="text-xs text-muted-foreground font-medium"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >

@@ -59,14 +59,14 @@ export default function UploadPhotosPage() {
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
-            className="cursor-pointer shrink-0 transition-all duration-200 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+            className="cursor-pointer shrink-0"
           >
             <ArrowLeft className="h-4 w-4 mr-1.5" />
             <span className="hidden sm:inline">Back</span>
           </Button>
           <div className="min-w-0">
             <p className="al-eyebrow">Add photos</p>
-            <h1 className="al-display text-lg sm:text-xl text-stone-900 dark:text-stone-100 truncate">
+            <h1 className="al-display text-xl md:text-2xl truncate">
               Upload Photos
             </h1>
           </div>
@@ -74,7 +74,8 @@ export default function UploadPhotosPage() {
         <Button
           onClick={uploadPhotos}
           disabled={isUploading || photos.length === 0 || photos.every(p => p.uploaded)}
-          className="cursor-pointer al-btn-coral text-white font-semibold px-5 disabled:opacity-50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+          variant="coral"
+          className="cursor-pointer font-semibold px-5"
           size="sm"
         >
           {isUploading ? (
@@ -96,7 +97,7 @@ export default function UploadPhotosPage() {
         {album && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-stone-900 dark:text-stone-100">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <Camera className="h-5 w-5" />
                 {album.title}
               </CardTitle>
@@ -117,20 +118,20 @@ export default function UploadPhotosPage() {
           <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
             <Card>
               <CardContent className="pt-5 pb-4 text-center">
-                <div className="text-xl sm:text-2xl font-bold text-olive-600 dark:text-olive-400 tabular-nums">{photos.length}</div>
-                <div className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5">Total</div>
+                <div className="al-stat-value text-xl sm:text-2xl tabular-nums">{photos.length}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground mt-0.5">Total</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-5 pb-4 text-center">
-                <div className="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">{uploadedPhotos}</div>
-                <div className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5">Uploaded</div>
+                <div className="al-stat-value text-xl sm:text-2xl tabular-nums text-primary">{uploadedPhotos}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground mt-0.5">Uploaded</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-5 pb-4 text-center">
-                <div className="text-xl sm:text-2xl font-bold text-olive-600 dark:text-olive-400 tabular-nums">{pendingPhotos}</div>
-                <div className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5">Pending</div>
+                <div className="al-stat-value text-xl sm:text-2xl tabular-nums">{pendingPhotos}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground mt-0.5">Pending</div>
               </CardContent>
             </Card>
           </div>

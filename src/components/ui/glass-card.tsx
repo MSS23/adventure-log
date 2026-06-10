@@ -23,29 +23,30 @@ const glassCardVariants = cva(
   'rounded-2xl transition-all duration-300 overflow-hidden',
   {
     variants: {
+      // Calm field-notebook surfaces — flat, bordered; shadow only on hover
       variant: {
-        default: 'bg-white/80 dark:bg-[#111111]/80 backdrop-blur-md border border-stone-200/30 dark:border-white/[0.1]/30 shadow-lg',
-        glass: 'bg-white/40 dark:bg-[#111111]/40 backdrop-blur-xl border border-white/30 dark:border-white/[0.1]/20 shadow-xl',
-        frost: 'bg-gradient-to-br from-white/60 to-white/30 dark:from-stone-900/60 dark:to-stone-900/30 backdrop-blur-lg border border-white/40 dark:border-white/[0.1]/30',
-        elevated: 'bg-white dark:bg-[#111111] shadow-sm border border-stone-200/50 dark:border-white/[0.06]',
-        featured: 'bg-gradient-to-br from-olive-50/80 to-olive-50/80 dark:from-olive-950/30 dark:to-olive-950/30 backdrop-blur-md border-2 border-olive-200/50 dark:border-olive-800/30',
-        solid: 'bg-white dark:bg-[#111111] border border-stone-200 dark:border-white/[0.1] shadow-sm',
+        default: 'bg-card border border-border',
+        glass: 'bg-card border border-border',
+        frost: 'bg-muted/50 border border-border',
+        elevated: 'bg-card border border-border',
+        featured: 'bg-primary/5 border border-primary/20',
+        solid: 'bg-card border border-border',
         dark: 'bg-[color:var(--background)]/85 backdrop-blur-xl border border-[color:var(--border)] text-[color:var(--foreground)]',
       },
       glow: {
         none: '',
-        subtle: 'hover:shadow-olive-500/10',
-        teal: 'hover:shadow-xl hover:shadow-olive-500/20 hover:border-olive-300/50',
-        purple: 'hover:shadow-xl hover:shadow-olive-500/20 hover:border-olive-300/50',
-        orange: 'hover:shadow-xl hover:shadow-olive-500/20 hover:border-olive-300/50',
-        rainbow: 'hover:shadow-xl hover:shadow-pink-500/20',
+        subtle: 'hover:shadow-md hover:border-primary/30',
+        teal: 'hover:shadow-md hover:border-primary/30',
+        purple: 'hover:shadow-md hover:border-primary/30',
+        orange: 'hover:shadow-md hover:border-primary/30',
+        rainbow: 'hover:shadow-md hover:border-primary/30',
       },
       hover: {
         none: '',
-        lift: 'hover:-translate-y-1',
-        scale: 'hover:scale-[1.02]',
-        glow: 'hover:ring-2 hover:ring-olive-500/20',
-        border: 'hover:border-olive-400/60',
+        lift: 'hover:-translate-y-0.5',
+        scale: 'hover:scale-[1.01]',
+        glow: 'hover:ring-2 hover:ring-ring/20',
+        border: 'hover:border-primary/40',
       },
       padding: {
         none: '',
@@ -115,9 +116,9 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
           }}
           whileHover={
             hover === 'lift'
-              ? { y: -4, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' }
+              ? { y: -2, boxShadow: '0 10px 24px rgba(26, 20, 14, 0.08)' }
               : hover === 'scale'
-              ? { scale: 1.02 }
+              ? { scale: 1.01 }
               : undefined
           }
         >
@@ -147,7 +148,7 @@ const GlassCardHeader = React.forwardRef<
     ref={ref}
     className={cn(
       'flex flex-col space-y-1.5 pb-4',
-      gradient && 'border-b border-gradient-to-r from-olive-200/50 via-transparent to-olive-200/50',
+      gradient && 'border-b border-border',
       className
     )}
     {...props}
@@ -165,8 +166,9 @@ const GlassCardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      'text-xl font-semibold leading-none tracking-tight',
-      gradient && 'bg-gradient-to-r from-stone-900 via-stone-700 to-stone-900 dark:from-stone-100 dark:via-stone-300 dark:to-stone-100 bg-clip-text text-transparent',
+      'font-heading text-xl font-semibold leading-none tracking-tight text-foreground',
+      // gradient text retired in the calm redesign — prop kept for API compatibility
+      gradient && 'text-foreground',
       className
     )}
     {...props}
@@ -183,7 +185,7 @@ const GlassCardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-stone-500 dark:text-stone-400', className)}
+    className={cn('text-sm text-muted-foreground', className)}
     {...props}
   />
 ))
@@ -209,7 +211,7 @@ const GlassCardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center pt-4 border-t border-stone-200/50 dark:border-white/[0.1]/30', className)}
+    className={cn('flex items-center pt-4 border-t border-border', className)}
     {...props}
   />
 ))

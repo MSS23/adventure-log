@@ -79,26 +79,26 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const getIcon = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return <CheckCircle2 className="h-5 w-5 text-green-600" />
+        return <CheckCircle2 className="h-5 w-5 text-primary" />
       case 'error':
-        return <AlertCircle className="h-5 w-5 text-red-600" />
+        return <AlertCircle className="h-5 w-5 text-destructive" />
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />
+        return <AlertTriangle className="h-5 w-5 text-[color:var(--color-gold)]" />
       case 'info':
-        return <Info className="h-5 w-5 text-olive-600" />
+        return <Info className="h-5 w-5 text-muted-foreground" />
     }
   }
 
   const getStyles = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-900/40'
+        return 'border-primary/25'
       case 'error':
-        return 'bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-900/40'
+        return 'border-destructive/30'
       case 'warning':
-        return 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:border-yellow-900/40'
+        return 'border-[color:var(--color-gold)]/35'
       case 'info':
-        return 'bg-olive-50 border-olive-200 dark:bg-olive-950/30 dark:border-olive-900/40'
+        return 'border-border'
     }
   }
 
@@ -110,7 +110,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             className={cn(
-              'max-w-sm w-full rounded-lg border shadow-lg p-4 pointer-events-auto transition-all duration-300',
+              'max-w-sm w-full rounded-2xl border bg-card shadow-lg p-4 pointer-events-auto transition-all duration-300',
               toast.exiting
                 ? 'opacity-0 translate-x-24 scale-90'
                 : 'animate-toast-in',
@@ -122,18 +122,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 {getIcon(toast.type)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+                <p className="text-sm font-semibold text-foreground">
                   {toast.title}
                 </p>
                 {toast.description && (
-                  <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {toast.description}
                   </p>
                 )}
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="flex-shrink-0 text-stone-400 hover:text-stone-600 dark:text-stone-500 dark:hover:text-stone-300 transition-colors"
+                className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>

@@ -7,7 +7,6 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Camera, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { useDoubleTapTouch } from '@/lib/hooks/useDoubleTap'
 import { useLikes } from '@/lib/hooks/useSocial'
 import { useHaptics } from '@/lib/hooks/useHaptics'
@@ -44,7 +43,6 @@ export function InteractivePhotoGallery({
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
   const [showHeartAnimation, setShowHeartAnimation] = useState(false)
-  const prefersReducedMotion = useReducedMotion()
   const { user } = useAuth()
 
   // Double-tap to like hooks
@@ -103,12 +101,12 @@ export function InteractivePhotoGallery({
   if (!photos || photos.length === 0) {
     return (
       <div className={cn(
-        "flex items-center justify-center h-64 bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-50 dark:to-white/[0.04] rounded-2xl border border-stone-200 dark:border-white/[0.10]",
+        "flex items-center justify-center h-64 rounded-2xl border border-dashed border-border bg-muted/30",
         className
       )}>
         <div className="text-center">
-          <Camera className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto mb-2" />
-          <p className="text-stone-500 dark:text-stone-400">No photos available</p>
+          <Camera className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground">No photos available</p>
         </div>
       </div>
     )
@@ -122,40 +120,26 @@ export function InteractivePhotoGallery({
     return (
       <>
         <div className={cn("relative group", className)}>
-          <div className="overflow-hidden rounded-2xl shadow-lg">
+          <div className="overflow-hidden rounded-2xl bg-muted">
             <motion.div
               className="relative aspect-[3/4] sm:aspect-[4/3] cursor-pointer"
               onClick={() => openLightbox(0)}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
-              whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Ken Burns animated container */}
-              <motion.div
-                className="absolute inset-0"
-                animate={prefersReducedMotion ? {} : {
-                  scale: [1, 1.08, 1.04, 1.1, 1.06, 1],
-                  x: [0, -15, 10, -5, 8, 0],
-                  y: [0, 8, -10, 15, -5, 0],
-                }}
-                transition={{
-                  duration: 25,
-                  repeat: Infinity,
-                  ease: 'linear'
-                }}
-              >
+              <div className="absolute inset-0">
                 {photoUrl && (
                   <Image
                     src={photoUrl}
                     alt={photo.caption || `${albumTitle} - Photo`}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     sizes="(max-width: 768px) 100vw, 80vw"
                     priority
                   />
                 )}
-              </motion.div>
+              </div>
 
               {/* Double-tap heart animation overlay */}
               <AnimatePresence>
@@ -181,12 +165,12 @@ export function InteractivePhotoGallery({
               {/* Zoom hint on hover */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                 <motion.div
-                  className="bg-white/95 dark:bg-white/[0.08] backdrop-blur-md rounded-full p-4 shadow-xl"
+                  className="bg-background/90 backdrop-blur-md rounded-full p-4 shadow-md"
                   initial={{ scale: 0.8, opacity: 0 }}
                   whileHover={{ scale: 1.1 }}
                   animate={{ scale: 1, opacity: 1 }}
                 >
-                  <ZoomIn className="h-6 w-6 text-stone-700 dark:text-stone-300" />
+                  <ZoomIn className="h-6 w-6 text-foreground" />
                 </motion.div>
               </div>
 
@@ -231,7 +215,7 @@ export function InteractivePhotoGallery({
       <div className={cn("relative group", className)}>
         {/* Main Carousel */}
         <div
-          className="overflow-hidden rounded-2xl shadow-lg"
+          className="overflow-hidden rounded-2xl bg-muted"
           ref={emblaRef}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -261,17 +245,17 @@ export function InteractivePhotoGallery({
                   {/* Zoom hint on hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <motion.div
-                      className="bg-white/95 dark:bg-white/[0.08] backdrop-blur-md rounded-full p-4 shadow-xl"
+                      className="bg-background/90 backdrop-blur-md rounded-full p-4 shadow-md"
                       whileHover={{ scale: 1.1 }}
                     >
-                      <ZoomIn className="h-6 w-6 text-stone-700 dark:text-stone-300" />
+                      <ZoomIn className="h-6 w-6 text-foreground" />
                     </motion.div>
                   </div>
 
                   {/* Caption overlay */}
                   {photo.caption && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                      <p className="text-white text-sm">{photo.caption}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/75 via-black/25 to-transparent">
+                      <p className="text-white/90 text-sm">{photo.caption}</p>
                     </div>
                   )}
                 </motion.div>
@@ -308,10 +292,10 @@ export function InteractivePhotoGallery({
             className={cn(
               "absolute left-3 top-1/2 -translate-y-1/2 z-10",
               "w-12 h-12 rounded-full",
-              "bg-white/95 dark:bg-white/[0.08] backdrop-blur-md shadow-xl",
+              "bg-background/90 backdrop-blur-md shadow-md",
               "flex items-center justify-center",
-              "text-stone-700 dark:text-stone-300 hover:text-olive-600",
-              "border border-white/50",
+              "text-foreground hover:text-primary",
+              "border border-border",
               "opacity-0 group-hover:opacity-100",
               "transition-all duration-300"
             )}
@@ -325,10 +309,10 @@ export function InteractivePhotoGallery({
             className={cn(
               "absolute right-3 top-1/2 -translate-y-1/2 z-10",
               "w-12 h-12 rounded-full",
-              "bg-white/95 dark:bg-white/[0.08] backdrop-blur-md shadow-xl",
+              "bg-background/90 backdrop-blur-md shadow-md",
               "flex items-center justify-center",
-              "text-stone-700 dark:text-stone-300 hover:text-olive-600",
-              "border border-white/50",
+              "text-foreground hover:text-primary",
+              "border border-border",
               "opacity-0 group-hover:opacity-100",
               "transition-all duration-300"
             )}
@@ -390,8 +374,8 @@ export function InteractivePhotoGallery({
                 className={cn(
                   "flex-shrink-0 relative w-20 h-20 rounded-xl overflow-hidden transition-all duration-300 snap-start",
                   selectedIndex === index
-                    ? "ring-2 ring-olive-500 ring-offset-2 shadow-lg scale-105"
-                    : "opacity-60 hover:opacity-100 hover:scale-102"
+                    ? "ring-2 ring-ring ring-offset-2 ring-offset-background"
+                    : "opacity-60 hover:opacity-100"
                 )}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -407,7 +391,7 @@ export function InteractivePhotoGallery({
                 )}
                 {/* Selection glow effect */}
                 {selectedIndex === index && (
-                  <div className="absolute inset-0 bg-olive-500/10 pointer-events-none" />
+                  <div className="absolute inset-0 bg-primary/10 pointer-events-none" />
                 )}
               </motion.button>
             )

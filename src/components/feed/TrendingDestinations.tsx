@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
@@ -222,17 +223,17 @@ export function TrendingDestinations() {
   if (loading) {
     return (
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Trending Destinations</h2>
-          <Link href="/search" className="text-sm text-olive-600 hover:text-olive-700 font-medium">
+        <div className="flex items-end justify-between gap-4 mb-4">
+          <h2 className="al-display text-xl md:text-2xl">Trending Destinations</h2>
+          <Link href="/search" className="text-sm text-primary hover:underline font-medium">
             See All
           </Link>
         </div>
         <div className="flex gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex-shrink-0 w-[140px]">
-              <div className="w-full h-[140px] bg-stone-200 dark:bg-white/[0.08] rounded-xl animate-pulse" />
-              <div className="mt-2 h-4 bg-stone-200 dark:bg-white/[0.08] rounded animate-pulse w-3/4" />
+              <Skeleton className="w-full h-[140px] rounded-2xl" />
+              <Skeleton className="mt-2 h-4 w-3/4" />
             </div>
           ))}
         </div>
@@ -246,9 +247,9 @@ export function TrendingDestinations() {
 
   return (
     <div className="mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Trending Destinations</h2>
-        <Link href="/search" className="text-sm text-olive-600 hover:text-olive-700 font-medium">
+      <div className="flex items-end justify-between gap-4 mb-4">
+        <h2 className="al-display text-xl md:text-2xl">Trending Destinations</h2>
+        <Link href="/search" className="text-sm text-primary hover:underline font-medium">
           See All
         </Link>
       </div>
@@ -258,10 +259,10 @@ export function TrendingDestinations() {
         {scrollPosition > 0 && (
           <button
             onClick={() => handleScroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 dark:bg-white/[0.08] backdrop-blur-sm rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white dark:hover:bg-white/[0.08]"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/55 p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70"
             aria-label="Scroll left"
           >
-            <ChevronLeft className="h-5 w-5 text-stone-700 dark:text-stone-300" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
         )}
 
@@ -284,24 +285,24 @@ export function TrendingDestinations() {
                 href={href}
                 className="flex-shrink-0 group/card"
               >
-                <div className="relative w-[140px] h-[140px] rounded-xl overflow-hidden bg-stone-100 dark:bg-white/[0.06]">
+                <div className="relative w-[140px] h-[140px] rounded-2xl overflow-hidden bg-muted">
                   {imageUrl ? (
                     <Image
                       src={imageUrl}
                       alt={`${destination.location}, ${destination.country}`}
                       fill
-                      className="object-cover group-hover/card:scale-105 transition-transform duration-300"
+                      className="object-cover group-hover/card:scale-[1.03] transition-transform duration-300"
                       sizes="140px"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-olive-400 to-olive-500 flex items-center justify-center" role="img" aria-label={`${destination.location}, ${destination.country}`}>
-                      <span className="text-white text-4xl font-bold" aria-hidden="true">
+                    <div className="w-full h-full bg-primary flex items-center justify-center" role="img" aria-label={`${destination.location}, ${destination.country}`}>
+                      <span className="text-primary-foreground text-4xl font-bold" aria-hidden="true">
                         {destination.location.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
                   {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
 
                   {/* Engagement Badge - top right */}
                   {destination.engagement_count > 0 && (
@@ -315,10 +316,10 @@ export function TrendingDestinations() {
 
                   {/* Destination Name */}
                   <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <p className="text-white text-sm font-semibold drop-shadow-lg line-clamp-1">
+                    <p className="text-white font-heading text-sm font-semibold drop-shadow-sm line-clamp-1">
                       {destination.location}
                     </p>
-                    <p className="text-white/90 text-xs sm:text-sm drop-shadow-lg">
+                    <p className="text-white/90 text-xs drop-shadow-sm">
                       {destination.country}
                     </p>
                   </div>
@@ -331,10 +332,10 @@ export function TrendingDestinations() {
         {/* Right Arrow */}
         <button
           onClick={() => handleScroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 dark:bg-white/[0.08] backdrop-blur-sm rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white dark:hover:bg-white/[0.08]"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/55 p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70"
           aria-label="Scroll right"
         >
-          <ChevronRight className="h-5 w-5 text-stone-700 dark:text-stone-300" />
+          <ChevronRight className="h-5 w-5" />
         </button>
       </div>
     </div>

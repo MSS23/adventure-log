@@ -229,9 +229,9 @@ export default function OrganizePage() {
   }, [photos, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-black pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white dark:bg-[#111] border-b dark:border-stone-800 sticky top-0 z-10">
+      <div className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -244,7 +244,7 @@ export default function OrganizePage() {
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                className="cursor-pointer"
               >
                 <Grid3x3 className="h-4 w-4" />
               </Button>
@@ -252,7 +252,7 @@ export default function OrganizePage() {
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                className="cursor-pointer"
               >
                 <List className="h-4 w-4" />
               </Button>
@@ -262,7 +262,7 @@ export default function OrganizePage() {
           {/* Search and filters */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search by caption or location..."
@@ -288,16 +288,16 @@ export default function OrganizePage() {
 
           {/* Selection toolbar */}
           {selectedPhotos.size > 0 && (
-            <div className="mt-4 p-3 bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800 rounded-lg flex items-center justify-between">
+            <div className="mt-4 flex items-center justify-between rounded-xl border border-primary/20 bg-primary/10 p-3">
               <div className="flex items-center gap-4">
-                <span className="font-medium text-olive-900 dark:text-olive-200">
+                <span className="text-sm font-medium text-foreground">
                   {selectedPhotos.size} selected
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={selectAll}
-                  className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                  className="cursor-pointer"
                 >
                   {selectedPhotos.size === photos.length ? 'Deselect all' : 'Select all'}
                 </Button>
@@ -322,7 +322,7 @@ export default function OrganizePage() {
                   variant="destructive"
                   size="sm"
                   onClick={handleDeleteSelected}
-                  className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500"
+                  className="cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
@@ -332,7 +332,7 @@ export default function OrganizePage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedPhotos(new Set())}
-                  className="cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                  className="cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -346,48 +346,45 @@ export default function OrganizePage() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         {loading ? (
           <div className="text-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-olive-500 mx-auto mb-3" />
-            <p className="text-stone-500 dark:text-stone-400">Loading photos...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">Loading photos...</p>
           </div>
         ) : filteredPhotos.length === 0 ? (
           searchQuery ? (
-            <div className="max-w-md mx-auto text-center py-16">
-              <div className="w-16 h-16 bg-stone-100 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="h-8 w-8 text-stone-400 dark:text-stone-500" />
+            <div className="mx-auto flex max-w-md flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground mb-4">
+                <Search className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">
+              <h3 className="font-heading text-lg font-semibold text-foreground">
                 No matching photos
               </h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mb-5">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Nothing matches &ldquo;{searchQuery}&rdquo;. Try a different caption or location.
               </p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setSearchQuery('')}
-                className="cursor-pointer active:scale-[0.97] transition-all duration-200"
+                className="mt-5 cursor-pointer"
               >
                 Clear search
               </Button>
             </div>
           ) : (
-            <div className="max-w-md mx-auto text-center py-16">
-              <div className="w-16 h-16 bg-olive-100 dark:bg-olive-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Grid3x3 className="h-8 w-8 text-olive-600 dark:text-olive-400" />
+            <div className="mx-auto flex max-w-md flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                <Grid3x3 className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-1.5">
+              <h3 className="font-heading text-lg font-semibold text-foreground">
                 Nothing to organize yet
               </h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mb-5">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {filterType === 'no-album'
                   ? 'All your photos are already filed into albums.'
                   : 'Upload photos to start sorting them into albums.'}
               </p>
-              <Link href="/albums/new">
-                <Button
-                  size="sm"
-                  className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
-                >
+              <Link href="/albums/new" className="mt-5">
+                <Button size="sm" className="cursor-pointer">
                   Create an album
                 </Button>
               </Link>
@@ -407,9 +404,9 @@ export default function OrganizePage() {
                 key={photo.id}
                 className={`relative group cursor-pointer transition-all duration-200 ${
                   viewMode === 'grid'
-                    ? 'aspect-square rounded-lg overflow-hidden hover:shadow-lg hover:scale-[1.02]'
-                    : 'flex items-center gap-4 p-3 bg-white dark:bg-[#111] rounded-lg border dark:border-stone-800 hover:border-olive-300 dark:hover:border-olive-600 hover:shadow-md'
-                } ${selectedPhotos.has(photo.id) ? 'ring-2 ring-olive-500' : ''}`}
+                    ? 'aspect-square rounded-xl overflow-hidden bg-muted hover:shadow-md hover:scale-[1.02]'
+                    : 'flex items-center gap-4 p-3 bg-card rounded-xl border border-border hover:border-primary/30 hover:shadow-md'
+                } ${selectedPhotos.has(photo.id) ? 'ring-2 ring-primary' : ''}`}
                 onClick={() => togglePhotoSelection(photo.id)}
                 tabIndex={0}
                 role="button"
@@ -421,13 +418,13 @@ export default function OrganizePage() {
                       src={getPhotoUrl(photo.file_path) || ''}
                       alt={photo.caption || 'Photo'}
                       fill
-                      className="object-cover rounded-lg"
+                      className="object-cover rounded-xl"
                     />
                     <div
-                      className={`absolute top-2 left-2 p-1 rounded transition-opacity duration-200 ${
+                      className={`absolute top-2 left-2 p-1 rounded-md transition-opacity duration-200 ${
                         selectedPhotos.has(photo.id)
-                          ? 'bg-olive-600 text-white'
-                          : 'bg-white/85 dark:bg-black/55 text-stone-600 dark:text-stone-200 opacity-0 group-hover:opacity-100'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background/85 text-foreground opacity-0 group-hover:opacity-100'
                       }`}
                     >
                       {selectedPhotos.has(photo.id) ? (
@@ -437,7 +434,7 @@ export default function OrganizePage() {
                       )}
                     </div>
                     {photo.location_name && (
-                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-xs rounded">
+                      <div className="absolute bottom-2 left-2 rounded-md bg-black/70 px-2 py-1 text-xs text-white">
                         {photo.location_name}
                       </div>
                     )}
@@ -449,21 +446,21 @@ export default function OrganizePage() {
                         src={getPhotoUrl(photo.file_path) || ''}
                         alt={photo.caption || 'Photo'}
                         fill
-                        className="object-cover rounded"
+                        className="object-cover rounded-lg"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
+                      <p className="font-medium text-sm text-foreground truncate">
                         {photo.caption || 'Untitled'}
                       </p>
                       {photo.location_name && (
-                        <p className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {photo.location_name}
                         </p>
                       )}
                       {photo.taken_at && (
-                        <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
+                        <p className="text-xs text-muted-foreground font-mono tracking-wide flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {new Date(photo.taken_at).toLocaleDateString()}
                         </p>
@@ -471,9 +468,9 @@ export default function OrganizePage() {
                     </div>
                     <div className="flex-shrink-0">
                       {selectedPhotos.has(photo.id) ? (
-                        <CheckSquare className="h-5 w-5 text-olive-600" />
+                        <CheckSquare className="h-5 w-5 text-primary" />
                       ) : (
-                        <Square className="h-5 w-5 text-stone-400" />
+                        <Square className="h-5 w-5 text-muted-foreground" />
                       )}
                     </div>
                   </>
@@ -485,12 +482,12 @@ export default function OrganizePage() {
       </div>
 
       {/* Keyboard shortcuts help (desktop only) */}
-      <div className="hidden md:block fixed bottom-4 right-4 p-3 bg-white dark:bg-[#111] rounded-lg shadow-lg border border-stone-200 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-400 max-w-xs">
-        <p className="font-semibold mb-2 text-stone-800 dark:text-stone-200">Keyboard Shortcuts:</p>
+      <div className="hidden md:block fixed bottom-4 right-4 max-w-xs rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground shadow-lg">
+        <p className="font-semibold mb-2 text-foreground">Keyboard Shortcuts:</p>
         <ul className="space-y-1">
-          <li><kbd className="px-1 py-0.5 bg-stone-100 dark:bg-stone-800 rounded text-stone-700 dark:text-stone-300">Ctrl/Cmd + A</kbd> - Select all</li>
-          <li><kbd className="px-1 py-0.5 bg-stone-100 dark:bg-stone-800 rounded text-stone-700 dark:text-stone-300">Esc</kbd> - Clear selection</li>
-          <li><kbd className="px-1 py-0.5 bg-stone-100 dark:bg-stone-800 rounded text-stone-700 dark:text-stone-300">Delete</kbd> - Delete selected</li>
+          <li><kbd className="px-1 py-0.5 bg-muted rounded text-foreground">Ctrl/Cmd + A</kbd> - Select all</li>
+          <li><kbd className="px-1 py-0.5 bg-muted rounded text-foreground">Esc</kbd> - Clear selection</li>
+          <li><kbd className="px-1 py-0.5 bg-muted rounded text-foreground">Delete</kbd> - Delete selected</li>
         </ul>
       </div>
     </div>

@@ -70,22 +70,22 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
         aria-label="Invite friends"
         className="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50"
       >
-        <div className="bg-white dark:bg-[#1B170E] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md sm:mx-4 shadow-2xl overflow-hidden border border-stone-200/60 dark:border-white/[0.08] animate-in slide-in-from-bottom sm:zoom-in-95 fade-in duration-300 max-h-[92vh] overflow-y-auto">
+        <div className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md sm:mx-4 shadow-lg overflow-hidden border border-border animate-in slide-in-from-bottom sm:zoom-in-95 fade-in duration-300 max-h-[92vh] overflow-y-auto">
           {/* Header */}
-          <div className="relative bg-gradient-to-br from-olive-500 via-olive-600 to-olive-700 px-6 py-8 text-white">
+          <div className="relative bg-primary px-6 py-8 text-primary-foreground">
             <button
               onClick={onClose}
               aria-label="Close"
-              className="absolute top-4 right-4 p-2 hover:bg-white/15 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              className="absolute top-4 right-4 p-2 hover:bg-primary-foreground/15 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/70"
             >
               <X className="h-5 w-5" />
             </button>
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 ring-1 ring-white/25 shadow-lg shadow-black/10">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-foreground/15 rounded-full mb-4 ring-1 ring-primary-foreground/25">
                 <Share2 className="h-8 w-8" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Invite Friends</h2>
-              <p className="text-white/85 text-sm max-w-xs mx-auto">
+              <h2 className="font-heading text-2xl font-bold mb-2">Invite Friends</h2>
+              <p className="text-primary-foreground/85 text-sm max-w-xs mx-auto">
                 Travel is better together. Send a friend your link — they join free in seconds.
               </p>
             </div>
@@ -95,7 +95,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
           <div className="px-6 py-6 space-y-5">
             {/* Copy Link */}
             <div>
-              <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">
+              <label className="block text-sm font-semibold text-foreground mb-2">
                 Share your invite link
               </label>
               <div className="flex gap-2">
@@ -104,16 +104,12 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                   value={inviteUrl}
                   readOnly
                   onFocus={(e) => e.currentTarget.select()}
-                  className="flex-1 min-w-0 px-4 py-3 bg-stone-50 dark:bg-white/[0.04] border border-stone-200 dark:border-white/[0.10] rounded-lg text-stone-700 dark:text-stone-300 text-sm font-mono truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500/60"
+                  className="flex-1 min-w-0 px-4 py-3 bg-muted/50 border border-border rounded-xl text-foreground text-sm font-mono truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 <Button
                   onClick={handleCopyLink}
                   aria-label={copied ? 'Link copied' : 'Copy invite link'}
-                  className={`shrink-0 gap-1.5 px-4 transition-all duration-200 active:scale-[0.97] ${
-                    copied
-                      ? 'bg-green-500 hover:bg-green-600'
-                      : 'bg-olive-500 hover:bg-olive-600'
-                  } text-white`}
+                  className="shrink-0 gap-1.5 px-4"
                 >
                   {copied ? (
                     <>
@@ -130,7 +126,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
               </div>
               <div className="h-5 mt-2" aria-live="polite">
                 {copied && (
-                  <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <p className="text-xs text-primary flex items-center gap-1">
                     <Check className="h-3 w-3" />
                     Link copied to clipboard!
                   </p>
@@ -141,10 +137,10 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-stone-200 dark:border-white/[0.10]" />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-white dark:bg-[#1B170E] text-stone-500 dark:text-stone-400">Or share via</span>
+                <span className="px-2 bg-card text-muted-foreground">Or share via</span>
               </div>
             </div>
 
@@ -155,14 +151,14 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
                 <Button
                   onClick={handleNativeShare}
                   variant="outline"
-                  className="w-full justify-start gap-3 py-6 border-olive-300 dark:border-olive-500/30 bg-olive-50/60 dark:bg-olive-500/10 hover:bg-olive-100 dark:hover:bg-olive-500/15"
+                  className="w-full justify-start gap-3 py-6 border-primary/30 bg-primary/5 hover:bg-primary/10"
                 >
-                  <div className="p-2 bg-olive-200/70 dark:bg-olive-500/25 rounded-lg">
-                    <Share2 className="h-5 w-5 text-olive-700 dark:text-olive-300" />
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Share2 className="h-5 w-5 text-primary" />
                   </div>
                   <div className="text-left flex-1">
-                    <div className="font-semibold text-stone-900 dark:text-stone-100">Share</div>
-                    <div className="text-xs text-stone-500 dark:text-stone-400">WhatsApp, Messages, and more</div>
+                    <div className="font-semibold text-foreground">Share</div>
+                    <div className="text-xs text-muted-foreground">WhatsApp, Messages, and more</div>
                   </div>
                 </Button>
               )}
@@ -170,48 +166,48 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
               <Button
                 onClick={handleShareEmail}
                 variant="outline"
-                className="w-full justify-start gap-3 py-6 border-stone-300 dark:border-white/[0.14] hover:bg-stone-50 dark:hover:bg-white/[0.06]"
+                className="w-full justify-start gap-3 py-6"
               >
-                <div className="p-2 bg-olive-100 dark:bg-olive-500/20 rounded-lg">
-                  <Mail className="h-5 w-5 text-olive-600 dark:text-olive-300" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Mail className="h-5 w-5 text-primary" />
                 </div>
                 <div className="text-left flex-1">
-                  <div className="font-semibold text-stone-900 dark:text-stone-100">Email</div>
-                  <div className="text-xs text-stone-500 dark:text-stone-400">Send via your email app</div>
+                  <div className="font-semibold text-foreground">Email</div>
+                  <div className="text-xs text-muted-foreground">Send via your email app</div>
                 </div>
               </Button>
 
               <Button
                 onClick={handleShareSMS}
                 variant="outline"
-                className="w-full justify-start gap-3 py-6 border-stone-300 dark:border-white/[0.14] hover:bg-stone-50 dark:hover:bg-white/[0.06]"
+                className="w-full justify-start gap-3 py-6"
               >
-                <div className="p-2 bg-green-100 dark:bg-green-500/20 rounded-lg">
-                  <MessageSquare className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <MessageSquare className="h-5 w-5 text-primary" />
                 </div>
                 <div className="text-left flex-1">
-                  <div className="font-semibold text-stone-900 dark:text-stone-100">Text Message</div>
-                  <div className="text-xs text-stone-500 dark:text-stone-400">Share via SMS</div>
+                  <div className="font-semibold text-foreground">Text Message</div>
+                  <div className="text-xs text-muted-foreground">Share via SMS</div>
                 </div>
               </Button>
             </div>
 
             {/* Benefits */}
-            <div className="p-4 bg-olive-50 dark:bg-olive-950/20 rounded-lg border border-olive-100 dark:border-white/[0.08] mt-6">
-              <h3 className="text-sm font-semibold text-olive-900 dark:text-olive-200 mb-2">
+            <div className="p-4 rounded-xl bg-muted/50 mt-6">
+              <h3 className="text-sm font-semibold text-foreground mb-2">
                 Why invite friends?
               </h3>
-              <ul className="space-y-1.5 text-xs text-olive-700 dark:text-olive-300/90">
-                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-olive-500 dark:text-olive-400" />Share and discover travel inspiration together</li>
-                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-olive-500 dark:text-olive-400" />Follow each other&apos;s adventures in real-time</li>
-                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-olive-500 dark:text-olive-400" />Collaborate on trip planning</li>
-                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-olive-500 dark:text-olive-400" />Build your travel community</li>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
+                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-primary" />Share and discover travel inspiration together</li>
+                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-primary" />Follow each other&apos;s adventures in real-time</li>
+                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-primary" />Collaborate on trip planning</li>
+                <li className="flex gap-2"><Check className="h-3.5 w-3.5 mt-px shrink-0 text-primary" />Build your travel community</li>
               </ul>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 bg-stone-50 dark:bg-white/[0.04] border-t border-stone-200 dark:border-white/[0.10]">
+          <div className="px-6 py-4 bg-muted/40 border-t border-border">
             <Button
               onClick={onClose}
               variant="outline"

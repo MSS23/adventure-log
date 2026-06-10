@@ -14,37 +14,20 @@ interface StatCardProps {
   onClick?: () => void
 }
 
-// Each stat gets its own Field Notebook accent so the four read as distinct.
-// Backgrounds/icons use the *-tint tokens (defined for both light and dark),
-// values/icons use the accent token directly — keeping dark mode robust.
+// Flat, bordered Field Notebook tiles — the per-stat accent lives only in the
+// small icon chip (tint tokens are defined for both light and dark themes).
 const gradientStyles = {
   teal: {
-    bg: 'bg-[color:var(--color-forest-tint)]',
-    border: 'border-[color:var(--color-line-warm)] hover:border-[color:var(--color-forest)]',
-    shadow: '',
     icon: 'bg-[color:var(--color-forest-tint)] text-[color:var(--color-forest)]',
-    value: 'text-[color:var(--color-forest)]'
   },
   blue: {
-    bg: 'bg-[color:var(--color-sky-tint)]',
-    border: 'border-[color:var(--color-line-warm)] hover:border-[color:var(--color-sky)]',
-    shadow: '',
     icon: 'bg-[color:var(--color-sky-tint)] text-[color:var(--color-sky)]',
-    value: 'text-[color:var(--color-sky)]'
   },
   purple: {
-    bg: 'bg-[color:var(--color-coral-tint)]',
-    border: 'border-[color:var(--color-line-warm)] hover:border-[color:var(--color-coral)]',
-    shadow: '',
     icon: 'bg-[color:var(--color-coral-tint)] text-[color:var(--color-coral)]',
-    value: 'text-[color:var(--color-coral)]'
   },
   orange: {
-    bg: 'bg-[color:var(--color-gold-tint)]',
-    border: 'border-[color:var(--color-line-warm)] hover:border-[color:var(--color-gold)]',
-    shadow: '',
     icon: 'bg-[color:var(--color-gold-tint)] text-[color:var(--color-gold)]',
-    value: 'text-[color:var(--color-gold)]'
   }
 }
 
@@ -99,25 +82,22 @@ function StatCard({ value, label, icon: Icon, gradient, delay = 0, onClick }: St
         damping: 24,
         delay
       }}
-      whileHover={{ y: -4, scale: 1.02 }}
+      whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        'relative p-4 rounded-2xl border-2 cursor-pointer',
-        'transition-all duration-300',
-        'hover:shadow-xl',
-        styles.bg,
-        styles.border,
-        styles.shadow
+        'relative p-4 sm:p-5 rounded-2xl border border-border bg-card cursor-pointer',
+        'transition-all duration-200',
+        'hover:border-primary/30 hover:shadow-md'
       )}
     >
       {/* Icon */}
-      <div className={cn('inline-flex p-2 rounded-xl mb-3', styles.icon)}>
+      <div className={cn('inline-flex p-2 rounded-full mb-3', styles.icon)}>
         <Icon className="h-5 w-5" />
       </div>
 
       {/* Value */}
-      <div className={cn('text-2xl sm:text-3xl font-bold mb-1', styles.value)}>
+      <div className="al-stat-value text-2xl sm:text-3xl mb-1">
         {isNumeric ? (
           <AnimatedCounter value={value} />
         ) : (
@@ -126,12 +106,9 @@ function StatCard({ value, label, icon: Icon, gradient, delay = 0, onClick }: St
       </div>
 
       {/* Label */}
-      <div className="text-sm font-medium text-stone-600 dark:text-stone-400">
+      <div className="text-xs text-muted-foreground font-medium">
         {label}
       </div>
-
-      {/* Decorative gradient overlay on hover */}
-      <div className="absolute inset-0 rounded-2xl bg-white/0 hover:bg-white/20 transition-colors pointer-events-none" />
     </motion.div>
   )
 }

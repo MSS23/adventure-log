@@ -163,13 +163,12 @@ export function PublicProfileContent({
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <div className="relative inline-block mb-6">
-              <div className="absolute -inset-1.5 bg-gradient-to-br from-white/30 to-white/10 rounded-full blur-sm" />
-              <Avatar className="relative w-28 h-28 ring-4 ring-white/30 shadow-2xl">
+              <Avatar className="relative w-28 h-28 ring-4 ring-white/30">
                 <AvatarImage
                   src={getAvatarUrl(user.avatar_url, user.username)}
                   alt={displayName}
                 />
-                <AvatarFallback className="text-3xl text-white font-heading" style={{ background: 'var(--color-coral)' }}>
+                <AvatarFallback className="bg-accent text-3xl text-accent-foreground font-heading">
                   {displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -181,12 +180,12 @@ export function PublicProfileContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
+            <h1 className="font-heading text-4xl md:text-5xl font-semibold tracking-tight text-white mb-2">
               {displayName}
             </h1>
-            <p className="text-white/70 text-lg mb-4">@{user.username}</p>
+            <p className="text-white/85 text-lg mb-4">@{user.username}</p>
             {user.bio && (
-              <p className="text-white/80 max-w-prose mx-auto text-lg leading-relaxed">
+              <p className="text-white/90 max-w-prose mx-auto text-lg leading-relaxed">
                 {user.bio}
               </p>
             )}
@@ -213,7 +212,7 @@ export function PublicProfileContent({
       <div className="max-w-4xl mx-auto px-6">
         {/* ───────── Stats Bar ───────── */}
         <motion.div
-          className="-mt-8 relative z-10 al-card p-6 mb-10"
+          className="-mt-8 relative z-10 rounded-2xl border border-border bg-card p-6 mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
@@ -221,7 +220,7 @@ export function PublicProfileContent({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <stat.icon className="h-5 w-5 mx-auto mb-2" style={{ color: 'var(--color-forest)' }} />
+                <stat.icon className="h-5 w-5 mx-auto mb-2 text-primary" />
                 <p className="al-stat-value text-2xl md:text-3xl">
                   {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                 </p>
@@ -276,20 +275,17 @@ export function PublicProfileContent({
               Travel Map
             </h2>
             <Link href={`/embed/${user.username}`} target="_blank">
-              <div className="al-card p-5 flex items-center gap-4 cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'var(--color-forest-tint)' }}
-                >
-                  <Globe className="h-6 w-6" style={{ color: 'var(--color-forest)' }} />
+              <div className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-5 cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Globe className="h-6 w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[color:var(--color-ink)]">View travel map</p>
-                  <p className="text-sm text-[color:var(--color-muted-warm)]">
+                  <p className="font-heading font-semibold text-foreground">View travel map</p>
+                  <p className="text-sm text-muted-foreground">
                     {albums.filter((a) => a.latitude && a.longitude).length} locations on the interactive 3D globe
                   </p>
                 </div>
-                <ArrowRight className="h-5 w-5 shrink-0" style={{ color: 'var(--color-muted-warm)' }} />
+                <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5" />
               </div>
             </Link>
           </motion.div>
@@ -297,12 +293,14 @@ export function PublicProfileContent({
 
         {/* ───────── Albums Grid ───────── */}
         {isPrivate ? (
-          <div className="al-card text-center py-16">
-            <Users className="h-12 w-12 mx-auto mb-3" style={{ color: 'var(--color-muted-warm)' }} />
-            <p className="font-medium text-[color:var(--color-ink)]">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+              <Users className="h-6 w-6" />
+            </div>
+            <p className="font-heading font-semibold text-foreground">
               This account is private
             </p>
-            <p className="text-[color:var(--color-muted-warm)] text-sm mt-1">
+            <p className="text-muted-foreground text-sm mt-1">
               Follow to see their adventures
             </p>
           </div>
@@ -317,7 +315,7 @@ export function PublicProfileContent({
               <Camera className="h-4 w-4" />
               Adventures
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {albums.map((album, i) => (
                 <motion.div
                   key={album.id}
@@ -326,33 +324,31 @@ export function PublicProfileContent({
                   transition={{ duration: 0.35, delay: 0.65 + i * 0.04 }}
                 >
                   <Link href={`/albums/${album.id}/public`}>
-                    <div className="group cursor-pointer al-card overflow-hidden transition-all duration-300 hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-[color:var(--color-coral)]">
+                    <div className="group cursor-pointer rounded-2xl border border-border bg-card overflow-hidden transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-ring">
                       {/* Image */}
-                      <div className="relative aspect-[4/3] overflow-hidden" style={{ background: 'var(--color-ivory-alt)' }}>
+                      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                         {album.cover_photo_url ? (
                           <Image
                             src={getPhotoUrl(album.cover_photo_url) || ''}
                             alt={album.title}
                             fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <Globe className="h-10 w-10" style={{ color: 'var(--color-muted-warm)' }} />
+                            <Globe className="h-10 w-10 text-muted-foreground" />
                           </div>
                         )}
-                        {/* Subtle gradient overlay for readability */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                       </div>
 
                       {/* Card content - always visible */}
                       <div className="p-4">
-                        <h3 className="font-semibold text-[color:var(--color-ink)] text-base truncate mb-1.5">
+                        <h3 className="font-heading font-semibold text-foreground text-base truncate mb-1.5">
                           {album.title}
                         </h3>
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5 text-[color:var(--color-muted-warm)] text-sm min-w-0">
+                          <div className="flex items-center gap-1.5 text-muted-foreground text-sm min-w-0">
                             {album.country_code && (
                               <span className="text-base leading-none flex-shrink-0">
                                 {countryCodeToFlag(album.country_code)}
@@ -366,7 +362,7 @@ export function PublicProfileContent({
                             )}
                           </div>
                           {album.date_start && (
-                            <span className="text-xs text-[color:var(--color-muted-warm)] flex items-center gap-1 flex-shrink-0">
+                            <span className="text-xs text-muted-foreground font-mono tracking-wide flex items-center gap-1 flex-shrink-0">
                               <CalendarDays className="h-3 w-3" />
                               {formatDate(album.date_start)}
                             </span>
@@ -380,9 +376,11 @@ export function PublicProfileContent({
             </div>
           </motion.div>
         ) : (
-          <div className="al-card text-center py-16 mb-10">
-            <Globe className="h-12 w-12 mx-auto mb-3" style={{ color: 'var(--color-muted-warm)' }} />
-            <p className="text-[color:var(--color-muted-warm)]">No public adventures yet</p>
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center mb-10">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+              <Globe className="h-6 w-6" />
+            </div>
+            <p className="text-sm text-muted-foreground">No public adventures yet</p>
           </div>
         )}
 
@@ -394,32 +392,24 @@ export function PublicProfileContent({
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.45 }}
         >
-          <div className="relative overflow-hidden rounded-2xl shadow-lg">
-            {/* Forest gradient backdrop */}
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to bottom right, var(--color-forest-deep), var(--color-forest), var(--color-forest-deep))' }}
-            />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
-            <div className="relative px-6 py-10 md:px-10 md:py-12 text-center">
-              <span className="al-eyebrow text-white/70 mb-3 block">Adventure Log</span>
-              <h2 className="al-display text-2xl md:text-3xl text-white mb-3">
-                Map your own journey
-              </h2>
-              <p className="text-white/85 max-w-md mx-auto leading-relaxed mb-7">
-                Turn your trips into a living map, build your travel passport, and share
-                your adventures — free, forever.
-              </p>
-              <Link href="/sign-up">
-                <Button className="cursor-pointer bg-white font-semibold px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white" style={{ color: 'var(--color-forest-deep)' }}>
-                  Create your free profile
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-              <p className="text-white/70 text-xs mt-4">
-                No credit card · Set up in under a minute
-              </p>
-            </div>
+          <div className="rounded-2xl border border-border bg-card px-6 py-10 md:px-10 md:py-12 text-center">
+            <span className="al-eyebrow mb-3 block">Adventure Log</span>
+            <h2 className="al-display text-2xl md:text-3xl mb-3">
+              Map your own journey
+            </h2>
+            <p className="text-sm md:text-[15px] text-muted-foreground max-w-md mx-auto leading-relaxed mb-7">
+              Turn your trips into a living map, build your travel passport, and share
+              your adventures — free, forever.
+            </p>
+            <Link href="/sign-up">
+              <Button variant="coral" className="cursor-pointer px-8">
+                Create your free profile
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+            <p className="text-muted-foreground text-xs mt-4">
+              No credit card · Set up in under a minute
+            </p>
           </div>
         </motion.div>
 
@@ -435,12 +425,12 @@ export function PublicProfileContent({
               <Share2 className="h-4 w-4" />
               Share This Profile
             </h2>
-            <div className="al-card overflow-hidden">
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
               {/* One-tap share — primary action */}
-              <div className="p-5 border-b border-[color:var(--color-line-warm)]">
+              <div className="p-5 border-b border-border">
                 <Button
                   onClick={handleShareProfile}
-                  className="al-btn-coral cursor-pointer w-full gap-2 py-6 text-base font-semibold transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
+                  className="cursor-pointer w-full gap-2 py-6 text-base font-semibold"
                 >
                   <Share2 className="h-5 w-5" />
                   Share {displayName}&apos;s travels
@@ -448,23 +438,23 @@ export function PublicProfileContent({
               </div>
 
               {/* Copy profile URL */}
-              <div className="p-5 border-b border-[color:var(--color-line-warm)]">
-                <p className="text-sm font-medium text-[color:var(--color-ink-soft)] mb-3">
+              <div className="p-5 border-b border-border">
+                <p className="text-sm font-medium text-foreground mb-3">
                   Profile Link
                 </p>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 rounded-xl px-4 py-2.5 text-sm text-[color:var(--color-muted-warm)] truncate font-mono" style={{ background: 'var(--color-ivory-alt)' }}>
+                  <div className="flex-1 rounded-xl bg-muted/50 px-4 py-2.5 text-sm text-muted-foreground truncate font-mono">
                     {profileUrl}
                   </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
+                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0"
                     onClick={() => copyToClipboard(profileUrl, 'url')}
                   >
                     {copiedUrl ? (
                       <>
-                        <Check className="h-4 w-4" style={{ color: 'var(--color-forest)' }} />
+                        <Check className="h-4 w-4 text-primary" />
                         Copied
                       </>
                     ) : (
@@ -479,25 +469,25 @@ export function PublicProfileContent({
 
               {/* Embed code */}
               <div className="p-5">
-                <p className="text-sm font-medium text-[color:var(--color-ink-soft)] mb-1">
+                <p className="text-sm font-medium text-foreground mb-1">
                   Embed on Your Website
                 </p>
-                <p className="text-xs text-[color:var(--color-muted-warm)] mb-3">
+                <p className="text-xs text-muted-foreground mb-3">
                   Add an interactive travel map to your blog or portfolio
                 </p>
                 <div className="flex items-start gap-2">
-                  <div className="flex-1 rounded-xl px-4 py-2.5 text-xs text-[color:var(--color-muted-warm)] font-mono break-all leading-relaxed max-h-20 overflow-auto" style={{ background: 'var(--color-ivory-alt)' }}>
+                  <div className="flex-1 rounded-xl bg-muted/50 px-4 py-2.5 text-xs text-muted-foreground font-mono break-all leading-relaxed max-h-20 overflow-auto">
                     {embedCode}
                   </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 mt-0.5 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
+                    className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 mt-0.5"
                     onClick={() => copyToClipboard(embedCode, 'embed')}
                   >
                     {copiedEmbed ? (
                       <>
-                        <Check className="h-4 w-4" style={{ color: 'var(--color-forest)' }} />
+                        <Check className="h-4 w-4 text-primary" />
                         Copied
                       </>
                     ) : (
@@ -517,7 +507,7 @@ export function PublicProfileContent({
         <div className="mb-10 flex justify-center">
           <button
             onClick={() => setReportOpen(true)}
-            className="cursor-pointer flex items-center gap-1.5 text-xs text-[color:var(--color-muted-warm)] hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200 py-2 px-3 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none min-h-[44px]"
+            className="cursor-pointer flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors duration-200 py-2 px-3 rounded-xl hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none min-h-[44px]"
           >
             <Flag className="h-3 w-3" />
             Report this profile
@@ -533,23 +523,22 @@ export function PublicProfileContent({
 
         {/* ───────── Footer ───────── */}
         <motion.footer
-          className="text-center py-10 border-t border-[color:var(--color-line-warm)]"
+          className="text-center py-10 border-t border-border"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.8 }}
         >
-          <p className="text-sm text-[color:var(--color-muted-warm)] mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             Powered by{' '}
             <Link
               href="/"
-              className="font-semibold transition-colors"
-              style={{ color: 'var(--color-forest)' }}
+              className="font-semibold text-primary transition-colors"
             >
               Adventure Log
             </Link>
           </p>
           <Link href="/sign-up">
-            <Button className="al-btn-coral cursor-pointer px-8 py-2.5 transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
+            <Button className="cursor-pointer px-8">
               Start Your Adventure Log
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

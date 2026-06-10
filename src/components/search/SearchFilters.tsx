@@ -36,41 +36,37 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
   return (
     <>
       {/* Search Input */}
-      <Card className="border-none shadow-md">
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-            <Input
-              type="text"
-              placeholder="Search adventures, places, travelers..."
-              value={filters.query}
-              onChange={(e) => updateFilter('query', e.target.value)}
-              className="pl-11 pr-10 h-12 text-base"
-            />
-            {filters.query && (
-              <button
-                onClick={() => updateFilter('query', '')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search adventures, places, travelers..."
+          value={filters.query}
+          onChange={(e) => updateFilter('query', e.target.value)}
+          className="pl-10 pr-10 h-12 text-base"
+        />
+        {filters.query && (
+          <button
+            onClick={() => updateFilter('query', '')}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
+      </div>
 
       {/* Filters Section */}
-      <Card className="border-none shadow-md">
-        <CardContent className="p-3 sm:p-4">
+      <Card className="py-0">
+        <CardContent className="p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-3 sm:mb-4">
-            <SlidersHorizontal className="h-4 w-4 text-stone-600" />
-            <h3 className="font-medium text-stone-900">Filters</h3>
+            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+            <h3 className="font-heading font-semibold text-foreground">Filters</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Content Type */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">Content Type</label>
+              <label className="text-sm font-medium text-foreground">Content Type</label>
               <Select
                 value={filters.contentType}
                 onValueChange={(value) => updateFilter('contentType', value)}
@@ -103,7 +99,7 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
 
             {/* Sort By */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">Sort By</label>
+              <label className="text-sm font-medium text-foreground">Sort By</label>
               <Select
                 value={filters.sortBy}
                 onValueChange={(value) => updateFilter('sortBy', value)}
@@ -138,7 +134,7 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
 
             {/* Visibility Filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">Visibility</label>
+              <label className="text-sm font-medium text-foreground">Visibility</label>
               <Select
                 value={filters.visibility}
                 onValueChange={(value) => updateFilter('visibility', value)}
@@ -177,9 +173,9 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
 
             {/* Date Range From */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">From Date</label>
+              <label className="text-sm font-medium text-foreground">From Date</label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="date"
                   value={filters.dateRange.from || ''}
@@ -191,9 +187,9 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
 
             {/* Date Range To */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-700">To Date</label>
+              <label className="text-sm font-medium text-foreground">To Date</label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="date"
                   value={filters.dateRange.to || ''}
@@ -206,14 +202,13 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
 
           {/* Active Filters Display */}
           {(filters.dateRange.from || filters.dateRange.to || filters.locations.length > 0 || filters.visibility !== 'public' || filters.sortBy !== 'relevance') && (
-            <div className="mt-4 pt-4 border-t border-stone-200">
+            <div className="mt-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-stone-600">Active filters:</p>
+                <p className="text-sm text-muted-foreground">Active filters:</p>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={clearFilters}
-                  className="text-olive-600 hover:text-olive-700 hover:bg-olive-50"
                 >
                   Clear all
                 </Button>
@@ -224,7 +219,7 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
                     From: {new Date(filters.dateRange.from).toLocaleDateString()}
                     <button
                       onClick={() => updateFilter('dateRange', { ...filters.dateRange, from: undefined })}
-                      className="ml-1 hover:text-red-600"
+                      className="ml-1 transition-colors hover:text-destructive"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -235,7 +230,7 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
                     To: {new Date(filters.dateRange.to).toLocaleDateString()}
                     <button
                       onClick={() => updateFilter('dateRange', { ...filters.dateRange, to: undefined })}
-                      className="ml-1 hover:text-red-600"
+                      className="ml-1 transition-colors hover:text-destructive"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -247,7 +242,7 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
                     {location}
                     <button
                       onClick={() => removeLocationFilter(location)}
-                      className="ml-1 hover:text-red-600"
+                      className="ml-1 transition-colors hover:text-destructive"
                     >
                       <X className="h-3 w-3" />
                     </button>

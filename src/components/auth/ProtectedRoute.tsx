@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from './AuthProvider'
 import { MotionReveal } from '@/components/animations/MotionList'
+import { Button } from '@/components/ui/button'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -92,36 +93,29 @@ interface ProvisionPanelProps {
 
 function ProvisionPanel({ eyebrow, title, body, onRetry }: ProvisionPanelProps) {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-6"
-      style={{ background: 'var(--color-ivory)', color: 'var(--color-ink)' }}
-    >
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-6">
       <MotionReveal>
-        <div className="max-w-md w-full text-center space-y-5">
+        <div className="max-w-md w-full text-center space-y-4">
           <p className="al-eyebrow">{eyebrow}</p>
-          <h1 className="font-heading al-display text-3xl md:text-4xl leading-[1.05]">
+          <h1 className="al-display text-3xl md:text-4xl">
             {title}
           </h1>
-          <p className="al-body" style={{ color: 'var(--color-muted-warm)' }}>
+          <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground">
             {body}
           </p>
           <div className="pt-2">
-            <button
+            <Button
               type="button"
+              variant="coral"
+              size="pill"
               onClick={() => {
                 void onRetry()
               }}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold transition-shadow active:scale-[0.98] hover:shadow-[0_10px_28px_rgba(226,85,58,0.45)]"
-              style={{
-                background: 'var(--color-coral)',
-                color: '#fff',
-                boxShadow: '0 6px 18px rgba(226,85,58,0.35)',
-              }}
             >
               Try again
-            </button>
+            </Button>
           </div>
-          <p className="al-caption pt-1" style={{ color: 'var(--color-muted-warm)' }}>
+          <p className="text-xs text-muted-foreground pt-1">
             If this keeps happening, please contact support.
           </p>
         </div>

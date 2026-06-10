@@ -18,36 +18,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { transitions } from '@/lib/animations/spring-configs'
 
-// Floating particle animation
-function FloatingParticles({ count = 6 }: { count?: number }) {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {Array.from({ length: count }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 rounded-full bg-olive-400/30"
-          initial={{
-            x: `${Math.random() * 100}%`,
-            y: `${Math.random() * 100}%`,
-            scale: Math.random() * 0.5 + 0.5,
-          }}
-          animate={{
-            y: [null, `${Math.random() * 40 - 20}%`],
-            x: [null, `${Math.random() * 20 - 10}%`],
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 4 + Math.random() * 2,
-            repeat: Infinity,
-            repeatType: 'reverse',
-            delay: Math.random() * 2,
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
 interface EnhancedEmptyStateProps {
   icon?: React.ReactNode
   title: string
@@ -64,6 +34,7 @@ interface EnhancedEmptyStateProps {
   }
   variant?: 'default' | 'minimal' | 'card' | 'centered'
   className?: string
+  /** Kept for API compatibility — decorative particles were retired in the calm redesign. */
   showParticles?: boolean
 }
 
@@ -75,9 +46,8 @@ export function EnhancedEmptyState({
   secondaryAction,
   variant = 'default',
   className,
-  showParticles = true,
 }: EnhancedEmptyStateProps) {
-  const iconElement = icon || <Compass className="h-12 w-12" />
+  const iconElement = icon || <Compass className="h-6 w-6" />
 
   if (variant === 'minimal') {
     return (
@@ -87,14 +57,13 @@ export function EnhancedEmptyState({
         animate={{ opacity: 1, y: 0 }}
         transition={transitions.natural}
       >
-        <div className="text-stone-300 dark:text-stone-600 mb-3">{iconElement}</div>
-        <p className="text-stone-500 dark:text-stone-400 text-sm">{title}</p>
+        <div className="mb-3 text-muted-foreground/60">{iconElement}</div>
+        <p className="text-sm text-muted-foreground">{title}</p>
+        {description && (
+          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+        )}
         {action && (
-          <Button
-            variant="link"
-            className="mt-2 text-olive-600"
-            onClick={action.onClick}
-          >
+          <Button variant="link" className="mt-2" onClick={action.onClick}>
             {action.label}
           </Button>
         )}
@@ -106,31 +75,25 @@ export function EnhancedEmptyState({
     return (
       <motion.div
         className={cn(
-          'bg-white dark:bg-[#1B170E] rounded-2xl border border-stone-100 dark:border-white/[0.08] shadow-sm p-8',
+          'rounded-2xl border border-border bg-card p-8',
           className
         )}
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={transitions.natural}
       >
         <div className="flex flex-col items-center text-center">
-          <motion.div
-            className="w-20 h-20 bg-gradient-to-br from-olive-50 to-olive-50 rounded-full flex items-center justify-center text-olive-500 mb-4"
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 4, repeat: Infinity }}
-          >
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
             {iconElement}
-          </motion.div>
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">{title}</h3>
+          </div>
+          <h3 className="font-heading text-lg font-semibold text-foreground">{title}</h3>
           {description && (
-            <p className="text-stone-500 dark:text-stone-400 text-sm max-w-xs mb-4">{description}</p>
+            <p className="mt-1 max-w-xs text-sm text-muted-foreground">{description}</p>
           )}
           {action && (
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button onClick={action.onClick} className="bg-olive-600 hover:bg-olive-700">
-                {action.label}
-              </Button>
-            </motion.div>
+            <Button onClick={action.onClick} className="mt-5">
+              {action.label}
+            </Button>
           )}
         </div>
       </motion.div>
@@ -140,84 +103,37 @@ export function EnhancedEmptyState({
   return (
     <motion.div
       className={cn(
-        'relative flex flex-col items-center justify-center py-16 px-6',
+        'flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center',
         variant === 'centered' && 'min-h-[400px]',
         className
       )}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      {showParticles && <FloatingParticles />}
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+        {iconElement}
+      </div>
 
-      {/* Main icon with animation */}
-      <motion.div
-        className="relative mb-6"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1, ...transitions.natural }}
-      >
-        <div className="w-24 h-24 bg-gradient-to-br from-olive-100 via-olive-50 to-olive-100 rounded-full flex items-center justify-center">
-          <motion.div
-            className="text-olive-500"
-            animate={{
-              y: [0, -5, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            {iconElement}
-          </motion.div>
-        </div>
+      <h3 className="font-heading text-lg font-semibold text-foreground">{title}</h3>
+      {description && (
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
+      )}
 
-        {/* Decorative rings */}
-        <div className="absolute inset-0 rounded-full border border-olive-200/50 animate-ping" style={{ animationDuration: '3s' }} />
-        <div className="absolute -inset-2 rounded-full border border-olive-100/30" />
-      </motion.div>
-
-      {/* Text content */}
-      <motion.div
-        className="text-center max-w-md"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <h3 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2">{title}</h3>
-        {description && (
-          <p className="text-stone-500 dark:text-stone-400 mb-6">{description}</p>
-        )}
-      </motion.div>
-
-      {/* Actions */}
       {(action || secondaryAction) && (
-        <motion.div
-          className="flex flex-wrap items-center justify-center gap-3"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
           {action && (
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                onClick={action.onClick}
-                className="bg-olive-600 hover:bg-olive-700 shadow-lg shadow-olive-600/20"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {action.label}
-              </Button>
-            </motion.div>
+            <Button onClick={action.onClick}>
+              <Plus className="mr-2 h-4 w-4" />
+              {action.label}
+            </Button>
           )}
           {secondaryAction && (
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button variant="outline" onClick={secondaryAction.onClick}>
-                {secondaryAction.label}
-              </Button>
-            </motion.div>
+            <Button variant="outline" onClick={secondaryAction.onClick}>
+              {secondaryAction.label}
+            </Button>
           )}
-        </motion.div>
+        </div>
       )}
     </motion.div>
   )
@@ -234,7 +150,7 @@ export function NoAlbumsEmptyState({
 }) {
   return (
     <EnhancedEmptyState
-      icon={<Camera className="h-12 w-12" />}
+      icon={<Camera className="h-6 w-6" />}
       title="No Adventures Yet"
       description="Start documenting your travels by creating your first album."
       action={{ label: 'Create Album', onClick: onCreateAlbum }}
@@ -249,7 +165,7 @@ export function NoPhotosEmptyState({
 }) {
   return (
     <EnhancedEmptyState
-      icon={<ImageIcon className="h-12 w-12" />}
+      icon={<ImageIcon className="h-6 w-6" />}
       title="No Photos Yet"
       description="Upload some photos to bring your adventure to life."
       action={{ label: 'Upload Photos', onClick: onUploadPhotos }}
@@ -267,7 +183,7 @@ export function NoSearchResultsEmptyState({
 }) {
   return (
     <EnhancedEmptyState
-      icon={<Search className="h-12 w-12" />}
+      icon={<Search className="h-6 w-6" />}
       title="No Results Found"
       description={query ? `We couldn't find anything matching "${query}"` : 'Try adjusting your search or filters'}
       action={{ label: 'Clear Search', onClick: onClear }}
@@ -279,7 +195,7 @@ export function NoSearchResultsEmptyState({
 export function NoFollowersEmptyState() {
   return (
     <EnhancedEmptyState
-      icon={<Users className="h-12 w-12" />}
+      icon={<Users className="h-6 w-6" />}
       title="No Followers Yet"
       description="Share your adventures to attract followers!"
       variant="minimal"
@@ -294,7 +210,7 @@ export function NoFeedEmptyState({
 }) {
   return (
     <EnhancedEmptyState
-      icon={<Compass className="h-12 w-12" />}
+      icon={<Compass className="h-6 w-6" />}
       title="Your Feed is Empty"
       description="Follow other travelers to see their adventures here."
       action={{ label: 'Explore', onClick: onExplore }}
@@ -306,7 +222,7 @@ export function NoFeedEmptyState({
 export function NoNotificationsEmptyState() {
   return (
     <EnhancedEmptyState
-      icon={<Bell className="h-12 w-12" />}
+      icon={<Bell className="h-6 w-6" />}
       title="All Caught Up!"
       description="You have no new notifications."
       variant="minimal"
@@ -318,7 +234,7 @@ export function NoNotificationsEmptyState() {
 export function NoCommentsEmptyState() {
   return (
     <EnhancedEmptyState
-      icon={<MessageCircle className="h-10 w-10" />}
+      icon={<MessageCircle className="h-6 w-6" />}
       title="No Comments Yet"
       description="Be the first to leave a comment!"
       variant="minimal"
@@ -334,7 +250,7 @@ export function NoSavedEmptyState({
 }) {
   return (
     <EnhancedEmptyState
-      icon={<Bookmark className="h-12 w-12" />}
+      icon={<Bookmark className="h-6 w-6" />}
       title="Nothing Saved"
       description="Save albums you want to revisit later."
       action={{ label: 'Explore Albums', onClick: onExplore }}
@@ -349,7 +265,7 @@ export function NoLocationEmptyState({
 }) {
   return (
     <EnhancedEmptyState
-      icon={<MapPin className="h-12 w-12" />}
+      icon={<MapPin className="h-6 w-6" />}
       title="Location Not Available"
       description="Enable location to see nearby adventures."
       action={{ label: 'Enable Location', onClick: onEnableLocation }}
@@ -361,7 +277,7 @@ export function NoLocationEmptyState({
 export function GlobeEmptyState() {
   return (
     <EnhancedEmptyState
-      icon={<Globe className="h-16 w-16" />}
+      icon={<Globe className="h-7 w-7" />}
       title="Your World Awaits"
       description="Create albums with locations to see them on your personal globe."
       variant="centered"

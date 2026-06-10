@@ -37,7 +37,7 @@ function SuccessBurst({ onComplete }: { onComplete: () => void }) {
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-olive-400 to-olive-400"
+          className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-primary"
           initial={{ x: '-50%', y: '-50%', scale: 1, opacity: 1 }}
           animate={{
             x: `calc(-50% + ${Math.cos(particle.angle) * 24}px)`,
@@ -54,7 +54,7 @@ function SuccessBurst({ onComplete }: { onComplete: () => void }) {
         animate={{ scale: 1.5, opacity: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Sparkles className="w-6 h-6 text-olive-400" />
+        <Sparkles className="w-6 h-6 text-primary" />
       </motion.div>
     </div>
   )
@@ -134,32 +134,32 @@ export function FollowButton({
         return {
           icon: UserCheck,
           text: 'Following',
-          className: 'bg-gradient-to-r from-stone-100 dark:from-white/[0.06] to-stone-50 dark:to-white/[0.04] hover:from-stone-200 dark:hover:from-white/[0.06] hover:to-stone-100 dark:hover:to-white/[0.06] text-stone-900 dark:text-stone-100 border-stone-200 dark:border-white/[0.10]',
-          iconColor: 'text-green-600',
+          className: 'bg-muted text-foreground border-border hover:bg-muted/70',
+          iconColor: 'text-primary',
           showIcon: true
         }
       case 'pending':
         return {
           icon: Clock,
           text: 'Requested',
-          className: 'bg-gradient-to-r from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20 hover:from-olive-100 dark:hover:from-olive-950/30 hover:to-olive-100 dark:hover:to-olive-950/30 text-olive-800 dark:text-olive-300 border-olive-200 dark:border-white/[0.08]',
-          iconColor: 'text-olive-600',
+          className: 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/15',
+          iconColor: 'text-primary',
           showIcon: true
         }
       case 'blocked':
         return {
           icon: UserX,
           text: 'Blocked',
-          className: 'bg-stone-100 dark:bg-white/[0.06] text-stone-400 dark:text-stone-500 cursor-not-allowed',
-          iconColor: 'text-stone-400 dark:text-stone-500',
+          className: 'bg-muted text-muted-foreground border-border cursor-not-allowed',
+          iconColor: 'text-muted-foreground',
           showIcon: true
         }
       default:
         return {
           icon: UserPlus,
           text: 'Follow',
-          className: 'bg-gradient-to-r from-olive-600 to-olive-600 hover:from-olive-700 hover:to-olive-700 text-white font-semibold shadow-lg shadow-olive-500/25 hover:shadow-xl hover:shadow-olive-500/30',
-          iconColor: 'text-white',
+          className: 'bg-primary text-primary-foreground border-transparent font-semibold shadow-sm hover:bg-primary/90 hover:shadow-md',
+          iconColor: 'text-primary-foreground',
           showIcon: false
         }
     }
@@ -195,22 +195,13 @@ export function FollowButton({
         size={size}
         variant="outline"
         className={cn(
-          'rounded-xl font-medium transition-all duration-300 relative overflow-hidden',
+          'rounded-xl font-medium transition-all duration-200 relative overflow-hidden',
           'min-h-[44px] md:min-h-[36px]', // Larger touch target on mobile (44px recommended)
           buttonContent.className,
           isLoading && 'opacity-60 cursor-wait',
           className
         )}
       >
-        {/* Shine effect on hover */}
-        {!prefersReducedMotion && followStatus === 'not_following' && (
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
-            whileHover={{ translateX: '200%' }}
-            transition={{ duration: 0.6 }}
-          />
-        )}
-
         <span className="relative flex items-center gap-2">
           <AnimatePresence mode="wait">
             {isLoading ? (

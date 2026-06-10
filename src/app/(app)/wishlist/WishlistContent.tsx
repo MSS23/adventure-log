@@ -4,7 +4,6 @@ import { useState, useMemo, useCallback } from 'react'
 import { useWishlist, type WishlistItem, type TravelPartner } from '@/lib/hooks/useWishlist'
 import { type LocationData } from '@/lib/utils/locationUtils'
 import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
-import { GlassCard } from '@/components/ui/glass-card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -38,18 +37,18 @@ type Priority = 'low' | 'medium' | 'high'
 const priorityConfig: Record<Priority, { label: string; color: string; dot: string }> = {
   low: {
     label: 'Low',
-    color: 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400',
-    dot: 'bg-stone-400',
+    color: 'bg-muted text-muted-foreground border border-border',
+    dot: 'bg-muted-foreground/60',
   },
   medium: {
     label: 'Medium',
-    color: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-    dot: 'bg-amber-400',
+    color: 'bg-[color:var(--color-gold)]/15 text-[color:var(--color-gold)] border border-[color:var(--color-gold)]/25',
+    dot: 'bg-[color:var(--color-gold)]',
   },
   high: {
     label: 'High',
-    color: 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
-    dot: 'bg-rose-400',
+    color: 'bg-accent/10 text-accent border border-accent/20',
+    dot: 'bg-accent',
   },
 }
 
@@ -277,7 +276,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
   const totalBucketList = items?.filter((i) => !i.completed_at).length ?? 0
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto w-full max-w-4xl">
       {/* ── Walkthrough Tour ───────────────────────────────── */}
       <WalkthroughTour
         tourId="wishlist-tour"
@@ -303,17 +302,17 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <p className="al-eyebrow mb-1">Bucket list</p>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <header className="space-y-1">
+              <p className="al-eyebrow">Bucket list</p>
               <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
-                <Star className="h-6 w-6" style={{ color: 'var(--color-coral)' }} />
+                <Star className="h-6 w-6 text-accent" />
                 Wishlist
               </h1>
-              <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
+              <p className="text-sm text-muted-foreground">
                 {totalBucketList} destination{totalBucketList !== 1 ? 's' : ''} on your bucket list.
               </p>
-            </div>
+            </header>
 
             <div className="flex items-center gap-2">
               {/* Help / restart tour button */}
@@ -323,7 +322,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                 onClick={() => {
                   document.getElementById('tour-restart-trigger')?.click()
                 }}
-                className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-stone-400 hover:text-olive-600 dark:text-stone-500 dark:hover:text-olive-400 cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
+                className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl cursor-pointer"
                 title="Take a tour"
               >
                 <HelpCircle className="h-5 w-5" />
@@ -331,13 +330,9 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
 
               <Button
                 data-tour-step="add-destination-btn"
+                variant={showAddForm ? 'secondary' : 'coral'}
                 onClick={() => setShowAddForm(!showAddForm)}
-                className={cn(
-                  'gap-2 shrink-0 rounded-full',
-                  showAddForm
-                    ? 'bg-[color:var(--color-ivory-alt)] text-[color:var(--color-ink-soft)] hover:bg-[color:var(--color-line-warm)]'
-                    : 'al-btn-coral'
-                )}
+                className="gap-2 shrink-0 rounded-full"
               >
                 {showAddForm ? (
                   <>
@@ -366,11 +361,11 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="overflow-hidden"
             >
-              <GlassCard variant="featured" padding="lg">
-                <div className="space-y-5">
-                  <div className="flex items-center gap-2 text-olive-700 dark:text-olive-400">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-primary">
                     <Sparkles className="h-4 w-4" />
-                    <span className="text-sm font-semibold uppercase tracking-wider">
+                    <span className="al-eyebrow text-primary">
                       New Destination
                     </span>
                   </div>
@@ -385,8 +380,8 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
 
                   {/* Notes */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-olive-500" />
+                    <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-primary" />
                       Notes (optional)
                     </label>
                     <Textarea
@@ -399,7 +394,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
 
                   {/* Priority Selector */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                    <label className="text-sm font-medium text-foreground">
                       Priority
                     </label>
                     <div className="flex gap-2">
@@ -408,10 +403,10 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                           key={p}
                           onClick={() => setPriority(p)}
                           className={cn(
-                            'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none',
+                            'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                             priority === p
-                              ? 'bg-[color:var(--color-coral-tint)] text-[color:var(--color-coral)] border-[color:var(--color-coral)]/40 shadow-sm'
-                              : 'bg-[color:var(--card)] text-[color:var(--color-muted-warm)] border-[color:var(--color-line-warm)] hover:border-[color:var(--color-coral)]/30'
+                              ? 'bg-primary/10 text-primary border-primary/40'
+                              : 'bg-card text-muted-foreground border-border hover:border-primary/30'
                           )}
                         >
                           <span
@@ -427,7 +422,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                   <Button
                     onClick={handleAddItem}
                     disabled={!location || isAdding}
-                    className="al-btn-coral w-full gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full gap-2"
                   >
                     {isAdding ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -437,7 +432,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                     Add to Wishlist
                   </Button>
                 </div>
-              </GlassCard>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -459,24 +454,19 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
               key={key}
               onClick={() => setActiveFilter(key)}
               className={cn(
-                'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none',
+                'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                 activeFilter === key
-                  ? 'text-white shadow-sm'
-                  : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted'
               )}
-              style={
-                activeFilter === key
-                  ? { background: 'var(--color-coral)' }
-                  : { background: 'var(--card)', border: '1px solid var(--color-line-warm)' }
-              }
             >
               {label}
               <span
                 className={cn(
                   'ml-2 px-1.5 py-0.5 text-xs rounded-full inline-block',
                   activeFilter === key
-                    ? 'bg-white/20 text-white'
-                    : 'bg-[color:var(--color-ivory-alt)] text-[color:var(--color-muted-warm)]'
+                    ? 'bg-primary-foreground/20 text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 )}
               >
                 {counts[key]}
@@ -521,13 +511,12 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                       delay: index * 0.06,
                     }}
                   >
-                    <GlassCard
-                      variant={item.completed_at ? 'solid' : 'default'}
-                      hover={item.completed_at ? 'none' : 'lift'}
-                      padding="none"
+                    <div
                       className={cn(
-                        'group relative',
-                        item.completed_at && 'opacity-60'
+                        'group relative rounded-2xl border border-border bg-card transition-all duration-200',
+                        item.completed_at
+                          ? 'opacity-60'
+                          : 'hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5'
                       )}
                     >
                       <div className="p-5">
@@ -542,8 +531,8 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                               )}
                               <h3
                                 className={cn(
-                                  'font-semibold text-stone-900 dark:text-white truncate',
-                                  item.completed_at && 'line-through text-stone-500 dark:text-stone-500'
+                                  'font-heading font-semibold text-foreground truncate',
+                                  item.completed_at && 'line-through text-muted-foreground'
                                 )}
                               >
                                 {item.location_name}
@@ -552,7 +541,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                             {item.notes && (
                               <p
                                 className={cn(
-                                  'text-sm text-stone-500 dark:text-stone-400 line-clamp-2 mt-1',
+                                  'text-sm text-muted-foreground line-clamp-2 mt-1',
                                   item.completed_at && 'line-through'
                                 )}
                               >
@@ -562,7 +551,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                           </div>
                           <span
                             className={cn(
-                              'shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5',
+                              'shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
                               priorityConfig[(item.priority as Priority) || 'medium']?.color
                             )}
                           >
@@ -579,7 +568,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                         {/* Source badge */}
                         {item.source === 'shared' && item.shared_by?.username && (
                           <div className="mb-3">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-olive-50 dark:bg-olive-900/20 text-olive-700 dark:text-olive-400 text-xs font-medium">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                               <ArrowUpRight className="h-3 w-3" />
                               Suggested by @{item.shared_by?.username}
                             </span>
@@ -587,8 +576,8 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                         )}
 
                         {/* Bottom: date + actions */}
-                        <div className="flex items-center justify-between pt-3 border-t border-stone-100 dark:border-white/[0.06]">
-                          <span className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
+                        <div className="flex items-center justify-between pt-3 border-t border-border">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1 font-mono tracking-wide">
                             <Calendar className="h-3 w-3" />
                             {new Date(item.created_at).toLocaleDateString('en-US', {
                               month: 'short',
@@ -602,7 +591,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleMarkCompleted(item.id)}
-                                className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-lg text-olive-600 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
+                                className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-primary hover:bg-primary/10 hover:text-primary cursor-pointer"
                                 title="Mark as visited (creates an album)"
                               >
                                 <Check className="h-4 w-4" />
@@ -612,7 +601,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                               variant="ghost"
                               size="sm"
                               onClick={() => handleRemoveItem(item.id)}
-                              className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-lg text-stone-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
+                              className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                               title="Remove"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -620,7 +609,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                           </div>
                         </div>
                       </div>
-                    </GlassCard>
+                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -637,15 +626,13 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
             transition={{ delay: 0.3 }}
             className="space-y-5 pt-4"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-olive-100 to-olive-200/60 dark:from-olive-900/40 dark:to-olive-800/20">
-                <Users className="h-5 w-5 text-olive-600 dark:text-olive-400" />
-              </div>
+            <div className="flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-xl font-heading font-semibold text-stone-900 dark:text-white">
+                <p className="al-eyebrow mb-0.5">Friends</p>
+                <h2 className="al-display text-xl md:text-2xl">
                   Travel Partners&apos; Wishlists
                 </h2>
-                <p className="text-sm text-stone-500 dark:text-stone-400">
+                <p className="text-sm text-muted-foreground mt-1">
                   See where your friends want to go
                 </p>
               </div>
@@ -658,21 +645,21 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                   key={partner.id}
                   onClick={() => handleExpandPartner(partner.id)}
                   className={cn(
-                    'flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-w-[44px] min-h-[44px]',
+                    'flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none min-w-[44px] min-h-[44px]',
                     expandedPartner === partner.id
-                      ? 'bg-olive-50 dark:bg-olive-900/20 ring-2 ring-olive-300 dark:ring-olive-700'
-                      : 'hover:bg-stone-50 dark:hover:bg-stone-800/50'
+                      ? 'bg-primary/10 ring-2 ring-primary/40'
+                      : 'hover:bg-muted'
                   )}
                 >
-                  <Avatar className="h-12 w-12 ring-2 ring-olive-200 dark:ring-olive-800 ring-offset-2 ring-offset-white dark:ring-offset-stone-950">
+                  <Avatar className="h-12 w-12 ring-2 ring-border ring-offset-2 ring-offset-background">
                     <AvatarImage src={partner.avatar_url || undefined} alt={partner.display_name || partner.username} />
-                    <AvatarFallback className="bg-olive-100 dark:bg-olive-900 text-olive-700 dark:text-olive-300 text-sm font-semibold">
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                       {(partner.display_name || partner.username || '?')
                         .charAt(0)
                         .toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-xs font-medium text-stone-600 dark:text-stone-400 max-w-[64px] truncate">
+                  <span className="text-xs font-medium text-muted-foreground max-w-[64px] truncate">
                     {partner.display_name || partner.username}
                   </span>
                 </button>
@@ -697,7 +684,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                     if (!partner) return null
 
                     return (
-                      <GlassCard variant="solid" padding="lg">
+                      <div className="rounded-2xl border border-border bg-card p-6">
                         <div className="space-y-4">
                           {/* Partner header */}
                           <div className="flex items-center justify-between flex-wrap gap-3">
@@ -707,17 +694,17 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                   src={partner.avatar_url || undefined}
                                   alt={partner.display_name || partner.username}
                                 />
-                                <AvatarFallback className="bg-olive-100 dark:bg-olive-900 text-olive-700 dark:text-olive-300 text-xs font-semibold">
+                                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                                   {(partner.display_name || partner.username || '?')
                                     .charAt(0)
                                     .toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="font-semibold text-stone-900 dark:text-white text-sm">
+                                <p className="font-semibold text-foreground text-sm">
                                   @{partner.username}
                                 </p>
-                                <p className="text-xs text-stone-400 dark:text-stone-500">
+                                <p className="text-xs text-muted-foreground">
                                   {wishlistItems?.length ?? 0} destination{(wishlistItems?.length ?? 0) !== 1 ? 's' : ''}
                                 </p>
                               </div>
@@ -757,8 +744,8 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                 transition={{ duration: 0.25 }}
                                 className="overflow-hidden"
                               >
-                                <div className="p-4 rounded-xl bg-olive-50/50 dark:bg-olive-900/10 border border-olive-200/50 dark:border-olive-800/30 space-y-3">
-                                  <p className="text-sm font-medium text-olive-700 dark:text-olive-400">
+                                <div className="rounded-xl bg-muted/50 p-4 space-y-3">
+                                  <p className="text-sm font-medium text-foreground">
                                     Suggest a destination to @{partner.username}
                                   </p>
                                   <LocationSearchInput
@@ -789,7 +776,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                       size="sm"
                                       disabled={!suggestLocation || isSuggesting}
                                       onClick={() => handleSuggest(partner.id)}
-                                      className="al-btn-coral gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                                      className="gap-1.5"
                                     >
                                       {isSuggesting ? (
                                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -807,10 +794,10 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                           {/* Partner's wishlist items */}
                           {!wishlistItems ? (
                             <div className="flex justify-center py-6">
-                              <Loader2 className="h-5 w-5 animate-spin text-olive-500" />
+                              <Loader2 className="h-5 w-5 animate-spin text-primary" />
                             </div>
                           ) : wishlistItems.length === 0 ? (
-                            <p className="text-center py-6 text-sm text-stone-400 dark:text-stone-500">
+                            <p className="text-center py-6 text-sm text-muted-foreground">
                               No destinations on their wishlist yet
                             </p>
                           ) : (
@@ -822,10 +809,8 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: idx * 0.05 }}
                                   className={cn(
-                                    'flex items-center justify-between p-3 rounded-xl border transition-colors',
-                                    item.completed_at
-                                      ? 'bg-[color:var(--color-ivory-alt)] border-[color:var(--color-line-warm)] opacity-50'
-                                      : 'bg-[color:var(--card)] border-[color:var(--color-line-warm)] hover:border-[color:var(--color-coral)]/40'
+                                    'flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/60',
+                                    item.completed_at && 'opacity-50'
                                   )}
                                 >
                                   <div className="flex items-center gap-3 min-w-0">
@@ -837,14 +822,14 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                     <div className="min-w-0">
                                       <p
                                         className={cn(
-                                          'text-sm font-medium text-stone-800 dark:text-stone-200 truncate',
-                                          item.completed_at && 'line-through text-stone-400 dark:text-stone-600'
+                                          'text-sm font-medium text-foreground truncate',
+                                          item.completed_at && 'line-through text-muted-foreground'
                                         )}
                                       >
                                         {item.location_name}
                                       </p>
                                       {item.notes && (
-                                        <p className="text-xs text-stone-400 dark:text-stone-500 truncate">
+                                        <p className="text-xs text-muted-foreground truncate">
                                           {item.notes}
                                         </p>
                                       )}
@@ -852,9 +837,9 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                   </div>
                                   <span
                                     className={cn(
-                                      'shrink-0 px-2 py-0.5 rounded-md text-xs font-medium',
+                                      'shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
                                       item.completed_at
-                                        ? 'bg-olive-50 dark:bg-olive-900/20 text-olive-600 dark:text-olive-400'
+                                        ? 'bg-primary/10 text-primary border border-primary/20'
                                         : priorityConfig[(item.priority as Priority) || 'medium']?.color
                                     )}
                                   >
@@ -867,7 +852,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                             </div>
                           )}
                         </div>
-                      </GlassCard>
+                      </div>
                     )
                   })()}
                 </motion.div>

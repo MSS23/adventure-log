@@ -88,15 +88,15 @@ function ProfileQRCode({ url, size = 160 }: { url: string; size?: number }) {
     }).then(setQrDataUrl).catch(() => {})
   }, [url, size])
 
-  if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-stone-100 dark:bg-stone-800 rounded-xl animate-pulse" />
+  if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-muted rounded-xl animate-pulse" />
 
   return (
     <div className="relative">
-      <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#1B170E] p-3 shadow-lg border border-stone-200 dark:border-stone-700">
-        <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-lg" />
+      <div className="rounded-2xl overflow-hidden bg-card p-3 border border-border">
+        <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-xl" />
       </div>
-      <div className="absolute -bottom-2 -right-2 size-8 rounded-full bg-olive-600 flex items-center justify-center shadow-md ring-2 ring-white dark:ring-black">
-        <Compass className="size-3.5 text-white" />
+      <div className="absolute -bottom-2 -right-2 size-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-background">
+        <Compass className="size-3.5 text-primary-foreground" />
       </div>
     </div>
   )
@@ -113,30 +113,17 @@ function GlobeCoverageRing({ percentage, countriesCount }: { percentage: number;
   return (
     <div className="relative w-36 h-36">
       <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-        <circle cx="60" cy="60" r={radius} fill="none" strokeWidth="6" className="text-stone-200 dark:text-stone-800" stroke="currentColor" />
-        <defs>
-          <linearGradient id="pubProgressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#F2A179" />
-            <stop offset="50%" stopColor="#E2553A" />
-            <stop offset="100%" stopColor="#A2322B" />
-          </linearGradient>
-        </defs>
+        <circle cx="60" cy="60" r={radius} fill="none" strokeWidth="6" stroke="var(--muted)" />
         <circle
           cx="60" cy="60" r={radius} fill="none" strokeWidth="7"
-          stroke="url(#pubProgressGrad)" strokeLinecap="round"
+          stroke="var(--color-coral)" strokeLinecap="round"
           strokeDasharray={circumference} strokeDashoffset={offset}
           style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)' }}
         />
-        <circle
-          cx="60" cy="60" r={radius} fill="none" strokeWidth="7"
-          stroke="url(#pubProgressGrad)" strokeLinecap="round"
-          strokeDasharray={circumference} strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1)', filter: 'blur(6px)', opacity: 0.3 }}
-        />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-stone-900 dark:text-white tabular-nums">{percentage.toFixed(1)}%</span>
-        <span className="text-[9px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-[0.15em]">
+        <span className="al-stat-value text-2xl tabular-nums">{percentage.toFixed(1)}%</span>
+        <span className="font-mono text-[9px] font-semibold text-muted-foreground uppercase tracking-[0.15em]">
           {countriesCount} / 195
         </span>
       </div>
@@ -227,7 +214,7 @@ export function PublicPassportContent({
   const allContinents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
 
   return (
-    <div className="min-h-screen bg-[#FAF7F1] dark:bg-black">
+    <div className="min-h-screen bg-background">
       {/* ── Hero ── */}
       <motion.section
         className="relative overflow-hidden"
@@ -239,15 +226,15 @@ export function PublicPassportContent({
 
         <div className="relative max-w-3xl mx-auto px-6 pt-12 pb-20 text-center">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.1 }}>
-            <Avatar className="w-24 h-24 mx-auto mb-4 ring-2 ring-olive-400/20 shadow-2xl">
+            <Avatar className="w-24 h-24 mx-auto mb-4 ring-2 ring-white/20">
               <AvatarImage src={getPhotoUrl(user.avatar_url) || undefined} alt={displayName} />
               <AvatarFallback className="text-2xl bg-olive-700 text-white font-heading">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-1 font-heading">{displayName}</h1>
-            <p className="text-olive-400/70 mb-3 text-sm">@{user.username}</p>
+            <h1 className="font-heading text-3xl md:text-4xl font-semibold text-white mb-1">{displayName}</h1>
+            <p className="text-white/90 mb-3 text-sm">@{user.username}</p>
           </motion.div>
 
           <motion.div
@@ -256,14 +243,14 @@ export function PublicPassportContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Trophy className="h-4 w-4 text-olive-300" />
+            <Trophy className="h-4 w-4 text-white/90" />
             <span className="text-white font-semibold text-sm">{personality}</span>
           </motion.div>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 60" className="w-full h-auto block" preserveAspectRatio="none">
-            <path d="M0 60V20C240 0 480 0 720 10C960 20 1200 40 1440 30V60H0Z" className="fill-[#FAF7F1] dark:fill-black" />
+            <path d="M0 60V20C240 0 480 0 720 10C960 20 1200 40 1440 30V60H0Z" className="fill-background" />
           </svg>
         </div>
       </motion.section>
@@ -278,11 +265,11 @@ export function PublicPassportContent({
               exit={{ opacity: 0, height: 0 }}
               className="mb-4 -mt-3 relative z-20"
             >
-              <div className="bg-olive-50 dark:bg-olive-950/40 border border-olive-200 dark:border-olive-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="size-8 rounded-full bg-olive-100 dark:bg-olive-900/60 flex items-center justify-center shrink-0">
-                  <UserCheck className="size-4 text-olive-600 dark:text-olive-400" />
+              <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 flex items-center gap-3">
+                <div className="size-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                  <UserCheck className="size-4 text-primary" />
                 </div>
-                <p className="text-sm text-olive-800 dark:text-olive-200">
+                <p className="text-sm text-foreground">
                   You and <span className="font-semibold">{displayName}</span> are now following each other
                 </p>
               </div>
@@ -295,9 +282,9 @@ export function PublicPassportContent({
               exit={{ opacity: 0 }}
               className="mb-4 -mt-3 relative z-20"
             >
-              <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="size-4 rounded-full border-2 border-olive-500 border-t-transparent animate-spin shrink-0" />
-                <p className="text-sm text-stone-600 dark:text-stone-400">Connecting...</p>
+              <div className="rounded-xl border border-border bg-card px-4 py-3 flex items-center gap-3">
+                <div className="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
+                <p className="text-sm text-muted-foreground">Connecting...</p>
               </div>
             </motion.div>
           )}
@@ -305,19 +292,19 @@ export function PublicPassportContent({
 
         {/* ── Stats Bar ── */}
         <motion.div
-          className="-mt-6 relative z-10 bg-white dark:bg-[#111] rounded-2xl shadow-lg border border-stone-200/60 dark:border-stone-800 p-5 mb-8"
+          className="-mt-6 relative z-10 rounded-2xl border border-border bg-card p-5 mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
             {[
-              { icon: Globe, value: countryCodes.length, label: 'Countries', color: 'text-olive-500' },
-              { icon: MapPin, value: cities.length, label: 'Cities', color: 'text-emerald-500' },
-              { icon: Camera, value: totalPhotos, label: 'Photos', color: 'text-sky-500' },
-              { icon: Route, value: `${formatDistance(totalDistance)}km`, label: 'Traveled', color: 'text-amber-500' },
-              { icon: Users, value: followerCount, label: 'Followers', color: 'text-violet-500' },
-              { icon: Globe, value: `${worldPercent.toFixed(1)}%`, label: 'of World', color: 'text-olive-500' },
+              { icon: Globe, value: countryCodes.length, label: 'Countries' },
+              { icon: MapPin, value: cities.length, label: 'Cities' },
+              { icon: Camera, value: totalPhotos, label: 'Photos' },
+              { icon: Route, value: `${formatDistance(totalDistance)}km`, label: 'Traveled' },
+              { icon: Users, value: followerCount, label: 'Followers' },
+              { icon: Globe, value: `${worldPercent.toFixed(1)}%`, label: 'of World' },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -326,11 +313,11 @@ export function PublicPassportContent({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + i * 0.05 }}
               >
-                <stat.icon className={cn('h-4 w-4 mx-auto mb-1', stat.color)} />
-                <p className="text-xl md:text-2xl font-bold text-stone-900 dark:text-white tabular-nums">
+                <stat.icon className="h-4 w-4 mx-auto mb-1 text-primary" />
+                <p className="al-stat-value text-xl md:text-2xl tabular-nums">
                   {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                 </p>
-                <p className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wider font-medium">{stat.label}</p>
+                <p className="al-eyebrow text-[10px]">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -353,7 +340,7 @@ export function PublicPassportContent({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55 }}
         >
-          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3">Continents</p>
+          <p className="al-eyebrow mb-3">Continents</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {allContinents.map((continent, i) => {
               const visited = continentsVisited.includes(continent)
@@ -361,24 +348,24 @@ export function PublicPassportContent({
                 <motion.div
                   key={continent}
                   className={cn(
-                    "flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-200",
+                    "flex items-center gap-3 p-3.5 rounded-2xl border border-border bg-card transition-colors duration-200",
                     visited
-                      ? "bg-olive-50 dark:bg-olive-950/30 border-olive-200 dark:border-olive-800 hover:shadow-md hover:border-olive-300 dark:hover:border-olive-700"
-                      : "bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800 opacity-40"
+                      ? "hover:border-primary/30"
+                      : "opacity-50"
                   )}
                   initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: visited ? 1 : 0.4, scale: 1 }}
+                  animate={{ opacity: visited ? 1 : 0.5, scale: 1 }}
                   transition={{ delay: 0.6 + i * 0.05 }}
                 >
                   {(() => {
                     const Icon = continentIcon[continent] || Globe
-                    return <Icon className={cn("h-5 w-5", visited ? "text-olive-600 dark:text-olive-400" : "text-stone-400")} />
+                    return <Icon className={cn("h-5 w-5", visited ? "text-primary" : "text-muted-foreground")} />
                   })()}
                   <div>
-                    <p className={cn("text-sm font-semibold", visited ? "text-olive-800 dark:text-olive-200" : "text-stone-400")}>
+                    <p className={cn("text-sm font-semibold", visited ? "text-foreground" : "text-muted-foreground")}>
                       {continent}
                     </p>
-                    <p className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">
+                    <p className="text-[10px] text-muted-foreground font-medium">
                       {visited ? '✓ Explored' : 'Not yet'}
                     </p>
                   </div>
@@ -396,8 +383,8 @@ export function PublicPassportContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65 }}
           >
-            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3">Countries Visited</p>
-            <div className="bg-white dark:bg-[#111] rounded-2xl border border-stone-200 dark:border-stone-800 p-4 sm:p-5">
+            <p className="al-eyebrow mb-3">Countries Visited</p>
+            <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
               <div className="flex flex-wrap gap-2">
                 {countryCodes.map((code, i) => (
                   <motion.div
@@ -407,11 +394,11 @@ export function PublicPassportContent({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.7 + i * 0.02, type: 'spring', stiffness: 200, damping: 15 }}
                   >
-                    <div className="flex items-center gap-1.5 bg-olive-50 dark:bg-olive-950/40 border border-olive-200/80 dark:border-olive-800/50 rounded-xl px-3 py-2 hover:bg-olive-100 dark:hover:bg-olive-900/40 hover:border-olive-300 dark:hover:border-olive-700 hover:shadow-sm transition-all duration-200 cursor-default">
+                    <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-2 hover:bg-primary/15 hover:border-primary/30 transition-colors duration-200 cursor-default">
                       <span className="text-xl leading-none">{countryCodeToFlag(code)}</span>
-                      <span className="text-xs font-semibold text-olive-700 dark:text-olive-300">{code}</span>
+                      <span className="font-mono text-xs font-semibold text-primary">{code}</span>
                     </div>
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-800 text-[10px] font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-foreground text-background text-[10px] font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                       {countryNames[code] || code}
                     </div>
                   </motion.div>
@@ -429,44 +416,44 @@ export function PublicPassportContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.75 }}
           >
-            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-3">Journey</p>
+            <p className="al-eyebrow mb-3">Journey</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {firstTrip && (
-                <div className="bg-white dark:bg-[#111] rounded-xl border border-stone-200 dark:border-stone-800 p-4">
+                <div className="rounded-2xl border border-border bg-card p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="size-8 rounded-full bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center">
-                      <Plane className="h-3.5 w-3.5 text-olive-600 dark:text-olive-400" />
+                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Plane className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">First Adventure</span>
+                    <span className="al-eyebrow text-[10px]">First Adventure</span>
                   </div>
-                  <p className="font-semibold text-stone-900 dark:text-white">{firstTrip.title}</p>
+                  <p className="font-heading font-semibold text-foreground">{firstTrip.title}</p>
                   {firstTrip.location && (
-                    <p className="text-sm text-stone-500 dark:text-stone-400 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {firstTrip.location.split(',')[0]}
                     </p>
                   )}
-                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+                  <p className="font-mono text-xs tracking-wide text-muted-foreground mt-1">
                     {new Date(firstTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </p>
                 </div>
               )}
               {latestTrip && latestTrip !== firstTrip && (
-                <div className="bg-white dark:bg-[#111] rounded-xl border border-stone-200 dark:border-stone-800 p-4">
+                <div className="rounded-2xl border border-border bg-card p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="size-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
-                      <MapPin className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <div className="size-8 rounded-full bg-accent/10 flex items-center justify-center">
+                      <MapPin className="h-3.5 w-3.5 text-accent" />
                     </div>
-                    <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Latest Adventure</span>
+                    <span className="al-eyebrow text-[10px]">Latest Adventure</span>
                   </div>
-                  <p className="font-semibold text-stone-900 dark:text-white">{latestTrip.title}</p>
+                  <p className="font-heading font-semibold text-foreground">{latestTrip.title}</p>
                   {latestTrip.location && (
-                    <p className="text-sm text-stone-500 dark:text-stone-400 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {latestTrip.location.split(',')[0]}
                     </p>
                   )}
-                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+                  <p className="font-mono text-xs tracking-wide text-muted-foreground mt-1">
                     {new Date(latestTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </p>
                 </div>
@@ -482,10 +469,10 @@ export function PublicPassportContent({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
         >
-          <div className="bg-white dark:bg-[#111] rounded-2xl border border-stone-200 dark:border-stone-800">
+          <div className="rounded-2xl border border-border bg-card">
             <div className="py-8 sm:py-10 px-6 flex flex-col items-center text-center">
-              <h2 className="text-lg font-bold text-stone-800 dark:text-stone-200">Share this profile</h2>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mt-1 mb-6 max-w-xs">
+              <h2 className="font-heading text-base md:text-lg font-semibold text-foreground">Share this profile</h2>
+              <p className="text-sm text-muted-foreground mt-1 mb-6 max-w-xs">
                 Scan to see {displayName}&apos;s travel profile
               </p>
 
@@ -498,16 +485,16 @@ export function PublicPassportContent({
                   variant="outline"
                   size="sm"
                   onClick={handleCopy}
-                  className="cursor-pointer gap-2 rounded-xl transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                  className="cursor-pointer gap-2"
                 >
-                  {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                  {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
                   {copied ? 'Copied!' : 'Copy Link'}
                 </Button>
                 {typeof navigator !== 'undefined' && 'share' in navigator && (
                   <Button
                     size="sm"
                     onClick={handleShare}
-                    className="cursor-pointer gap-2 bg-olive-600 hover:bg-olive-700 text-white rounded-xl transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2"
+                    className="cursor-pointer gap-2"
                   >
                     <Share2 className="h-4 w-4" /> Share
                   </Button>
@@ -519,22 +506,22 @@ export function PublicPassportContent({
 
         {/* ── Footer ── */}
         <motion.footer
-          className="text-center py-10 border-t border-stone-200/60 dark:border-stone-800"
+          className="text-center py-10 border-t border-border"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
         >
-          <p className="text-xs text-stone-400 dark:text-stone-500 mb-1">
+          <p className="font-mono text-xs tracking-wide text-muted-foreground mb-1">
             Member since {new Date(memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </p>
-          <p className="text-sm text-stone-400 dark:text-stone-500 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             Powered by{' '}
-            <Link href="/" className="text-olive-600 dark:text-olive-400 hover:text-olive-700 font-semibold transition-colors">
+            <Link href="/" className="text-primary hover:text-primary/80 font-semibold transition-colors">
               Adventure Log
             </Link>
           </p>
           <Link href="/sign-up">
-            <Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 text-white px-8 rounded-xl shadow-md gap-2 transition-all duration-200 active:scale-[0.97] hover:shadow-lg focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
+            <Button variant="coral" className="cursor-pointer px-8 gap-2">
               Create Your Profile
               <ArrowRight className="h-4 w-4" />
             </Button>

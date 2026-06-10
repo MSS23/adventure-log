@@ -72,29 +72,23 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
       {/* Add album card for own profile */}
       {isOwnProfile && (
         <motion.div variants={itemVariants}>
-          <Link href="/albums/new">
+          <Link
+            href="/albums/new"
+            className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             <motion.div
-              whileHover={{ y: -6, scale: 1.02 }}
+              whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-              className="group/add aspect-[4/5] rounded-2xl border-2 border-dashed
+              className="group/add aspect-[4/3] rounded-2xl border border-dashed border-border bg-muted/30
                          flex flex-col items-center justify-center gap-3
-                         cursor-pointer transition-all duration-300
-                         shadow-sm hover:shadow-lg"
-              style={{
-                borderColor: 'var(--color-line-warm)',
-                background: 'var(--color-ivory-alt)',
-              }}
+                         cursor-pointer transition-colors duration-200
+                         hover:border-primary/40"
             >
-              <motion.div
-                className="p-4 rounded-full transition-colors"
-                style={{ background: 'var(--color-coral-tint)' }}
-                whileHover={{ scale: 1.1, rotate: 90 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              >
-                <Plus className="h-8 w-8" style={{ color: 'var(--color-coral)' }} />
-              </motion.div>
-              <span className="text-sm font-semibold text-[color:var(--color-muted-warm)] group-hover/add:text-[color:var(--color-coral)] transition-colors">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Plus className="h-6 w-6" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground group-hover/add:text-primary transition-colors">
                 Add Album
               </span>
             </motion.div>

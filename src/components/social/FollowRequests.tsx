@@ -30,8 +30,10 @@ export function FollowRequests() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <User className="h-12 w-12 mx-auto text-stone-700 mb-4" />
-            <p className="text-stone-800">No pending follow requests</p>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden>
+              <User className="h-5 w-5" />
+            </div>
+            <p className="text-sm text-muted-foreground">No pending follow requests</p>
           </div>
         </CardContent>
       </Card>
@@ -56,7 +58,7 @@ export function FollowRequests() {
         {pendingRequests.map((request) => (
           <div
             key={request.id}
-            className="flex items-center justify-between p-4 border rounded-lg"
+            className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/60"
           >
             <div className="flex items-center gap-3">
               <Avatar>
@@ -67,15 +69,15 @@ export function FollowRequests() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium">
+                <p className="text-sm font-medium text-foreground">
                   {request.follower?.display_name || request.follower?.username}
                 </p>
                 {request.follower?.display_name && (
-                  <p className="text-sm text-stone-800">
+                  <p className="text-xs text-muted-foreground">
                     @{request.follower.username}
                   </p>
                 )}
-                <p className="text-sm text-stone-800">
+                <p className="text-xs text-muted-foreground">
                   {new Date(request.created_at).toLocaleDateString()}
                 </p>
               </div>
@@ -86,7 +88,6 @@ export function FollowRequests() {
                 size="sm"
                 onClick={() => acceptFollowRequest(request.follower_id)}
                 disabled={loading}
-                className="bg-green-600 hover:bg-green-700"
               >
                 <Check className="h-4 w-4" />
               </Button>
@@ -95,7 +96,7 @@ export function FollowRequests() {
                 variant="outline"
                 onClick={() => rejectFollowRequest(request.follower_id)}
                 disabled={loading}
-                className="text-red-600 border-red-200 hover:bg-red-50"
+                className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
               >
                 <X className="h-4 w-4" />
               </Button>

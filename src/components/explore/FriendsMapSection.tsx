@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { Globe, Users } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
@@ -155,13 +157,13 @@ export function FriendsMapSection() {
     return (
       <section>
         <div className="flex items-center gap-2.5 mb-4">
-          <Globe className="h-4.5 w-4.5" style={{ color: 'var(--color-forest)' }} />
-          <h2 className="font-heading text-base font-semibold text-[color:var(--color-ink)]">Friends&apos; Adventures</h2>
+          <Globe className="h-4.5 w-4.5 text-primary" />
+          <h2 className="font-heading text-base font-semibold text-foreground">Friends&apos; Adventures</h2>
         </div>
-        <div className="rounded-2xl border border-[color:var(--color-line-warm)] overflow-hidden animate-pulse" style={{ background: 'var(--card)' }}>
-          <div className="h-[240px]" style={{ background: 'var(--color-ivory-alt)' }} />
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <Skeleton className="h-[240px] w-full rounded-none" />
           <div className="px-4 py-3 flex gap-2">
-            {[...Array(4)].map((_, i) => <div key={i} className="h-7 w-7 rounded-full" style={{ background: 'var(--color-ivory-alt)' }} />)}
+            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-7 w-7 rounded-full" />)}
           </div>
         </div>
       </section>
@@ -178,29 +180,23 @@ export function FriendsMapSection() {
         transition={{ duration: 0.35 }}
       >
         <div className="flex items-center gap-2.5 mb-4">
-          <Globe className="h-4.5 w-4.5" style={{ color: 'var(--color-forest)' }} />
-          <h2 className="font-heading text-base font-semibold text-[color:var(--color-ink)]">Friends&apos; Adventures</h2>
+          <Globe className="h-4.5 w-4.5 text-primary" />
+          <h2 className="font-heading text-base font-semibold text-foreground">Friends&apos; Adventures</h2>
         </div>
-        <div className="rounded-2xl border border-[color:var(--color-line-warm)] overflow-hidden shadow-sm" style={{ background: 'var(--card)' }}>
-          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-            <div className="p-3.5 rounded-2xl mb-4" style={{ background: 'var(--color-forest-tint)' }}>
-              <Globe className="h-8 w-8" style={{ color: 'var(--color-forest)' }} />
-            </div>
-            <p className="font-heading text-[color:var(--color-ink)] font-semibold mb-1">
-              See where your friends are exploring
-            </p>
-            <p className="text-sm text-[color:var(--color-ink-soft)] mb-5 max-w-xs">
-              Follow other adventurers to see their journeys appear on this map
-            </p>
-            <button
-              onClick={() => router.push('/explore/creators')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-shadow shadow-sm hover:shadow-[0_10px_28px_rgba(74,93,35,0.35)]"
-              style={{ background: 'var(--color-forest)', color: 'var(--color-ivory)' }}
-            >
-              <Users className="h-4 w-4" />
-              Discover Adventurers
-            </button>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+            <Globe className="h-6 w-6" />
           </div>
+          <p className="font-heading text-lg font-semibold text-foreground">
+            See where your friends are exploring
+          </p>
+          <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+            Follow other adventurers to see their journeys appear on this map
+          </p>
+          <Button onClick={() => router.push('/explore/creators')} className="mt-5">
+            <Users className="h-4 w-4" />
+            Discover Adventurers
+          </Button>
         </div>
       </motion.section>
     )
@@ -213,19 +209,19 @@ export function FriendsMapSection() {
       transition={{ duration: 0.35 }}
     >
       <div className="flex items-center gap-2.5 mb-4">
-        <Globe className="h-4.5 w-4.5" style={{ color: 'var(--color-forest)' }} />
-        <h2 className="font-heading text-base font-semibold text-[color:var(--color-ink)]">Friends&apos; Adventures</h2>
-        <span className="font-mono text-[11px] tracking-[0.04em] uppercase text-[color:var(--color-muted-warm)] ml-auto">{albums.length} recent</span>
+        <Globe className="h-4.5 w-4.5 text-primary" />
+        <h2 className="font-heading text-base font-semibold text-foreground">Friends&apos; Adventures</h2>
+        <span className="font-mono text-[11px] tracking-wide uppercase text-muted-foreground ml-auto">{albums.length} recent</span>
       </div>
 
-      <div className="rounded-2xl border border-[color:var(--color-line-warm)] overflow-hidden shadow-sm" style={{ background: 'var(--card)' }}>
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {/* Map area */}
-        <div className="relative bg-gradient-to-b from-stone-50 to-stone-100/80 dark:from-[#0c0c0c] dark:to-[#0a0a0a]">
+        <div className="relative bg-muted/40">
           <svg viewBox="0 0 800 400" className="w-full" style={{ height: 'clamp(180px, 28vw, 260px)' }}>
             <defs>
               {/* Subtle grid pattern */}
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.3" className="text-stone-200/50 dark:text-stone-800/30" />
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.3" className="text-foreground/[0.06]" />
               </pattern>
               {/* Glow filter for pins */}
               <filter id="pinGlow" x="-50%" y="-50%" width="200%" height="200%">
@@ -238,7 +234,7 @@ export function FriendsMapSection() {
             <rect width="800" height="400" fill="url(#grid)" />
 
             {/* Continents — filled shapes with soft stroke */}
-            <g className="text-stone-300/70 dark:text-stone-700/50" fill="currentColor" stroke="currentColor" strokeWidth="0.5" strokeLinejoin="round">
+            <g className="text-foreground/20" fill="currentColor" stroke="currentColor" strokeWidth="0.5" strokeLinejoin="round">
               {/* North America */}
               <path d="M95,55 L115,38 L148,30 L175,28 L205,35 L225,50 L238,68 L240,88 L232,108 L220,128 L208,145 L195,158 L178,168 L165,178 L155,182 L148,188 L142,196 L138,178 L125,162 L112,138 L100,115 L92,92 L90,72Z" opacity="0.4" />
               {/* Greenland */}
@@ -329,19 +325,16 @@ export function FriendsMapSection() {
                   transform: `translate(${alignRight ? '-100%' : '0'}, ${alignBottom ? '12px' : 'calc(-100% - 12px)'})`,
                 }}
               >
-                <div
-                  className="rounded-xl shadow-lg shadow-black/10 dark:shadow-black/40 border border-[color:var(--color-line-warm)] px-3 py-2 flex items-center gap-2.5 min-w-[160px]"
-                  style={{ background: 'var(--card)' }}
-                >
+                <div className="flex min-w-[160px] items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2 shadow-md">
                   <div
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: colors.dot }}
                   />
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[color:var(--color-ink)] truncate">
+                    <p className="text-xs font-semibold text-foreground truncate">
                       {hoveredAlbum.location_name || hoveredAlbum.title}
                     </p>
-                    <p className="text-[10px] text-[color:var(--color-muted-warm)] truncate">
+                    <p className="text-[10px] text-muted-foreground truncate">
                       {hoveredAlbum.user.display_name || hoveredAlbum.user.username}
                     </p>
                   </div>
@@ -352,18 +345,18 @@ export function FriendsMapSection() {
         </div>
 
         {/* Friend avatars legend — clean row */}
-        <div className="px-4 py-2.5 flex items-center gap-0.5 overflow-x-auto scrollbar-hide border-t border-[color:var(--color-line-warm)]">
+        <div className="px-4 py-2.5 flex items-center gap-0.5 overflow-x-auto scrollbar-hide border-t border-border">
           {friendLegend.map((friend) => (
             <button
               key={friend.id}
               onClick={() => handleFriendClick(friend.id)}
-              className="relative shrink-0 p-1 rounded-full hover:bg-[color:var(--color-ivory-alt)] transition-colors group"
+              className="relative shrink-0 p-1 rounded-full hover:bg-muted/60 transition-colors group"
               title={`${friend.displayName} — ${friend.count} trip${friend.count > 1 ? 's' : ''}`}
             >
               <div className="relative">
                 <Avatar className="h-7 w-7 ring-2 transition-all duration-200 group-hover:ring-[3px]" style={{ ['--tw-ring-color' as string]: friend.colors.dot }}>
                   <AvatarImage src={getAvatarUrl(friend.avatarUrl, friend.username)} />
-                  <AvatarFallback className="text-[9px] font-medium" style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}>
+                  <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-medium">
                     {friend.displayName[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -378,7 +371,7 @@ export function FriendsMapSection() {
               </div>
             </button>
           ))}
-          <span className="font-mono text-[11px] tracking-[0.04em] text-[color:var(--color-muted-warm)] ml-auto shrink-0 pl-2">
+          <span className="font-mono text-[11px] tracking-wide text-muted-foreground ml-auto shrink-0 pl-2">
             {friendIds.length} friend{friendIds.length !== 1 ? 's' : ''}
           </span>
         </div>

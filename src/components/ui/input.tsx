@@ -11,12 +11,12 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       data-slot="input"
       className={cn(
         // Base layout
-        "h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
-        // Light mode colors
-        "border-input bg-white text-stone-900 placeholder:text-stone-400 selection:bg-primary selection:text-primary-foreground",
-        // Dark mode colors — warm dark surface so inputs don't feel like
-        // light cutouts pasted on a dark page.
-        "dark:bg-[#221D14] dark:text-stone-100 dark:placeholder:text-stone-500 dark:border-stone-700",
+        "h-10 w-full min-w-0 rounded-xl border px-3 py-1 text-base transition-[color,box-shadow] outline-none md:text-sm",
+        // Semantic tokens — warm in both themes
+        "border-border bg-card text-foreground placeholder:text-muted-foreground/80 selection:bg-primary selection:text-primary-foreground",
+        // Dark mode — slightly raised warm surface so inputs read as fields,
+        // not cutouts, against the umber card background.
+        "dark:bg-secondary",
         // File input quirk
         "file:text-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium",
         // States
@@ -25,7 +25,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         "aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
         // Autofill — Chromium overrides bg/text aggressively; mirror per-mode
         "autofill:bg-white autofill:text-black autofill:shadow-[inset_0_0_0_1000px_white]",
-        "dark:autofill:shadow-[inset_0_0_0_1000px_#221D14] dark:autofill:text-stone-100",
+        "dark:autofill:shadow-[inset_0_0_0_1000px_#221D13] dark:autofill:text-[#F2EBD7]",
         className
       )}
       suppressHydrationWarning

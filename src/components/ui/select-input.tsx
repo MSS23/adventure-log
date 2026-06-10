@@ -19,7 +19,7 @@ export const SelectInput = React.forwardRef<HTMLSelectElement, SelectInputProps>
         <select
           ref={ref}
           className={cn(
-            'w-full py-2.5 border border-stone-300 dark:border-white/[0.14] rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-500 focus:border-transparent bg-white dark:bg-[#1B170E] cursor-pointer appearance-none transition-all',
+            'w-full py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-card cursor-pointer appearance-none transition-all',
             icon ? 'pl-10' : 'pl-4',
             'pr-10',
             className

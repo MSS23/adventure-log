@@ -64,7 +64,7 @@ export default function TripMap({ pins, members, selectedPinId, onSelectPin }: T
     : [20, 0]
 
   return (
-    <div className="h-full w-full relative rounded-xl overflow-hidden border border-olive-200 dark:border-white/10">
+    <div className="h-full w-full relative rounded-2xl overflow-hidden border border-border bg-muted">
       <MapContainer
         center={center}
         zoom={pins.length > 0 ? 10 : 2}

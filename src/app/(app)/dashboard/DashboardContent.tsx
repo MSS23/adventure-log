@@ -110,21 +110,16 @@ export default function DashboardContent({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div
-        className="min-h-screen"
-        style={{ background: 'var(--color-ivory)', color: 'var(--color-ink)' }}
-      >
-        <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-8">
           {/* Top bar */}
           <MotionReveal>
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="al-eyebrow mb-1">{dateLabel}</p>
-                <h1 className="al-display text-4xl md:text-5xl">
-                  {isFirstRun ? `Welcome, ${firstName}.` : `Welcome back, ${firstName}.`}
-                </h1>
-              </div>
-            </div>
+            <header className="space-y-1">
+              <p className="al-eyebrow">{dateLabel}</p>
+              <h1 className="al-display text-4xl md:text-5xl">
+                {isFirstRun ? `Welcome, ${firstName}.` : `Welcome back, ${firstName}.`}
+              </h1>
+            </header>
           </MotionReveal>
 
           {/* HERO — magazine-style */}
@@ -132,7 +127,7 @@ export default function DashboardContent({
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EDITORIAL_EASE, delay: 0.1 }}
-            className="relative rounded-[22px] overflow-hidden min-h-[320px] p-8 text-white"
+            className="relative rounded-2xl overflow-hidden min-h-[320px] p-8 text-white"
           >
             {/* Base gradient — brightest olive sits near the globe (top-right) and
                 deepens to a near-black warm ink at the lower-left, so the headline
@@ -313,21 +308,16 @@ export default function DashboardContent({
           </MotionReveal>
 
           {/* Recent albums */}
-          <section>
+          <section className="space-y-4">
             <MotionReveal delay={0.05}>
-              <div className="flex items-end justify-between mb-5">
+              <div className="flex items-end justify-between gap-4">
                 <div>
-                  <p className="al-eyebrow mb-1">Recent</p>
-                  <h3
-                    className="font-heading text-2xl font-semibold"
-                    style={{ letterSpacing: '-0.02em' }}
-                  >
-                    Latest adventures
-                  </h3>
+                  <p className="al-eyebrow mb-0.5">Recent</p>
+                  <h3 className="al-display text-xl md:text-2xl">Latest adventures</h3>
                 </div>
                 <Link
                   href="/albums"
-                  className="group inline-flex items-center gap-1 text-[13px] font-semibold text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-coral)] transition-colors"
+                  className="group inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   All
                   <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -341,17 +331,19 @@ export default function DashboardContent({
               </MotionReveal>
             ) : (
               <MotionList
-                className="grid grid-cols-2 md:grid-cols-3 gap-5"
-                stagger={0.07}
+                className="grid grid-cols-2 md:grid-cols-3 gap-4"
+                stagger={0.06}
               >
                 {recentAlbums.map((album) => (
                   <MotionItem key={album.id}>
-                    <Link href={`/albums/${album.id}`} className="group block">
+                    <Link
+                      href={`/albums/${album.id}`}
+                      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
                       <motion.div
-                        whileHover={{ y: -4 }}
+                        whileHover={{ y: -2 }}
                         transition={{ type: 'spring', stiffness: 320, damping: 24 }}
-                        className="relative aspect-[4/5] rounded-xl overflow-hidden mb-3 will-change-transform"
-                        style={{ background: 'var(--color-ivory-alt)' }}
+                        className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted mb-3 will-change-transform"
                       >
                         {album.cover_photo_url && (
                           <Image
@@ -359,20 +351,23 @@ export default function DashboardContent({
                             alt={album.title}
                             fill
                             sizes="(max-width: 768px) 50vw, 33vw"
-                            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+                            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                           />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                        <div
+                          aria-hidden
+                          className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent"
+                        />
                         {album.country_code && (
                           <span className="absolute top-3 left-3 text-xl drop-shadow">
                             {flagEmoji(album.country_code)}
                           </span>
                         )}
                       </motion.div>
-                      <div className="font-heading text-[15px] font-semibold text-[color:var(--color-ink)] leading-tight line-clamp-1">
+                      <div className="font-heading text-base font-semibold text-foreground leading-tight line-clamp-1">
                         {album.title}
                       </div>
-                      <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-[color:var(--color-muted-warm)] mt-1 line-clamp-1">
+                      <div className="mt-1 font-mono text-xs uppercase tracking-wide text-muted-foreground line-clamp-1">
                         {(album.location_name || 'Unknown').split(',')[0]}
                         {album.date_start &&
                           ` · ${new Date(album.date_start).toLocaleDateString('en-US', {
@@ -407,25 +402,15 @@ function QuickTile({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-2.5 p-3 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(26,20,14,0.18)]"
-      style={{
-        background: 'var(--card)',
-        border: '1px solid var(--color-line-warm)',
-      }}
+      className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span
-        className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
-        style={{
-          background: 'var(--color-ivory-alt)',
-          color: 'var(--color-coral)',
-        }}
-      >
+      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-200 group-hover:scale-105">
         {icon}
       </span>
-      <span className="flex-1 text-[13px] font-semibold text-[color:var(--color-ink)]">
+      <span className="flex-1 text-sm font-semibold text-foreground">
         {label}
       </span>
-      <ArrowRight className="h-3 w-3 text-[color:var(--color-muted-warm)] transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-[color:var(--color-coral)]" />
+      <ArrowRight className="h-3 w-3 text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
     </Link>
   )
 }
@@ -460,51 +445,30 @@ function FirstRunGuide() {
   return (
     <div className="space-y-8">
       {/* Core-loop explainer */}
-      <section aria-labelledby="how-it-works-heading">
+      <section aria-labelledby="how-it-works-heading" className="space-y-4">
         <MotionReveal>
-          <p className="al-eyebrow mb-1">How Adventure Log works</p>
-          <h3
-            id="how-it-works-heading"
-            className="font-heading text-2xl font-semibold mb-1"
-            style={{ letterSpacing: '-0.02em' }}
-          >
+          <p className="al-eyebrow mb-0.5">How Adventure Log works</p>
+          <h3 id="how-it-works-heading" className="al-display text-xl md:text-2xl">
             Three steps to your map of the world
           </h3>
-          <p className="text-sm text-[color:var(--color-muted-warm)] mb-5 max-w-xl">
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Turn your travels into a living atlas. It starts with a single album.
           </p>
         </MotionReveal>
-        <MotionList className="grid grid-cols-1 sm:grid-cols-3 gap-4" stagger={0.08}>
+        <MotionList className="grid grid-cols-1 sm:grid-cols-3 gap-4" stagger={0.06}>
           {loop.map((step, i) => (
             <MotionItem key={step.title}>
-              <div
-                className="h-full p-5 rounded-2xl"
-                style={{
-                  background: 'var(--card)',
-                  border: '1px solid var(--color-line-warm)',
-                }}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <span
-                    className="flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0"
-                    style={{
-                      background: 'var(--color-coral-tint)',
-                      color: 'var(--color-coral)',
-                    }}
-                  >
+              <div className="h-full rounded-2xl border border-border bg-card p-5">
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     {step.icon}
                   </span>
-                  <span
-                    className="font-mono text-[11px] tracking-[0.12em] uppercase"
-                    style={{ color: 'var(--color-muted-warm)' }}
-                  >
-                    Step {i + 1}
-                  </span>
+                  <span className="al-eyebrow">Step {i + 1}</span>
                 </div>
-                <h4 className="font-heading text-[16px] font-semibold leading-tight mb-1">
+                <h4 className="font-heading text-base font-semibold leading-tight text-foreground mb-1">
                   {step.title}
                 </h4>
-                <p className="text-[13px] leading-relaxed text-[color:var(--color-muted-warm)]">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {step.body}
                 </p>
               </div>
@@ -515,36 +479,23 @@ function FirstRunGuide() {
 
       {/* Primary CTA — the one obvious next action */}
       <MotionReveal delay={0.1}>
-        <div
-          className="relative overflow-hidden rounded-2xl p-7 sm:p-8 text-center"
-          style={{
-            background: 'var(--color-coral-tint)',
-            border: '1px solid var(--color-line-warm)',
-          }}
-        >
+        <div className="rounded-2xl border border-border bg-card p-7 text-center sm:p-8">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-            className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
-            style={{ background: 'var(--color-coral)', color: '#fff' }}
+            className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent"
           >
-            <MapPin className="h-5 w-5" strokeWidth={1.8} />
+            <MapPin className="h-6 w-6" strokeWidth={1.8} />
           </motion.div>
-          <h3
-            className="font-heading text-2xl font-semibold mb-1"
-            style={{ letterSpacing: '-0.02em' }}
-          >
-            Drop your first pin
-          </h3>
-          <p className="text-sm text-[color:var(--color-muted-warm)] mb-5 max-w-md mx-auto">
+          <h3 className="al-display text-xl md:text-2xl">Drop your first pin</h3>
+          <p className="mx-auto mt-1 mb-5 max-w-md text-sm text-muted-foreground">
             Your world map is empty right now. Create one album and watch it come alive.
           </p>
           <motion.div whileTap={{ scale: 0.96 }} className="inline-block">
             <Link
               href="/albums/new"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-semibold transition-shadow hover:shadow-[0_10px_28px_rgba(226,85,58,0.45)]"
-              style={{ background: 'var(--color-coral)', color: '#fff' }}
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Calendar className="h-4 w-4" strokeWidth={1.8} />
               Create your first album
@@ -553,23 +504,13 @@ function FirstRunGuide() {
 
           {/* Low-friction starting points */}
           <div className="mt-6">
-            <p
-              className="font-mono text-[10px] tracking-[0.12em] uppercase mb-2.5"
-              style={{ color: 'var(--color-muted-warm)' }}
-            >
-              Not sure where to start? Try
-            </p>
+            <p className="al-eyebrow mb-2.5">Not sure where to start? Try</p>
             <div className="flex flex-wrap justify-center gap-2">
               {starters.map((s) => (
                 <Link
                   key={s}
                   href="/albums/new"
-                  className="px-3.5 py-2 rounded-full text-[12.5px] font-medium transition-colors"
-                  style={{
-                    background: 'var(--card)',
-                    border: '1px solid var(--color-line-warm)',
-                    color: 'var(--color-ink)',
-                  }}
+                  className="rounded-full border border-border bg-background px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted/60"
                 >
                   {s}
                 </Link>
@@ -584,34 +525,22 @@ function FirstRunGuide() {
 
 function EmptyAlbums() {
   return (
-    <div
-      className="p-10 rounded-2xl text-center"
-      style={{
-        background: 'var(--card)',
-        border: '1px solid var(--color-line-warm)',
-      }}
-    >
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-        className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
-        style={{ background: 'var(--color-coral-tint)' }}
+        className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"
       >
-        <MapPin
-          className="h-5 w-5"
-          style={{ color: 'var(--color-coral)' }}
-          strokeWidth={1.8}
-        />
+        <MapPin className="h-6 w-6" strokeWidth={1.8} />
       </motion.div>
-      <h4 className="font-heading text-lg font-semibold">No albums yet</h4>
-      <p className="text-sm text-[color:var(--color-muted-warm)] mt-1 mb-4">
+      <h4 className="font-heading text-lg font-semibold text-foreground">No albums yet</h4>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
         Your first trip starts with a single photo.
       </p>
       <Link
         href="/albums/new"
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold transition-shadow hover:shadow-[0_10px_28px_rgba(226,85,58,0.45)]"
-        style={{ background: 'var(--color-coral)', color: '#fff' }}
+        className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <Calendar className="h-3.5 w-3.5" />
         Create your first album

@@ -40,8 +40,8 @@ import { cn } from '@/lib/utils'
 const TripMap = dynamic(() => import('@/components/trips/TripMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-full w-full flex items-center justify-center bg-olive-50 dark:bg-white/[0.02] rounded-xl">
-      <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+    <div className="h-full w-full flex items-center justify-center bg-muted rounded-2xl">
+      <Loader2 className="h-6 w-6 animate-spin text-primary" />
     </div>
   ),
 })
@@ -300,13 +300,15 @@ export default function TripDetailPage() {
   if (!tripId) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 min-h-[60vh] text-center">
-        <MapPin className="h-8 w-8 text-olive-400 mb-3" />
-        <h2 className="text-lg font-semibold text-olive-950 dark:text-olive-50 mb-1">Trip not found</h2>
-        <p className="text-sm text-olive-600 dark:text-olive-400 mb-5">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+          <MapPin className="h-6 w-6" />
+        </div>
+        <h2 className="font-heading text-lg font-semibold text-foreground mb-1">Trip not found</h2>
+        <p className="text-sm text-muted-foreground mb-5">
           This trip link looks incomplete or invalid.
         </p>
         <Link href="/trips">
-          <Button variant="outline" size="sm" className="rounded-xl">
+          <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to trips
           </Button>
@@ -318,7 +320,7 @@ export default function TripDetailPage() {
   if (loading || !trip) {
     return (
       <div className="flex-1 flex items-center justify-center p-6 min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     )
   }
@@ -326,7 +328,7 @@ export default function TripDetailPage() {
   const myMember = user ? memberByUser.get(user.id) : null
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pt-4 sm:pt-6 pb-24 md:pb-8">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-24 md:pb-8">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -343,39 +345,37 @@ export default function TripDetailPage() {
               </h1>
             </div>
             {trip.description && (
-              <p className="text-sm text-[color:var(--color-muted-warm)] mt-1 leading-relaxed">{trip.description}</p>
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{trip.description}</p>
             )}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
           {trip.status === 'live' && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 text-xs font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-destructive/20 bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">
+              <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
               LIVE
             </span>
           )}
           <Button
             variant="outline"
             size="sm"
-            className="rounded-xl"
             onClick={handleSuggestRoute}
             disabled={pins.length === 0}
           >
             <Sparkles className="h-4 w-4 mr-2" />
             Suggest route
           </Button>
-          <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setShareOpen(true)}>
+          <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
             <Share2 className="h-4 w-4 mr-2" />
             Share
           </Button>
-          <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setInviteOpen(true)}>
+          <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
             <UserPlus className="h-4 w-4 mr-2" />
             Invite
           </Button>
           {user?.id === trip.owner_id && pins.some((p) => p.visited_at) && (
             <Button
               size="sm"
-              className="rounded-xl bg-olive-700 hover:bg-olive-800 text-white"
               onClick={handleSaveAsAlbum}
               disabled={savingAlbum}
             >
@@ -392,36 +392,26 @@ export default function TripDetailPage() {
 
       {/* Trip completed banner — prominent save-as-album CTA */}
       {trip.status === 'completed' && user?.id === trip.owner_id && (
-        <div
-          className="mb-5 p-5 rounded-2xl flex items-center gap-4"
-          style={{
-            background:
-              'linear-gradient(135deg, var(--color-coral-tint) 0%, var(--color-gold-tint) 100%)',
-            border: '1px solid var(--color-coral)',
-          }}
-        >
-          <div
-            className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-white"
-            style={{ background: 'var(--color-coral)' }}
-          >
+        <div className="mb-5 flex items-center gap-4 rounded-2xl border border-accent/30 bg-card p-5">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent">
             <BookOpen className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="al-eyebrow mb-1" style={{ color: 'var(--color-stamp)' }}>
+            <p className="al-eyebrow mb-1 text-accent">
               Trip complete
             </p>
-            <div className="font-heading text-lg font-semibold text-[color:var(--color-ink)] leading-tight">
+            <div className="font-heading text-base md:text-lg font-semibold text-foreground leading-tight">
               Turn this trip into an album
             </div>
-            <p className="text-xs text-[color:var(--color-ink-soft)] mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {pins.filter((p) => p.visited_at).length > 0
                 ? `${pins.filter((p) => p.visited_at).length} of ${pins.length} places visited — we'll use those to seed your album.`
                 : `${pins.length} pins ready to become an album draft.`}
             </p>
           </div>
           <Button
-            size="sm"
-            className="al-btn-coral text-white font-semibold rounded-full px-5"
+            variant="coral"
+            size="pill"
             onClick={handleSaveAsAlbum}
             disabled={savingAlbum}
           >
@@ -467,17 +457,17 @@ export default function TripDetailPage() {
         })}
 
         {myMember && (
-          <div className="flex items-center gap-1 ml-auto">
-            <span className="text-xs text-olive-600 dark:text-olive-400 mr-1">My color:</span>
+          <div className="flex items-center gap-1.5 ml-auto">
+            <span className="text-xs text-muted-foreground mr-1">My color:</span>
             {MEMBER_COLOR_PALETTE.map((color) => (
               <button
                 key={color}
                 onClick={() => handleChangeColor(myMember.id, color)}
                 className={cn(
-                  'w-5 h-5 rounded-full border-2 transition-transform',
+                  'w-5 h-5 rounded-full transition-transform',
                   myMember.color === color
-                    ? 'border-olive-900 dark:border-white scale-110'
-                    : 'border-transparent hover:scale-110'
+                    ? 'ring-2 ring-ring ring-offset-2 ring-offset-background scale-110'
+                    : 'hover:scale-110'
                 )}
                 style={{ backgroundColor: color }}
                 aria-label={`Use color ${color}`}
@@ -500,9 +490,9 @@ export default function TripDetailPage() {
 
         {/* Sidebar: add pin + list */}
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-              <LinkIcon className="h-4 w-4" />
+          <Card className="p-4 gap-0">
+            <h3 className="font-heading text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <LinkIcon className="h-4 w-4 text-primary" />
               Add a place
             </h3>
             <Input
@@ -524,31 +514,31 @@ export default function TripDetailPage() {
               maxLength={1000}
               className="mb-2"
             />
-            {addError && <p className="text-xs text-red-600 mb-2">{addError}</p>}
+            {addError && <p className="text-xs text-destructive mb-2">{addError}</p>}
             <Button
-              className="w-full bg-olive-700 hover:bg-olive-800 text-white"
+              className="w-full"
               onClick={handleAddPin}
               disabled={adding || !pinInput.trim()}
             >
               {adding ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
               Add pin
             </Button>
-            <p className="text-[11px] text-olive-500 mt-2">
-              Try: <code className="bg-olive-50 dark:bg-white/5 px-1 rounded">Eiffel Tower, Paris</code> or a{' '}
-              <code className="bg-olive-50 dark:bg-white/5 px-1 rounded">maps.google.com/...</code> link
+            <p className="text-xs text-muted-foreground mt-2">
+              Try: <code className="bg-muted px-1 rounded">Eiffel Tower, Paris</code> or a{' '}
+              <code className="bg-muted px-1 rounded">maps.google.com/...</code> link
             </p>
           </Card>
 
-          <Card className="p-4 flex-1 overflow-hidden flex flex-col">
+          <Card className="p-4 gap-0 flex-1 overflow-hidden flex flex-col">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+              <h3 className="font-heading text-sm font-semibold text-foreground flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
                 {userFilter ? 'Filtered pins' : 'All pins'} ({visiblePins.length})
               </h3>
             </div>
 
             {visiblePins.length === 0 ? (
-              <p className="text-sm text-olive-500 py-8 text-center">
+              <p className="text-sm text-muted-foreground py-8 text-center">
                 No pins yet. Paste a link above to get started.
               </p>
             ) : (
@@ -563,10 +553,10 @@ export default function TripDetailPage() {
                       key={pin.id}
                       onClick={() => setSelectedPinId(pin.id)}
                       className={cn(
-                        'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
+                        'flex items-start gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors',
                         isSelected
-                          ? 'bg-olive-100 dark:bg-white/10'
-                          : 'hover:bg-olive-50 dark:hover:bg-white/5'
+                          ? 'bg-muted'
+                          : 'hover:bg-muted/60'
                       )}
                     >
                       <div
@@ -576,11 +566,11 @@ export default function TripDetailPage() {
                         {idx + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-olive-950 dark:text-olive-50 truncate">
+                        <div className="font-medium text-sm text-foreground truncate">
                           {pin.name}
                         </div>
                         {pin.note && (
-                          <div className="text-xs text-olive-600 dark:text-olive-400 mt-0.5 line-clamp-2">
+                          <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                             {pin.note}
                           </div>
                         )}
@@ -591,7 +581,7 @@ export default function TripDetailPage() {
                               {(member?.user?.display_name || member?.user?.username || '?')[0]}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-[11px] text-olive-500">
+                          <span className="text-xs text-muted-foreground">
                             {member?.user?.display_name || member?.user?.username || 'Unknown'}
                           </span>
                           {pin.source_url && (
@@ -600,7 +590,7 @@ export default function TripDetailPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="text-[11px] text-olive-700 dark:text-olive-400 underline underline-offset-2 hover:text-olive-800 dark:hover:text-olive-300"
+                              className="text-xs text-primary underline underline-offset-2 hover:text-primary/80"
                             >
                               open
                             </a>
@@ -614,10 +604,10 @@ export default function TripDetailPage() {
                             handleCheckIn(pin.id, Boolean(pin.visited_at))
                           }}
                           className={cn(
-                            'p-1 rounded',
+                            'p-1 rounded-md transition-colors',
                             pin.visited_at
-                              ? 'text-olive-700 dark:text-olive-400 hover:bg-olive-50 dark:hover:bg-olive-900/20'
-                              : 'text-stone-400 dark:text-stone-500 hover:bg-stone-100 dark:hover:bg-white/[0.06]'
+                              ? 'text-primary hover:bg-primary/10'
+                              : 'text-muted-foreground hover:bg-muted'
                           )}
                           aria-label={pin.visited_at ? 'Mark unvisited' : 'Check in'}
                           title={pin.visited_at ? 'Visited — click to undo' : 'Check in here'}
@@ -630,7 +620,7 @@ export default function TripDetailPage() {
                               e.stopPropagation()
                               handleDeletePin(pin.id)
                             }}
-                            className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500"
+                            className="p-1 rounded-md text-destructive transition-colors hover:bg-destructive/10"
                             aria-label="Delete pin"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -653,10 +643,10 @@ export default function TripDetailPage() {
             <DialogTitle>Share this trip</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-olive-50 dark:bg-white/5">
+            <div className="flex items-center justify-between rounded-xl bg-muted/50 p-4">
               <div>
-                <p className="font-medium text-sm">Public link</p>
-                <p className="text-xs text-olive-600 dark:text-olive-400">
+                <p className="font-medium text-sm text-foreground">Public link</p>
+                <p className="text-xs text-muted-foreground">
                   Anyone with the link can view this trip (read-only).
                 </p>
               </div>
@@ -665,7 +655,6 @@ export default function TripDetailPage() {
                 variant={trip.is_public ? 'outline' : 'default'}
                 onClick={() => handleToggleShare(!trip.is_public)}
                 disabled={sharingBusy}
-                className={trip.is_public ? '' : 'bg-olive-700 hover:bg-olive-800 text-white'}
               >
                 {sharingBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : trip.is_public ? 'Unshare' : 'Enable'}
               </Button>
@@ -699,25 +688,25 @@ export default function TripDetailPage() {
           </DialogHeader>
           {suggesting ? (
             <div className="flex items-center justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-olive-600" />
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : dayPlans.length === 0 ? (
-            <p className="text-sm text-olive-500 py-6">
+            <p className="text-sm text-muted-foreground py-6">
               Add a few pins first, then we&apos;ll cluster them into a walkable day-by-day plan.
             </p>
           ) : (
             <div className="space-y-4 max-h-[400px] overflow-y-auto">
               {dayPlans.map((plan) => (
-                <div key={plan.day} className="border border-stone-200 dark:border-white/10 rounded-lg p-3">
+                <div key={plan.day} className="rounded-xl bg-muted/50 p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold text-sm text-olive-950 dark:text-olive-50">
+                    <h4 className="font-heading font-semibold text-sm text-foreground">
                       Day {plan.day}: {plan.title}
                     </h4>
-                    <span className="text-xs text-olive-500">
+                    <span className="text-xs font-mono tracking-wide text-muted-foreground">
                       ~{plan.total_walking_km} km walking
                     </span>
                   </div>
-                  <ol className="space-y-1 pl-5 list-decimal text-sm text-olive-700 dark:text-olive-300">
+                  <ol className="space-y-1 pl-5 list-decimal text-sm text-foreground">
                     {plan.pins.map((pin) => (
                       <li key={pin.id}>{pin.name}</li>
                     ))}
@@ -754,13 +743,13 @@ export default function TripDetailPage() {
                   }
                 }}
               />
-              <p className="text-xs text-olive-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 They&apos;ll get a color automatically. You can invite multiple people.
               </p>
             </div>
-            {inviteError && <p className="text-xs text-red-600">{inviteError}</p>}
+            {inviteError && <p className="text-xs text-destructive">{inviteError}</p>}
             <div className="pt-2">
-              <h4 className="text-xs font-medium text-olive-600 mb-2">Current members</h4>
+              <h4 className="text-xs font-medium text-muted-foreground mb-2">Current members</h4>
               <div className="flex flex-wrap gap-2">
                 {members.map((m) => (
                   <Badge key={m.id} variant="outline" className="flex items-center gap-1.5">
@@ -780,7 +769,6 @@ export default function TripDetailPage() {
               Close
             </Button>
             <Button
-              className="bg-olive-700 hover:bg-olive-800 text-white"
               onClick={handleInvite}
               disabled={inviting || !inviteUsername.trim()}
             >
@@ -795,12 +783,7 @@ export default function TripDetailPage() {
       {actionError && (
         <div
           role="alert"
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl text-xs font-medium shadow-lg"
-          style={{
-            background: 'var(--color-coral-tint)',
-            color: 'var(--color-stamp)',
-            border: '1px solid var(--color-coral)',
-          }}
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-xl border border-destructive/30 bg-card px-4 py-2.5 text-xs font-medium text-destructive shadow-lg"
         >
           {actionError}
         </div>

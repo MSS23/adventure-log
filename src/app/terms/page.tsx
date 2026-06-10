@@ -8,20 +8,19 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-ivory)', color: 'var(--color-ink)' }}>
-      <div className="max-w-2xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
         <Link
           href="/"
-          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest)] rounded-sm"
-          style={{ color: 'var(--color-muted-warm)' }}
+          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Home
         </Link>
 
-        <p className="al-eyebrow mt-6 mb-2">Last updated · April 2026</p>
-        <h1 className="al-display text-4xl mb-4">Terms of Service</h1>
-        <p className="al-body mb-8">
+        <p className="al-eyebrow mt-8 mb-1">Last updated · April 2026</p>
+        <h1 className="al-display text-3xl md:text-4xl mb-4">Terms of Service</h1>
+        <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
           By creating an Adventure Log account you agree to these terms. They cover what you can do with the service and what we ask of you in return.
         </p>
 
@@ -67,7 +66,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="9. Contact">
-          <p>Questions about these Terms? Email <a className="underline" style={{ color: 'var(--color-coral)' }} href="mailto:hello@adventure-log.app">hello@adventure-log.app</a>.</p>
+          <p>Questions about these Terms? Email <a className="text-primary underline" href="mailto:hello@adventure-log.app">hello@adventure-log.app</a>.</p>
         </Section>
       </div>
     </div>
@@ -77,13 +76,10 @@ export default function TermsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8">
-      <h2
-        className="font-heading text-xl font-semibold mb-3"
-        style={{ color: 'var(--color-ink)', letterSpacing: '-0.01em' }}
-      >
+      <h2 className="al-display text-xl md:text-2xl mb-3">
         {title}
       </h2>
-      <div className="al-body space-y-3">{children}</div>
+      <div className="text-sm md:text-[15px] leading-relaxed text-muted-foreground space-y-3 [&_strong]:font-semibold [&_strong]:text-foreground">{children}</div>
     </section>
   )
 }

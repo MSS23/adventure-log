@@ -47,48 +47,44 @@ const CHANNELS = [
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-ivory)', color: 'var(--color-ink)' }}>
-      <div className="max-w-3xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-12 space-y-8">
         <Link
           href="/"
-          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest)] rounded-sm"
-          style={{ color: 'var(--color-muted-warm)' }}
+          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Home
         </Link>
 
-        <p className="al-eyebrow mt-6 mb-2">We&apos;d love to hear from you</p>
-        <h1 className="al-display text-4xl mb-4">Contact Us</h1>
-        <p className="al-body mb-10 max-w-prose">
-          Have questions, feedback, or need support? We&apos;re here to help. Pick the channel that fits best.
-        </p>
+        <header className="space-y-1">
+          <p className="al-eyebrow">We&apos;d love to hear from you</p>
+          <h1 className="al-display text-3xl md:text-4xl">Contact Us</h1>
+          <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground max-w-prose">
+            Have questions, feedback, or need support? We&apos;re here to help. Pick the channel that fits best.
+          </p>
+        </header>
 
         {/* Channels grid */}
-        <div className="grid sm:grid-cols-2 gap-4 mb-6">
+        <div className="grid sm:grid-cols-2 gap-4">
           {CHANNELS.map((c) => (
             <div
               key={c.title}
-              className="al-card p-5 transition-all duration-200 hover:-translate-y-0.5"
-              style={{ boxShadow: '0 1px 2px rgba(26,20,14,0.04), 0 4px 16px rgba(26,20,14,0.06)' }}
+              className="rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div
-                  className="p-2 rounded-lg"
-                  style={{ background: 'var(--color-forest-tint)' }}
-                >
-                  <c.icon className="h-5 w-5" style={{ color: 'var(--color-forest)' }} />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <c.icon className="h-5 w-5" />
                 </div>
-                <h2 className="font-heading text-base font-semibold" style={{ color: 'var(--color-ink)' }}>
+                <h2 className="font-heading text-base font-semibold text-foreground">
                   {c.title}
                 </h2>
               </div>
-              <p className="al-body text-sm mb-4">{c.desc}</p>
+              <p className="text-sm text-muted-foreground mb-4">{c.desc}</p>
               <a
                 href={c.href}
                 {...(c.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className="inline-flex items-center gap-2 text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest)] rounded-sm py-0.5"
-                style={{ color: 'var(--color-forest)' }}
+                className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm py-0.5"
               >
                 <c.ctaIcon className="h-4 w-4" />
                 {c.cta}
@@ -98,41 +94,34 @@ export default function ContactPage() {
         </div>
 
         {/* Business inquiries */}
-        <div className="al-card p-6 mb-6">
-          <h2 className="font-heading text-lg font-semibold mb-2" style={{ color: 'var(--color-ink)' }}>
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-heading text-base md:text-lg font-semibold text-foreground mb-2">
             Business Inquiries
           </h2>
-          <p className="al-body mb-4">
+          <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-4">
             For partnerships, press inquiries, or other business matters:
           </p>
           <a
             href="mailto:business@adventurelog.app"
-            className="font-mono text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-forest)] rounded-sm"
-            style={{ color: 'var(--color-coral)' }}
+            className="font-mono text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
           >
             business@adventurelog.app
           </a>
         </div>
 
         {/* Response time */}
-        <div
-          className="rounded-2xl p-6"
-          style={{
-            background: 'var(--color-gold-tint)',
-            border: '1px solid var(--color-line-warm)',
-          }}
-        >
-          <h2 className="font-heading text-base font-semibold mb-2" style={{ color: 'var(--color-ink)' }}>
+        <div className="rounded-2xl bg-muted/50 p-6">
+          <h2 className="font-heading text-base font-semibold text-foreground mb-2">
             Response Time
           </h2>
-          <p className="al-body">
+          <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground">
             We typically respond within 24–48 hours during business days. For urgent issues, please add &quot;URGENT&quot; to your subject line.
           </p>
         </div>
 
-        <p className="al-caption mt-10">
+        <p className="text-xs text-muted-foreground">
           Prefer to look around first?{' '}
-          <Link href="/discover" className="underline" style={{ color: 'var(--color-forest)' }}>
+          <Link href="/discover" className="text-primary underline">
             Explore the community globe
           </Link>
           .

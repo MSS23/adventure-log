@@ -57,55 +57,51 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
 
   return (
     <div className={cn("relative w-full group", className)}>
-      <div className="relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300">
-        {/* Background Image with Ken Burns effect on hover */}
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
+        {/* Background Image */}
         <div className="relative h-[240px] sm:h-[320px] md:h-[400px] w-full overflow-hidden">
           <div
-            className="absolute inset-0 bg-cover bg-center scale-105 group-hover:scale-110 transition-transform duration-[8s] ease-out"
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03]"
             style={{
               backgroundImage: `url(${destination.imageUrl})`
             }}
           />
 
-          {/* Enhanced Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
+          {/* Scrim for text legibility */}
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
 
           {/* Content */}
           <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10">
             <div className="max-w-2xl space-y-3 sm:space-y-4">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                <div className="h-2 w-2 rounded-full animate-pulse" style={{ background: 'var(--color-gold-soft)' }} />
-                <span className="text-xs font-medium text-white/90 uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/30 px-3 py-1.5 backdrop-blur-md">
+                <div className="h-2 w-2 rounded-full" style={{ background: 'var(--color-gold-soft)' }} />
+                <span className="font-mono text-xs font-medium uppercase tracking-wider text-white/90">
                   Featured This Week
                 </span>
               </div>
 
               {/* Location Name */}
               <div className="space-y-1">
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
+                <h3 className="al-display text-2xl sm:text-3xl md:text-4xl !text-white leading-tight drop-shadow-sm">
                   {destination.name}
                 </h3>
-                <p className="text-base sm:text-lg md:text-xl text-white/90 flex items-center gap-2">
+                <p className="text-base sm:text-lg text-white/90 flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   {destination.country}
                 </p>
               </div>
 
               {/* Description */}
-              <p className="text-sm md:text-base text-white/85 max-w-xl leading-relaxed">
+              <p className="text-sm md:text-base text-white/90 max-w-xl leading-relaxed">
                 {destination.description}
               </p>
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap gap-3 pt-1">
                 <Link href={`/search?q=${encodeURIComponent(destination.searchQuery || destination.name)}`}>
-                  <Button
-                    size="default"
-                    className="text-white font-semibold rounded-full px-6 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200 border-0"
-                    style={{ background: 'var(--color-coral)' }}
-                  >
+                  <Button variant="coral" size="default">
                     <span className="flex items-center gap-2">
                       Explore Journeys
                       <ArrowRight className="h-4 w-4" />
@@ -114,9 +110,9 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
                 </Link>
 
                 <Button
-                  size="default"
+                  size="pill"
                   variant="outline"
-                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-medium rounded-full px-5 shadow-lg"
+                  className="border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white hover:border-white/40"
                 >
                   Learn More
                 </Button>
@@ -126,13 +122,13 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
 
           {/* Decorative elements */}
           <div className="absolute top-6 right-6 hidden md:block">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/10">
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 backdrop-blur-md">
               <div className="flex -space-x-1.5">
                 <div className="h-6 w-6 rounded-full border-2 border-white" style={{ background: 'var(--color-forest-soft)' }} />
                 <div className="h-6 w-6 rounded-full border-2 border-white" style={{ background: 'var(--color-gold-soft)' }} />
                 <div className="h-6 w-6 rounded-full border-2 border-white" style={{ background: 'var(--color-coral-soft)' }} />
               </div>
-              <span className="text-xs text-white/90 font-medium ml-1">
+              <span className="ml-1 text-xs font-medium text-white/90">
                 234 travelers visited
               </span>
             </div>

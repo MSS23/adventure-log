@@ -102,12 +102,12 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
   const activeDays = useMemo(() => cells.filter(c => c.count > 0).length, [cells])
 
   function getColor(count: number): string {
-    if (count === 0) return 'bg-stone-100 dark:bg-stone-800/60'
+    if (count === 0) return 'bg-muted'
     const ratio = count / maxCount
-    if (ratio > 0.75) return 'bg-olive-600 dark:bg-olive-400'
-    if (ratio > 0.5) return 'bg-olive-500 dark:bg-olive-500'
-    if (ratio > 0.25) return 'bg-olive-300 dark:bg-olive-600'
-    return 'bg-olive-200 dark:bg-olive-700'
+    if (ratio > 0.75) return 'bg-primary'
+    if (ratio > 0.5) return 'bg-primary/75'
+    if (ratio > 0.25) return 'bg-primary/50'
+    return 'bg-primary/30'
   }
 
   // Group cells into weeks for rendering
@@ -139,9 +139,9 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
   if (activeDays === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
-        <Calendar className="h-8 w-8 text-stone-300 dark:text-stone-600 mb-3" />
-        <p className="text-sm text-stone-500 dark:text-stone-400">No travel activity recorded yet</p>
-        <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+        <Calendar className="h-8 w-8 text-muted-foreground/50 mb-3" />
+        <p className="text-sm text-muted-foreground">No travel activity recorded yet</p>
+        <p className="text-xs text-muted-foreground mt-1">
           Add albums with dates to see your {year} activity here.
         </p>
       </div>
@@ -152,8 +152,8 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
     <div>
       {/* Active days summary */}
       <div className="flex items-baseline gap-1.5 mb-4">
-        <span className="text-2xl font-bold text-stone-900 dark:text-white">{activeDays}</span>
-        <span className="text-sm text-stone-500 dark:text-stone-400">active days in {year}</span>
+        <span className="al-stat-value text-2xl">{activeDays}</span>
+        <span className="text-sm text-muted-foreground">active days in {year}</span>
       </div>
 
       <div className="overflow-x-auto -mx-1 px-1 pb-1">
@@ -166,7 +166,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
               return (
                 <div
                   key={`${m.month}-${i}`}
-                  className="text-[11px] text-stone-400 dark:text-stone-500 font-medium"
+                  className="text-[11px] text-muted-foreground font-medium"
                   style={{ width: span * (CELL + GAP) }}
                 >
                   {m.month}
@@ -181,7 +181,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
               <div key={dayIdx} className="flex items-center" style={{ gap: GAP }}>
                 {/* Day label */}
                 <div
-                  className="text-[10px] text-stone-400 dark:text-stone-500 text-right shrink-0"
+                  className="text-[10px] text-muted-foreground text-right shrink-0"
                   style={{ width: DAY_LABEL_W }}
                 >
                   {dayIdx === 0 ? 'M' : dayIdx === 2 ? 'W' : dayIdx === 4 ? 'F' : ''}
@@ -197,7 +197,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
                     <div
                       key={weekIdx}
                       className={cn(
-                        'rounded-sm transition-all duration-150 hover:ring-1 hover:ring-olive-400/50',
+                        'rounded-sm transition-all duration-150 hover:ring-1 hover:ring-ring/50',
                         cell.count > 0 && 'cursor-pointer',
                         getColor(cell.count)
                       )}
@@ -211,14 +211,14 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
           </div>
 
           {/* Legend */}
-          <div className="flex items-center justify-end gap-1.5 mt-3 text-[11px] text-stone-400 dark:text-stone-500">
+          <div className="flex items-center justify-end gap-1.5 mt-3 text-[11px] text-muted-foreground">
             <span>Less</span>
             {[
-              'bg-stone-100 dark:bg-stone-800/60',
-              'bg-olive-200 dark:bg-olive-700',
-              'bg-olive-300 dark:bg-olive-600',
-              'bg-olive-500 dark:bg-olive-500',
-              'bg-olive-600 dark:bg-olive-400',
+              'bg-muted',
+              'bg-primary/30',
+              'bg-primary/50',
+              'bg-primary/75',
+              'bg-primary',
             ].map((c, i) => (
               <div key={i} className={cn('rounded-sm', c)} style={{ width: CELL, height: CELL }} />
             ))}
@@ -249,7 +249,7 @@ function Section({ children, className, delay = 0 }: { children: React.ReactNode
   return (
     <motion.div
       className={cn(
-        'rounded-2xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 p-5 sm:p-6 transition-shadow duration-200 hover:shadow-sm',
+        'rounded-2xl border border-border bg-card p-5 sm:p-6',
         className
       )}
       initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
@@ -263,8 +263,8 @@ function Section({ children, className, delay = 0 }: { children: React.ReactNode
 
 function SectionTitle({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
   return (
-    <h2 className="text-lg font-semibold text-stone-900 dark:text-white flex items-center gap-2 mb-5">
-      <Icon className="h-5 w-5 text-olive-500" />
+    <h2 className="font-heading text-base md:text-lg font-semibold text-foreground flex items-center gap-2 mb-5">
+      <Icon className="h-5 w-5 text-primary" />
       {children}
     </h2>
   )
@@ -415,11 +415,11 @@ export default function AnalyticsPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="w-14 h-14 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto mb-4">
-            <BarChart3 className="h-7 w-7 text-stone-400 dark:text-stone-500" />
+          <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+            <BarChart3 className="h-7 w-7" />
           </div>
-          <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your analytics</p>
-          <button onClick={() => router.push('/login')}><Button className="cursor-pointer bg-olive-600 hover:bg-olive-700 active:scale-[0.97] text-white transition-all duration-200">Log In</Button></button>
+          <p className="text-muted-foreground mb-4">Log in to view your analytics</p>
+          <Button onClick={() => router.push('/login')} className="cursor-pointer">Log In</Button>
         </div>
       </div>
     )
@@ -430,11 +430,11 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <motion.div
-            className="h-10 w-10 rounded-full border-3 border-olive-200 dark:border-olive-800 border-t-olive-600 mx-auto mb-4"
+            className="h-10 w-10 rounded-full border-3 border-muted border-t-primary mx-auto mb-4"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
-          <p className="text-stone-500 dark:text-stone-400 text-sm">Loading analytics...</p>
+          <p className="text-muted-foreground text-sm">Loading analytics...</p>
         </div>
       </div>
     )
@@ -444,8 +444,8 @@ export default function AnalyticsPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <Globe2 className="h-10 w-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
-          <p className="text-stone-500 dark:text-stone-400">Unable to load analytics</p>
+          <Globe2 className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-muted-foreground">Unable to load analytics</p>
         </div>
       </div>
     )
@@ -468,7 +468,7 @@ export default function AnalyticsPage() {
         >
           <p className="al-eyebrow mb-1">Dashboard</p>
           <h1 className="al-display text-3xl md:text-4xl">Analytics</h1>
-          <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
             Your travel numbers, mapped out.
           </p>
         </motion.div>
@@ -485,16 +485,16 @@ export default function AnalyticsPage() {
           ].map((card, i) => (
             <motion.div
               key={card.label}
-              className="rounded-xl border border-stone-200 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 p-4 hover:border-olive-300/50 dark:hover:border-olive-700/40 hover:shadow-sm transition-all duration-200"
+              className="rounded-2xl border border-border bg-card p-4 transition-colors duration-200 hover:border-primary/30"
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04, type: 'spring', stiffness: 300, damping: 28 }}
             >
-              <card.icon className="h-5 w-5 text-olive-500 mb-2" />
-              <div className="text-2xl font-bold text-stone-900 dark:text-white">
+              <card.icon className="h-5 w-5 text-primary mb-2" />
+              <div className="al-stat-value text-2xl">
                 <AnimatedCounter value={card.value} duration={0.6} />
               </div>
-              <div className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{card.label}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{card.label}</div>
             </motion.div>
           ))}
         </div>
@@ -504,9 +504,9 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between mb-6">
             <SectionTitle icon={Calendar}>Travel Activity</SectionTitle>
             <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => y - 1)} className="cursor-pointer h-8 w-8 p-0 text-xs active:scale-[0.93] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500" aria-label="Previous year">&larr;</Button>
-              <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 min-w-[3.5rem] text-center tabular-nums">{heatmapYear}</span>
-              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => Math.min(y + 1, new Date().getFullYear()))} disabled={heatmapYear >= new Date().getFullYear()} className="cursor-pointer h-8 w-8 p-0 text-xs active:scale-[0.93] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500" aria-label="Next year">&rarr;</Button>
+              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => y - 1)} className="cursor-pointer h-8 w-8 p-0 text-xs" aria-label="Previous year">&larr;</Button>
+              <span className="text-sm font-semibold text-foreground min-w-[3.5rem] text-center tabular-nums">{heatmapYear}</span>
+              <Button variant="outline" size="sm" onClick={() => setHeatmapYear(y => Math.min(y + 1, new Date().getFullYear()))} disabled={heatmapYear >= new Date().getFullYear()} className="cursor-pointer h-8 w-8 p-0 text-xs" aria-label="Next year">&rarr;</Button>
             </div>
           </div>
           <TravelHeatmap data={stats.heatmapData} year={heatmapYear} />
@@ -519,8 +519,8 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between mb-5">
               <SectionTitle icon={Globe2}>Top Destinations</SectionTitle>
               <div className="text-right">
-                <p className="text-xl font-bold text-olive-600 dark:text-olive-400">{worldPercentage}%</p>
-                <p className="text-[11px] text-stone-500 dark:text-stone-400">of the world</p>
+                <p className="al-stat-value text-xl text-primary">{worldPercentage}%</p>
+                <p className="text-[11px] text-muted-foreground">of the world</p>
               </div>
             </div>
             <div className="space-y-3">
@@ -531,13 +531,13 @@ export default function AnalyticsPage() {
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         <span className="text-base">{getFlagEmoji(dest.country_code)}</span>
-                        <span className="text-sm text-stone-700 dark:text-stone-300">{dest.country_name}</span>
+                        <span className="text-sm text-foreground">{dest.country_name}</span>
                       </div>
-                      <span className="text-xs text-stone-500 dark:text-stone-400">{dest.count} {dest.count === 1 ? 'album' : 'albums'}</span>
+                      <span className="font-mono text-xs tracking-wide text-muted-foreground">{dest.count} {dest.count === 1 ? 'album' : 'albums'}</span>
                     </div>
-                    <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                       <motion.div
-                        className="h-full rounded-full bg-olive-500 dark:bg-olive-400"
+                        className="h-full rounded-full bg-primary"
                         initial={prefersReducedMotion ? { width: `${widthPct}%` } : { width: 0 }}
                         animate={{ width: `${widthPct}%` }}
                         transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -547,7 +547,7 @@ export default function AnalyticsPage() {
                 )
               })}
               {stats.topDestinations.length === 0 && (
-                <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-6">No country data yet</p>
+                <p className="text-muted-foreground text-sm text-center py-6">No country data yet</p>
               )}
             </div>
           </Section>
@@ -560,11 +560,11 @@ export default function AnalyticsPage() {
                 const heightPct = maxMonthCount > 0 ? (m.count / maxMonthCount) * 100 : 0
                 return (
                   <div key={m.month} className="flex-1 flex flex-col items-center justify-end group cursor-pointer">
-                    <div className="text-[10px] text-stone-500 dark:text-stone-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="text-[10px] text-muted-foreground mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       {m.count || ''}
                     </div>
                     <motion.div
-                      className="w-full rounded-t bg-olive-500 dark:bg-olive-400 group-hover:bg-olive-600 dark:group-hover:bg-olive-300 transition-colors duration-200"
+                      className="w-full rounded-t bg-primary/70 group-hover:bg-primary transition-colors duration-200"
                       initial={prefersReducedMotion ? { height: `${Math.max(heightPct, m.count > 0 ? 8 : 0)}%` } : { height: 0 }}
                       animate={{ height: `${Math.max(heightPct, m.count > 0 ? 8 : 0)}%` }}
                       transition={{ type: 'spring', stiffness: 100, damping: 15, delay: 0.3 }}
@@ -573,25 +573,25 @@ export default function AnalyticsPage() {
                 )
               })}
             </div>
-            <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-700 pt-2 mt-1">
+            <div className="flex items-center justify-between border-t border-border pt-2 mt-1">
               {stats.photosByMonth.map(m => (
                 <div key={m.month} className="flex-1 text-center">
-                  <span className="text-[10px] text-stone-500 dark:text-stone-400">{m.month}</span>
+                  <span className="text-[10px] text-muted-foreground">{m.month}</span>
                 </div>
               ))}
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-3 mt-5 pt-5 border-t border-stone-100 dark:border-stone-700">
+            <div className="grid grid-cols-2 gap-3 mt-5 pt-5 border-t border-border">
               <div className="text-center">
-                <p className="text-xl font-bold text-stone-900 dark:text-white">{stats.averagePhotosPerAlbum}</p>
-                <p className="text-xs text-stone-500 dark:text-stone-400">Avg photos/album</p>
+                <p className="al-stat-value text-xl">{stats.averagePhotosPerAlbum}</p>
+                <p className="text-xs text-muted-foreground">Avg photos/album</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold text-stone-900 dark:text-white">
+                <p className="al-stat-value text-xl">
                   {stats.photosByYear.reduce((max, y) => y.count > max.count ? y : max, stats.photosByYear[0])?.year || '—'}
                 </p>
-                <p className="text-xs text-stone-500 dark:text-stone-400">Most active year</p>
+                <p className="text-xs text-muted-foreground">Most active year</p>
               </div>
             </div>
           </Section>
@@ -608,15 +608,15 @@ export default function AnalyticsPage() {
                 const isHighest = yearData.count === maxPhotoCount && yearData.count > 0
                 return (
                   <div key={yearData.year} className="flex-1 flex flex-col items-center justify-end group cursor-pointer">
-                    <div className="text-xs text-stone-500 dark:text-stone-400 mb-1.5 font-medium">
+                    <div className="text-xs text-muted-foreground mb-1.5 font-medium">
                       {yearData.count || ''}
                     </div>
                     <motion.div
                       className={cn(
                         'w-full rounded-t-lg',
                         isHighest
-                          ? 'bg-olive-600 dark:bg-olive-400'
-                          : 'bg-olive-400 dark:bg-olive-600 group-hover:bg-olive-500 dark:group-hover:bg-olive-500 transition-colors duration-200'
+                          ? 'bg-primary'
+                          : 'bg-primary/60 group-hover:bg-primary/80 transition-colors duration-200'
                       )}
                       initial={prefersReducedMotion ? { height: `${Math.max(heightPct, yearData.count > 0 ? 10 : 0)}%` } : { height: 0 }}
                       animate={{ height: `${Math.max(heightPct, yearData.count > 0 ? 10 : 0)}%` }}
@@ -626,10 +626,10 @@ export default function AnalyticsPage() {
                 )
               })}
             </div>
-            <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-700 pt-2.5 mt-1">
+            <div className="flex items-center justify-between border-t border-border pt-2.5 mt-1">
               {stats.photosByYear.map(y => (
                 <div key={y.year} className="flex-1 text-center">
-                  <span className="text-xs text-stone-500 dark:text-stone-400">{y.year}</span>
+                  <span className="font-mono text-xs tracking-wide text-muted-foreground">{y.year}</span>
                 </div>
               ))}
             </div>
@@ -639,31 +639,31 @@ export default function AnalyticsPage() {
           <Section delay={0.3}>
             <SectionTitle icon={Users}>Social</SectionTitle>
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-stone-50 dark:bg-stone-700/40 rounded-xl p-3 text-center transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-700/60">
-                <p className="text-2xl font-bold text-stone-900 dark:text-white">
+              <div className="rounded-xl bg-muted/50 p-3 text-center transition-colors duration-200 hover:bg-muted/70">
+                <p className="al-stat-value text-2xl">
                   <AnimatedCounter value={stats.followerCount} />
                 </p>
-                <p className="text-xs text-stone-500 dark:text-stone-400">Followers</p>
+                <p className="text-xs text-muted-foreground">Followers</p>
               </div>
-              <div className="bg-stone-50 dark:bg-stone-700/40 rounded-xl p-3 text-center transition-colors duration-200 hover:bg-stone-100 dark:hover:bg-stone-700/60">
-                <p className="text-2xl font-bold text-stone-900 dark:text-white">
+              <div className="rounded-xl bg-muted/50 p-3 text-center transition-colors duration-200 hover:bg-muted/70">
+                <p className="al-stat-value text-2xl">
                   <AnimatedCounter value={stats.followingCount} />
                 </p>
-                <p className="text-xs text-stone-500 dark:text-stone-400">Following</p>
+                <p className="text-xs text-muted-foreground">Following</p>
               </div>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
-                  <Heart className="h-3.5 w-3.5 text-red-400" /> Likes Received
+                <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <Heart className="h-3.5 w-3.5 text-accent" /> Likes Received
                 </span>
-                <span className="text-sm font-semibold text-stone-900 dark:text-white">{stats.totalLikes}</span>
+                <span className="text-sm font-semibold text-foreground">{stats.totalLikes}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-stone-600 dark:text-stone-400 flex items-center gap-1.5">
-                  <MessageCircle className="h-3.5 w-3.5 text-olive-400" /> Comments
+                <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <MessageCircle className="h-3.5 w-3.5 text-primary" /> Comments
                 </span>
-                <span className="text-sm font-semibold text-stone-900 dark:text-white">{stats.totalComments}</span>
+                <span className="text-sm font-semibold text-foreground">{stats.totalComments}</span>
               </div>
             </div>
           </Section>

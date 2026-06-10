@@ -105,7 +105,7 @@ export function CountryShowcase() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-olive-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
@@ -113,19 +113,21 @@ export function CountryShowcase() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">{error}</p>
+        <p className="text-destructive">{error}</p>
       </div>
     )
   }
 
   if (albums.length === 0) {
     return (
-      <div className="text-center py-16">
-        <MapPin className="h-16 w-16 mx-auto text-stone-300 mb-4" />
-        <h3 className="text-lg font-semibold text-stone-900 mb-2">
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden>
+          <MapPin className="h-6 w-6" />
+        </div>
+        <h3 className="font-heading text-lg font-semibold text-foreground">
           No Albums Yet
         </h3>
-        <p className="text-stone-600">
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
           Create your first album to see it organized by country here.
         </p>
       </div>
@@ -135,7 +137,7 @@ export function CountryShowcase() {
   if (filteredCountries.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-stone-600">No countries found matching &quot;{searchQuery}&quot;</p>
+        <p className="text-sm text-muted-foreground">No countries found matching &quot;{searchQuery}&quot;</p>
       </div>
     )
   }
@@ -144,16 +146,16 @@ export function CountryShowcase() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-stone-900 mb-2">
+        <h2 className="al-display text-xl md:text-2xl mb-1">
           My Adventures by Country
         </h2>
-        <p className="text-stone-600 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           Browse your travel albums organized by the countries you&apos;ve visited.
         </p>
 
         {/* Search Bar */}
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search for a country..."

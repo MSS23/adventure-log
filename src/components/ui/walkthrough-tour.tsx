@@ -413,7 +413,7 @@ export function WalkthroughTour({
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
-                className="absolute rounded-xl ring-2 ring-olive-400/60 dark:ring-olive-500/50 pointer-events-none"
+                className="absolute rounded-xl ring-2 ring-ring/50 pointer-events-none"
                 style={{
                   top: targetRect.top - padding,
                   left: targetRect.left - padding,
@@ -442,11 +442,11 @@ export function WalkthroughTour({
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 border border-stone-200/60 dark:border-white/[0.1] overflow-hidden">
+              <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden">
                 {/* Progress bar */}
-                <div className="h-1 bg-stone-100 dark:bg-stone-800">
+                <div className="h-1 bg-muted">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-olive-500 to-olive-600"
+                    className="h-full bg-primary"
                     initial={{ width: 0 }}
                     animate={{
                       width: `${((currentStep + 1) / steps.length) * 100}%`,
@@ -458,12 +458,12 @@ export function WalkthroughTour({
                 <div className="p-5">
                   {/* Step counter + close */}
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-olive-600 dark:text-olive-400 bg-olive-50 dark:bg-olive-900/30 px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                       {currentStep + 1} of {steps.length}
                     </span>
                     <button
                       onClick={() => endTour(false)}
-                      className="p-1 rounded-lg text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                      className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       aria-label="Close tour"
                     >
                       <X className="h-4 w-4" />
@@ -473,17 +473,17 @@ export function WalkthroughTour({
                   {/* Icon + Title */}
                   <div className="flex items-start gap-3 mb-2">
                     {step.icon && (
-                      <div className="shrink-0 p-2 rounded-xl bg-olive-50 dark:bg-olive-900/20 text-olive-600 dark:text-olive-400">
+                      <div className="shrink-0 p-2 rounded-xl bg-primary/10 text-primary">
                         {step.icon}
                       </div>
                     )}
-                    <h3 className="text-base font-semibold text-stone-900 dark:text-white leading-snug pt-1">
+                    <h3 className="font-heading text-base font-semibold text-foreground leading-snug pt-1">
                       {step.title}
                     </h3>
                   </div>
 
                   {/* Description */}
-                  <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed mb-5 ml-0">
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-5 ml-0">
                     {step.description}
                   </p>
 
@@ -491,7 +491,7 @@ export function WalkthroughTour({
                   <div className="flex items-center justify-between gap-2">
                     <button
                       onClick={() => endTour(false)}
-                      className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors px-2 py-1"
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
                     >
                       Skip tour
                     </button>
@@ -499,7 +499,7 @@ export function WalkthroughTour({
                       {!isFirst && (
                         <button
                           onClick={() => goToStep(currentStep - 1)}
-                          className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                          className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                         >
                           <ChevronLeft className="h-3.5 w-3.5" />
                           Back
@@ -507,7 +507,7 @@ export function WalkthroughTour({
                       )}
                       <button
                         onClick={() => goToStep(currentStep + 1)}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-olive-600 to-olive-700 hover:from-olive-700 hover:to-olive-800 text-white shadow-sm transition-all"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all"
                       >
                         {isLast ? (
                           'Got it!'
@@ -531,9 +531,9 @@ export function WalkthroughTour({
                     onClick={() => goToStep(i)}
                     className={`h-1.5 rounded-full transition-all duration-300 ${
                       i === currentStep
-                        ? 'w-6 bg-olive-500'
+                        ? 'w-6 bg-primary'
                         : i < currentStep
-                          ? 'w-1.5 bg-olive-400/50'
+                          ? 'w-1.5 bg-primary/40'
                           : 'w-1.5 bg-white/40'
                     }`}
                     aria-label={`Go to step ${i + 1}`}
@@ -566,7 +566,7 @@ export function TourTriggerButton({
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-olive-700 dark:text-olive-400 bg-olive-50 dark:bg-olive-900/20 hover:bg-olive-100 dark:hover:bg-olive-900/30 border border-olive-200/60 dark:border-olive-800/40 transition-colors"
+      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 transition-colors"
     >
       <Sparkles className="h-4 w-4" />
       {label}

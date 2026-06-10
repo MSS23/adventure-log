@@ -300,8 +300,8 @@ export function Sidebar() {
                 disabled={loggingOut}
                 whileTap={{ scale: 0.96 }}
                 className={cn(
-                  'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200',
-                  'text-[color:var(--color-muted-warm)] hover:text-red-600 hover:bg-red-50/80 dark:hover:bg-red-900/15 dark:hover:text-red-300',
+                  'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors duration-200',
+                  'text-muted-foreground hover:text-destructive hover:bg-destructive/10',
                   loggingOut && 'opacity-50 cursor-not-allowed',
                 )}
               >

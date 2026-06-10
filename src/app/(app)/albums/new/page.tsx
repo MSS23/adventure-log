@@ -58,32 +58,21 @@ export default function NewAlbumPage() {
       >
         <p className="al-eyebrow mb-2">New entry</p>
         <h1 className="al-display text-3xl md:text-4xl">Create an adventure</h1>
-        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+        <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
           Share your journey with the world — or keep it just for you.
         </p>
 
         {/* Mode Toggle — editorial pill group */}
-        <div
-          className="mt-5 inline-flex items-center rounded-full p-[3px] gap-0.5"
-          style={{
-            background: 'var(--color-ivory-alt)',
-            border: '1px solid var(--color-line-warm)',
-          }}
-        >
+        <div className="mt-5 inline-flex items-center rounded-full border border-border bg-muted/50 p-[3px] gap-0.5">
           <button
             type="button"
             onClick={() => setMode('quick')}
             className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97]'
-            )}
-            style={
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97]',
               mode === 'quick'
-                ? {
-                    background: 'var(--color-ink)',
-                    color: 'var(--color-ivory)',
-                  }
-                : { background: 'transparent', color: 'var(--color-ink-soft)' }
-            }
+                ? 'bg-foreground text-background'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             <Zap className="h-3.5 w-3.5" />
             Quick Post
@@ -92,16 +81,11 @@ export default function NewAlbumPage() {
             type="button"
             onClick={() => setMode('full')}
             className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97]'
-            )}
-            style={
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97]',
               mode === 'full'
-                ? {
-                    background: 'var(--color-ink)',
-                    color: 'var(--color-ivory)',
-                  }
-                : { background: 'transparent', color: 'var(--color-ink-soft)' }
-            }
+                ? 'bg-foreground text-background'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             <BookOpen className="h-3.5 w-3.5" />
             Full Album
@@ -109,7 +93,7 @@ export default function NewAlbumPage() {
         </div>
 
         {/* Plain-language explanation of the active mode */}
-        <p className="mt-2 text-[12px] text-[color:var(--color-muted-warm)] leading-relaxed">
+        <p className="mt-2 text-[12px] text-muted-foreground leading-relaxed">
           {mode === 'quick'
             ? 'Quick Post — drop a few photos and a place. We name it for you. Fastest way to share.'
             : 'Full Album — add a title, story, dates and choose your cover. Best for trips worth remembering.'}
@@ -119,8 +103,7 @@ export default function NewAlbumPage() {
         <div className="mt-3">
           <Link
             href="/albums/import"
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold transition-all hover:translate-x-0.5"
-            style={{ color: 'var(--color-coral)' }}
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-accent transition-all hover:translate-x-0.5"
           >
             <Images className="h-3.5 w-3.5" />
             Import from Photos
@@ -136,7 +119,7 @@ export default function NewAlbumPage() {
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            className="mb-6 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 rounded-xl text-red-600 dark:text-red-400 text-sm"
+            className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-sm"
           >
             {error}
           </motion.div>

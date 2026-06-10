@@ -515,13 +515,13 @@
   }
 
   .shimmer {
-    background: linear-gradient(90deg, #ECEEE6 0px, #D5D9CB 40px, #ECEEE6 80px);
+    background: linear-gradient(90deg, #EFE9D9 0px, #E5DDC8 40px, #EFE9D9 80px);
     background-size: 200px;
     animation: shimmer 1.5s ease-in-out infinite;
   }
 
   .dark .shimmer {
-    background: linear-gradient(90deg, #1A1A1A 0px, #252525 40px, #1A1A1A 80px);
+    background: linear-gradient(90deg, #221D13 0px, #2C2619 40px, #221D13 80px);
     background-size: 200px;
   }
 

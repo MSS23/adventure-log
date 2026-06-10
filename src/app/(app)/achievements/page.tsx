@@ -6,6 +6,7 @@ import { Trophy } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
 
 export default function AchievementsPage() {
@@ -18,13 +19,11 @@ export default function AchievementsPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="w-14 h-14 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto mb-4">
-            <Trophy className="h-7 w-7 text-stone-400 dark:text-stone-500" />
+          <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+            <Trophy className="h-7 w-7" />
           </div>
-          <p className="text-stone-500 dark:text-stone-400 mb-4">Log in to view your achievements</p>
-          <button onClick={() => router.push('/login')}>
-            <Button className="bg-olive-600 hover:bg-olive-700 text-white cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">Log In</Button>
-          </button>
+          <p className="text-muted-foreground mb-4">Log in to view your achievements</p>
+          <Button onClick={() => router.push('/login')} className="cursor-pointer">Log In</Button>
         </div>
       </div>
     )
@@ -33,27 +32,24 @@ export default function AchievementsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6">
       {/* Editorial header */}
-      <motion.div
-        className="mb-6"
+      <motion.header
+        className="mb-8 space-y-1"
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
       >
-        <p className="al-eyebrow mb-1">Level · Wanderer</p>
-        <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
-          <Trophy className="h-7 w-7" style={{ color: 'var(--color-coral)' }} />
-          Achievements
-        </h1>
-        <p className="text-sm text-[color:var(--color-muted-warm)] mt-2 max-w-xl leading-relaxed">
+        <p className="al-eyebrow">Level · Wanderer</p>
+        <h1 className="al-display text-3xl md:text-4xl">Achievements</h1>
+        <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
           Earn badges by exploring the world and sharing your adventures.
         </p>
-      </motion.div>
+      </motion.header>
 
       {/* Achievements Content */}
       {isAuthLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square bg-stone-100 dark:bg-stone-800 rounded-xl animate-pulse" />
+            <Skeleton key={i} className="aspect-square rounded-2xl" />
           ))}
         </div>
       ) : user ? (

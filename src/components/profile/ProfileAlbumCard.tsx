@@ -29,7 +29,10 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
   const date = formatDate(album.date_start)
 
   return (
-    <Link href={`/albums/${album.id}`}>
+    <Link
+      href={`/albums/${album.id}`}
+      className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -39,36 +42,30 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
           damping: 24,
           delay: index * 0.05
         }}
-        whileHover={{ y: -6 }}
+        whileHover={{ y: -2 }}
         className={cn(
-          'group relative aspect-[4/5] rounded-2xl overflow-hidden',
-          'bg-stone-100 dark:bg-stone-900 cursor-pointer',
-          'shadow-sm hover:shadow-xl',
-          'ring-1 ring-[color:var(--color-line-warm)] hover:ring-[color:var(--color-coral)]/40',
-          'transition-all duration-300',
+          'group relative aspect-[4/3] rounded-2xl overflow-hidden',
+          'bg-muted border border-border cursor-pointer',
+          'transition-all duration-200 hover:border-primary/30 hover:shadow-md',
           className
         )}
       >
-        {/* Image with zoom effect */}
-        <motion.div
-          className="absolute inset-0"
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-        >
+        {/* Cover image */}
+        <div className="absolute inset-0">
           {coverUrl ? (
             <Image
               src={coverUrl}
               alt={album.title}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-300 dark:from-white/[0.06] dark:to-white/[0.03] flex items-center justify-center">
-              <Camera className="h-10 w-10 text-stone-400 dark:text-stone-500" />
+            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+              <Camera className="h-10 w-10 text-muted-foreground" />
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Top badges */}
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-10 pointer-events-none">
@@ -77,8 +74,8 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
             <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-1 px-2 py-1 rounded-full
-                         bg-black/40 backdrop-blur-sm text-white text-xs font-medium"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full
+                         bg-black/55 text-white text-xs font-medium"
             >
               <MapPin className="h-3 w-3" />
               <span className="truncate max-w-[100px]">{location}</span>
@@ -90,8 +87,8 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
             <motion.div
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-1 px-2 py-1 rounded-full
-                         bg-black/40 backdrop-blur-sm text-white text-xs font-medium"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full
+                         bg-black/55 text-white text-xs font-medium"
             >
               <Camera className="h-3 w-3" />
               <span>{album.photos.length}</span>
@@ -99,50 +96,35 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
           )}
         </div>
 
-        {/* Gradient overlay - always visible at bottom, more on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent
-                        opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
+        {/* Scrim — keeps overlay text legible on any photo */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent"
+        />
 
         {/* Content overlay */}
         <div className="absolute inset-x-0 bottom-0 p-4 z-10">
-          <motion.div
-            initial={{ y: 10, opacity: 0.8 }}
-            whileHover={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            <h3 className="font-bold text-white text-base sm:text-lg line-clamp-2 mb-1
-                           drop-shadow-lg">
-              {album.title}
-            </h3>
+          <h3 className="font-heading font-semibold text-white text-base sm:text-lg line-clamp-2 mb-1 drop-shadow-sm">
+            {album.title}
+          </h3>
 
-            {date && (
-              <div className="flex items-center gap-1.5 text-white/80 text-xs">
-                <Calendar className="h-3 w-3" />
-                <span>{date}</span>
-              </div>
-            )}
-          </motion.div>
+          {date && (
+            <div className="flex items-center gap-1.5 text-white/90 text-xs">
+              <Calendar className="h-3 w-3" />
+              <span>{date}</span>
+            </div>
+          )}
 
           {/* View button - appears on hover */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileHover={{ opacity: 1, y: 0 }}
-            className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          >
+          <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <span className="inline-flex items-center px-4 py-2 rounded-full
-                            bg-white/20 backdrop-blur-sm border border-white/30
+                            bg-white/15 border border-white/40
                             text-white text-sm font-medium
-                            hover:bg-white/30 transition-colors">
+                            hover:bg-white/25 transition-colors">
               View Album
             </span>
-          </motion.div>
+          </div>
         </div>
-
-        {/* Shimmer effect on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500
-                        bg-gradient-to-r from-transparent via-white/10 to-transparent
-                        -translate-x-full group-hover:translate-x-full
-                        transition-transform duration-1000 ease-out pointer-events-none" />
       </motion.div>
     </Link>
   )

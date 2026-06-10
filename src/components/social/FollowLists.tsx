@@ -46,9 +46,11 @@ export function FollowLists() {
           <TabsContent value="followers" className="space-y-4 mt-4">
             {stats.followersCount === 0 ? (
               <div className="text-center py-8">
-                <UserCheck className="h-12 w-12 mx-auto text-stone-700 dark:text-stone-300 mb-4" />
-                <p className="text-stone-800 dark:text-stone-200">No followers yet</p>
-                <p className="text-sm text-stone-800 dark:text-stone-200 mt-1">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden>
+                  <UserCheck className="h-5 w-5" />
+                </div>
+                <p className="text-sm font-medium text-foreground">No followers yet</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Share your adventure albums to gain followers!
                 </p>
               </div>
@@ -57,7 +59,7 @@ export function FollowLists() {
                 {followers.map((follow) => (
                   <div
                     key={follow.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-stone-50 dark:hover:bg-white/[0.06]"
+                    className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/60"
                   >
                     <div className="flex items-center gap-3">
                       <Avatar>
@@ -68,15 +70,15 @@ export function FollowLists() {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">
+                        <p className="text-sm font-medium text-foreground">
                           {follow.follower?.display_name || follow.follower?.username}
                         </p>
                         {follow.follower?.display_name && (
-                          <p className="text-sm text-stone-800 dark:text-stone-200">
+                          <p className="text-xs text-muted-foreground">
                             @{follow.follower.username}
                           </p>
                         )}
-                        <p className="text-sm text-stone-800 dark:text-stone-200">
+                        <p className="text-xs text-muted-foreground">
                           Following since {new Date(follow.created_at).toLocaleDateString()}
                         </p>
                       </div>
@@ -96,9 +98,11 @@ export function FollowLists() {
           <TabsContent value="following" className="space-y-4 mt-4">
             {stats.followingCount === 0 ? (
               <div className="text-center py-8">
-                <UserPlus className="h-12 w-12 mx-auto text-stone-700 dark:text-stone-300 mb-4" />
-                <p className="text-stone-800 dark:text-stone-200">Not following anyone yet</p>
-                <p className="text-sm text-stone-800 dark:text-stone-200 mt-1">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden>
+                  <UserPlus className="h-5 w-5" />
+                </div>
+                <p className="text-sm font-medium text-foreground">Not following anyone yet</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Discover and follow other travelers!
                 </p>
               </div>
@@ -107,7 +111,7 @@ export function FollowLists() {
                 {following.map((follow) => (
                   <div
                     key={follow.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-stone-50 dark:hover:bg-white/[0.06]"
+                    className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/60"
                   >
                     <div className="flex items-center gap-3">
                       <Avatar>
@@ -118,15 +122,15 @@ export function FollowLists() {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">
+                        <p className="text-sm font-medium text-foreground">
                           {follow.following?.display_name || follow.following?.username}
                         </p>
                         {follow.following?.display_name && (
-                          <p className="text-sm text-stone-800 dark:text-stone-200">
+                          <p className="text-xs text-muted-foreground">
                             @{follow.following.username}
                           </p>
                         )}
-                        <p className="text-sm text-stone-800 dark:text-stone-200">
+                        <p className="text-xs text-muted-foreground">
                           Following since {new Date(follow.created_at).toLocaleDateString()}
                         </p>
                       </div>

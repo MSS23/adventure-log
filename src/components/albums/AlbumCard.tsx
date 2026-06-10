@@ -28,33 +28,36 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
         delay: index * 0.06
       }}
     >
-      <Link href={`/albums/${album.id}`} className="block">
+      <Link
+        href={`/albums/${album.id}`}
+        className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
         {/* Image container */}
-        <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-900">
+        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted transition-shadow duration-200 group-hover:shadow-md">
           {album.cover_photo_url ? (
             <Image
               src={getPhotoUrl(album.cover_photo_url) || ''}
               alt={album.title}
               fill
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-900 dark:to-stone-800">
-              <Camera className="h-10 w-10 text-stone-300 dark:text-stone-700" />
+            <div className="w-full h-full flex items-center justify-center bg-muted">
+              <Camera className="h-10 w-10 text-muted-foreground" />
             </div>
           )}
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+          {/* Scrim */}
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
 
           {/* Content overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <h3 className="text-white font-semibold text-[15px] line-clamp-2 drop-shadow-sm leading-snug">
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            <h3 className="font-heading font-semibold text-[15px] line-clamp-2 drop-shadow-sm leading-snug">
               {album.title}
             </h3>
             {album.location_name && (
-              <p className="text-white/70 text-xs flex items-center gap-1 mt-1.5">
+              <p className="text-white/90 text-xs flex items-center gap-1 mt-1.5">
                 <MapPin className="h-3 w-3 flex-shrink-0" />
                 <span className="truncate">{album.location_name}</span>
               </p>

@@ -335,23 +335,23 @@ export default function AlbumDetailPage() {
   // Show deleted album message
   if (isDeleted) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
+      <div className="min-h-screen bg-background py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <BackButton fallbackRoute="/feed" />
-          <Card className="border-olive-200 dark:border-white/[0.08] bg-olive-50 dark:bg-olive-950/20 mt-6">
+          <Card className="mt-6">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
-                <div className="mx-auto w-12 h-12 bg-olive-100 dark:bg-olive-950/30 rounded-full flex items-center justify-center">
-                  <Trash2 className="h-6 w-6 text-olive-600" />
+                <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Trash2 className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-olive-900 dark:text-olive-200 font-medium text-lg">Album Deleted</p>
-                  <p className="text-olive-700 dark:text-olive-400 text-sm mt-1">
+                  <p className="font-heading text-lg font-semibold text-foreground">Album Deleted</p>
+                  <p className="text-sm text-muted-foreground mt-1">
                     This album has been deleted and is no longer available.
                   </p>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <p className="text-sm text-stone-600 dark:text-stone-400">
+                  <p className="text-sm text-muted-foreground">
                     Redirecting to feed in {redirectTimer} seconds...
                   </p>
                   <Link href="/feed">
@@ -370,7 +370,7 @@ export default function AlbumDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)]">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <motion.div
             className="space-y-8"
@@ -407,13 +407,13 @@ export default function AlbumDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)]">
-        <div className="bg-white dark:bg-[#1A1A1A] border-b border-stone-200 dark:border-stone-800">
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-card">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100"
+              className="gap-2"
               onClick={() => router.back()}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -423,12 +423,12 @@ export default function AlbumDetailPage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="max-w-2xl mx-auto">
-            <Card className="border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/30">
+            <Card className="border-destructive/20 bg-destructive/10">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
-                    <p className="text-red-600 dark:text-red-400 font-medium text-lg">Unable to Load Album</p>
-                    <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
+                    <p className="text-destructive font-medium text-lg">Unable to Load Album</p>
+                    <p className="text-destructive text-sm mt-1">{error}</p>
                   </div>
                   <div className="flex gap-2 justify-center pt-2">
                     <Button onClick={fetchAlbumData} disabled={loading} className="min-w-[120px]">
@@ -449,13 +449,13 @@ export default function AlbumDetailPage() {
 
   if (!album) {
     return (
-      <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
+      <div className="min-h-screen bg-background py-8 px-4">
         <div className="max-w-2xl mx-auto">
           <BackButton fallbackRoute="/feed" />
           <Card className="mt-6">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-stone-800 dark:text-stone-200">Album not found</p>
+                <p className="text-foreground">Album not found</p>
                 <Link href="/albums" className="mt-4 inline-block">
                   <Button variant="outline">Back to Albums</Button>
                 </Link>
@@ -471,21 +471,21 @@ export default function AlbumDetailPage() {
   if (isPrivateContent && album) {
     if (!user) {
       return (
-        <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
+        <div className="min-h-screen bg-background py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
-            <Card className="border-olive-200 dark:border-white/[0.08] bg-olive-50 dark:bg-olive-950/20 mt-6">
+            <Card className="mt-6">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
                   <div>
-                    <p className="text-olive-900 dark:text-olive-200 font-medium text-lg">Login Required</p>
-                    <p className="text-olive-700 dark:text-olive-400 text-sm mt-1">
+                    <p className="font-heading text-lg font-semibold text-foreground">Login Required</p>
+                    <p className="text-sm text-muted-foreground mt-1">
                       This album is {album.visibility}. Please log in to view it.
                     </p>
                   </div>
                   <div className="flex gap-2 justify-center pt-2">
                     <Link href={`/sign-in?redirect_url=${encodeURIComponent(`/albums/${album.id}`)}`}>
-                      <Button className="bg-olive-600 hover:bg-olive-700">Log In</Button>
+                      <Button>Log In</Button>
                     </Link>
                     <Link href="/">
                       <Button variant="outline">Home</Button>
@@ -501,7 +501,7 @@ export default function AlbumDetailPage() {
 
     if (album.user) {
       return (
-        <div className="min-h-screen bg-stone-50 dark:bg-[color:var(--background)] py-8 px-4">
+        <div className="min-h-screen bg-background py-8 px-4">
           <div className="max-w-2xl mx-auto">
             <BackButton fallbackRoute="/feed" />
             <div className="mt-6">
@@ -525,7 +525,7 @@ export default function AlbumDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[color:var(--background)] pb-24 md:pb-8">
+    <div className="min-h-screen bg-background pb-24 md:pb-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {photos.length > 0 ? (
           <>
@@ -535,23 +535,23 @@ export default function AlbumDetailPage() {
             {/* ── Share Prompt (after album creation) ── */}
             {showSharePrompt && (
               <motion.div
-                className="mb-5 bg-olive-50 dark:bg-olive-900/20 border border-olive-200 dark:border-olive-800/40 rounded-xl p-4 flex items-center justify-between gap-4"
+                className="mb-5 rounded-2xl border border-primary/20 bg-primary/10 p-4 flex items-center justify-between gap-4"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-olive-100 dark:bg-olive-800/40 flex items-center justify-center shrink-0">
-                    <Share2 className="h-4 w-4 text-olive-600 dark:text-olive-400" />
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Share2 className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-olive-900 dark:text-olive-100">Album created!</p>
-                    <p className="text-xs text-olive-600 dark:text-olive-400">Share it with friends and fellow travelers</p>
+                    <p className="text-sm font-semibold text-foreground">Album created!</p>
+                    <p className="text-xs text-muted-foreground">Share it with friends and fellow travelers</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Button
                     size="sm"
-                    className="bg-olive-600 hover:bg-olive-700 text-white rounded-lg h-8 px-3 text-xs gap-1.5"
+                    className="rounded-lg h-8 px-3 text-xs gap-1.5"
                     onClick={async () => {
                       const url = window.location.href
                       if (navigator.share) {
@@ -567,7 +567,7 @@ export default function AlbumDetailPage() {
                   >
                     {shareCopied ? <><Check className="h-3 w-3" /> Copied</> : <><Share2 className="h-3 w-3" /> Share</>}
                   </Button>
-                  <button onClick={() => setShowSharePrompt(false)} className="text-olive-400 hover:text-olive-600 dark:hover:text-olive-300 cursor-pointer transition-all duration-200 active:scale-[0.97] p-1 rounded-md focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none">
+                  <button onClick={() => setShowSharePrompt(false)} className="text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] p-1 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
@@ -586,11 +586,11 @@ export default function AlbumDetailPage() {
                 <div className="flex items-center gap-3 min-w-0">
                   {albumUser && (
                     <Link href={`/profile/${albumUser.username}`} className="shrink-0 cursor-pointer">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-olive-400 to-olive-600 flex items-center justify-center ring-2 ring-white dark:ring-stone-800 shadow-sm overflow-hidden relative">
+                      <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center ring-2 ring-background overflow-hidden relative">
                         {albumUser.avatar_url ? (
                           <Image src={albumUser.avatar_url} alt={`${albumUser.display_name || albumUser.username || 'User'} avatar`} fill className="object-cover" sizes="40px" />
                         ) : (
-                          <span className="text-white text-sm font-semibold">
+                          <span className="text-primary-foreground text-sm font-semibold">
                             {albumUser.display_name?.[0] || albumUser.username?.[0] || 'U'}
                           </span>
                         )}
@@ -599,15 +599,15 @@ export default function AlbumDetailPage() {
                   )}
                   <div className="min-w-0">
                     {albumUser && (
-                      <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
+                      <p className="text-sm font-semibold text-foreground truncate">
                         {albumUser.display_name || albumUser.username}
                       </p>
                     )}
-                    <div className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       {albumUser && <span>@{albumUser.username}</span>}
                       {formatDate() && (
                         <>
-                          <span className="text-stone-300 dark:text-stone-600">&middot;</span>
+                          <span className="text-muted-foreground/60">&middot;</span>
                           <span>{formatDate()}</span>
                         </>
                       )}
@@ -625,8 +625,8 @@ export default function AlbumDetailPage() {
                       className={cn(
                         "rounded-full px-5 h-9 text-sm font-medium",
                         followStatus === 'following'
-                          ? "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 border border-stone-200 dark:border-stone-700"
-                          : "bg-olive-600 hover:bg-olive-700 text-white"
+                          ? "bg-muted text-foreground hover:bg-muted/80 border border-border"
+                          : "bg-primary hover:bg-primary/90 text-primary-foreground"
                       )}
                     >
                       {followLoading ? (
@@ -638,7 +638,7 @@ export default function AlbumDetailPage() {
               </div>
 
               {/* Title + metadata */}
-              <h1 className="al-display text-2xl sm:text-3xl lg:text-4xl text-stone-900 dark:text-white leading-tight mb-2">
+              <h1 className="al-display text-3xl md:text-4xl leading-tight mb-2">
                 {album.title}
               </h1>
 
@@ -652,23 +652,23 @@ export default function AlbumDetailPage() {
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center gap-3 text-sm text-stone-600 dark:text-stone-400">
+              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 {album.location_name && (
                   <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 text-olive-500" />
+                    <MapPin className="h-3.5 w-3.5 text-primary" />
                     {album.location_name}
                   </span>
                 )}
                 {album.date_start && album.date_end && album.date_start !== album.date_end && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5 text-olive-500" />
+                    <Calendar className="h-3.5 w-3.5 text-primary" />
                     {new Date(album.date_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     {' - '}
                     {new Date(album.date_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 )}
                 {photos.length > 0 && (
-                  <span className="text-stone-400 dark:text-stone-500">{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
+                  <span className="text-xs font-mono tracking-wide text-muted-foreground">{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
                 )}
                 {isOwner && album.visibility && (
                   <span className="al-badge">
@@ -684,7 +684,7 @@ export default function AlbumDetailPage() {
               </div>
 
               {album.description && (
-                <p className="mt-3 text-stone-600 dark:text-stone-400 text-sm leading-relaxed max-w-2xl">
+                <p className="mt-3 text-sm md:text-[15px] leading-relaxed text-foreground max-w-2xl">
                   {album.description}
                 </p>
               )}
@@ -692,18 +692,18 @@ export default function AlbumDetailPage() {
               {/* Collaborators */}
               {activeCollaborators.length > 0 && (
                 <div className="flex items-center gap-2 mt-3">
-                  <span className="text-xs text-stone-400">with</span>
+                  <span className="text-xs text-muted-foreground">with</span>
                   <div className="flex -space-x-1.5">
                     {activeCollaborators.slice(0, 6).map((c) => (
-                      <Avatar key={c.id} className="h-6 w-6 ring-2 ring-white dark:ring-stone-900">
+                      <Avatar key={c.id} className="h-6 w-6 ring-2 ring-background">
                         <AvatarImage src={getPhotoUrl(c.user?.avatar_url) || undefined} />
-                        <AvatarFallback className="text-[8px] bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400">
+                        <AvatarFallback className="text-[8px] bg-primary/10 text-primary">
                           {c.user?.display_name?.[0] || c.user?.username?.[0] || '?'}
                         </AvatarFallback>
                       </Avatar>
                     ))}
                   </div>
-                  <span className="text-xs text-stone-500 dark:text-stone-400">
+                  <span className="text-xs text-muted-foreground">
                     {activeCollaborators.map(c => c.user?.display_name || c.user?.username).filter(Boolean).join(', ')}
                   </span>
                 </div>
@@ -725,18 +725,18 @@ export default function AlbumDetailPage() {
 
             {/* ── Engagement Bar ── */}
             <motion.div
-              className="flex items-center justify-between py-3 mt-3 border-y border-stone-200/60 dark:border-stone-700/40"
+              className="flex items-center justify-between py-3 mt-3 border-y border-border"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.15 }}
             >
-              <div className="flex items-center gap-5">
+              <div className="flex items-center gap-4">
                 {/* Like */}
                 <button
                   onClick={handleLikeClick}
                   className={cn(
-                    "flex items-center gap-1.5 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1",
-                    isLiked ? "text-red-500" : "text-stone-600 dark:text-stone-400 hover:text-red-500"
+                    "flex items-center gap-1.5 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1",
+                    isLiked ? "text-accent" : "text-muted-foreground hover:text-accent"
                   )}
                 >
                   <Heart className={cn("h-5 w-5", isLiked && "fill-current")} />
@@ -746,14 +746,14 @@ export default function AlbumDetailPage() {
                 {/* Comment */}
                 <button
                   onClick={handleCommentClick}
-                  className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
+                  className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
                 >
                   <MessageCircle className="h-5 w-5" />
                   <span>{albumComments.length}</span>
                 </button>
 
                 {/* Share */}
-                <div className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
                   <ShareButton
                     albumId={album.id}
                     albumTitle={album.title}
@@ -766,7 +766,7 @@ export default function AlbumDetailPage() {
                 {album.latitude && album.longitude && (
                   <button
                     onClick={handleGlobeClick}
-                    className="flex items-center gap-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-olive-600 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1 -m-1"
+                    className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
                   >
                     <Globe className="h-5 w-5" />
                     <span className="hidden sm:inline">Globe</span>
@@ -780,8 +780,8 @@ export default function AlbumDetailPage() {
                   <button
                     onClick={handleSaveClick}
                     className={cn(
-                      "transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1",
-                      isSaved ? "text-olive-500" : "text-stone-400 dark:text-stone-500 hover:text-stone-600"
+                      "transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1",
+                      isSaved ? "text-primary" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Bookmark className={cn("h-5 w-5", isSaved && "fill-current")} />
@@ -792,7 +792,7 @@ export default function AlbumDetailPage() {
                 {!isOwner && user && (
                   <button
                     onClick={() => setReportOpen(true)}
-                    className="text-stone-400 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-md p-1"
+                    className="text-muted-foreground hover:text-destructive transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1"
                     title="Report album"
                   >
                     <Flag className="h-4 w-4" />
@@ -802,7 +802,7 @@ export default function AlbumDetailPage() {
                 {/* Owner actions */}
                 {isOwner && (
                   <Link href={`/albums/${album.id}/edit`} className="cursor-pointer">
-                    <Button variant="ghost" size="sm" className="text-xs text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 dark:text-stone-400 cursor-pointer active:scale-[0.97] transition-all duration-200">
+                    <Button variant="ghost" size="sm" className="text-xs cursor-pointer">
                       Edit
                     </Button>
                   </Link>
@@ -817,7 +817,7 @@ export default function AlbumDetailPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Share this album</p>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Share this album</p>
               <SocialShareButtons
                 albumId={album.id}
                 albumTitle={album.title}
@@ -858,28 +858,28 @@ export default function AlbumDetailPage() {
           </>
         ) : (
           /* No Photos Empty State */
-          <div className="al-card p-8 sm:p-16">
-            <div className="text-center max-w-md mx-auto">
-              <div className="mx-auto mb-5 w-14 h-14 rounded-2xl bg-olive-100 dark:bg-olive-950/30 flex items-center justify-center">
-                <Camera className="h-7 w-7 text-olive-600 dark:text-olive-400" />
-              </div>
-              <p className="al-eyebrow mb-2">{isOwner ? 'New adventure' : 'Album'}</p>
-              <h3 className="al-display text-xl sm:text-2xl mb-3">
-                {isOwner ? 'Start Your Journey' : 'No photos yet'}
-              </h3>
-              <p className="text-stone-600 dark:text-stone-400 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
-                {isOwner
-                  ? 'Upload your first photo to bring this adventure to life.'
-                  : "This album doesn't have any photos yet."}
-              </p>
-              {isOwner && (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+              <Camera className="h-6 w-6" />
+            </div>
+            <p className="al-eyebrow mb-2">{isOwner ? 'New adventure' : 'Album'}</p>
+            <h3 className="font-heading text-lg font-semibold text-foreground">
+              {isOwner ? 'Start Your Journey' : 'No photos yet'}
+            </h3>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground leading-relaxed">
+              {isOwner
+                ? 'Upload your first photo to bring this adventure to life.'
+                : "This album doesn't have any photos yet."}
+            </p>
+            {isOwner && (
+              <div className="mt-5">
                 <Link href={`/albums/${album.id}/upload`}>
-                  <Button size="lg" className="al-btn-coral text-white px-6">
+                  <Button size="lg" variant="coral" className="px-6">
                     Upload Photos
                   </Button>
                 </Link>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -887,7 +887,7 @@ export default function AlbumDetailPage() {
       {/* Mobile Floating Action Bar */}
       <div className="sm:hidden fixed left-4 right-4 z-40 fab-position">
         <motion.div
-          className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl rounded-2xl shadow-lg border border-stone-200/60 dark:border-stone-700/40 px-4 py-2.5"
+          className="bg-card/95 backdrop-blur-xl rounded-2xl shadow-lg border border-border px-4 py-2.5"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -897,7 +897,7 @@ export default function AlbumDetailPage() {
               onClick={handleLikeClick}
               className={cn(
                 "flex flex-col items-center gap-1 py-2 rounded-xl transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]",
-                isLiked ? "text-red-500" : "text-stone-600 dark:text-stone-400"
+                isLiked ? "text-accent" : "text-muted-foreground"
               )}
               whileTap={{ scale: 0.9 }}
             >
@@ -907,14 +907,14 @@ export default function AlbumDetailPage() {
 
             <motion.button
               onClick={handleCommentClick}
-              className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600 dark:text-stone-400 transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
+              className="flex flex-col items-center gap-1 py-2 rounded-xl text-muted-foreground transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
               whileTap={{ scale: 0.9 }}
             >
               <MessageCircle className="h-6 w-6" />
               <span className="text-[10px] font-medium">Comment</span>
             </motion.button>
 
-            <div className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-600 dark:text-stone-400">
+            <div className="flex flex-col items-center gap-1 py-2 rounded-xl text-muted-foreground">
               <ShareButton albumId={album.id} albumTitle={album.title} variant="icon" className="!p-0" />
               <span className="text-[10px] font-medium">Share</span>
             </div>
@@ -924,7 +924,7 @@ export default function AlbumDetailPage() {
                 onClick={handleSaveClick}
                 className={cn(
                   "flex flex-col items-center gap-1 py-2 rounded-xl transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]",
-                  isSaved ? "text-olive-500" : "text-stone-600 dark:text-stone-400"
+                  isSaved ? "text-primary" : "text-muted-foreground"
                 )}
                 whileTap={{ scale: 0.9 }}
               >
@@ -936,7 +936,7 @@ export default function AlbumDetailPage() {
             {album.latitude && album.longitude && (
               <motion.button
                 onClick={handleGlobeClick}
-                className="flex flex-col items-center gap-1 py-2 rounded-xl text-olive-600 transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-primary transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
                 whileTap={{ scale: 0.9 }}
               >
                 <Globe className="h-6 w-6" />
@@ -947,7 +947,7 @@ export default function AlbumDetailPage() {
             {!isOwner && user && (
               <motion.button
                 onClick={() => setReportOpen(true)}
-                className="flex flex-col items-center gap-1 py-2 rounded-xl text-stone-400 dark:text-stone-500 transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
+                className="flex flex-col items-center gap-1 py-2 rounded-xl text-muted-foreground transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
                 whileTap={{ scale: 0.9 }}
               >
                 <Flag className="h-5 w-5" />

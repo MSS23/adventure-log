@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Globe, Camera, MapPin, Plane } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Skeleton } from '@/components/ui/skeleton'
 import { log } from '@/lib/utils/logger'
 
 // Animated counter component
@@ -187,11 +188,11 @@ export function TravelInsights() {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] p-4 animate-pulse">
-        <div className="h-5 bg-stone-200 dark:bg-white/[0.08] rounded w-36 mb-4" />
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <Skeleton className="h-5 w-36 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-16 bg-stone-100 dark:bg-white/[0.06] rounded-lg" />
+            <Skeleton key={i} className="h-16 rounded-xl" />
           ))}
         </div>
       </div>
@@ -206,38 +207,30 @@ export function TravelInsights() {
       icon: Globe,
       label: 'Countries',
       value: stats.totalCountries,
-      color: 'text-olive-600',
-      bg: 'bg-olive-50'
     },
     {
       icon: MapPin,
       label: 'Cities',
       value: stats.totalCities,
-      color: 'text-olive-600',
-      bg: 'bg-olive-50'
     },
     {
       icon: Camera,
       label: 'Photos',
       value: stats.totalPhotos,
-      color: 'text-olive-600',
-      bg: 'bg-olive-50'
     },
     {
       icon: Plane,
       label: distanceLabel,
       value: `${Math.floor(stats.totalDistance / 1000)}k km`,
-      color: 'text-olive-600',
-      bg: 'bg-olive-50'
     }
   ]
 
   return (
-    <div className="bg-white dark:bg-[#1B170E] rounded-xl border border-stone-100 dark:border-white/[0.08] shadow-sm p-4">
+    <div className="rounded-2xl border border-border bg-card p-4">
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100">Your Travel Insights</h3>
-        <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">See how you compare</p>
+        <h3 className="font-heading text-base font-semibold text-foreground">Your Travel Insights</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">See how you compare</p>
       </div>
 
       {/* Stats Grid - 2 columns */}
@@ -248,20 +241,16 @@ export function TravelInsights() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
-            whileHover={{ x: 4, backgroundColor: 'rgba(243, 244, 246, 1)' }}
-            className="flex items-center justify-between p-2.5 rounded-lg transition-colors cursor-default"
+            whileHover={{ x: 4 }}
+            className="flex items-center justify-between rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/60 cursor-default"
           >
             <div className="flex items-center gap-3">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                className={cn("p-2 rounded-lg", insight.bg)}
-              >
-                <insight.icon className={cn("h-4 w-4", insight.color)} />
-              </motion.div>
-              <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{insight.label}</span>
+              <div className="p-2 rounded-xl bg-primary/10">
+                <insight.icon className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-sm font-medium text-foreground">{insight.label}</span>
             </div>
-            <span className={cn("text-lg font-bold tabular-nums", insight.color)}>
+            <span className={cn("text-lg font-bold tabular-nums text-foreground")}>
               {typeof insight.value === 'number' ? (
                 <AnimatedValue value={insight.value} />
               ) : (
@@ -274,13 +263,13 @@ export function TravelInsights() {
 
       {/* Travel Profile Summary */}
       {stats.mostVisitedContinent !== 'N/A' && (
-        <div className="mt-4 p-3 bg-gradient-to-br from-stone-50 dark:from-white/[0.04] to-stone-100 dark:to-white/[0.06] rounded-lg border border-stone-200 dark:border-white/[0.10]">
+        <div className="mt-4 rounded-xl bg-muted/50 p-3">
           <div className="flex items-start gap-2">
-            <Globe className="h-4 w-4 text-olive-600 mt-0.5" />
+            <Globe className="h-4 w-4 text-primary mt-0.5" />
             <div>
-              <p className="text-xs font-semibold text-stone-900 dark:text-stone-100">Travel Profile</p>
-              <p className="text-xs text-stone-700 dark:text-stone-300 mt-1">
-                Most visited: <span className="font-medium">{stats.mostVisitedContinent}</span>
+              <p className="text-xs font-semibold text-foreground">Travel Profile</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Most visited: <span className="font-medium text-foreground">{stats.mostVisitedContinent}</span>
               </p>
             </div>
           </div>

@@ -6,10 +6,7 @@ export function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        "animate-pulse rounded-lg bg-gradient-to-r from-stone-200 dark:from-white/[0.08] via-stone-100 dark:via-white/[0.06] to-stone-200 dark:to-white/[0.08] bg-[length:200%_100%]",
-        className
-      )}
+      className={cn("animate-pulse rounded-lg bg-muted", className)}
       {...props}
     />
   )
@@ -17,8 +14,8 @@ export function Skeleton({
 
 export function AlbumCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-[#1B170E] rounded-2xl overflow-hidden border border-stone-100 dark:border-white/[0.08] shadow-sm">
-      <Skeleton className="aspect-[4/3] w-full" />
+    <div className="bg-card rounded-2xl overflow-hidden border border-border">
+      <Skeleton className="aspect-[4/3] w-full rounded-none" />
       <div className="p-5 space-y-4">
         <div>
           <Skeleton className="h-5 w-3/4 mb-2" />
@@ -29,7 +26,7 @@ export function AlbumCardSkeleton() {
             <Skeleton className="h-8 w-8 rounded-full" />
             <Skeleton className="h-4 w-24" />
           </div>
-          <Skeleton className="h-9 w-20 rounded-lg" />
+          <Skeleton className="h-9 w-20 rounded-xl" />
         </div>
       </div>
     </div>
@@ -49,7 +46,7 @@ export function ProfileSkeleton() {
       </div>
       <div className="grid grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-20" />
+          <Skeleton key={i} className="h-20 rounded-2xl" />
         ))}
       </div>
     </div>
@@ -58,7 +55,7 @@ export function ProfileSkeleton() {
 
 export function FeedItemSkeleton() {
   return (
-    <div className="bg-white dark:bg-[#1B170E] rounded-lg overflow-hidden border border-stone-200 dark:border-white/[0.10] shadow-sm">
+    <div className="bg-card rounded-2xl overflow-hidden border border-border">
       <div className="px-4 py-3 flex items-center gap-3">
         <Skeleton className="h-10 w-10 rounded-full" />
         <div className="flex-1 space-y-2">
@@ -66,7 +63,7 @@ export function FeedItemSkeleton() {
           <Skeleton className="h-3 w-24" />
         </div>
       </div>
-      <Skeleton className="aspect-square w-full" />
+      <Skeleton className="aspect-square w-full rounded-none" />
       <div className="px-4 py-3 space-y-3">
         <div className="flex items-center gap-4">
           <Skeleton className="h-8 w-8 rounded-full" />
@@ -84,8 +81,8 @@ export function GlobeLocationSkeleton() {
   return (
     <div className="p-4 space-y-3">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="rounded-lg overflow-hidden border-2 border-stone-200 dark:border-white/[0.10]">
-          <Skeleton className="h-40 w-full" />
+        <div key={i} className="rounded-2xl overflow-hidden border border-border">
+          <Skeleton className="h-40 w-full rounded-none" />
         </div>
       ))}
     </div>
@@ -94,7 +91,7 @@ export function GlobeLocationSkeleton() {
 
 export function NotificationSkeleton() {
   return (
-    <div className="p-4 rounded-lg border border-stone-200 dark:border-white/[0.10]">
+    <div className="p-4 rounded-2xl border border-border">
       <div className="flex items-start gap-3">
         <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
         <div className="flex-1 space-y-2">
@@ -111,14 +108,14 @@ export function LeaderboardSkeleton() {
   return (
     <div className="space-y-3">
       {[1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="p-4 bg-white dark:bg-[#1B170E] rounded-xl border border-stone-200 dark:border-white/[0.10]">
+        <div key={i} className="p-4 bg-card rounded-2xl border border-border">
           <div className="flex items-center gap-4">
             <Skeleton className="h-12 w-12 rounded-full" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-3 w-24" />
             </div>
-            <Skeleton className="h-8 w-16 rounded-lg" />
+            <Skeleton className="h-8 w-16 rounded-xl" />
           </div>
         </div>
       ))}
@@ -128,7 +125,7 @@ export function LeaderboardSkeleton() {
 
 export function StatCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-[#1B170E] rounded-lg p-4 border border-stone-200 dark:border-white/[0.10]">
+    <div className="bg-card rounded-2xl p-4 border border-border">
       <div className="flex items-center gap-2 mb-2">
         <Skeleton className="h-8 w-8 rounded-lg" />
         <Skeleton className="h-4 w-24" />

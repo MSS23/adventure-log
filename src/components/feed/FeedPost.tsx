@@ -70,10 +70,10 @@ const ActionButton = memo(
       whileTap={{ scale: 0.92 }}
       aria-label={label}
       className={cn(
-        'inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors',
+        'inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200',
         isActive
-          ? 'text-[color:var(--color-coral)]'
-          : 'text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-forest)] hover:bg-[color:var(--color-ivory-alt)]',
+          ? 'text-accent'
+          : 'text-muted-foreground hover:text-primary hover:bg-muted',
         className,
       )}
     >
@@ -135,9 +135,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
   }
 
   return (
-    <article
-      className="relative rounded-2xl overflow-hidden bg-[color:var(--card)] border border-[color:var(--color-line-warm)] shadow-[0_1px_2px_rgba(26,20,14,0.04)] hover:shadow-[0_8px_24px_rgba(26,20,14,0.08)] transition-shadow duration-300"
-    >
+    <article className="relative overflow-hidden rounded-2xl border border-border bg-card">
       {/* Byline — avatar, name, location chip, date */}
       <header className="px-5 pt-4 pb-3 flex items-center gap-3">
         <UserAvatarLink user={user}>
@@ -153,7 +151,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
           <div className="flex items-center gap-1.5">
             <UserLink
               user={user}
-              className="text-[14px] font-semibold text-[color:var(--color-ink)] hover:text-[color:var(--color-forest)] transition-colors"
+              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
               {user.display_name || user.username}
             </UserLink>
@@ -163,7 +161,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
               </span>
             )}
           </div>
-          <p className="font-mono text-[10.5px] tracking-[0.04em] uppercase text-[color:var(--color-ink-soft)] mt-0.5">
+          <p className="font-mono text-[11px] tracking-wide uppercase text-muted-foreground mt-0.5">
             {dateFormatted}
           </p>
         </div>
@@ -172,12 +170,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
         {album.location && (
           <Link
             href={userGlobeHref}
-            className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all hover:-translate-y-0.5"
-            style={{
-              background: 'var(--color-forest-tint)',
-              color: 'var(--color-forest)',
-              border: '1px solid var(--color-forest-soft)',
-            }}
+            className="group inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors duration-200 hover:bg-primary/15"
             title={`Open ${user.display_name || user.username}'s globe`}
           >
             <MapPin className="w-3 h-3" strokeWidth={2.2} aria-hidden />
@@ -211,26 +204,26 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
       {/* Title + description — editorial, photo-anchored */}
       <div className="px-5 pt-4 pb-3">
         <Link href={`/albums/${album.id}`}>
-          <h3 className="font-heading text-[20px] md:text-[22px] font-semibold leading-tight text-[color:var(--color-ink)] hover:text-[color:var(--color-forest)] transition-colors">
+          <h3 className="font-heading text-lg md:text-xl font-semibold leading-tight text-foreground hover:text-primary transition-colors">
             {album.title}
           </h3>
         </Link>
 
         {album.description && (
-          <p className="mt-1.5 text-[14px] leading-[1.55] text-[color:var(--color-ink-soft)] line-clamp-2">
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground line-clamp-2">
             {album.description}
           </p>
         )}
       </div>
 
       {/* Action row — minimal, typographic */}
-      <div className="px-5 py-2 flex items-center justify-between border-t border-[color:var(--color-line-warm)]">
+      <div className="px-5 py-2 flex items-center justify-between border-t border-border">
         <div className="flex items-center gap-1">
           <LikeButton albumId={album.id} showCount={false} size="md" />
           <Link
             href={`/albums/${album.id}#comments`}
             aria-label="View comments"
-            className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[color:var(--color-ink-soft)] hover:text-[color:var(--color-forest)] hover:bg-[color:var(--color-ivory-alt)] transition-colors"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full text-muted-foreground hover:text-primary hover:bg-muted transition-colors duration-200"
           >
             <MessageCircle className="h-5 w-5" strokeWidth={1.7} />
           </Link>
@@ -269,7 +262,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
 
       {/* Stats footer — tight typographic row */}
       {(album.likes_count > 0 || album.comments_count > 0) && (
-        <div className="px-5 pb-4 -mt-1 flex items-center gap-3 font-mono text-[11px] tracking-[0.04em] uppercase text-[color:var(--color-muted-warm)]">
+        <div className="px-5 pb-4 -mt-1 flex items-center gap-3 font-mono text-[11px] tracking-wide uppercase text-muted-foreground">
           {album.likes_count > 0 && (
             <span>
               {album.likes_count} {album.likes_count === 1 ? 'like' : 'likes'}
@@ -278,7 +271,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
           {album.comments_count > 0 && (
             <Link
               href={`/albums/${album.id}#comments`}
-              className="hover:text-[color:var(--color-forest)] transition-colors"
+              className="hover:text-primary transition-colors"
             >
               {album.comments_count} {album.comments_count === 1 ? 'comment' : 'comments'}
             </Link>
@@ -293,7 +286,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[color:var(--color-ink)] text-[color:var(--color-ivory)] text-xs font-medium px-4 py-2 rounded-full shadow-lg z-10"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs font-medium px-4 py-2 rounded-full shadow-lg z-10"
           >
             Link copied
           </motion.div>

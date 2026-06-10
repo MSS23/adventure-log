@@ -22,6 +22,7 @@ import { ProfileHero } from '@/components/profile/ProfileHero'
 import { ProfileAlbumGrid } from '@/components/profile/ProfileAlbumGrid'
 import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
 import { AlbumGridShimmer } from '@/components/ui/shimmer-skeleton'
+import { cn } from '@/lib/utils'
 
 type TabType = 'albums' | 'badges'
 
@@ -116,27 +117,19 @@ export default function ProfileContent({
       {/* Profile Hero — compact cover + avatar + bio + follow counts */}
       <ProfileHero profile={profile} isOwnProfile={true} followStats={followStats} />
 
-      {/* Travel snapshot — 3 clean stats, one row, color-differentiated */}
-      <div
-        className="mt-5 mx-4 md:mx-0 p-2 rounded-2xl grid grid-cols-3 gap-2"
-        style={{
-          background: 'var(--card)',
-          border: '1px solid var(--color-line-warm)',
-        }}
-      >
-        <div className="text-center py-3 rounded-xl" style={{ background: 'var(--color-coral-tint)' }}>
-          <div className="al-stat-value text-[28px]" style={{ color: 'var(--color-coral)' }}>
-            {travelStats.countries}
-          </div>
-          <div className="al-eyebrow mt-1">Countries</div>
+      {/* Travel snapshot — 3 calm stat tiles */}
+      <div className="mt-6 mx-4 md:mx-0 grid grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-border bg-card p-4 text-center">
+          <p className="al-eyebrow">Countries</p>
+          <p className="al-stat-value text-2xl sm:text-3xl mt-1">{travelStats.countries}</p>
         </div>
-        <div className="text-center py-3 rounded-xl" style={{ background: 'var(--color-forest-tint)' }}>
-          <div className="al-stat-value text-[28px]" style={{ color: 'var(--color-forest)' }}>{travelStats.cities}</div>
-          <div className="al-eyebrow mt-1">Cities</div>
+        <div className="rounded-2xl border border-border bg-card p-4 text-center">
+          <p className="al-eyebrow">Cities</p>
+          <p className="al-stat-value text-2xl sm:text-3xl mt-1">{travelStats.cities}</p>
         </div>
-        <div className="text-center py-3 rounded-xl" style={{ background: 'var(--color-gold-tint)' }}>
-          <div className="al-stat-value text-[28px]" style={{ color: 'var(--color-gold)' }}>{albums.length}</div>
-          <div className="al-eyebrow mt-1">Albums</div>
+        <div className="rounded-2xl border border-border bg-card p-4 text-center">
+          <p className="al-eyebrow">Albums</p>
+          <p className="al-stat-value text-2xl sm:text-3xl mt-1">{albums.length}</p>
         </div>
       </div>
 
@@ -157,7 +150,7 @@ export default function ProfileContent({
       </div>
 
       {/* Secondary tools — quiet, grouped, still one tap away */}
-      <div className="mt-3 mx-4 md:mx-0 flex flex-wrap gap-2">
+      <div className="mt-4 mx-4 md:mx-0 flex flex-wrap gap-2">
         <QuietLink href="/wishlist" icon={<Star className="h-3.5 w-3.5" />} label="Wishlist" />
         <QuietLink href="/saved" icon={<Bookmark className="h-3.5 w-3.5" />} label="Saved" />
         <QuietLink href="/analytics" icon={<BarChart3 className="h-3.5 w-3.5" />} label="Analytics" />
@@ -165,21 +158,17 @@ export default function ProfileContent({
       </div>
 
       {/* Simple tab pair — Adventures / Badges */}
-      <div
-        className="mt-6 mx-4 md:mx-0 flex gap-1"
-        style={{ borderBottom: '1px solid var(--color-line-warm)' }}
-      >
+      <div className="mt-8 mx-4 md:mx-0 flex gap-1 border-b border-border">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="relative px-5 py-3 text-[13px] font-semibold transition-colors"
-            style={{
-              color:
-                activeTab === tab.id
-                  ? 'var(--color-ink)'
-                  : 'var(--color-muted-warm)',
-            }}
+            className={cn(
+              'relative px-5 py-3 text-sm font-medium transition-colors duration-200',
+              activeTab === tab.id
+                ? 'text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             <span className="inline-flex items-center gap-2">
               <tab.icon className="h-3.5 w-3.5" />
@@ -188,8 +177,7 @@ export default function ProfileContent({
             {activeTab === tab.id && (
               <motion.div
                 layoutId="profileTab"
-                className="absolute bottom-0 left-0 right-0 h-[2px]"
-                style={{ background: 'var(--color-coral)' }}
+                className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary"
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               />
             )}
@@ -198,7 +186,7 @@ export default function ProfileContent({
       </div>
 
       {/* Tab content — single column, no sidebar clutter */}
-      <div className="mt-5 mx-4 md:mx-0">
+      <div className="mt-6 mx-4 md:mx-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -212,7 +200,7 @@ export default function ProfileContent({
             ) : activeTab === 'albums' ? (
               <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
             ) : activeTab === 'badges' && userId ? (
-              <div className="al-card p-5">
+              <div className="rounded-2xl border border-border bg-card p-5">
                 <AchievementsBadges userId={userId} showAll />
               </div>
             ) : null}
@@ -241,29 +229,16 @@ function FeatureTile({
   return (
     <Link
       href={href}
-      className="group flex flex-col gap-2.5 p-4 rounded-2xl transition-all hover:-translate-y-0.5"
-      style={{
-        background: 'var(--card)',
-        border: '1px solid var(--color-line-warm)',
-      }}
+      className="group flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span
-        className="flex items-center justify-center w-10 h-10 rounded-xl"
-        style={{
-          background: 'var(--color-coral-tint)',
-          color: 'var(--color-coral)',
-        }}
-      >
+      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
         {icon}
       </span>
       <div>
-        <div className="text-[15px] font-semibold text-[color:var(--color-ink)] leading-tight">
+        <div className="font-heading text-base font-semibold text-foreground leading-tight">
           {label}
         </div>
-        <div
-          className="text-[12px] mt-0.5"
-          style={{ color: 'var(--color-muted-warm)' }}
-        >
+        <div className="text-xs text-muted-foreground mt-0.5">
           {hint}
         </div>
       </div>
@@ -284,14 +259,9 @@ function QuietLink({
   return (
     <Link
       href={href}
-      className="group inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[13px] font-medium transition-colors"
-      style={{
-        background: 'var(--card)',
-        border: '1px solid var(--color-line-warm)',
-        color: 'var(--color-ink-soft)',
-      }}
+      className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="text-[color:var(--color-muted-warm)] group-hover:text-[color:var(--color-coral)] transition-colors">
+      <span className="transition-colors duration-200 group-hover:text-primary">
         {icon}
       </span>
       {label}

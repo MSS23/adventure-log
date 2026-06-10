@@ -133,35 +133,25 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
   }, [savedAlbums, groupBy])
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="space-y-6">
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="space-y-8">
         {/* Page Header */}
         <motion.div
           initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <motion.div
-                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'var(--color-coral-tint)' }}
-                whileHover={prefersReducedMotion ? {} : { scale: 1.08, rotate: 4 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-              >
-                <Bookmark className="h-5 w-5" style={{ color: 'var(--color-coral)' }} />
-              </motion.div>
-              <div className="min-w-0">
-                <p className="al-eyebrow mb-1">Library</p>
-                <h1 className="al-display text-3xl md:text-4xl">Saved</h1>
-                <p className="text-sm text-[color:var(--color-muted-warm)] mt-2">
-                  {savedAlbums.length} album{savedAlbums.length !== 1 ? 's' : ''} saved
-                  {viewMode === 'collections' && ` · ${collections.length} collection${collections.length !== 1 ? 's' : ''}`}
-                </p>
-              </div>
-            </div>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <header className="min-w-0 space-y-1">
+              <p className="al-eyebrow">Library</p>
+              <h1 className="al-display text-3xl md:text-4xl">Saved</h1>
+              <p className="text-sm text-muted-foreground">
+                {savedAlbums.length} album{savedAlbums.length !== 1 ? 's' : ''} saved
+                {viewMode === 'collections' && ` · ${collections.length} collection${collections.length !== 1 ? 's' : ''}`}
+              </p>
+            </header>
             <Link href="/explore" className="shrink-0">
-              <Button variant="outline" size="sm" className="gap-2 rounded-full cursor-pointer active:scale-[0.97] transition-all duration-200 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]">
+              <Button variant="outline" size="sm" className="gap-2 cursor-pointer">
                 <Compass className="h-4 w-4" />
                 <span className="hidden xs:inline sm:inline">Explore</span>
               </Button>
@@ -177,19 +167,15 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
             {/* Controls Bar */}
             <div className="flex flex-wrap items-center gap-3">
               {/* View Toggle */}
-              <div
-                className="flex items-center rounded-lg p-1"
-                style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
-              >
+              <div className="flex items-center rounded-xl border border-border bg-card p-1">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] active:scale-[0.97]',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]',
                     viewMode === 'grid'
-                      ? 'text-white shadow-sm'
-                      : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   )}
-                  style={viewMode === 'grid' ? { background: 'var(--color-coral)' } : undefined}
                 >
                   <LayoutGrid className="h-4 w-4" />
                   <span className="hidden sm:inline">All</span>
@@ -197,12 +183,11 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                 <button
                   onClick={() => setViewMode('collections')}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] active:scale-[0.97]',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]',
                     viewMode === 'collections'
-                      ? 'text-white shadow-sm'
-                      : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   )}
-                  style={viewMode === 'collections' ? { background: 'var(--color-coral)' } : undefined}
                 >
                   <FolderOpen className="h-4 w-4" />
                   <span className="hidden sm:inline">Collections</span>
@@ -212,7 +197,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
               {/* Sort / Group By */}
               {viewMode === 'grid' ? (
                 <Select value={sortMode} onValueChange={(v: SortMode) => setSortMode(v)}>
-                  <SelectTrigger className="w-[160px] h-9" style={{ background: 'var(--card)' }}>
+                  <SelectTrigger className="w-[160px] h-9">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -229,7 +214,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                 </Select>
               ) : (
                 <Select value={groupBy} onValueChange={(v: GroupBy) => setGroupBy(v)}>
-                  <SelectTrigger className="w-[170px] h-9" style={{ background: 'var(--card)' }}>
+                  <SelectTrigger className="w-[170px] h-9">
                     <SelectValue placeholder="Group by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -285,8 +270,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                     return (
                       <motion.div
                         key={group.key}
-                        className="rounded-2xl overflow-hidden shadow-sm"
-                        style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
+                        className="rounded-2xl border border-border bg-card overflow-hidden"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -294,33 +278,33 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                         {/* Collection Header */}
                         <button
                           onClick={() => toggleGroup(group.key)}
-                          className="w-full flex items-center justify-between px-5 py-4 hover:bg-[color:var(--color-ivory-alt)] transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--color-coral)] active:scale-[0.99]"
+                          className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/60 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3">
                             {group.flag ? (
                               <span className="text-2xl">{group.flag}</span>
                             ) : groupBy === 'username' ? (
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>
-                                <User className="h-4 w-4" style={{ color: 'var(--color-forest)' }} />
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                <User className="h-4 w-4" />
                               </div>
                             ) : (
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--color-ivory-alt)' }}>
-                                <MapPin className="h-4 w-4" style={{ color: 'var(--color-muted-warm)' }} />
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                                <MapPin className="h-4 w-4" />
                               </div>
                             )}
                             <div className="text-left">
-                              <h3 className="font-heading font-semibold text-[color:var(--color-ink)]">
+                              <h3 className="font-heading font-semibold text-foreground">
                                 {group.label}
                               </h3>
-                              <p className="text-xs text-[color:var(--color-muted-warm)]">
+                              <p className="text-xs text-muted-foreground">
                                 {group.albums.length} album{group.albums.length !== 1 ? 's' : ''}
                               </p>
                             </div>
                           </div>
                           {isCollapsed ? (
-                            <ChevronRight className="h-5 w-5 text-[color:var(--color-muted-warm)]" />
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
                           ) : (
-                            <ChevronDown className="h-5 w-5 text-[color:var(--color-muted-warm)]" />
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
                           )}
                         </button>
 
@@ -396,18 +380,17 @@ function AlbumCard({
 }) {
   return (
     <motion.div
-      className="group relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
-      style={{ background: 'var(--card)', border: '1px solid var(--color-line-warm)' }}
+      className="group relative rounded-2xl border border-border bg-card overflow-hidden transition-all duration-200 hover:border-primary/30 hover:shadow-md"
       variants={{
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
       }}
-      whileHover={prefersReducedMotion ? {} : { y: -4 }}
+      whileHover={prefersReducedMotion ? {} : { y: -2 }}
     >
       <Link href={`/albums/${album.id}`}>
         {/* Album Cover */}
         <div className={cn(
-          "relative overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700",
+          "relative overflow-hidden bg-muted",
           compact ? "aspect-square" : "aspect-[4/3]"
         )}>
           {album.cover_photo_url ? (
@@ -415,12 +398,12 @@ function AlbumCard({
               src={getPhotoUrl(album.cover_photo_url) || ''}
               alt={album.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
               sizes={compact ? "(max-width: 640px) 50vw, 25vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Camera className="h-10 w-10 text-stone-300 dark:text-stone-600" />
+              <Camera className="h-10 w-10 text-muted-foreground/40" />
             </div>
           )}
 
@@ -438,21 +421,21 @@ function AlbumCard({
         {/* Album Info */}
         <div className={cn("p-3", compact ? "p-2.5" : "p-4")}>
           <h3 className={cn(
-            "font-semibold text-[color:var(--color-ink)] truncate group-hover:text-[color:var(--color-coral)] transition-colors",
+            "font-heading font-semibold text-foreground truncate group-hover:text-primary transition-colors",
             compact ? "text-sm mb-0.5" : "mb-1"
           )}>
             {album.title}
           </h3>
 
           {album.location_name && (
-            <div className="flex items-center gap-1.5 text-sm text-[color:var(--color-muted-warm)] mb-1">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-1">
               <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
               <span className="truncate">{album.location_name}</span>
             </div>
           )}
 
           {!compact && album.user && (
-            <div className="flex items-center gap-1.5 text-xs text-[color:var(--color-muted-warm)] opacity-80">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <User className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">
                 {album.user.display_name || album.user.username}
@@ -472,16 +455,16 @@ function AlbumCard({
           }}
           className={cn(
             "p-2 rounded-full cursor-pointer",
-            "bg-white/90 dark:bg-black/70 backdrop-blur-sm shadow-lg",
-            "hover:bg-red-50 dark:hover:bg-red-950/50 hover:scale-110",
+            "bg-background/90 backdrop-blur-sm shadow-md",
+            "hover:bg-accent/10 hover:scale-110",
             "transition-all duration-200",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           )}
           whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
           title="Remove from saved"
           aria-label="Remove from saved"
         >
-          <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+          <Heart className="h-4 w-4 text-accent fill-[currentColor]" />
         </motion.button>
       </div>
     </motion.div>

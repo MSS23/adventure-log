@@ -175,61 +175,55 @@ export default function FeedPage() {
   if (!user) {
     return (
       <div className="flex-1 flex items-center justify-center p-6">
-        <Loader2 className="h-6 w-6 animate-spin text-[color:var(--color-forest)]" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 py-6 md:py-8">
       {/* Editorial header — eyebrow + display heading */}
-      <header className="mb-7">
-        <p className="al-eyebrow mb-2">The latest from your travelers</p>
-        <div className="flex items-end justify-between gap-4">
-          <h1 className="al-display text-[36px] md:text-[44px] leading-[0.95]">
+      <header className="mb-8 space-y-1">
+        <p className="al-eyebrow">The latest from your travelers</p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <h1 className="al-display text-3xl md:text-4xl">
             <em className="italic font-normal">Field</em> Feed
           </h1>
 
           {/* Quiet toggle — underline, not pill */}
           <nav
             aria-label="Feed mode"
-            className="flex items-center gap-5 pb-1"
+            className="flex items-center gap-6 pb-1"
             role="tablist"
           >
             <button
               role="tab"
               aria-selected={mode === 'following'}
               onClick={() => setMode('following')}
-              className={`relative pb-1.5 text-[12px] font-semibold tracking-wide uppercase transition-colors ${
+              className={`relative pb-1.5 text-xs font-semibold tracking-wide uppercase transition-colors ${
                 mode === 'following'
-                  ? 'text-[color:var(--color-ink)]'
-                  : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink-soft)]'
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Friends
               {mode === 'following' && (
-                <span
-                  className="absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full"
-                  style={{ background: 'var(--color-forest)' }}
-                />
+                <span className="absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full bg-primary" />
               )}
             </button>
             <button
               role="tab"
               aria-selected={mode === 'discover'}
               onClick={() => setMode('discover')}
-              className={`relative pb-1.5 text-[12px] font-semibold tracking-wide uppercase transition-colors ${
+              className={`relative pb-1.5 text-xs font-semibold tracking-wide uppercase transition-colors ${
                 mode === 'discover'
-                  ? 'text-[color:var(--color-ink)]'
-                  : 'text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink-soft)]'
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Discover
               {mode === 'discover' && (
-                <span
-                  className="absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full"
-                  style={{ background: 'var(--color-forest)' }}
-                />
+                <span className="absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full bg-primary" />
               )}
             </button>
           </nav>
@@ -240,7 +234,7 @@ export default function FeedPage() {
       {suggestedUsers.length > 0 && (
         <section
           aria-label="Suggested travelers"
-          className="mb-6 pb-5 border-b border-[color:var(--color-line-warm)]"
+          className="mb-6 pb-6 border-b border-border"
         >
           <p className="al-eyebrow mb-3">Travelers to follow</p>
           <div className="flex gap-4 overflow-x-auto -mx-4 px-4 scrollbar-hide">
@@ -250,19 +244,19 @@ export default function FeedPage() {
                 <Link
                   key={u.id}
                   href={`/u/${u.username}`}
-                  className="flex flex-col items-center gap-1.5 min-w-[60px] group"
+                  className="flex flex-col items-center gap-1.5 min-w-[60px] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
                   aria-label={`View ${name}'s profile`}
                 >
-                  <span className="transition-transform group-hover:-translate-y-0.5">
+                  <span className="transition-transform duration-200 group-hover:-translate-y-0.5">
                     <OptimizedAvatar
                       src={u.avatar_url || undefined}
                       alt={name}
                       fallback={name[0]?.toUpperCase() || 'U'}
                       size="lg"
-                      className="ring-2 ring-[color:var(--color-forest-tint)]"
+                      className="ring-2 ring-primary/20"
                     />
                   </span>
-                  <span className="text-[11px] font-medium text-[color:var(--color-ink-soft)] truncate max-w-[60px] text-center">
+                  <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground transition-colors truncate max-w-[60px] text-center">
                     {name.split(' ')[0]}
                   </span>
                 </Link>
@@ -276,24 +270,14 @@ export default function FeedPage() {
       <div className="flex gap-2 mb-6 overflow-x-auto -mx-4 px-4 scrollbar-hide">
         <Link
           href="/explore"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap transition-colors hover:bg-[color:var(--color-forest-tint)] hover:text-[color:var(--color-forest)]"
-          style={{
-            background: 'var(--color-ivory-alt)',
-            color: 'var(--color-ink-soft)',
-            border: '1px solid var(--color-line-warm)',
-          }}
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
         >
           <Compass className="h-3 w-3" strokeWidth={2} />
           Explore
         </Link>
         <Link
           href="/travel-twins"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap transition-colors hover:bg-[color:var(--color-forest-tint)] hover:text-[color:var(--color-forest)]"
-          style={{
-            background: 'var(--color-ivory-alt)',
-            color: 'var(--color-ink-soft)',
-            border: '1px solid var(--color-line-warm)',
-          }}
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
         >
           <Users className="h-3 w-3" strokeWidth={2} />
           Travel twins
@@ -323,9 +307,10 @@ export default function FeedPage() {
             <div className="flex justify-center py-8">
               <Button
                 variant="outline"
+                size="pill"
                 onClick={() => loadFeed(page + 1, false)}
                 disabled={loadingMore}
-                className="rounded-full px-6"
+                className="px-6"
               >
                 {loadingMore ? (
                   <>
@@ -346,59 +331,41 @@ export default function FeedPage() {
 
 function EmptyState({ mode }: { mode: FeedMode }) {
   return (
-    <div className="text-center py-20 px-6">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
       <div
-        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-        style={{
-          background: 'var(--color-forest-tint)',
-          color: 'var(--color-forest)',
-        }}
+        className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"
         aria-hidden
       >
         {mode === 'following' ? (
-          <Users className="h-7 w-7" strokeWidth={1.6} />
+          <Users className="h-6 w-6" strokeWidth={1.6} />
         ) : (
-          <Compass className="h-7 w-7" strokeWidth={1.6} />
+          <Compass className="h-6 w-6" strokeWidth={1.6} />
         )}
       </div>
-      <h3 className="font-heading text-[24px] font-semibold text-[color:var(--color-ink)] mb-2">
+      <h3 className="font-heading text-lg font-semibold text-foreground">
         {mode === 'following' ? 'Your field is quiet' : 'Nothing public yet'}
       </h3>
-      <p className="text-[14px] leading-[1.6] text-[color:var(--color-ink-soft)] mb-7 max-w-sm mx-auto">
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
         {mode === 'following'
           ? 'Follow a few travelers to fill your feed — every adventure they log shows up here.'
           : 'Be the first to share a public adventure. Others will find it here once you post.'}
       </p>
-      <div className="flex gap-3 justify-center">
+      <div className="mt-5 flex gap-3 justify-center">
         {mode === 'following' ? (
           <>
-            <Button
-              asChild
-              className="rounded-full px-5 text-[13px] font-semibold"
-              style={{
-                background: 'var(--color-forest)',
-                color: 'var(--color-ivory)',
-              }}
-            >
+            <Button asChild size="pill">
               <Link href="/explore">Find people to follow</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-full px-5 text-[13px]">
+            <Button asChild variant="outline" size="pill">
               <Link href="/albums/new">Create album</Link>
             </Button>
           </>
         ) : (
           <>
-            <Button
-              asChild
-              className="rounded-full px-5 text-[13px] font-semibold"
-              style={{
-                background: 'var(--color-forest)',
-                color: 'var(--color-ivory)',
-              }}
-            >
+            <Button asChild size="pill">
               <Link href="/albums/new">Create album</Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-full px-5 text-[13px]">
+            <Button asChild variant="outline" size="pill">
               <Link href="/explore">Explore people</Link>
             </Button>
           </>

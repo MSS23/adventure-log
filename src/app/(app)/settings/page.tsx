@@ -287,20 +287,20 @@ export default function SettingsPage() {
       <div className="mb-8">
         <p className="al-eyebrow mb-1">Preferences</p>
         <h1 className="al-display text-3xl md:text-4xl">Settings</h1>
-        <p className="al-body mt-2 max-w-xl">
+        <p className="text-sm text-muted-foreground mt-2 max-w-xl">
           Manage your account, privacy, and data — all in one place.
         </p>
       </div>
 
       {/* Feedback */}
       {error && (
-        <div className="mb-5 rounded-xl border border-[color:var(--color-coral)]/40 bg-[color:var(--color-coral-tint)] px-4 py-3" role="alert">
-          <p className="text-sm text-[color:var(--color-coral)] font-medium">{error}</p>
+        <div className="mb-5 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3" role="alert">
+          <p className="text-sm text-destructive font-medium">{error}</p>
         </div>
       )}
       {success && (
-        <div className="mb-5 rounded-xl border border-[color:var(--color-forest)]/40 bg-[color:var(--color-forest-tint)] px-4 py-3" role="status">
-          <p className="text-sm text-[color:var(--color-forest-deep)] dark:text-[color:var(--color-forest-bright)] font-medium">{success}</p>
+        <div className="mb-5 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3" role="status">
+          <p className="text-sm text-primary font-medium">{success}</p>
         </div>
       )}
 
@@ -312,23 +312,23 @@ export default function SettingsPage() {
         {/* Edit profile — identity fields live on the dedicated page */}
         <Link
           href="/profile/edit"
-          className="al-card flex items-center gap-4 p-5 group transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]"
+          className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="grid place-items-center h-10 w-10 rounded-full bg-[color:var(--color-forest-tint)] text-[color:var(--color-forest)] shrink-0">
+          <span className="grid place-items-center h-10 w-10 rounded-full bg-primary/10 text-primary shrink-0">
             <UserCog className="h-5 w-5" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-[color:var(--color-ink)]">Edit profile</span>
-            <span className="block text-xs text-[color:var(--color-muted-warm)] mt-0.5">Name, username, bio, photo, links</span>
+            <span className="block text-sm font-semibold text-foreground">Edit profile</span>
+            <span className="block text-xs text-muted-foreground mt-0.5">Name, username, bio, photo, links</span>
           </span>
-          <ChevronRight className="h-5 w-5 text-[color:var(--color-muted-warm)] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
         </Link>
 
         {/* Cover photo */}
         <Card>
           <CardHead icon={ImageIcon} title="Cover photo" subtitle="Shown across the top of your profile" />
           <div className="p-5 space-y-4">
-            <div className="relative w-full h-32 rounded-xl overflow-hidden bg-[color:var(--color-ivory-alt)]">
+            <div className="relative w-full h-32 rounded-xl overflow-hidden bg-muted">
               {(coverPhotoPreview || profile?.cover_photo_url) ? (
                 <Image
                   src={coverPhotoPreview || getPhotoUrl(profile?.cover_photo_url, 'covers') || ''}
@@ -338,29 +338,29 @@ export default function SettingsPage() {
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Camera className="h-8 w-8 text-[color:var(--color-muted-warm)] opacity-50" />
+                  <Camera className="h-8 w-8 text-muted-foreground" />
                 </div>
               )}
             </div>
             <div className="flex flex-wrap gap-2">
               {coverPhotoPreview ? (
                 <>
-                  <Button size="sm" onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="al-btn-coral text-white min-h-[44px] px-5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]">
+                  <Button size="sm" onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="min-h-[44px] px-5 cursor-pointer">
                     {uploadingCover ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" />Uploading</> : 'Save'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setCoverPhotoFile(null); setCoverPhotoPreview(null) }} className="min-h-[44px] cursor-pointer active:scale-[0.97] transition-all duration-200">
+                  <Button size="sm" variant="outline" onClick={() => { setCoverPhotoFile(null); setCoverPhotoPreview(null) }} className="min-h-[44px] cursor-pointer">
                     Cancel
                   </Button>
                 </>
               ) : (
                 <>
-                  <Label htmlFor="cover-input" className="inline-flex items-center min-h-[44px] px-4 rounded-full border border-[color:var(--color-line-warm)] bg-[color:var(--card)] hover:bg-[color:var(--color-ivory-alt)] cursor-pointer text-sm font-medium text-[color:var(--color-ink-soft)] transition-all duration-200 hover:shadow-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]">
+                  <Label htmlFor="cover-input" className="inline-flex items-center min-h-[44px] px-4 rounded-xl border border-border bg-card hover:bg-muted cursor-pointer text-sm font-medium text-foreground transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                     <Camera className="h-4 w-4 mr-1.5" />
                     {profile?.cover_photo_url ? 'Change photo' : 'Upload photo'}
                   </Label>
                   <input id="cover-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCoverPhotoSelect} className="hidden" />
                   {profile?.cover_photo_url && (
-                    <Button size="sm" variant="outline" onClick={handleRemoveCoverPhoto} disabled={uploadingCover} className="min-h-[44px] text-[color:var(--color-coral)] border-[color:var(--color-coral)]/30 hover:bg-[color:var(--color-coral-tint)] cursor-pointer">
+                    <Button size="sm" variant="outline" onClick={handleRemoveCoverPhoto} disabled={uploadingCover} className="min-h-[44px] text-destructive border-destructive/30 hover:bg-destructive/10 cursor-pointer">
                       Remove
                     </Button>
                   )}
@@ -376,15 +376,15 @@ export default function SettingsPage() {
           <div className="p-5 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="home-city" className="text-xs font-medium text-[color:var(--color-ink-soft)]">City</Label>
+                <Label htmlFor="home-city" className="text-xs font-medium text-foreground">City</Label>
                 <Input id="home-city" value={homeLocationData.city} onChange={(e) => setHomeLocationData(prev => ({ ...prev, city: e.target.value }))} placeholder="London" className="min-h-[44px] text-sm" />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="home-country" className="text-xs font-medium text-[color:var(--color-ink-soft)]">Country</Label>
+                <Label htmlFor="home-country" className="text-xs font-medium text-foreground">Country</Label>
                 <Input id="home-country" value={homeLocationData.country} onChange={(e) => setHomeLocationData(prev => ({ ...prev, country: e.target.value }))} placeholder="United Kingdom" className="min-h-[44px] text-sm" />
               </div>
             </div>
-            <Button size="sm" onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="al-btn-coral text-white min-h-[44px] px-5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]">
+            <Button size="sm" onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="min-h-[44px] px-5 cursor-pointer">
               {loading ? 'Saving…' : 'Save location'}
             </Button>
           </div>
@@ -410,18 +410,18 @@ export default function SettingsPage() {
                     onClick={() => updatePrivacyLevel(opt.value)}
                     disabled={loading}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl border text-left transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed",
+                      "w-full flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-xl border text-left transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed",
                       active
-                        ? "border-[color:var(--color-forest)] bg-[color:var(--color-forest-tint)] shadow-sm"
-                        : "border-[color:var(--color-line-warm)] hover:bg-[color:var(--color-ivory-alt)] hover:shadow-sm"
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:bg-muted/60"
                     )}
                   >
-                    <Icon className={cn("h-5 w-5 shrink-0", active ? "text-[color:var(--color-forest)]" : "text-[color:var(--color-muted-warm)]")} />
+                    <Icon className={cn("h-5 w-5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
                     <div className="min-w-0">
-                      <p className={cn("text-sm font-medium", active ? "text-[color:var(--color-forest-deep)] dark:text-[color:var(--color-forest-bright)]" : "text-[color:var(--color-ink)]")}>{opt.label}</p>
-                      <p className="text-xs text-[color:var(--color-muted-warm)]">{opt.desc}</p>
+                      <p className={cn("text-sm font-medium", active ? "text-primary" : "text-foreground")}>{opt.label}</p>
+                      <p className="text-xs text-muted-foreground">{opt.desc}</p>
                     </div>
-                    {active && <div className="ml-auto w-2 h-2 rounded-full bg-[color:var(--color-forest)] shrink-0" />}
+                    {active && <div className="ml-auto w-2 h-2 rounded-full bg-primary shrink-0" />}
                   </button>
                 )
               })}
@@ -436,16 +436,16 @@ export default function SettingsPage() {
         {/* Notifications — managed on a dedicated page */}
         <Link
           href="/settings/notifications"
-          className="al-card flex items-center gap-4 p-5 group transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]"
+          className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="grid place-items-center h-10 w-10 rounded-full bg-[color:var(--color-gold-tint)] text-[color:var(--color-gold)] shrink-0">
+          <span className="grid place-items-center h-10 w-10 rounded-full bg-primary/10 text-primary shrink-0">
             <Bell className="h-5 w-5" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-[color:var(--color-ink)]">Notifications</span>
-            <span className="block text-xs text-[color:var(--color-muted-warm)] mt-0.5">Choose what activity you get notified about</span>
+            <span className="block text-sm font-semibold text-foreground">Notifications</span>
+            <span className="block text-xs text-muted-foreground mt-0.5">Choose what activity you get notified about</span>
           </span>
-          <ChevronRight className="h-5 w-5 text-[color:var(--color-muted-warm)] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
+          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
         </Link>
 
         {/* ── SECURITY & DATA ─────────────────────────────────── */}
@@ -456,28 +456,28 @@ export default function SettingsPage() {
           <CardHead icon={Key} title="Change password" subtitle="Use at least 8 characters" />
           <div className="p-5 space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="current-password" className="text-xs font-medium text-[color:var(--color-ink-soft)]">Current password</Label>
+              <Label htmlFor="current-password" className="text-xs font-medium text-foreground">Current password</Label>
               <div className="relative">
                 <Input id="current-password" type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="min-h-[44px] text-sm pr-11" />
-                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-9 w-9 grid place-items-center cursor-pointer rounded-md transition-colors duration-200 hover:bg-[color:var(--color-ivory-alt)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword} aria-controls="current-password">
-                  {showCurrentPassword ? <EyeOff className="h-4 w-4 text-[color:var(--color-muted-warm)]" /> : <Eye className="h-4 w-4 text-[color:var(--color-muted-warm)]" />}
+                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-9 w-9 grid place-items-center cursor-pointer rounded-xl transition-colors duration-200 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword} aria-controls="current-password">
+                  {showCurrentPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                 </button>
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="new-password" className="text-xs font-medium text-[color:var(--color-ink-soft)]">New password</Label>
+              <Label htmlFor="new-password" className="text-xs font-medium text-foreground">New password</Label>
               <div className="relative">
                 <Input id="new-password" type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="min-h-[44px] text-sm pr-11" />
-                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-9 w-9 grid place-items-center cursor-pointer rounded-md transition-colors duration-200 hover:bg-[color:var(--color-ivory-alt)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword} aria-controls="new-password">
-                  {showNewPassword ? <EyeOff className="h-4 w-4 text-[color:var(--color-muted-warm)]" /> : <Eye className="h-4 w-4 text-[color:var(--color-muted-warm)]" />}
+                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-9 w-9 grid place-items-center cursor-pointer rounded-xl transition-colors duration-200 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword} aria-controls="new-password">
+                  {showNewPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                 </button>
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="confirm-password" className="text-xs font-medium text-[color:var(--color-ink-soft)]">Confirm new password</Label>
+              <Label htmlFor="confirm-password" className="text-xs font-medium text-foreground">Confirm new password</Label>
               <Input id="confirm-password" type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} className="min-h-[44px] text-sm" />
             </div>
-            <Button size="sm" onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="al-btn-coral text-white min-h-[44px] px-5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]">
+            <Button size="sm" onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="min-h-[44px] px-5 cursor-pointer">
               {loading ? 'Updating…' : 'Update password'}
             </Button>
           </div>
@@ -487,7 +487,7 @@ export default function SettingsPage() {
         <Card>
           <CardHead icon={Download} title="Export your data" subtitle="Download albums, photos, and profile as JSON" />
           <div className="p-5">
-            <Button size="sm" variant="outline" onClick={exportData} disabled={loading} className="min-h-[44px] px-5 cursor-pointer active:scale-[0.97] transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] hover:shadow-sm hover:bg-[color:var(--color-ivory-alt)]">
+            <Button size="sm" variant="outline" onClick={exportData} disabled={loading} className="min-h-[44px] px-5 cursor-pointer">
               <Download className="h-4 w-4 mr-1.5" />
               {loading ? 'Preparing…' : 'Download data'}
             </Button>
@@ -497,15 +497,15 @@ export default function SettingsPage() {
         {/* ── DANGER ZONE ─────────────────────────────────────── */}
         <SectionHeader title="Danger zone" className="pt-3" tone="danger" />
 
-        <section className="rounded-[20px] border border-[color:var(--color-coral)]/35 bg-[color:var(--color-coral-tint)] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[color:var(--color-coral)]/20">
+        <section className="rounded-2xl border border-destructive/25 bg-destructive/5 overflow-hidden">
+          <div className="px-5 py-4 border-b border-destructive/15">
             <div className="flex items-center gap-2.5">
-              <Trash2 className="h-4 w-4 text-[color:var(--color-coral)]" />
-              <h2 className="text-sm font-semibold text-[color:var(--color-coral)]">Delete account</h2>
+              <Trash2 className="h-4 w-4 text-destructive" />
+              <h2 className="font-heading text-sm font-semibold text-destructive">Delete account</h2>
             </div>
           </div>
           <div className="p-5">
-            <p className="text-sm text-[color:var(--color-ink-soft)] mb-4 leading-relaxed">
+            <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
               Your account is deactivated immediately. You have a 30-day recovery window before everything is permanently deleted.
             </p>
             <Dialog>
@@ -538,24 +538,24 @@ export default function SettingsPage() {
 
 function SectionHeader({ title, className, tone = 'default' }: { title: string; className?: string; tone?: 'default' | 'danger' }) {
   return (
-    <p className={cn('al-eyebrow', tone === 'danger' && 'text-[color:var(--color-coral)]', className)}>
+    <p className={cn('al-eyebrow', tone === 'danger' && 'text-destructive', className)}>
       {title}
     </p>
   )
 }
 
 function Card({ children }: { children: React.ReactNode }) {
-  return <section className="al-card overflow-hidden">{children}</section>
+  return <section className="rounded-2xl border border-border bg-card overflow-hidden">{children}</section>
 }
 
 function CardHead({ icon: Icon, title, subtitle }: { icon: React.ComponentType<{ className?: string }>; title: string; subtitle?: string }) {
   return (
-    <div className="px-5 py-4 border-b border-[color:var(--color-line-warm)]">
+    <div className="px-5 py-4 border-b border-border">
       <div className="flex items-center gap-2.5">
-        <Icon className="h-4 w-4 text-[color:var(--color-forest)]" />
-        <h2 className="text-sm font-semibold text-[color:var(--color-ink)]">{title}</h2>
+        <Icon className="h-4 w-4 text-primary" />
+        <h2 className="font-heading text-sm font-semibold text-foreground">{title}</h2>
       </div>
-      {subtitle && <p className="text-xs text-[color:var(--color-muted-warm)] mt-1 ml-[26px]">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-muted-foreground mt-1 ml-[26px]">{subtitle}</p>}
     </div>
   )
 }

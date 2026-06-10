@@ -96,11 +96,11 @@ export function LocationWishlist() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-100 dark:bg-red-950/30 text-red-800 dark:text-red-400 border-red-300 dark:border-red-900/40'
-      case 'high': return 'bg-olive-100 dark:bg-olive-950/30 text-olive-800 border-olive-300 dark:border-white/[0.08]'
-      case 'medium': return 'bg-yellow-100 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-400 border-yellow-300 dark:border-yellow-900/40'
-      case 'low': return 'bg-stone-100 dark:bg-white/[0.06] text-stone-800 dark:text-stone-200 border-stone-300 dark:border-white/[0.14]'
-      default: return 'bg-stone-100 dark:bg-white/[0.06] text-stone-800 dark:text-stone-200 border-stone-300 dark:border-white/[0.14]'
+      case 'urgent': return 'bg-destructive/10 text-destructive border-destructive/20'
+      case 'high': return 'bg-accent/10 text-accent border-accent/20'
+      case 'medium': return 'bg-[color:var(--color-gold)]/15 text-[color:var(--color-gold)] border-[color:var(--color-gold)]/25'
+      case 'low': return 'bg-muted text-muted-foreground border-border'
+      default: return 'bg-muted text-muted-foreground border-border'
     }
   }
 
@@ -126,11 +126,11 @@ export function LocationWishlist() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-3">
-            <Star className="h-7 w-7 text-yellow-600" />
+          <h2 className="al-display text-xl md:text-2xl flex items-center gap-3">
+            <Star className="h-6 w-6 text-accent" />
             Travel Wishlist
           </h2>
-          <p className="text-stone-800 dark:text-stone-200 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Plan your future adventures and dream destinations
           </p>
         </div>
@@ -148,8 +148,8 @@ export function LocationWishlist() {
                 <DialogTitle>Add New Destination</DialogTitle>
               </DialogHeader>
               <div className="p-4">
-                <p className="text-stone-800 dark:text-stone-200">Feature coming soon!</p>
-                <p className="text-sm text-stone-800 dark:text-stone-200 mt-2">
+                <p className="text-foreground">Feature coming soon!</p>
+                <p className="text-sm text-muted-foreground mt-2">
                   You&apos;ll be able to add destinations, set priorities, plan dates, and track costs.
                 </p>
               </div>
@@ -168,55 +168,39 @@ export function LocationWishlist() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-olive-600">
-                {wishlistLocations.length}
-              </div>
-              <div className="text-sm text-stone-800 dark:text-stone-200">Total Destinations</div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+          <p className="al-eyebrow">Total Destinations</p>
+          <p className="al-stat-value text-2xl md:text-3xl mt-1">
+            {wishlistLocations.length}
+          </p>
+        </div>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {wishlistLocations.filter(l => l.visited).length}
-              </div>
-              <div className="text-sm text-stone-800 dark:text-stone-200">Visited</div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+          <p className="al-eyebrow">Visited</p>
+          <p className="al-stat-value text-2xl md:text-3xl mt-1">
+            {wishlistLocations.filter(l => l.visited).length}
+          </p>
+        </div>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-olive-600">
-                {wishlistLocations.filter(l => l.priority === 'urgent' || l.priority === 'high').length}
-              </div>
-              <div className="text-sm text-stone-800 dark:text-stone-200">High Priority</div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+          <p className="al-eyebrow">High Priority</p>
+          <p className="al-stat-value text-2xl md:text-3xl mt-1">
+            {wishlistLocations.filter(l => l.priority === 'urgent' || l.priority === 'high').length}
+          </p>
+        </div>
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-olive-600">
-                {formatCurrency(wishlistLocations.reduce((sum, l) => sum + (l.estimatedCost || 0), 0))}
-              </div>
-              <div className="text-sm text-stone-800 dark:text-stone-200">Total Budget</div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+          <p className="al-eyebrow">Total Budget</p>
+          <p className="al-stat-value text-2xl md:text-3xl mt-1">
+            {formatCurrency(wishlistLocations.reduce((sum, l) => sum + (l.estimatedCost || 0), 0))}
+          </p>
+        </div>
       </div>
 
       {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-700 dark:text-stone-300" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search destinations..."
             value={searchQuery}
@@ -229,7 +213,7 @@ export function LocationWishlist() {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value as FilterPriority)}
-            className="px-3 py-2 border border-stone-300 dark:border-white/[0.14] rounded-md text-sm dark:bg-[#1B170E] dark:text-stone-100"
+            className="px-3 py-2 rounded-xl border border-border bg-card text-sm text-foreground"
           >
             <option value="all">All Priority</option>
             <option value="urgent">Urgent</option>
@@ -241,7 +225,7 @@ export function LocationWishlist() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="px-3 py-2 border border-stone-300 dark:border-white/[0.14] rounded-md text-sm dark:bg-[#1B170E] dark:text-stone-100"
+            className="px-3 py-2 rounded-xl border border-border bg-card text-sm text-foreground"
           >
             <option value="priority">Sort by Priority</option>
             <option value="dateAdded">Date Added</option>
@@ -254,7 +238,7 @@ export function LocationWishlist() {
             variant="outline"
             size="sm"
             onClick={() => setShowVisited(!showVisited)}
-            className={showVisited ? 'bg-green-50 dark:bg-green-950/30 border-green-300' : ''}
+            className={showVisited ? 'bg-primary/10 border-primary/30 text-primary' : ''}
           >
             {showVisited ? 'Hide Visited' : 'Show Visited'}
           </Button>
@@ -277,26 +261,26 @@ export function LocationWishlist() {
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
               <Card className={cn(
-                'group hover:shadow-lg transition-all duration-300 cursor-pointer',
+                'group transition-all duration-200 hover:border-primary/30 hover:shadow-md cursor-pointer overflow-hidden',
                 location.visited && 'opacity-75',
                 viewMode === 'list' && 'flex flex-row'
               )}>
                 {/* Image */}
                 {location.imageUrl && (
                   <div className={cn(
-                    'relative overflow-hidden bg-stone-100 dark:bg-white/[0.06]',
+                    'relative overflow-hidden bg-muted',
                     viewMode === 'grid' ? 'aspect-video' : 'w-32 h-32 flex-shrink-0'
                   )}>
                     <Image
                       src={location.imageUrl}
                       alt={location.name}
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
 
                     {/* Priority badge */}
                     <Badge className={cn(
-                      'absolute top-2 left-2 text-sm border',
+                      'absolute top-2 left-2 text-xs border rounded-full',
                       getPriorityColor(location.priority)
                     )}>
                       {location.priority.toUpperCase()}
@@ -304,8 +288,8 @@ export function LocationWishlist() {
 
                     {/* Visited overlay */}
                     {location.visited && (
-                      <div className="absolute inset-0 bg-green-600/20 flex items-center justify-center">
-                        <div className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                      <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                        <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
                           Visited ✓
                         </div>
                       </div>
@@ -321,10 +305,10 @@ export function LocationWishlist() {
                     {/* Header */}
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-stone-900 dark:text-stone-100 truncate">
+                        <h3 className="font-heading font-semibold text-foreground truncate">
                           {location.name}
                         </h3>
-                        <p className="text-sm text-stone-800 dark:text-stone-200 flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {location.country}
                         </p>
@@ -338,7 +322,7 @@ export function LocationWishlist() {
 
                     {/* Description */}
                     {location.description && (
-                      <p className="text-sm text-stone-800 dark:text-stone-200 line-clamp-2">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
                         {location.description}
                       </p>
                     )}
@@ -346,15 +330,15 @@ export function LocationWishlist() {
                     {/* Details */}
                     <div className="space-y-2">
                       {location.plannedDate && (
-                        <div className="flex items-center gap-2 text-sm text-stone-800 dark:text-stone-200">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-3 w-3" />
                           <span>Planned: {formatDate(location.plannedDate)}</span>
                         </div>
                       )}
 
                       {location.estimatedCost && (
-                        <div className="flex items-center gap-2 text-sm text-stone-800 dark:text-stone-200">
-                          <span className="text-green-600 font-medium">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span className="text-primary font-medium">
                             {formatCurrency(location.estimatedCost)}
                           </span>
                           <span>estimated</span>
@@ -366,12 +350,12 @@ export function LocationWishlist() {
                     {location.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {location.tags.slice(0, 3).map((tag, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-sm">
+                          <Badge key={idx} variant="secondary" className="text-xs">
                             {tag}
                           </Badge>
                         ))}
                         {location.tags.length > 3 && (
-                          <Badge variant="outline" className="text-sm">
+                          <Badge variant="outline" className="text-xs">
                             +{location.tags.length - 3}
                           </Badge>
                         )}
@@ -379,8 +363,8 @@ export function LocationWishlist() {
                     )}
 
                     {/* Actions */}
-                    <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.08]">
-                      <div className="text-sm text-stone-800 dark:text-stone-200">
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <div className="text-xs text-muted-foreground">
                         Added {formatDate(location.dateAdded)}
                       </div>
 
@@ -393,7 +377,7 @@ export function LocationWishlist() {
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
                           <Edit className="h-3 w-3" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-600">
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10">
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
@@ -408,28 +392,28 @@ export function LocationWishlist() {
 
       {/* Empty State */}
       {filteredLocations.length === 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <Star className="h-16 w-16 text-stone-300 dark:text-stone-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-2">
-                {searchQuery || filterPriority !== 'all' ? 'No matching destinations' : 'Your wishlist is empty'}
-              </h3>
-              <p className="text-stone-800 dark:text-stone-200 mb-6">
-                {searchQuery || filterPriority !== 'all'
-                  ? 'Try adjusting your search or filters'
-                  : 'Start planning your dream adventures by adding destinations to your wishlist!'
-                }
-              </p>
-              {!searchQuery && filterPriority === 'all' && (
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Destination
-                </Button>
-              )}
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+            <Star className="h-6 w-6" />
+          </div>
+          <h3 className="font-heading text-lg font-semibold text-foreground">
+            {searchQuery || filterPriority !== 'all' ? 'No matching destinations' : 'Your wishlist is empty'}
+          </h3>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            {searchQuery || filterPriority !== 'all'
+              ? 'Try adjusting your search or filters'
+              : 'Start planning your dream adventures by adding destinations to your wishlist!'
+            }
+          </p>
+          {!searchQuery && filterPriority === 'all' && (
+            <div className="mt-5">
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Destination
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       )}
     </div>
   )

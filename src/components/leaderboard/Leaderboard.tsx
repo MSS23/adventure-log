@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Trophy, Medal, Award, TrendingUp } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
@@ -181,20 +183,16 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
 
   if (isLoading) {
     return (
-      <div className={cn("space-y-2.5", className)}>
+      <div className={cn("rounded-2xl border border-border bg-card p-2 space-y-1", className)}>
         {Array.from({ length: limit }).map((_, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-4 rounded-xl border border-[color:var(--color-line-warm)] p-4 animate-pulse"
-            style={{ background: 'var(--card)' }}
-          >
-            <div className="w-9 h-9 rounded-full" style={{ background: 'var(--color-ivory-alt)' }} />
-            <div className="h-12 w-12 rounded-full" style={{ background: 'var(--color-ivory-alt)' }} />
+          <div key={i} className="flex items-center gap-3 rounded-xl px-3 py-2.5">
+            <Skeleton className="h-9 w-9 rounded-full flex-shrink-0" />
+            <Skeleton className="h-11 w-11 rounded-full flex-shrink-0" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 rounded w-1/3" style={{ background: 'var(--color-ivory-alt)' }} />
-              <div className="h-3 rounded w-1/4" style={{ background: 'var(--color-ivory-alt)' }} />
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-3 w-1/4" />
             </div>
-            <div className="h-6 w-16 rounded-full" style={{ background: 'var(--color-ivory-alt)' }} />
+            <Skeleton className="h-5 w-14" />
           </div>
         ))}
       </div>
@@ -204,43 +202,33 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-10 px-4">
-        <TrendingUp className="h-8 w-8 text-[color:var(--color-muted-warm)] mb-2" />
-        <p className="text-sm text-[color:var(--color-ink-soft)]">{error}</p>
+        <TrendingUp className="h-8 w-8 text-muted-foreground mb-2" />
+        <p className="text-sm text-muted-foreground">{error}</p>
       </div>
     )
   }
 
   if (leaders.length === 0) {
     return (
-      <div
-        className="flex flex-col items-center justify-center py-14 px-6 rounded-2xl border border-[color:var(--color-line-warm)] text-center"
-        style={{ background: 'var(--card)' }}
-      >
-        <div
-          className="w-14 h-14 flex items-center justify-center rounded-2xl mb-4"
-          style={{ background: 'var(--color-gold-tint)' }}
-        >
-          <Trophy className="h-7 w-7" style={{ color: 'var(--color-gold)' }} strokeWidth={1.8} />
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--color-gold)]/15 mb-4">
+          <Trophy className="h-6 w-6" style={{ color: 'var(--color-gold)' }} strokeWidth={1.8} />
         </div>
-        <h4 className="font-heading text-lg font-semibold text-[color:var(--color-ink)] mb-1">
+        <h4 className="font-heading text-lg font-semibold text-foreground">
           No rankings yet
         </h4>
-        <p className="text-sm text-[color:var(--color-ink-soft)] mb-5 max-w-xs">
+        <p className="mt-1 max-w-xs text-sm text-muted-foreground">
           Log albums, visit countries, and grow your following to climb the board.
         </p>
-        <Link
-          href="/albums/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-semibold transition-shadow hover:shadow-[0_10px_28px_rgba(226,85,58,0.45)]"
-          style={{ background: 'var(--color-coral)', color: '#fff' }}
-        >
-          Start your first album
-        </Link>
+        <Button asChild className="mt-5">
+          <Link href="/albums/new">Start your first album</Link>
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className={cn("space-y-2.5", className)}>
+    <div className={cn("rounded-2xl border border-border bg-card p-2 space-y-1", className)}>
       {leaders.map((leader, index) => {
         const rank = index + 1
         const accent = RANK_ACCENTS[rank as keyof typeof RANK_ACCENTS]
@@ -252,21 +240,15 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
           <Link
             key={leader.id}
             href={`/profile/${leader.username}`}
-            className="group flex items-center gap-4 rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(26,20,14,0.18)]"
-            style={{
-              background: 'var(--card)',
-              // Top-3 carry a hairline accent border; the rest use the warm line.
-              border: `1px solid ${isTopThree ? accent.accent : 'var(--color-line-warm)'}`,
-            }}
+            className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {/* Rank badge */}
             <div
-              className="flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm flex-shrink-0"
-              style={
-                isTopThree
-                  ? { background: accent.tint, color: accent.accent }
-                  : { background: 'var(--color-ivory-alt)', color: 'var(--color-muted-warm)' }
-              }
+              className={cn(
+                "flex items-center justify-center w-9 h-9 rounded-full text-sm font-semibold flex-shrink-0",
+                !isTopThree && "bg-muted text-muted-foreground"
+              )}
+              style={isTopThree ? { background: accent.tint, color: accent.accent } : undefined}
             >
               {RankIcon ? (
                 <RankIcon className="h-[18px] w-[18px]" strokeWidth={2} />
@@ -277,27 +259,27 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
 
             {/* Avatar — keep avatar URL logic unchanged */}
             <Avatar
-              className="h-12 w-12 ring-2 transition-all duration-200 flex-shrink-0"
-              style={{ '--tw-ring-color': isTopThree ? accent.accent : 'var(--color-line-warm)' } as React.CSSProperties}
+              className={cn(
+                "h-11 w-11 flex-shrink-0",
+                isTopThree ? "ring-2" : "ring-1 ring-border"
+              )}
+              style={isTopThree ? ({ '--tw-ring-color': accent.accent } as React.CSSProperties) : undefined}
             >
               <AvatarImage
                 src={getAvatarUrl(leader.avatar_url, leader.username)}
                 alt={leader.display_name || leader.username}
               />
-              <AvatarFallback
-                className="font-bold"
-                style={{ background: 'var(--color-forest-tint)', color: 'var(--color-forest)' }}
-              >
+              <AvatarFallback className="bg-primary/10 text-primary font-bold">
                 {(leader.display_name || leader.username || 'U')[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-heading font-semibold text-[color:var(--color-ink)] group-hover:text-[color:var(--color-forest)] transition-colors truncate">
+              <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                 {leader.display_name || leader.username}
               </h3>
-              <p className="font-mono text-[11px] tracking-[0.04em] text-[color:var(--color-muted-warm)] truncate">
+              <p className="font-mono text-[11px] tracking-wide text-muted-foreground truncate">
                 @{leader.username}
               </p>
             </div>
@@ -305,12 +287,12 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             {/* Metric Value */}
             <div className="flex flex-col items-end flex-shrink-0">
               <span
-                className="text-lg font-bold tabular-nums"
-                style={{ color: isTopThree ? accent.accent : 'var(--color-ink)' }}
+                className={cn("text-lg font-semibold tabular-nums", !isTopThree && "text-foreground")}
+                style={isTopThree ? { color: accent.accent } : undefined}
               >
                 {metricValue.toLocaleString()}
               </span>
-              <span className="font-mono text-[10px] tracking-[0.08em] uppercase text-[color:var(--color-muted-warm)]">
+              <span className="font-mono text-[10px] tracking-wide uppercase text-muted-foreground">
                 {getMetricLabel()}
               </span>
             </div>

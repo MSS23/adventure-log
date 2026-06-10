@@ -165,7 +165,7 @@ export function StatCounter({
         </span>
       )}
       {label && (
-        <p className="text-sm text-stone-500 mt-1">{label}</p>
+        <p className="text-sm text-muted-foreground mt-1">{label}</p>
       )}
     </div>
   )
@@ -199,7 +199,7 @@ export function BadgeCounter({
   return (
     <motion.span
       className={cn(
-        'inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-medium text-white bg-red-500 rounded-full',
+        'inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-medium text-accent-foreground bg-accent rounded-full',
         className
       )}
       animate={isAnimating ? { scale: [1, 1.2, 1] } : {}}

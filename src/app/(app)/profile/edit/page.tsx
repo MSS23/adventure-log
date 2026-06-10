@@ -153,9 +153,9 @@ export default function EditProfilePage() {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
-          <p className="text-[color:var(--color-muted-warm)]">Profile not found</p>
+          <p className="text-muted-foreground">Profile not found</p>
           <Link href="/setup" className="mt-3 inline-block">
-            <Button className="al-btn-coral">Complete Profile Setup</Button>
+            <Button>Complete Profile Setup</Button>
           </Link>
         </div>
       </div>
@@ -166,41 +166,39 @@ export default function EditProfilePage() {
     <div className="max-w-xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/profile" className="inline-flex items-center text-sm text-[color:var(--color-muted-warm)] hover:text-[color:var(--color-ink)] mb-3 cursor-pointer transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none rounded">
+        <Link href="/profile" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-3 cursor-pointer transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to profile
         </Link>
         <p className="al-eyebrow mb-1">Your account</p>
-        <h1 className="al-display text-3xl">Edit Profile</h1>
+        <h1 className="al-display text-3xl md:text-4xl">Edit Profile</h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {error && (
           <div
-            className="rounded-xl border px-4 py-3"
-            style={{ background: 'var(--color-coral-tint)', borderColor: 'var(--color-coral-soft)' }}
+            className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3"
             role="alert"
           >
-            <p className="text-sm" style={{ color: 'var(--color-coral)' }}>{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
         {/* Avatar */}
-        <div className="al-card p-5">
-          <div className="flex items-center gap-5">
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="flex items-center gap-4">
             <div className="relative">
-              <Avatar className="h-20 w-20 ring-2 ring-[color:var(--color-line-warm)]">
+              <Avatar className="h-20 w-20 ring-2 ring-background">
                 <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
-                <AvatarFallback className="text-lg text-white" style={{ background: 'var(--color-coral)' }}>
+                <AvatarFallback className="bg-accent text-lg text-accent-foreground">
                   {(watch('display_name') || watch('username') || 'U').charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <Label
                 htmlFor="avatar"
-                className="absolute -bottom-1 -right-1 p-1.5 rounded-full cursor-pointer transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 active:scale-95"
-                style={{ background: 'var(--color-coral)' }}
+                className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-primary text-primary-foreground shadow-sm cursor-pointer transition-all duration-200 hover:bg-primary/90 active:scale-95"
               >
-                <Camera className="h-3.5 w-3.5 text-white" />
+                <Camera className="h-3.5 w-3.5" />
               </Label>
               <Input
                 id="avatar"
@@ -211,18 +209,18 @@ export default function EditProfilePage() {
               />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[color:var(--color-ink)]">Profile photo</p>
-              <p className="text-xs text-[color:var(--color-muted-warm)] mt-0.5">Square image, at least 200&times;200px</p>
+              <p className="text-sm font-semibold text-foreground">Profile photo</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Square image, at least 200&times;200px</p>
             </div>
           </div>
         </div>
 
         {/* Form fields */}
-        <div className="al-card p-5 space-y-5">
+        <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
           {/* Username */}
           <div className="space-y-1.5">
-            <Label htmlFor="username" className="text-[color:var(--color-ink-soft)] font-medium">
-              Username <span style={{ color: 'var(--color-coral)' }}>*</span>
+            <Label htmlFor="username" className="text-foreground font-medium">
+              Username <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Input
@@ -230,43 +228,43 @@ export default function EditProfilePage() {
                 {...register('username')}
                 className={cn(
                   "pr-9",
-                  errors.username || (usernameAvailable === false && watch('username') !== profile?.username) ? 'border-red-500 dark:border-red-500' : '',
-                  usernameAvailable === true ? 'border-[color:var(--color-forest)]' : ''
+                  errors.username || (usernameAvailable === false && watch('username') !== profile?.username) ? 'border-destructive' : '',
+                  usernameAvailable === true ? 'border-primary' : ''
                 )}
               />
               <div className="absolute right-3 top-2.5">
-                {checkingUsername && <Loader2 className="h-4 w-4 animate-spin text-[color:var(--color-muted-warm)]" />}
-                {!checkingUsername && usernameAvailable === true && <Check className="h-4 w-4" style={{ color: 'var(--color-forest)' }} />}
-                {!checkingUsername && usernameAvailable === false && watch('username') !== profile?.username && <X className="h-4 w-4 text-red-500" />}
+                {checkingUsername && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                {!checkingUsername && usernameAvailable === true && <Check className="h-4 w-4 text-primary" />}
+                {!checkingUsername && usernameAvailable === false && watch('username') !== profile?.username && <X className="h-4 w-4 text-destructive" />}
               </div>
             </div>
-            {errors.username && <p className="text-xs text-red-600 dark:text-red-400">{errors.username.message}</p>}
+            {errors.username && <p className="text-xs text-destructive">{errors.username.message}</p>}
             {!errors.username && usernameAvailable === false && watch('username') !== profile?.username && (
-              <p className="text-xs text-red-600 dark:text-red-400">Username taken</p>
+              <p className="text-xs text-destructive">Username taken</p>
             )}
             {!errors.username && usernameAvailable === true && (
-              <p className="text-xs" style={{ color: 'var(--color-forest)' }}>Available</p>
+              <p className="text-xs text-primary">Available</p>
             )}
           </div>
 
           {/* Display Name */}
           <div className="space-y-1.5">
-            <Label htmlFor="display_name" className="text-[color:var(--color-ink-soft)] font-medium">
-              Display name <span className="text-[color:var(--color-muted-warm)] font-normal">(optional)</span>
+            <Label htmlFor="display_name" className="text-foreground font-medium">
+              Display name <span className="text-muted-foreground font-normal">(optional)</span>
             </Label>
             <Input
               id="display_name"
               {...register('display_name')}
               placeholder="Your name"
-              className={cn(errors.display_name ? 'border-red-500' : '')}
+              className={cn(errors.display_name ? 'border-destructive' : '')}
             />
-            {errors.display_name && <p className="text-xs text-red-600 dark:text-red-400">{errors.display_name.message}</p>}
+            {errors.display_name && <p className="text-xs text-destructive">{errors.display_name.message}</p>}
           </div>
 
           {/* Bio */}
           <div className="space-y-1.5">
-            <Label htmlFor="bio" className="text-[color:var(--color-ink-soft)] font-medium">
-              Bio <span className="text-[color:var(--color-muted-warm)] font-normal">(optional)</span>
+            <Label htmlFor="bio" className="text-foreground font-medium">
+              Bio <span className="text-muted-foreground font-normal">(optional)</span>
             </Label>
             <Textarea
               id="bio"
@@ -274,33 +272,33 @@ export default function EditProfilePage() {
               placeholder="Tell others about yourself..."
               rows={3}
               maxLength={1000}
-              className={cn("resize-none", errors.bio ? 'border-red-500' : '')}
+              className={cn("resize-none", errors.bio ? 'border-destructive' : '')}
             />
-            {errors.bio && <p className="text-xs text-red-600 dark:text-red-400">{errors.bio.message}</p>}
+            {errors.bio && <p className="text-xs text-destructive">{errors.bio.message}</p>}
           </div>
 
           {/* Location + Website */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="location" className="text-[color:var(--color-ink-soft)] font-medium">
-                Location <span className="text-[color:var(--color-muted-warm)] font-normal">(optional)</span>
+              <Label htmlFor="location" className="text-foreground font-medium">
+                Location <span className="text-muted-foreground font-normal">(optional)</span>
               </Label>
               <Input
                 id="location"
                 {...register('location')}
                 placeholder="City, Country"
-                className={cn(errors.location ? 'border-red-500' : '')}
+                className={cn(errors.location ? 'border-destructive' : '')}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="website" className="text-[color:var(--color-ink-soft)] font-medium">
-                Website <span className="text-[color:var(--color-muted-warm)] font-normal">(optional)</span>
+              <Label htmlFor="website" className="text-foreground font-medium">
+                Website <span className="text-muted-foreground font-normal">(optional)</span>
               </Label>
               <Input
                 id="website"
                 {...register('website')}
                 placeholder="your-site.com"
-                className={cn(errors.website ? 'border-red-500' : '')}
+                className={cn(errors.website ? 'border-destructive' : '')}
               />
             </div>
           </div>
@@ -310,7 +308,7 @@ export default function EditProfilePage() {
         <Button
           type="submit"
           disabled={loading || checkingUsername || (usernameAvailable === false && watch('username') !== profile?.username)}
-          className="al-btn-coral w-full cursor-pointer transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full cursor-pointer"
         >
           {loading ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</>

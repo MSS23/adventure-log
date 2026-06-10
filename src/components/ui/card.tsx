@@ -10,10 +10,9 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        // Editorial card: warm border, layered soft shadow, 20px radius — matches .al-card
-        "bg-[color:var(--card)] text-[color:var(--card-foreground)]",
-        "flex flex-col gap-6 rounded-[20px] border border-[color:var(--color-line-warm)] py-6",
-        "shadow-[0_1px_2px_rgba(26,20,14,0.04),0_4px_16px_rgba(26,20,14,0.06)]",
+        // Field-notebook card: flat, calm, bordered surface (shadow only on hover of interactive cards)
+        "bg-card text-card-foreground",
+        "flex flex-col gap-6 rounded-2xl border border-border py-6 shadow-none",
         className
       )}
       {...props}
@@ -40,16 +39,16 @@ const MotionCard = React.forwardRef<HTMLDivElement, MotionCardProps>(
           flat
             ? undefined
             : {
-                y: -3,
+                y: -2,
                 boxShadow:
-                  "0 2px 4px rgba(26,20,14,0.06), 0 16px 36px rgba(26,20,14,0.10)",
+                  "0 2px 4px rgba(26,20,14,0.05), 0 10px 24px rgba(26,20,14,0.08)",
               }
         }
         transition={{ type: "spring", stiffness: 320, damping: 24 }}
         className={cn(
-          "bg-[color:var(--card)] text-[color:var(--card-foreground)]",
-          "flex flex-col gap-6 rounded-[20px] border border-[color:var(--color-line-warm)] py-6",
-          "shadow-[0_1px_2px_rgba(26,20,14,0.04),0_4px_16px_rgba(26,20,14,0.06)]",
+          "bg-card text-card-foreground",
+          "flex flex-col gap-6 rounded-2xl border border-border py-6 shadow-none",
+          "transition-colors hover:border-primary/30",
           "will-change-transform",
           className
         )}
@@ -79,7 +78,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "font-heading leading-tight font-semibold tracking-tight text-[color:var(--color-ink)]",
+        "font-heading leading-tight font-semibold tracking-tight text-foreground",
         className
       )}
       {...props}
@@ -91,7 +90,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-[color:var(--color-muted-warm)] text-sm leading-relaxed", className)}
+      className={cn("text-muted-foreground text-sm leading-relaxed", className)}
       {...props}
     />
   )

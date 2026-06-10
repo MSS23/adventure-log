@@ -13,7 +13,7 @@ export default function PublicLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-[color:var(--color-ivory)] dark:bg-[color:var(--background)] transition-colors duration-300">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Top navigation for desktop and tablet */}
       <TopNavigation />
 

@@ -24,23 +24,23 @@ export default function AlbumError({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-[#FAF7F1] dark:bg-black flex items-center justify-center px-4">
-      <Card className="max-w-md w-full border-stone-200 dark:border-stone-800">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <Card className="max-w-md w-full">
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
-            <div className="mx-auto w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-              <RefreshCw className="h-6 w-6 text-red-500" />
+            <div className="mx-auto w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
+              <RefreshCw className="h-6 w-6 text-destructive" />
             </div>
             <div>
-              <p className="text-stone-900 dark:text-stone-100 font-medium text-lg">
+              <p className="font-heading text-lg font-semibold text-foreground">
                 Something went wrong
               </p>
-              <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 We couldn&apos;t load this album. Please try again.
               </p>
             </div>
             <div className="flex gap-2 justify-center pt-2">
-              <Button onClick={reset} className="bg-olive-600 hover:bg-olive-700 text-white">
+              <Button onClick={reset}>
                 Try Again
               </Button>
               <Link href="/albums">

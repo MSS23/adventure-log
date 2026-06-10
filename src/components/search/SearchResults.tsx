@@ -34,7 +34,7 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
       {/* Results Summary - Simplified */}
       {results.length > 0 && (
         <div className="text-center">
-          <p className="text-sm text-stone-600 dark:text-stone-400">
+          <p className="font-mono text-xs tracking-wide text-muted-foreground">
             {results.length} result{results.length !== 1 ? 's' : ''} found
           </p>
         </div>
@@ -45,12 +45,12 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
         {/* Results Heading */}
         {!isSearching && results.length > 0 && !filters.query && (
           <div className="mb-6 text-center">
-            <h2 className="text-3xl font-bold text-stone-900 dark:text-stone-100 mb-2">
+            <h2 className="al-display text-2xl md:text-3xl mb-2">
               {filters.contentType === 'travelers' ? 'Discover Travelers' :
                filters.contentType === 'albums' ? 'Discover Albums' :
                'Discover Adventures'}
             </h2>
-            <p className="text-stone-600 dark:text-stone-400">
+            <p className="text-sm text-muted-foreground">
               {filters.contentType === 'travelers' ? 'Connect with top travelers from around the world' :
                filters.contentType === 'albums' ? 'Explore popular travel albums' :
                'Explore popular albums and connect with top travelers'}
@@ -61,26 +61,24 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
         {isSearching ? (
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600 mx-auto mb-4"></div>
-              <p className="text-stone-600 dark:text-stone-400">{filters.query ? 'Searching...' : 'Loading travelers...'}</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-sm text-muted-foreground">{filters.query ? 'Searching...' : 'Loading travelers...'}</p>
             </div>
           </div>
         ) : results.length === 0 ? (
-          <Card>
-            <CardContent className="py-16">
-              <div className="text-center text-stone-500 dark:text-stone-400">
-                <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium mb-2">
-                  {filters.query ? 'No results found' : 'No travelers found'}
-                </p>
-                <p className="text-sm">
-                  {filters.query
-                    ? 'Try adjusting your search terms or filters'
-                    : 'Start searching to discover adventures and travelers'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+              <Search className="h-6 w-6" />
+            </div>
+            <p className="font-heading text-lg font-semibold text-foreground">
+              {filters.query ? 'No results found' : 'No travelers found'}
+            </p>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              {filters.query
+                ? 'Try adjusting your search terms or filters'
+                : 'Start searching to discover adventures and travelers'}
+            </p>
+          </div>
         ) : (
           <>
             {!filters.query && results.length > 0 ? (
@@ -89,7 +87,7 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
                 {/* Popular Albums Section - Only show if not filtering for travelers only */}
                 {(filters.contentType === 'all' || filters.contentType === 'albums') && results.filter(r => r.type === 'album').length > 0 && (
                   <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-3 sm:mb-4 px-2">
+                    <h3 className="font-heading text-base md:text-lg font-semibold text-foreground mb-3 sm:mb-4">
                       🌍 Popular Albums
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
@@ -107,7 +105,7 @@ export function SearchResults({ results, filters, isSearching, resultsRef, onRes
                 {/* Top Travelers Section - Only show if not filtering for albums only */}
                 {(filters.contentType === 'all' || filters.contentType === 'travelers') && results.filter(r => r.type === 'user').length > 0 && (
                   <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 mb-3 sm:mb-4 px-2">
+                    <h3 className="font-heading text-base md:text-lg font-semibold text-foreground mb-3 sm:mb-4">
                       👥 Top Travelers
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
@@ -179,13 +177,13 @@ function SearchResultCard({ result }: SearchResultCardProps) {
     const level = result.type === 'user' ? result.privacyLevel : result.visibility
     switch (level) {
       case 'public':
-        return 'bg-green-100 dark:bg-green-950/30 text-green-700'
+        return 'border-transparent bg-background/90 text-primary'
       case 'private':
-        return 'bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300'
+        return 'border-transparent bg-background/90 text-muted-foreground'
       case 'friends':
-        return 'bg-olive-100 dark:bg-olive-950/30 text-olive-700'
+        return 'border-transparent bg-background/90 text-[color:var(--color-gold)]'
       default:
-        return 'bg-green-100 dark:bg-green-950/30 text-green-700'
+        return 'border-transparent bg-background/90 text-primary'
     }
   }
 
@@ -200,28 +198,30 @@ function SearchResultCard({ result }: SearchResultCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ scale: 1.02 }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
       className="group"
     >
-      <Card className="overflow-hidden border-2 border-stone-100 dark:border-white/[0.08] hover:border-olive-300 hover:shadow-xl transition-all duration-300">
+      <Card className="overflow-hidden gap-0 py-0 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5">
         <Link href={linkHref} className="block">
           {/* Cover Image */}
-          <div className="relative aspect-[4/3] bg-gradient-to-br from-stone-100 dark:from-white/[0.06] to-stone-200 dark:to-white/[0.08] overflow-hidden cursor-pointer">
+          <div className="relative aspect-[4/3] bg-muted overflow-hidden cursor-pointer">
             {result.imageUrl && result.visibility === 'public' ? (
               <Image
                 src={getPhotoUrl(result.imageUrl) || ''}
                 alt={result.title}
                 fill
-                className="object-cover group-hover:scale-110 transition-transform duration-300"
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
-                <Camera className="h-16 w-16 text-stone-300 dark:text-stone-600" />
+                <Camera className="h-16 w-16 text-muted-foreground/50" />
               </div>
             )}
+
+            {/* Gradient overlay */}
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
 
             {/* Overlay badges */}
             <div className="absolute top-3 right-3 flex gap-2">
@@ -230,20 +230,17 @@ function SearchResultCard({ result }: SearchResultCardProps) {
                 <span className="capitalize text-xs">{getVisibilityLabel()}</span>
               </Badge>
               {result.type === 'user' && (
-                <Badge className="bg-olive-100 dark:bg-olive-950/30 text-olive-700">
+                <Badge className="border-transparent bg-background/90 text-primary">
                   <Users className="h-3 w-3 mr-1" />
                   User
                 </Badge>
               )}
             </div>
 
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
-
             {/* Location badge at bottom */}
             {result.location && (
               <div className="absolute bottom-3 left-3 right-3">
-                <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm gap-1 max-w-full">
+                <Badge className="border-transparent bg-background/90 text-foreground gap-1 max-w-full">
                   <MapPin className="h-3 w-3 flex-shrink-0" />
                   <span className="truncate">{result.location}</span>
                 </Badge>
@@ -254,17 +251,17 @@ function SearchResultCard({ result }: SearchResultCardProps) {
           {/* Content */}
           <CardContent className="p-4 space-y-2">
             <div>
-              <h3 className="font-semibold text-stone-900 dark:text-stone-100 line-clamp-1 text-lg group-hover:text-olive-600 transition-colors">
+              <h3 className="font-heading font-semibold text-foreground line-clamp-1 text-base md:text-lg group-hover:text-primary transition-colors">
                 {result.title}
               </h3>
               {result.description && (
-                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2 mt-1">
+                <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
                   {result.description}
                 </p>
               )}
             </div>
 
-            <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 {result.type === 'user' ? (
                   <span className="font-medium">@{result.username}</span>

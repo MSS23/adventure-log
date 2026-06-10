@@ -290,27 +290,21 @@ export default function UserProfilePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" style={{ color: 'var(--color-coral)' }} />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[color:var(--background)]">
+      <div className="min-h-screen bg-background">
         <div className="max-w-md mx-auto px-4 pt-24 text-center">
-          <div
-            className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"
-            style={{ background: 'var(--color-ivory-alt)' }}
-          >
-            <Users className="h-8 w-8" style={{ color: 'var(--color-muted-warm)' }} />
+          <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+            <Users className="h-6 w-6" />
           </div>
           <h2 className="al-display text-2xl mb-2">User not found</h2>
-          <p className="text-sm text-[color:var(--color-muted-warm)] mb-6">{error}</p>
-          <Button
-            onClick={() => router.push('/feed')}
-            className="al-btn-coral cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]"
-          >
+          <p className="text-sm text-muted-foreground mb-6">{error}</p>
+          <Button onClick={() => router.push('/feed')} className="cursor-pointer">
             Go to Feed
           </Button>
         </div>
@@ -329,11 +323,9 @@ export default function UserProfilePage() {
     <Button
       onClick={handleFollowToggle}
       disabled={followLoading}
-      className={`cursor-pointer rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] ${
-        followStatus === 'following'
-          ? 'border border-[color:var(--color-line-warm)] bg-transparent text-[color:var(--color-ink)] hover:bg-[color:var(--color-ivory-alt)]'
-          : 'al-btn-coral'
-      }`}
+      variant={followStatus === 'following' ? 'outline' : 'coral'}
+      size="pill"
+      className="cursor-pointer rounded-full"
     >
       {followLoading ? (
         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -349,38 +341,35 @@ export default function UserProfilePage() {
   // Show private account message
   if (isPrivate) {
     return (
-      <div className="min-h-screen bg-[color:var(--background)]">
+      <div className="min-h-screen bg-background">
         <div className="max-w-md mx-auto px-4 pt-10 pb-24 text-center">
-          <Avatar className="h-24 w-24 mx-auto ring-2 ring-[color:var(--color-line-warm)]">
+          <Avatar className="h-24 w-24 mx-auto ring-2 ring-background">
             <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={displayName} />
-            <AvatarFallback className="text-2xl text-white" style={{ background: 'var(--color-coral)' }}>
+            <AvatarFallback className="bg-accent text-2xl text-accent-foreground">
               {displayName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
           <h1 className="al-display text-2xl mt-4">{displayName}</h1>
           {profile.username && (
-            <p className="text-sm text-[color:var(--color-muted-warm)] mt-1">@{profile.username}</p>
+            <p className="text-sm text-muted-foreground mt-1">@{profile.username}</p>
           )}
           {profile.bio && (
-            <p className="text-sm text-[color:var(--color-ink-soft)] mt-3 leading-relaxed">{profile.bio}</p>
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{profile.bio}</p>
           )}
 
-          <div className="al-card p-6 mt-6">
-            <div
-              className="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3"
-              style={{ background: 'var(--color-ivory-alt)' }}
-            >
+          <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-3">
               {isFriendsOnly ? (
-                <Users className="h-6 w-6" style={{ color: 'var(--color-forest)' }} />
+                <Users className="h-6 w-6" />
               ) : (
-                <Lock className="h-6 w-6" style={{ color: 'var(--color-forest)' }} />
+                <Lock className="h-6 w-6" />
               )}
             </div>
-            <h2 className="font-semibold text-base text-[color:var(--color-ink)] mb-1">
+            <h2 className="font-heading font-semibold text-base text-foreground mb-1">
               {isFriendsOnly ? 'Friends-only account' : 'This account is private'}
             </h2>
-            <p className="text-sm text-[color:var(--color-muted-warm)] mb-5">
+            <p className="text-sm text-muted-foreground mb-5">
               Follow this account and wait for approval to see their adventures.
             </p>
             {followButton}
@@ -391,25 +380,25 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[color:var(--background)]">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24 space-y-8">
         {/* ───────── Hero ───────── */}
-        <div className="al-card p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
-            <Avatar className="h-24 w-24 shrink-0 ring-2 ring-[color:var(--color-line-warm)]">
+        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+            <Avatar className="h-24 w-24 shrink-0 ring-2 ring-background">
               <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={displayName} />
-              <AvatarFallback className="text-2xl text-white" style={{ background: 'var(--color-coral)' }}>
+              <AvatarFallback className="bg-accent text-2xl text-accent-foreground">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
             <div className="flex-1 min-w-0">
               <h1 className="al-display text-2xl sm:text-3xl">{displayName}</h1>
-              <p className="text-sm text-[color:var(--color-muted-warm)] mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 @{profile.username || 'anonymous'}
               </p>
               {profile.bio && (
-                <p className="text-sm text-[color:var(--color-ink-soft)] mt-3 leading-relaxed max-w-prose">
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed max-w-prose">
                   {profile.bio}
                 </p>
               )}
@@ -418,7 +407,7 @@ export default function UserProfilePage() {
           </div>
 
           {/* Key stats */}
-          <div className="grid grid-cols-4 gap-2 mt-6 pt-6 border-t border-[color:var(--color-line-warm)]">
+          <div className="grid grid-cols-4 gap-2 mt-6 pt-6 border-t border-border">
             {[
               { value: albums.length, label: 'Albums' },
               { value: countriesCount, label: 'Countries' },
@@ -434,7 +423,7 @@ export default function UserProfilePage() {
         </div>
 
         {/* ───────── Albums ───────── */}
-        <div className="mt-8">
+        <div>
           <p className="al-eyebrow mb-3">Adventures</p>
           {albums.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -442,39 +431,37 @@ export default function UserProfilePage() {
                 <Link
                   key={album.id}
                   href={`/albums/${album.id}`}
-                  className="group relative aspect-square overflow-hidden rounded-xl block shadow-sm cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)] focus-visible:outline-none"
-                  style={{ background: 'var(--color-ivory-alt)' }}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-2xl block bg-muted border border-border cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
                   {album.cover_photo_url || album.cover_image_url ? (
                     <Image
                       src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
                       alt={album.title}
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       sizes="(max-width: 640px) 50vw, 33vw"
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full">
-                      <Camera className="h-8 w-8" style={{ color: 'var(--color-muted-warm)' }} />
+                      <Camera className="h-8 w-8 text-muted-foreground" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <p className="text-white text-sm font-medium line-clamp-2">{album.title}</p>
-                    </div>
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <p className="font-heading font-semibold text-white text-sm line-clamp-2 drop-shadow-sm">{album.title}</p>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="al-card text-center py-16">
-              <div
-                className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-3"
-                style={{ background: 'var(--color-ivory-alt)' }}
-              >
-                <Camera className="h-7 w-7" style={{ color: 'var(--color-muted-warm)' }} />
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+              <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-3">
+                <Camera className="h-6 w-6" />
               </div>
-              <p className="text-sm text-[color:var(--color-muted-warm)]">No public albums yet</p>
+              <p className="text-sm text-muted-foreground">No public albums yet</p>
             </div>
           )}
         </div>

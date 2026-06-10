@@ -198,7 +198,7 @@ export function GlobalSearch() {
   return (
     <div className="relative w-full max-w-2xl">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400 dark:text-stone-500" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           ref={inputRef}
           type="text"
@@ -215,7 +215,7 @@ export function GlobalSearch() {
               setQuery('');
               setResults([]);
             }}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -226,11 +226,11 @@ export function GlobalSearch() {
       {showResults && (
         <div
           ref={resultsRef}
-          className="absolute top-full mt-2 w-full bg-white dark:bg-[#1B170E] rounded-lg shadow-lg border border-stone-200 dark:border-white/[0.10] max-h-96 overflow-y-auto z-50"
+          className="absolute top-full mt-2 w-full bg-card rounded-2xl shadow-md border border-border max-h-96 overflow-y-auto z-50"
         >
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-olive-600" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
             </div>
           ) : results.length > 0 ? (
             <div className="py-2">
@@ -239,12 +239,12 @@ export function GlobalSearch() {
                   key={`${result.type}-${result.id}`}
                   onClick={() => handleSelect(result)}
                   className={cn(
-                    'w-full px-4 py-3 flex items-center gap-3 hover:bg-stone-50 dark:hover:bg-white/[0.06] transition-colors text-left',
-                    index === selectedIndex && 'bg-olive-50 dark:bg-olive-950/30'
+                    'w-full px-4 py-3 flex items-center gap-3 hover:bg-muted/60 transition-colors text-left',
+                    index === selectedIndex && 'bg-primary/10'
                   )}
                 >
                   {/* Thumbnail */}
-                  <div className="w-12 h-12 flex-shrink-0 bg-stone-100 dark:bg-white/[0.06] rounded overflow-hidden">
+                  <div className="w-12 h-12 flex-shrink-0 bg-muted rounded-xl overflow-hidden">
                     {result.thumbnail ? (
                       <Image
                         src={result.thumbnail}
@@ -256,9 +256,9 @@ export function GlobalSearch() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         {result.type === 'album' ? (
-                          <Folder className="h-6 w-6 text-stone-400 dark:text-stone-500" />
+                          <Folder className="h-6 w-6 text-muted-foreground" />
                         ) : (
-                          <ImageIcon className="h-6 w-6 text-stone-400 dark:text-stone-500" />
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
                         )}
                       </div>
                     )}
@@ -270,12 +270,12 @@ export function GlobalSearch() {
                       <Badge variant={result.type === 'album' ? 'default' : 'secondary'} className="text-xs">
                         {result.type}
                       </Badge>
-                      <h4 className="font-medium text-sm truncate">{result.title}</h4>
+                      <h4 className="font-medium text-sm text-foreground truncate">{result.title}</h4>
                     </div>
                     {result.subtitle && (
-                      <p className="text-xs text-stone-500 dark:text-stone-400 truncate mt-1">{result.subtitle}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-1">{result.subtitle}</p>
                     )}
-                    <div className="flex items-center gap-3 mt-1 text-xs text-stone-400 dark:text-stone-500">
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                       {result.location && (
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
@@ -292,18 +292,18 @@ export function GlobalSearch() {
                   </div>
 
                   {/* Arrow */}
-                  <ArrowRight className="h-4 w-4 text-stone-400 dark:text-stone-500 flex-shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </button>
               ))}
             </div>
           ) : (
-            <div className="py-8 text-center text-stone-500 dark:text-stone-400 text-sm">
+            <div className="py-8 text-center text-muted-foreground text-sm">
               No results found for &quot;{query}&quot;
             </div>
           )}
 
           {/* Keyboard shortcuts hint */}
-          <div className="border-t border-stone-100 dark:border-white/[0.08] px-4 py-2 bg-stone-50 dark:bg-white/[0.04] text-xs text-stone-500 dark:text-stone-400 flex items-center justify-between">
+          <div className="border-t border-border px-4 py-2 bg-muted/50 text-xs text-muted-foreground flex items-center justify-between">
             <span>Use ↑↓ to navigate, Enter to select, Esc to close</span>
             <span>{results.length} results</span>
           </div>

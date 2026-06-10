@@ -107,7 +107,7 @@ export default function SharedAlbumPage() {
   // Loading state with animated spinner
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <motion.div
           className="flex flex-col items-center gap-6"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -115,20 +115,16 @@ export default function SharedAlbumPage() {
           transition={{ duration: 0.5 }}
         >
           <motion.div
-            className="relative w-20 h-20"
+            className="relative w-16 h-16"
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <div className="absolute inset-0 rounded-full border-4 border-olive-500/20" />
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-olive-500" />
+            <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary" />
           </motion.div>
-          <motion.p
-            className="text-white/80 text-lg"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
+          <p className="text-sm text-muted-foreground">
             Loading adventure...
-          </motion.p>
+          </p>
         </motion.div>
       </div>
     )
@@ -137,40 +133,32 @@ export default function SharedAlbumPage() {
   // Error state with animated icon
   if (error || !share || !album) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <motion.div
-          className="max-w-md w-full bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20"
+          className="max-w-md w-full rounded-2xl border border-border bg-card p-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <motion.div
-            className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <AlertCircle className="h-8 w-8 text-red-400" />
-          </motion.div>
-          <h3 className="text-xl font-semibold text-white text-center mb-2">
+          <div className="w-14 h-14 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-7 w-7 text-destructive" />
+          </div>
+          <h3 className="font-heading text-lg font-semibold text-foreground text-center mb-2">
             Cannot Access Album
           </h3>
-          <p className="text-stone-400 text-center mb-6">
+          <p className="text-sm text-muted-foreground text-center mb-6">
             {error || 'This share link may have expired or been revoked.'}
           </p>
           <div className="flex justify-center gap-3">
             <Link href="/sign-up">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-                  Join Adventure Log
-                </Button>
-              </motion.div>
+              <Button className="cursor-pointer">
+                Join Adventure Log
+              </Button>
             </Link>
             <Link href="/discover">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button variant="outline" className="cursor-pointer border-white/30 text-white hover:bg-white/10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-                  Explore the globe
-                </Button>
-              </motion.div>
+              <Button variant="outline" className="cursor-pointer">
+                Explore the globe
+              </Button>
             </Link>
           </div>
         </motion.div>
@@ -181,7 +169,7 @@ export default function SharedAlbumPage() {
   const coverPhotoUrl = album.cover_photo_url || album.cover_image_url || (photos[0]?.file_path ? getPhotoUrl(photos[0].file_path) : null)
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-white/[0.04]">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <AlbumHero
         title={album.title}
@@ -217,7 +205,7 @@ export default function SharedAlbumPage() {
         <div className="max-w-6xl mx-auto px-4 pb-20">
           {/* Album Info Card */}
           <motion.div
-            className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden mb-8"
+            className="rounded-2xl border border-border bg-card overflow-hidden mb-8"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -226,27 +214,27 @@ export default function SharedAlbumPage() {
               {/* Shared By Section */}
               {sharedBy && (
                 <motion.div
-                  className="flex items-center gap-3 p-4 bg-gradient-to-r from-olive-50 dark:from-olive-950/20 to-olive-50 dark:to-olive-950/20 rounded-xl mb-6"
+                  className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 mb-6"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Avatar className="h-12 w-12 ring-2 ring-olive-500/20">
+                  <Avatar className="h-12 w-12 ring-2 ring-primary/20">
                     <AvatarImage
                       src={getAvatarUrl(sharedBy.avatar_url, sharedBy.username)}
                       alt={sharedBy.display_name || sharedBy.username}
                     />
-                    <AvatarFallback className="bg-olive-500 text-white">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
                       {(sharedBy.display_name || sharedBy.username)[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="text-sm text-stone-600 dark:text-stone-400">Shared by</p>
-                    <p className="font-semibold text-stone-900 dark:text-stone-100">
+                    <p className="text-xs text-muted-foreground">Shared by</p>
+                    <p className="font-heading font-semibold text-foreground">
                       {sharedBy.display_name || sharedBy.username}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-olive-600 bg-white dark:bg-[color:var(--card)] px-3 py-1.5 rounded-full">
+                  <div className="flex items-center gap-2 text-sm text-primary bg-card px-3 py-1.5 rounded-full">
                     <Eye className="h-4 w-4" />
                     <span className="font-medium">
                       {share.permission_level === 'view' ? 'View Only' :
@@ -266,7 +254,7 @@ export default function SharedAlbumPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <p className={cn(
-                    "text-stone-700 dark:text-stone-300 text-lg leading-relaxed max-w-prose",
+                    "text-[15px] leading-relaxed text-foreground max-w-prose",
                     !showFullDescription && album.description.length > 200 && "line-clamp-3"
                   )}>
                     {album.description}
@@ -274,7 +262,7 @@ export default function SharedAlbumPage() {
                   {album.description.length > 200 && (
                     <button
                       onClick={() => setShowFullDescription(!showFullDescription)}
-                      className="cursor-pointer text-olive-600 hover:text-olive-700 text-sm font-medium mt-2 flex items-center gap-1 transition-colors duration-200 py-1 px-2 -ml-2 rounded-lg hover:bg-olive-50 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none"
+                      className="cursor-pointer text-primary hover:text-primary/80 text-sm font-medium mt-2 flex items-center gap-1 transition-colors duration-200 py-1 px-2 -ml-2 rounded-lg hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                     >
                       {showFullDescription ? 'Show less' : 'Read more'}
                       <motion.div
@@ -290,7 +278,7 @@ export default function SharedAlbumPage() {
 
               {/* Action Bar */}
               <motion.div
-                className="flex flex-wrap items-center gap-3 pt-4 border-t border-stone-200 dark:border-white/[0.08]"
+                className="flex flex-wrap items-center gap-3 pt-4 border-t border-border"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
@@ -308,23 +296,19 @@ export default function SharedAlbumPage() {
 
                 {canContribute && (
                   <Link href={`/albums/${album.id}/upload`}>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline" className="cursor-pointer border-olive-300 text-olive-700 hover:bg-olive-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Photos
-                      </Button>
-                    </motion.div>
+                    <Button size="sm" variant="outline" className="cursor-pointer">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Photos
+                    </Button>
                   </Link>
                 )}
 
                 {canEdit && (
                   <Link href={`/albums/${album.id}/edit`}>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button size="sm" variant="outline" className="cursor-pointer transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Album
-                      </Button>
-                    </motion.div>
+                    <Button size="sm" variant="outline" className="cursor-pointer">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Album
+                    </Button>
                   </Link>
                 )}
               </motion.div>
@@ -338,11 +322,11 @@ export default function SharedAlbumPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <div className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-4 md:p-6">
-                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-olive-500" />
+              <div className="rounded-2xl border border-border bg-card overflow-hidden p-4 md:p-6">
+                <h2 className="font-heading text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-primary" />
                   Photos
-                  <span className="text-sm font-normal text-stone-500 dark:text-stone-400">
+                  <span className="text-sm font-normal text-muted-foreground">
                     ({photos.length} {photos.length === 1 ? 'photo' : 'photos'})
                   </span>
                 </h2>
@@ -354,27 +338,21 @@ export default function SharedAlbumPage() {
             </motion.div>
           ) : (
             <motion.div
-              className="bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-12 text-center"
+              className="rounded-2xl border border-dashed border-border bg-muted/30 p-12 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <motion.div
-                className="w-20 h-20 bg-stone-100 dark:bg-white/[0.06] rounded-full flex items-center justify-center mx-auto mb-4"
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                <Camera className="h-10 w-10 text-stone-400 dark:text-stone-500" />
-              </motion.div>
-              <p className="text-stone-600 dark:text-stone-400 text-lg mb-4">This album doesn&apos;t have any photos yet.</p>
+              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Camera className="h-6 w-6 text-primary" />
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">This album doesn&apos;t have any photos yet.</p>
               {canContribute && (
                 <Link href={`/albums/${album.id}/upload`}>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button className="cursor-pointer bg-olive-500 hover:bg-olive-600 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add the first photo
-                    </Button>
-                  </motion.div>
+                  <Button className="cursor-pointer">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add the first photo
+                  </Button>
                 </Link>
               )}
             </motion.div>
@@ -382,7 +360,7 @@ export default function SharedAlbumPage() {
 
           {/* Social Share Section */}
           <motion.div
-            className="mt-8 bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden p-6"
+            className="mt-8 rounded-2xl border border-border bg-card overflow-hidden p-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
@@ -398,24 +376,24 @@ export default function SharedAlbumPage() {
           {/* Location Map Mini Preview (if coordinates available) */}
           {album.latitude && album.longitude && (
             <motion.div
-              className="mt-8 bg-white dark:bg-[color:var(--card)] rounded-2xl shadow-xl overflow-hidden"
+              className="mt-8 rounded-2xl border border-border bg-card overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <div className="p-6">
-                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-olive-500" />
+                <h2 className="font-heading text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
                   Location
                 </h2>
-                <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-stone-100 dark:bg-white/[0.06]">
+                <div className="relative h-48 md:h-64 rounded-xl overflow-hidden bg-muted">
                   <iframe
                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${album.longitude - 0.05}%2C${album.latitude - 0.05}%2C${album.longitude + 0.05}%2C${album.latitude + 0.05}&layer=mapnik&marker=${album.latitude}%2C${album.longitude}`}
                     className="w-full h-full border-0"
                     title="Album Location"
                   />
                   <motion.div
-                    className="absolute top-4 left-4 bg-white/90 dark:bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-stone-700 dark:text-stone-100"
+                    className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-foreground border border-border"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.8 }}
@@ -429,25 +407,23 @@ export default function SharedAlbumPage() {
 
           {/* Conversion CTA */}
           <motion.div
-            className="mt-8 relative overflow-hidden rounded-2xl shadow-xl"
+            className="mt-8 rounded-2xl border border-border bg-card overflow-hidden"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.5 }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-olive-800 via-olive-700 to-olive-900" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
-            <div className="relative px-6 py-10 md:px-10 md:py-12 text-center">
-              <span className="al-eyebrow text-olive-200 mb-3 block">Adventure Log</span>
-              <h2 className="al-display text-2xl md:text-3xl text-white mb-3">
+            <div className="px-6 py-10 md:px-10 md:py-12 text-center">
+              <span className="al-eyebrow mb-3 block">Adventure Log</span>
+              <h2 className="al-display text-2xl md:text-3xl mb-3">
                 Make your travels unforgettable
               </h2>
-              <p className="text-white/85 max-w-md mx-auto leading-relaxed mb-7">
+              <p className="text-sm md:text-[15px] text-muted-foreground max-w-md mx-auto leading-relaxed mb-7">
                 Create beautiful albums like this one, pin your journeys on an interactive
                 globe, and share them with the world — free, forever.
               </p>
               <Link href="/sign-up">
-                <Button className="cursor-pointer bg-white text-olive-800 hover:bg-olive-50 font-semibold px-8 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-olive-800">
+                <Button variant="coral" className="cursor-pointer font-semibold px-8">
                   Start your free Adventure Log
                 </Button>
               </Link>

@@ -72,7 +72,7 @@ export function OfflineSyncIndicator() {
           className={cn(
             "gap-2",
             !isOnline && "text-destructive",
-            pendingCount > 0 && "text-olive-600"
+            pendingCount > 0 && "text-primary"
           )}
         >
           {getStatusIcon()}
@@ -90,12 +90,12 @@ export function OfflineSyncIndicator() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {isOnline ? (
-                <Cloud className="h-5 w-5 text-green-600" />
+                <Cloud className="h-5 w-5 text-primary" />
               ) : (
-                <CloudOff className="h-5 w-5 text-red-600" />
+                <CloudOff className="h-5 w-5 text-destructive" />
               )}
               <div>
-                <h4 className="font-semibold">
+                <h4 className="font-semibold text-foreground">
                   {isOnline ? 'Connected' : 'Offline Mode'}
                 </h4>
                 <p className="text-xs text-muted-foreground">
@@ -127,10 +127,10 @@ export function OfflineSyncIndicator() {
               <div className="space-y-2">
                 {/* Pending */}
                 {pendingCount > 0 && (
-                  <div className="flex items-center justify-between p-2 rounded-md bg-olive-50 border border-olive-200">
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-primary/10 border border-primary/20">
                     <div className="flex items-center gap-2">
-                      <Upload className="h-4 w-4 text-olive-600" />
-                      <span className="text-sm text-olive-900">
+                      <Upload className="h-4 w-4 text-primary" />
+                      <span className="text-sm text-primary">
                         {pendingCount} pending upload{pendingCount !== 1 ? 's' : ''}
                       </span>
                     </div>
@@ -143,12 +143,12 @@ export function OfflineSyncIndicator() {
                     {queueItems
                       .filter(item => item.status === 'uploading')
                       .map(item => (
-                        <div key={item.id} className="p-2 rounded-md bg-olive-50 border border-olive-200">
+                        <div key={item.id} className="p-2 rounded-xl bg-primary/10 border border-primary/20">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm text-olive-900 font-medium">
+                            <span className="text-sm text-primary font-medium">
                               Uploading {item.resource_type}
                             </span>
-                            <RefreshCw className="h-3 w-3 text-olive-600 animate-spin" />
+                            <RefreshCw className="h-3 w-3 text-primary animate-spin" />
                           </div>
                           <Progress value={50} className="h-1" />
                         </div>
@@ -159,10 +159,10 @@ export function OfflineSyncIndicator() {
 
                 {/* Completed */}
                 {completedCount > 0 && (
-                  <div className="flex items-center justify-between p-2 rounded-md bg-green-50 border border-green-200">
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-primary/10 border border-primary/20">
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <span className="text-sm text-green-900">
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                      <span className="text-sm text-primary">
                         {completedCount} uploaded
                       </span>
                     </div>
@@ -171,10 +171,10 @@ export function OfflineSyncIndicator() {
 
                 {/* Failed */}
                 {queueItems.filter(item => item.status === 'failed').length > 0 && (
-                  <div className="p-2 rounded-md bg-red-50 border border-red-200">
+                  <div className="p-2 rounded-xl bg-destructive/10 border border-destructive/20">
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-red-600" />
-                      <span className="text-sm text-red-900">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <span className="text-sm text-destructive">
                         {queueItems.filter(item => item.status === 'failed').length} failed
                       </span>
                     </div>
@@ -187,7 +187,7 @@ export function OfflineSyncIndicator() {
           {/* No uploads */}
           {queueItems.length === 0 && isOnline && (
             <div className="text-center py-4 text-sm text-muted-foreground">
-              <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-600" />
+              <CheckCircle className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p>All synced up!</p>
             </div>
           )}
@@ -195,7 +195,7 @@ export function OfflineSyncIndicator() {
           {/* Offline message */}
           {!isOnline && queueItems.length === 0 && (
             <div className="text-center py-4 text-sm text-muted-foreground">
-              <CloudOff className="h-8 w-8 mx-auto mb-2 text-stone-400" />
+              <CloudOff className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
               <p>You&apos;re offline. Changes will sync when connected.</p>
             </div>
           )}

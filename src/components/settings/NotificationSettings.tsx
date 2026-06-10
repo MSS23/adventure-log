@@ -176,21 +176,21 @@ export function NotificationSettings() {
       icon: Heart,
       title: 'Likes',
       description: 'When someone likes your album',
-      color: 'text-red-500'
+      color: 'text-accent'
     },
     {
       key: 'comments_enabled',
       icon: MessageCircle,
       title: 'Comments',
       description: 'When someone comments on your album',
-      color: 'text-olive-500'
+      color: 'text-primary'
     },
     {
       key: 'follows_enabled',
       icon: UserPlus,
       title: 'New Followers',
       description: 'When someone starts following you',
-      color: 'text-green-500'
+      color: 'text-primary'
     }
     // Messages, Collaborations, and Achievements are hidden until features are complete
   ]
@@ -199,9 +199,9 @@ export function NotificationSettings() {
     return (
       <Card>
         <CardContent className="py-12">
-          <div className="text-center text-stone-500 dark:text-stone-400">
-            <Bell className="h-12 w-12 mx-auto mb-3 text-stone-400 dark:text-stone-500 animate-pulse" />
-            <p>Loading preferences...</p>
+          <div className="text-center text-muted-foreground">
+            <Bell className="h-12 w-12 mx-auto mb-3 text-muted-foreground animate-pulse" />
+            <p className="text-sm">Loading preferences...</p>
           </div>
         </CardContent>
       </Card>
@@ -222,18 +222,18 @@ export function NotificationSettings() {
       <CardContent className="space-y-6">
         {/* Push Notifications */}
         {pushAvailable && (
-          <div className="flex items-center justify-between p-4 border rounded-lg bg-olive-50/50 dark:bg-olive-950/20 border-olive-200 dark:border-olive-800">
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 p-4">
             <div className="flex items-center gap-3 flex-1">
-              <Smartphone className="h-5 w-5 text-olive-600 dark:text-olive-400" />
+              <Smartphone className="h-5 w-5 text-primary" />
               <div className="flex-1">
-                <Label htmlFor="push-toggle" className="font-medium cursor-pointer">Push Notifications</Label>
-                <p className="text-sm text-stone-600 dark:text-stone-400">
+                <Label htmlFor="push-toggle" className="font-medium cursor-pointer text-foreground">Push Notifications</Label>
+                <p className="text-sm text-muted-foreground">
                   Get notified on this device even when the app is closed
                 </p>
               </div>
             </div>
             {pushLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-olive-500" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
             ) : (
               <Switch
                 id="push-toggle"
@@ -245,19 +245,19 @@ export function NotificationSettings() {
         )}
 
         {/* Notification Types */}
-        <div className="space-y-3">
+        <div className="space-y-1">
           {notificationTypes.map((type) => (
             <div
               key={type.key}
-              className="flex items-center justify-between p-4 border rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800/50 dark:border-stone-700 transition-all duration-200 hover:shadow-sm"
+              className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors duration-200 hover:bg-muted/60"
             >
               <div className="flex items-center gap-3 flex-1">
                 <type.icon className={`h-5 w-5 ${type.color}`} />
                 <div className="flex-1">
-                  <Label htmlFor={type.key} className="font-medium cursor-pointer text-stone-900 dark:text-stone-100">
+                  <Label htmlFor={type.key} className="font-medium cursor-pointer text-foreground">
                     {type.title}
                   </Label>
-                  <p className="text-sm text-stone-600 dark:text-stone-400">
+                  <p className="text-sm text-muted-foreground">
                     {type.description}
                   </p>
                 </div>
@@ -276,16 +276,16 @@ export function NotificationSettings() {
         </div>
 
         {/* Info Box */}
-        <div className="bg-olive-50 dark:bg-olive-950/30 border border-olive-200 dark:border-olive-800/50 rounded-lg p-4">
+        <div className="rounded-xl bg-muted/50 p-4">
           <div className="flex items-start gap-3">
-            <Bell className="h-5 w-5 text-olive-600 dark:text-olive-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-olive-900 dark:text-olive-200">
-              <p className="font-medium mb-1">About Notifications</p>
-              <p className="text-olive-800 dark:text-olive-300">
+            <Bell className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium mb-1 text-foreground">About Notifications</p>
+              <p>
                 In-app notifications appear in the notification bell at the top of the page.
                 They&apos;re stored in your account and can be reviewed anytime.
               </p>
-              <p className="text-xs text-olive-700 dark:text-olive-400 mt-2">
+              <p className="text-xs mt-2">
                 Note: Critical account security alerts will always be shown regardless of these settings.
               </p>
             </div>
@@ -293,8 +293,8 @@ export function NotificationSettings() {
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-end pt-4 border-t dark:border-stone-700">
-          <Button onClick={savePreferences} disabled={saving} className="cursor-pointer active:scale-[0.97] transition-all duration-200 bg-olive-600 hover:bg-olive-700 text-white focus-visible:ring-2 focus-visible:ring-olive-500">
+        <div className="flex justify-end pt-4 border-t border-border">
+          <Button onClick={savePreferences} disabled={saving} className="cursor-pointer">
             {saving ? 'Saving...' : 'Save Preferences'}
           </Button>
         </div>

@@ -201,14 +201,17 @@ export async function GET(request: NextRequest) {
             {/* Stats row */}
             <div style={{ display: 'flex', gap: '32px', marginBottom: '32px' }}>
               {[
-                { value: countryCodes.length.toString(), label: 'Countries', icon: '&#127758;' },
-                { value: cities.length.toString(), label: 'Cities', icon: '&#128205;' },
-                { value: (photoCount || 0).toString(), label: 'Photos', icon: '&#128247;' },
-                { value: `${formatDistance(Math.round(totalDistance))} km`, label: 'Traveled', icon: '&#9992;' },
-                { value: `${worldPercent}%`, label: 'of World', icon: '&#127760;' },
+                { value: countryCodes.length.toString(), label: 'Countries', icon: '🌎' },
+                { value: cities.length.toString(), label: 'Cities', icon: '📍' },
+                { value: (photoCount || 0).toString(), label: 'Photos', icon: '📷' },
+                { value: `${formatDistance(Math.round(totalDistance))} km`, label: 'Traveled', icon: '✈️' },
+                { value: `${worldPercent}%`, label: 'of World', icon: '🌐' },
               ].map((stat, i) => (
                 <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ fontSize: '14px', marginBottom: '4px' }} dangerouslySetInnerHTML={{ __html: stat.icon }} />
+                  {/* Plain text children only — Satori (ImageResponse's
+                      renderer) throws on dangerouslySetInnerHTML, which was
+                      500-ing every card download. */}
+                  <div style={{ display: 'flex', fontSize: '20px', marginBottom: '4px' }}>{stat.icon}</div>
                   <div style={{ fontSize: '36px', fontWeight: 800, color: 'white', lineHeight: 1 }}>
                     {stat.value}
                   </div>

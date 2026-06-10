@@ -23,6 +23,7 @@ import {
   Sparkles,
   RotateCcw,
   Calendar,
+  Home,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -101,7 +102,6 @@ export default function WrappedPage() {
   )
   const [phase, setPhase] = useState<Phase>('intro')
   const [flightProgress, setFlightProgress] = useState(0)
-  const [currentCity, setCurrentCity] = useState('')
   // Tracks which segment of the flight reel is currently playing — used by
   // the FlightReelOverlay to look up the destination album to showcase.
   // -1 = before the first arc; 0..n-1 = arriving at locations[n+1].
@@ -117,7 +117,6 @@ export default function WrappedPage() {
     setMode(newMode)
     setPhase('intro')
     setFlightProgress(0)
-    setCurrentCity('')
     setSegmentIndex(-1)
   }
 
@@ -130,16 +129,10 @@ export default function WrappedPage() {
     }
   }, [data.locations.length])
 
-  const handleGlobeProgress = useCallback(
-    (progress: number, idx: number) => {
-      setFlightProgress(progress)
-      setSegmentIndex(idx)
-      if (data.locations[idx + 1]) {
-        setCurrentCity(data.locations[idx + 1].name)
-      }
-    },
-    [data.locations]
-  )
+  const handleGlobeProgress = useCallback((progress: number, idx: number) => {
+    setFlightProgress(progress)
+    setSegmentIndex(idx)
+  }, [])
 
   const handleGlobeComplete = useCallback(() => {
     setTimeout(() => setPhase('stats'), 1500)
@@ -183,15 +176,26 @@ export default function WrappedPage() {
   if (data.totalTrips === 0) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white p-8">
-        <Link href="/profile" className="absolute top-4 right-4 z-50">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="cursor-pointer text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </Link>
+        <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
+          <Link href="/dashboard" aria-label="Back to home">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link href="/profile" aria-label="Close">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
         <Plane className="h-16 w-16 text-olive-400 mb-6" />
         <h1 className="text-3xl font-bold mb-3">
           {mode === 'all' ? 'No Trips Yet' : `No Trips in ${currentYear}`}
@@ -219,16 +223,27 @@ export default function WrappedPage() {
 
   return (
     <div className="fixed inset-0 bg-black overflow-hidden">
-      {/* Close button */}
-      <Link href="/profile" className="absolute top-4 right-4 z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="cursor-pointer text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
-        >
-          <X className="h-5 w-5" />
-        </Button>
-      </Link>
+      {/* Home + close buttons */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
+        <Link href="/dashboard" aria-label="Back to home">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="cursor-pointer text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
+          >
+            <Home className="h-5 w-5" />
+          </Button>
+        </Link>
+        <Link href="/profile" aria-label="Close">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="cursor-pointer text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </Link>
+      </div>
 
       {/* Mode toggle */}
       <div className="absolute top-4 left-4 z-50">
@@ -634,7 +649,7 @@ export default function WrappedPage() {
                   onClick={() => {
                     setPhase('intro')
                     setFlightProgress(0)
-                    setCurrentCity('')
+                    setSegmentIndex(-1)
                   }}
                   variant="ghost"
                   className="cursor-pointer text-white/65 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
@@ -642,6 +657,15 @@ export default function WrappedPage() {
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Replay
                 </Button>
+                <Link href="/dashboard">
+                  <Button
+                    variant="ghost"
+                    className="cursor-pointer text-white/65 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                  >
+                    <Home className="h-4 w-4 mr-2" />
+                    Back to Home
+                  </Button>
+                </Link>
                 </div>
 
                 {/* Subtle attribution that travels with screenshots */}

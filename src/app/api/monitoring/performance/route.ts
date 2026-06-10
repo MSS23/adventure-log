@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       unit: ['ms', 'bytes', 'count'].includes(event.unit) ? event.unit : 'ms',
       timestamp: event.timestamp || new Date().toISOString(),
       url: event.url ? escapeHtmlServer(event.url) : null,
-      user_id: event.userId || null,
+      user_id: userId,
       context: event.context || {},
       session_id: event.context?.sessionId || null,
     }))

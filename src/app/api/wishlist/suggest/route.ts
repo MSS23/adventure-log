@@ -43,6 +43,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const lat = Number(latitude)
+    const lng = Number(longitude)
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return NextResponse.json({ error: 'Invalid coordinates' }, { status: 400 })
+    }
+
     if (partner_id === userId) {
       return NextResponse.json(
         { error: 'You cannot suggest a destination to yourself' },
@@ -94,11 +100,11 @@ export async function POST(request: NextRequest) {
       .from('wishlist_items')
       .insert({
         user_id: partner_id,
-        location_name,
+        location_name: String(location_name).slice(0, 200),
         country_code: country_code || null,
-        latitude,
-        longitude,
-        notes: notes || null,
+        latitude: lat,
+        longitude: lng,
+        notes: notes ? String(notes).slice(0, 2000) : null,
         priority: 'medium',
         source: 'shared',
         shared_by_user_id: userId,

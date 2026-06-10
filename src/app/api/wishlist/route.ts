@@ -198,6 +198,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const latitude = Number(body.latitude)
+    const longitude = Number(body.longitude)
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+      return NextResponse.json({ error: 'Invalid coordinates' }, { status: 400 })
+    }
+
     const priority = body.priority || 'medium'
     if (!['low', 'medium', 'high'].includes(priority)) {
       return NextResponse.json(
@@ -218,11 +224,11 @@ export async function POST(request: NextRequest) {
       .from('wishlist_items')
       .insert({
         user_id: userId,
-        location_name: body.location_name,
+        location_name: String(body.location_name).slice(0, 200),
         country_code: body.country_code || null,
-        latitude: body.latitude,
-        longitude: body.longitude,
-        notes: body.notes || null,
+        latitude,
+        longitude,
+        notes: body.notes ? String(body.notes).slice(0, 2000) : null,
         priority,
         source,
         shared_by_user_id: body.shared_by_user_id || null,

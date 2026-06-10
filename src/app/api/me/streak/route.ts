@@ -11,11 +11,12 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('users')
       .select('current_streak_days, longest_streak_days, last_activity_date')
       .eq('id', userId)
       .maybeSingle()
+    if (error) throw error
     return NextResponse.json({
       current: data?.current_streak_days || 0,
       longest: data?.longest_streak_days || 0,
@@ -23,7 +24,7 @@ export async function GET() {
     })
   } catch (error) {
     log.error('Streak read failed', { component: 'api/me/streak' }, error as Error)
-    return NextResponse.json({ current: 0, longest: 0, last_activity: null })
+    return NextResponse.json({ error: 'Failed to load streak' }, { status: 500 })
   }
 }
 
@@ -46,6 +47,6 @@ export async function POST(_request: NextRequest) {
     })
   } catch (error) {
     log.error('Streak record failed', { component: 'api/me/streak', userId }, error as Error)
-    return NextResponse.json({ current: 0, longest: 0, last_activity: null })
+    return NextResponse.json({ error: 'Failed to record activity' }, { status: 500 })
   }
 }

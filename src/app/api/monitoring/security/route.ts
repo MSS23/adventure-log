@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       ip: event.ip || null,
       user_agent: event.userAgent ? escapeHtmlServer(event.userAgent) : null,
       path: event.path ? escapeHtmlServer(event.path) : null,
-      user_id: event.userId || null,
+      user_id: userId,
       timestamp: event.timestamp || new Date().toISOString(),
       severity: ['low', 'medium', 'high', 'critical'].includes(event.severity)
         ? event.severity

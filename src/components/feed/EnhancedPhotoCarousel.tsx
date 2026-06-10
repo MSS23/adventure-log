@@ -44,7 +44,7 @@ export function EnhancedPhotoCarousel({
   const [direction, setDirection] = useState(0)
   const [isZoomed, _setIsZoomed] = useState(false)
   const { user } = useAuth()
-  const { toggleLike } = useLikes(albumId, undefined)
+  const { toggleLike } = useLikes(albumId, undefined, undefined, { fetchList: false, subscribe: false })
 
   // For gesture-based swiping
   const dragX = useMotionValue(0)

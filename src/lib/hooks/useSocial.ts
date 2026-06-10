@@ -17,7 +17,8 @@ export interface Like {
   }
 }
 
-export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
+export function useLikes(albumId?: string, photoId?: string, storyId?: string, options?: { fetchList?: boolean; subscribe?: boolean }) {
+  const { fetchList = true, subscribe = true } = options ?? {}
   const [likes, setLikes] = useState<Like[]>([])
   const [isLiked, setIsLiked] = useState(false)
   const { user } = useAuth()
@@ -79,17 +80,19 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
   // Fetch likes and check if liked only when IDs change or user changes
   useEffect(() => {
     if (albumId || photoId || storyId) {
-      fetchLikes()
+      if (fetchList) {
+        fetchLikes()
+      }
       if (user) {
         checkIfLiked()
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [albumId, photoId, storyId, user?.id]) // Only depend on user.id, not the whole user object or functions
+  }, [albumId, photoId, storyId, user?.id, fetchList]) // Only depend on user.id, not the whole user object or functions
 
   // Set up real-time subscription for likes
   useEffect(() => {
-    if (!albumId && !photoId && !storyId) return
+    if (!subscribe || (!albumId && !photoId && !storyId)) return
 
     const supabase = createClient()
 
@@ -142,14 +145,14 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
       supabase.removeChannel(filter)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is sufficient; full user object would cause unnecessary re-subscriptions
-  }, [albumId, photoId, storyId, user?.id])
+  }, [albumId, photoId, storyId, user?.id, subscribe])
 
   const toggleLike = useCallback(async () => {
     if (!user) return
 
     // Optimistic update - update UI immediately for instant feedback
     const previousIsLiked = isLiked
-    const previousLikesCount = likes.length
+    const previousLikes = likes
 
     // Immediately update UI without setting loading state
     setIsLiked(!isLiked)
@@ -221,21 +224,8 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string) {
     } catch (error) {
       // Revert optimistic update on error
       setIsLiked(previousIsLiked)
-      // Restore previous likes count by reconstructing array
-      if (!previousIsLiked && likes.length > previousLikesCount) {
-        // We added optimistically, remove the temp one
-        setLikes(likes.slice(1))
-      } else if (previousIsLiked && likes.length < previousLikesCount) {
-        // We removed optimistically, add it back
-        const restoredLike: Like = {
-          id: 'restored-' + Date.now(),
-          user_id: user.id,
-          target_type: albumId ? 'album' : storyId ? 'story' : 'photo',
-          target_id: (albumId || photoId || storyId) as string,
-          created_at: new Date().toISOString()
-        }
-        setLikes([restoredLike, ...likes])
-      }
+      // Restore previous likes array
+      setLikes(previousLikes)
       log.error('Error toggling like', { albumId, photoId, storyId }, error)
     }
   }, [user, isLiked, likes, albumId, photoId, storyId])

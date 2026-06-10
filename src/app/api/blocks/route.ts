@@ -30,14 +30,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Block + auto-unfollow both directions
-    await supabase.from('user_blocks').insert({
+    const { error: insertError } = await supabase.from('user_blocks').insert({
       blocker_id: userId,
       blocked_id: targetId,
     })
+    if (insertError) {
+      if (insertError.code === '23505') {
+        return NextResponse.json({ error: 'Already blocked' }, { status: 409 })
+      }
+      log.error('Block insert failed', { component: 'api/blocks', userId }, insertError as unknown as Error)
+      return NextResponse.json({ error: 'Failed to block' }, { status: 500 })
+    }
     await supabase
       .from('follows')
       .delete()
-      .or(`and(follower_id.eq.${userId},following_id.eq.${targetId}),and(follower_id.eq.${targetId},following_id.eq.${userId})`)
+      .eq('follower_id', userId)
+      .eq('following_id', targetId)
+    await supabase
+      .from('follows')
+      .delete()
+      .eq('follower_id', targetId)
+      .eq('following_id', userId)
 
     return NextResponse.json({ ok: true })
   } catch (error) {

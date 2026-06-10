@@ -29,18 +29,30 @@ export async function GET(request: NextRequest) {
   const geoUrl = 'https://api.openweathermap.org/geo/1.0'
   const oneCallUrl = 'https://api.openweathermap.org/data/3.0/onecall'
 
+  // Validate numeric params before building upstream URLs
+  const latN = Number(lat)
+  const lonN = Number(lon)
+  const coordsValid =
+    !!lat && !!lon &&
+    Number.isFinite(latN) && latN >= -90 && latN <= 90 &&
+    Number.isFinite(lonN) && lonN >= -180 && lonN <= 180
+  const dtN = Number(dt)
+  const dtValid = Number.isInteger(dtN) && dtN > 0
+  const cntN = Number(cnt)
+  const cntValid = Number.isInteger(cntN) && cntN >= 1 && cntN <= 40
+
   switch (endpoint) {
     case 'current':
-      if (!lat || !lon) return NextResponse.json({ error: 'lat and lon required' }, { status: 400 })
-      url = `${baseUrl}/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`
+      if (!coordsValid) return NextResponse.json({ error: 'lat and lon required' }, { status: 400 })
+      url = `${baseUrl}/weather?${new URLSearchParams({ lat: String(latN), lon: String(lonN), appid: OPENWEATHER_API_KEY, units: 'metric' })}`
       break
     case 'forecast':
-      if (!lat || !lon) return NextResponse.json({ error: 'lat and lon required' }, { status: 400 })
-      url = `${baseUrl}/forecast?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric${cnt ? `&cnt=${cnt}` : ''}`
+      if (!coordsValid) return NextResponse.json({ error: 'lat and lon required' }, { status: 400 })
+      url = `${baseUrl}/forecast?${new URLSearchParams({ lat: String(latN), lon: String(lonN), appid: OPENWEATHER_API_KEY, units: 'metric', ...(cntValid ? { cnt: String(cntN) } : {}) })}`
       break
     case 'historical':
-      if (!lat || !lon || !dt) return NextResponse.json({ error: 'lat, lon, and dt required' }, { status: 400 })
-      url = `${oneCallUrl}/timemachine?lat=${lat}&lon=${lon}&dt=${dt}&appid=${OPENWEATHER_API_KEY}&units=metric`
+      if (!coordsValid || !dtValid) return NextResponse.json({ error: 'lat, lon, and dt required' }, { status: 400 })
+      url = `${oneCallUrl}/timemachine?${new URLSearchParams({ lat: String(latN), lon: String(lonN), dt: String(dtN), appid: OPENWEATHER_API_KEY, units: 'metric' })}`
       break
     case 'geocode':
       if (!q) return NextResponse.json({ error: 'q required' }, { status: 400 })

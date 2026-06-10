@@ -10,7 +10,6 @@ import {
   X,
   AlertTriangle,
   ChevronRight,
-  Globe,
   Eye,
   EyeOff
 } from 'lucide-react'
@@ -54,14 +53,14 @@ export function MissingLocationNotification({
   if (compact) {
     return (
       <div className={cn("flex items-center gap-3 p-3 bg-olive-50 dark:bg-olive-950/20 border border-olive-200 dark:border-white/[0.08] rounded-lg", className)}>
-        <AlertTriangle className="h-4 w-4 text-olive-600 flex-shrink-0" />
+        <AlertTriangle className="h-4 w-4 text-olive-600 dark:text-olive-400 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-olive-800">
+          <p className="text-sm text-olive-800 dark:text-olive-200">
             {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'} missing location
           </p>
         </div>
-        <Link href="/globe/location-analysis">
-          <Button variant="outline" size="sm" className="text-olive-700 border-olive-300 hover:bg-olive-100">
+        <Link href={recentMissingAlbums[0] ? `${recentMissingAlbums[0].albumUrl}/edit` : '/globe'}>
+          <Button variant="outline" size="sm" className="text-olive-700 dark:text-olive-300 border-olive-300 dark:border-olive-700 hover:bg-olive-100 dark:hover:bg-olive-950/40">
             Fix Now
           </Button>
         </Link>
@@ -70,7 +69,7 @@ export function MissingLocationNotification({
             variant="ghost"
             size="sm"
             onClick={() => setDismissed(true)}
-            className="h-6 w-6 p-0 text-olive-600 hover:bg-olive-200"
+            className="h-6 w-6 p-0 text-olive-600 dark:text-olive-400 hover:bg-olive-200 dark:hover:bg-olive-950/40"
           >
             <X className="h-3 w-3" />
           </Button>
@@ -92,9 +91,9 @@ export function MissingLocationNotification({
           <div className="flex items-start gap-3 flex-1">
             <div className={cn(
               "p-2 rounded-lg flex-shrink-0",
-              severity === 'high' ? "bg-red-100 dark:bg-red-950/30 text-red-600" :
-              severity === 'medium' ? "bg-olive-100 dark:bg-olive-950/30 text-olive-600" :
-              "bg-olive-100 dark:bg-olive-950/30 text-olive-600"
+              severity === 'high' ? "bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400" :
+              severity === 'medium' ? "bg-olive-100 dark:bg-olive-950/30 text-olive-600 dark:text-olive-400" :
+              "bg-olive-100 dark:bg-olive-950/30 text-olive-600 dark:text-olive-400"
             )}>
               <MapPin className="h-4 w-4" />
             </div>
@@ -103,9 +102,9 @@ export function MissingLocationNotification({
               <div className="flex items-center gap-2">
                 <h3 className={cn(
                   "font-medium",
-                  severity === 'high' ? "text-red-800" :
-                  severity === 'medium' ? "text-olive-800" :
-                  "text-olive-800"
+                  severity === 'high' ? "text-red-800 dark:text-red-200" :
+                  severity === 'medium' ? "text-olive-800 dark:text-olive-200" :
+                  "text-olive-800 dark:text-olive-200"
                 )}>
                   Missing Location Data
                 </h3>
@@ -113,9 +112,9 @@ export function MissingLocationNotification({
                   variant="outline"
                   className={cn(
                     "text-xs",
-                    severity === 'high' ? "border-red-300 text-red-700" :
-                    severity === 'medium' ? "border-olive-300 text-olive-700" :
-                    "border-olive-300 text-olive-700"
+                    severity === 'high' ? "border-red-300 dark:border-red-800 text-red-700 dark:text-red-300" :
+                    severity === 'medium' ? "border-olive-300 dark:border-olive-700 text-olive-700 dark:text-olive-300" :
+                    "border-olive-300 dark:border-olive-700 text-olive-700 dark:text-olive-300"
                   )}
                 >
                   {stats.albumsWithoutLocation} album{stats.albumsWithoutLocation === 1 ? '' : 's'}
@@ -124,9 +123,9 @@ export function MissingLocationNotification({
 
               <p className={cn(
                 "text-sm",
-                severity === 'high' ? "text-red-700" :
-                severity === 'medium' ? "text-olive-700" :
-                "text-olive-700"
+                severity === 'high' ? "text-red-700 dark:text-red-300" :
+                severity === 'medium' ? "text-olive-700 dark:text-olive-300" :
+                "text-olive-700 dark:text-olive-300"
               )}>
                 {stats.albumsWithoutLocation === 1
                   ? '1 album is missing location data and won\'t appear on the globe.'
@@ -208,9 +207,9 @@ export function MissingLocationNotification({
               onClick={() => setDismissed(true)}
               className={cn(
                 "h-6 w-6 p-0 flex-shrink-0",
-                severity === 'high' ? "text-red-600 hover:bg-red-200" :
-                severity === 'medium' ? "text-olive-600 hover:bg-olive-200" :
-                "text-olive-600 hover:bg-olive-200"
+                severity === 'high' ? "text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-950/40" :
+                severity === 'medium' ? "text-olive-600 dark:text-olive-400 hover:bg-olive-200 dark:hover:bg-olive-950/40" :
+                "text-olive-600 dark:text-olive-400 hover:bg-olive-200 dark:hover:bg-olive-950/40"
               )}
             >
               <X className="h-3 w-3" />
@@ -220,7 +219,7 @@ export function MissingLocationNotification({
 
         {/* Action buttons */}
         <div className="flex items-center gap-2 mt-4">
-          <Link href="/globe/location-analysis">
+          <Link href="/globe">
             <Button
               size="sm"
               className={cn(
@@ -231,13 +230,6 @@ export function MissingLocationNotification({
             >
               <MapPin className="h-4 w-4 mr-1" />
               View Analysis
-            </Button>
-          </Link>
-
-          <Link href="/globe">
-            <Button variant="outline" size="sm">
-              <Globe className="h-4 w-4 mr-1" />
-              Open Globe
             </Button>
           </Link>
 

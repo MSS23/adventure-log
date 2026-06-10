@@ -70,6 +70,8 @@ export default function FeedPage() {
           photos(id, file_path, caption, taken_at)
         `
         )
+        .order('created_at', { ascending: true, referencedTable: 'photos' })
+        .limit(10, { referencedTable: 'photos' })
         .order('created_at', { ascending: false })
         .range(nextPage * PAGE_SIZE, nextPage * PAGE_SIZE + PAGE_SIZE - 1)
 
@@ -308,7 +310,7 @@ export default function FeedPage() {
         <div className="space-y-8 mt-2">
           {albums.map((album, idx) => (
             <div key={album.id}>
-              <FeedItem album={album} currentUserId={user.id} />
+              <FeedItem album={album} currentUserId={user.id} priority={idx === 0} />
               {idx === 2 && mode === 'following' && suggestedUsers.length > 0 && (
                 <div className="my-8">
                   <SuggestedUsersRow users={suggestedUsers} />

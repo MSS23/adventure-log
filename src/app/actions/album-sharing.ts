@@ -72,7 +72,7 @@ export async function createAlbumShare(request: CreateAlbumShareRequest) {
 
     if (shareError) {
       log.error('Failed to create album share', { component: 'createAlbumShare' }, shareError);
-      return { success: false, error: shareError.message };
+      return { success: false, error: 'Failed to create album share' };
     }
 
     revalidatePath(`/albums/${request.album_id}`);
@@ -108,7 +108,7 @@ export async function getAlbumShares(albumId: string) {
 
     if (error) {
       log.error('Failed to fetch album shares', { component: 'getAlbumShares', albumId }, error);
-      return { success: false, error: error.message };
+      return { success: false, error: 'Failed to fetch album shares' };
     }
 
     return { success: true, data: shares || [] };
@@ -143,7 +143,7 @@ export async function updateAlbumShare(
 
     if (error) {
       log.error('Failed to update album share', { component: 'updateAlbumShare', shareId }, error);
-      return { success: false, error: error.message };
+      return { success: false, error: 'Failed to update album share' };
     }
 
     revalidatePath(`/albums/${share.album_id}`);
@@ -183,7 +183,7 @@ export async function deleteAlbumShare(shareId: string) {
 
     if (error) {
       log.error('Failed to delete album share', { component: 'deleteAlbumShare', shareId }, error);
-      return { success: false, error: error.message };
+      return { success: false, error: 'Failed to delete album share' };
     }
 
     if (share) {

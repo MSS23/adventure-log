@@ -25,6 +25,7 @@ interface PhotoCarouselProps {
   albumId?: string
   coverPhotoOffset?: { x?: number; y?: number }
   className?: string
+  priority?: boolean
   onDoubleTap?: () => void
 }
 
@@ -34,6 +35,7 @@ export function PhotoCarousel({
   albumId,
   coverPhotoOffset,
   className,
+  priority = false,
   onDoubleTap
 }: PhotoCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' })
@@ -44,7 +46,7 @@ export function PhotoCarousel({
   const { user } = useAuth()
 
   // Use the same like hook as LikeButton for state sync
-  const { toggleLike } = useLikes(albumId, undefined)
+  const { toggleLike } = useLikes(albumId, undefined, undefined, { fetchList: false, subscribe: false })
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
@@ -129,7 +131,8 @@ export function PhotoCarousel({
                 objectPosition: `${coverPhotoOffset?.x ?? 50}% ${coverPhotoOffset?.y ?? 50}%`
               }}
               sizes="(max-width: 480px) 100vw, (max-width: 768px) 90vw, 650px"
-              loading="lazy"
+              loading={priority ? 'eager' : 'lazy'}
+              priority={priority}
               quality={90}
             />
             <HeartAnimation
@@ -179,9 +182,9 @@ export function PhotoCarousel({
                         : 'center'
                     }}
                     sizes="(max-width: 480px) 100vw, (max-width: 768px) 90vw, 650px"
-                    loading={index === 0 ? 'eager' : 'lazy'}
+                    loading={index === 0 && priority ? 'eager' : 'lazy'}
                     quality={90}
-                    priority={index === 0}
+                    priority={index === 0 && priority}
                   />
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: 'var(--color-forest-tint)' }}>

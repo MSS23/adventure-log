@@ -164,6 +164,8 @@ export default function AlbumDetailPage() {
         .from('photos')
         .select('*')
         .eq('album_id', params.id)
+        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: true })
 
       if (photosError) {
         setPhotos([])

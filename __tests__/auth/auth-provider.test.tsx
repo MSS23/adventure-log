@@ -6,44 +6,19 @@ import { createClient } from '@/lib/supabase/client'
 // Mocks
 // ────────────────────────────────────────────────────────────────────────────
 //
-// AuthProvider now reads identity from Clerk's React hooks (`useUser`,
-// `useClerk`) and loads the public.users row via Supabase. The Supabase auth
-// surface is no longer touched. Tests therefore mock:
+// AuthProvider reads identity from the Supabase session (`auth.getSession` +
+// `auth.onAuthStateChange`) and loads the public.users row via the same
+// client. Tests therefore mock `@/lib/supabase/client` with a stub exposing
+// both surfaces:
 //
-//   1. `@clerk/nextjs` — replace ClerkProvider with a passthrough fragment and
-//      stub useUser/useClerk so we can drive identity per test.
-//   2. `@/lib/supabase/client` — return a chainable stub whose
-//      `.from().select().eq().maybeSingle()` resolves to whatever the test
+//   1. `auth.getSession` / `auth.onAuthStateChange` / `auth.signOut` — drive
+//      the authenticated user per test via the `sessionUser` option.
+//   2. `.from().select().eq().maybeSingle()` — resolves to whatever the test
 //      preloads.
 //
 // We also stub `@/lib/hooks/useSmartNavigation` because AuthProvider imports
 // `resetNavigationState` for sign-out cleanup, and that module pulls in
 // next/navigation internals jsdom can't satisfy.
-
-type ClerkUserShape = {
-  id: string
-  primaryEmailAddress?: { emailAddress: string } | null
-  unsafeMetadata?: Record<string, unknown>
-  publicMetadata?: Record<string, unknown>
-  createdAt?: Date
-}
-
-let mockClerkUser: ClerkUserShape | null = null
-let mockClerkLoaded = true
-let mockSignOut = jest.fn().mockResolvedValue(undefined)
-
-jest.mock('@clerk/nextjs', () => ({
-  __esModule: true,
-  ClerkProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useUser: () => ({
-    isLoaded: mockClerkLoaded,
-    isSignedIn: !!mockClerkUser,
-    user: mockClerkUser,
-  }),
-  useClerk: () => ({
-    signOut: mockSignOut,
-  }),
-}))
 
 jest.mock('@/lib/hooks/useSmartNavigation', () => ({
   __esModule: true,
@@ -56,6 +31,13 @@ jest.mock('@/lib/supabase/client')
 // Helpers
 // ────────────────────────────────────────────────────────────────────────────
 
+type SessionUserShape = {
+  id: string
+  email?: string
+  app_metadata?: Record<string, unknown>
+  created_at?: string
+}
+
 interface SupabaseStubOptions {
   /**
    * Sequence of results to return from `.maybeSingle()`. The fetcher de-queues
@@ -64,9 +46,17 @@ interface SupabaseStubOptions {
    * exists and stays cached).
    */
   maybeSingleQueue?: Array<{ data: unknown; error: unknown }>
+  /**
+   * The Supabase session user `auth.getSession()` resolves with. `null`
+   * simulates an unauthenticated visitor.
+   */
+  sessionUser?: SessionUserShape | null
 }
 
-function makeSupabaseStub({ maybeSingleQueue = [{ data: null, error: null }] }: SupabaseStubOptions = {}) {
+function makeSupabaseStub({
+  maybeSingleQueue = [{ data: null, error: null }],
+  sessionUser = null,
+}: SupabaseStubOptions = {}) {
   let cursor = 0
   const maybeSingle = jest.fn().mockImplementation(() => {
     const next = maybeSingleQueue[Math.min(cursor, maybeSingleQueue.length - 1)]
@@ -78,7 +68,17 @@ function makeSupabaseStub({ maybeSingleQueue = [{ data: null, error: null }] }: 
   const select = jest.fn().mockReturnValue({ eq })
   const from = jest.fn().mockReturnValue({ select })
 
-  return { from, select, eq, maybeSingle }
+  const auth = {
+    getSession: jest.fn().mockResolvedValue({
+      data: { session: sessionUser ? { user: sessionUser } : null },
+    }),
+    onAuthStateChange: jest.fn().mockReturnValue({
+      data: { subscription: { unsubscribe: jest.fn() } },
+    }),
+    signOut: jest.fn().mockResolvedValue({ error: null }),
+  }
+
+  return { from, select, eq, maybeSingle, auth }
 }
 
 /**
@@ -115,12 +115,9 @@ function AuthProbe() {
 describe('AuthProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockClerkUser = null
-    mockClerkLoaded = true
-    mockSignOut = jest.fn().mockResolvedValue(undefined)
   })
 
-  it('exposes null user and null profile when Clerk reports unauthenticated', async () => {
+  it('exposes null user and null profile when Supabase reports no session', async () => {
     const stub = makeSupabaseStub()
     ;(createClient as jest.Mock).mockReturnValue(stub)
 
@@ -142,16 +139,16 @@ describe('AuthProvider', () => {
   })
 
   it('hydrates the profile when authenticated and the row already exists', async () => {
-    mockClerkUser = {
-      id: 'user_clerk_123',
-      primaryEmailAddress: { emailAddress: 'test@example.com' },
-      createdAt: new Date('2024-01-01T00:00:00Z'),
-    }
-
     const stub = makeSupabaseStub({
+      sessionUser: {
+        id: 'user-123',
+        email: 'test@example.com',
+        app_metadata: {},
+        created_at: '2024-01-01T00:00:00Z',
+      },
       maybeSingleQueue: [
         {
-          data: { id: 'user_clerk_123', username: 'existing_user', email: 'test@example.com' },
+          data: { id: 'user-123', username: 'existing_user', email: 'test@example.com' },
           error: null,
         },
       ],
@@ -167,11 +164,11 @@ describe('AuthProvider', () => {
     await waitFor(() => {
       expect(screen.getByTestId('profile-username')).toHaveTextContent('existing_user')
     })
-    expect(screen.getByTestId('user-id')).toHaveTextContent('user_clerk_123')
+    expect(screen.getByTestId('user-id')).toHaveTextContent('user-123')
     expect(screen.getByTestId('user-email')).toHaveTextContent('test@example.com')
     expect(screen.getByTestId('profile-error')).toHaveTextContent('null')
     expect(stub.from).toHaveBeenCalledWith('users')
-    expect(stub.eq).toHaveBeenCalledWith('id', 'user_clerk_123')
+    expect(stub.eq).toHaveBeenCalledWith('id', 'user-123')
   })
 
   it('exercises the retry loop when the profile row is missing initially', async () => {
@@ -181,18 +178,18 @@ describe('AuthProvider', () => {
     // awaits inside the IIFE still flush between fake-timer ticks.
     jest.useFakeTimers({ doNotFake: ['queueMicrotask'] })
     try {
-      mockClerkUser = {
-        id: 'user_clerk_pending',
-        primaryEmailAddress: { emailAddress: 'pending@example.com' },
-      }
-
-      // First two attempts return no row (webhook race), third attempt succeeds.
+      // First two attempts return no row (signup-trigger race), third attempt
+      // succeeds.
       const stub = makeSupabaseStub({
+        sessionUser: {
+          id: 'user-pending',
+          email: 'pending@example.com',
+        },
         maybeSingleQueue: [
           { data: null, error: null },
           { data: null, error: null },
           {
-            data: { id: 'user_clerk_pending', username: 'user_pending' },
+            data: { id: 'user-pending', username: 'user_pending' },
             error: null,
           },
         ],
@@ -204,6 +201,12 @@ describe('AuthProvider', () => {
           <AuthProbe />
         </AuthProvider>,
       )
+
+      // Flush the microtask queue first so getSession's promise resolves and
+      // the first profile fetch misses — no retry timer exists until then.
+      await act(async () => {
+        await Promise.resolve()
+      })
 
       // Drive the entire retry schedule to completion: each runAllTimersAsync()
       // advances every pending fake timer and yields to the microtask queue

@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       url: event.url ? escapeHtmlServer(event.url) : null,
       line_number: event.lineNumber || null,
       column_number: event.columnNumber || null,
-      user_id: event.userId || null,
+      user_id: userId,
       user_agent: event.userAgent ? escapeHtmlServer(event.userAgent) : null,
       timestamp: event.timestamp || new Date().toISOString(),
       severity: event.severity || 'medium',

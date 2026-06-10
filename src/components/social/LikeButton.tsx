@@ -27,7 +27,7 @@ export function LikeButton({
   className,
   showParticles = true
 }: LikeButtonProps) {
-  const { isLiked, likesCount, toggleLike } = useLikes(albumId, photoId)
+  const { isLiked, likesCount, toggleLike } = useLikes(albumId, photoId, undefined, { fetchList: showCount, subscribe: showCount })
   const { triggerLight, triggerSuccess } = useHaptics()
   const [showBurst, setShowBurst] = useState(false)
   const prefersReducedMotion = useReducedMotion()

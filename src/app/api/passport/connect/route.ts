@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // Check that the target user exists
     const { data: targetUser, error: targetError } = await supabaseAdmin
       .from('users')
-      .select('id, username, display_name')
+      .select('id, username, display_name, privacy_level')
       .eq('id', targetUserId)
       .single()
 
@@ -46,7 +46,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Create both follow directions, skipping if already exists
+    // Fetch the scanner's privacy level so the reverse follow respects it
+    const { data: scannerUser, error: scannerError } = await supabaseAdmin
+      .from('users')
+      .select('id, privacy_level')
+      .eq('id', userId)
+      .single()
+
+    if (scannerError || !scannerUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    // Create both follow directions, skipping if already exists.
+    // Private accounts get a 'pending' request instead of an auto-accepted
+    // follow, and existing rows are never upgraded without consent.
     // Direction 1: scanner → passport owner
     const { data: existing1 } = await supabaseAdmin
       .from('follows')
@@ -56,19 +69,23 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (!existing1) {
-      await supabaseAdmin
+      const { error: insert1Error } = await supabaseAdmin
         .from('follows')
         .insert({
           follower_id: userId,
           following_id: targetUserId,
-          status: 'accepted',
+          status: targetUser.privacy_level === 'private' ? 'pending' : 'accepted',
           created_at: new Date().toISOString(),
         })
-    } else if (existing1.status !== 'accepted') {
-      await supabaseAdmin
-        .from('follows')
-        .update({ status: 'accepted' })
-        .eq('id', existing1.id)
+      if (insert1Error) {
+        log.error('Passport connect: failed to create follow', {
+          component: 'PassportConnect',
+          action: 'connect',
+          userId,
+          targetUserId,
+        }, insert1Error as unknown as Error)
+        return NextResponse.json({ error: 'Connection failed' }, { status: 500 })
+      }
     }
 
     // Direction 2: passport owner → scanner
@@ -80,19 +97,23 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (!existing2) {
-      await supabaseAdmin
+      const { error: insert2Error } = await supabaseAdmin
         .from('follows')
         .insert({
           follower_id: targetUserId,
           following_id: userId,
-          status: 'accepted',
+          status: scannerUser.privacy_level === 'private' ? 'pending' : 'accepted',
           created_at: new Date().toISOString(),
         })
-    } else if (existing2.status !== 'accepted') {
-      await supabaseAdmin
-        .from('follows')
-        .update({ status: 'accepted' })
-        .eq('id', existing2.id)
+      if (insert2Error) {
+        log.error('Passport connect: failed to create reverse follow', {
+          component: 'PassportConnect',
+          action: 'connect',
+          userId,
+          targetUserId,
+        }, insert2Error as unknown as Error)
+        return NextResponse.json({ error: 'Connection failed' }, { status: 500 })
+      }
     }
 
     log.info('Passport connect: mutual follow created', {

@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       .eq('user_id', userId),
     supabase
       .from('photos')
-      .select('id')
+      .select('id', { count: 'exact', head: true })
       .eq('user_id', userId),
     supabase
       .from('albums')
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
 
   const initialStats = {
     albums: albums.length,
-    photos: photosResult.data?.length || 0,
+    photos: photosResult.count || 0,
     countries: uniqueCountries.size,
     cities: uniqueCities.size
   }

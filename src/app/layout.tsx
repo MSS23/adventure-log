@@ -10,7 +10,7 @@ import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistratio
 import { validateEnv } from "@/lib/utils/env";
 import { initializeEnvironmentValidation } from "@/lib/utils/environment-validator";
 import { Analytics } from '@vercel/analytics/react';
-import { Toaster } from 'sonner';
+import { ThemedToaster } from "@/components/ui/ThemedToaster";
 import { GlobalMotionConfig } from "@/components/providers/GlobalMotionConfig";
 
 // Validate environment variables at build/startup time
@@ -197,16 +197,7 @@ export default function RootLayout({
                       <Analytics />
                     </ConditionalAuthProvider>
                   </ToastProvider>
-                  <Toaster
-                    position="top-right"
-                    richColors
-                    closeButton
-                    toastOptions={{
-                      classNames: {
-                        toast: 'rounded-xl border shadow-lg',
-                      },
-                    }}
-                  />
+                  <ThemedToaster />
                 </GlobalMotionConfig>
               </ThemeProvider>
             </QueryProvider>

@@ -10,7 +10,7 @@ import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 
-interface UserWithStats extends User {
+interface UserWithStats extends Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url'> {
   albums_count: number
   countries_count: number
   photos_count: number
@@ -46,11 +46,13 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
         setIsLoading(true)
         setError(null)
 
-        // Fetch users with their stats
+        // Fetch users with photo/follower counts embedded (counted in the DB,
+        // not by pulling every row client-side)
         const { data: usersData, error: usersError } = await supabase
           .from('users')
-          .select('*')
+          .select('id, username, display_name, avatar_url, photos(count), followers:follows!following_id(count)')
           .eq('privacy_level', 'public')
+          .eq('followers.status', 'accepted')
           .limit(50) // Get more users to calculate stats
 
         if (usersError) {
@@ -69,22 +71,11 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
 
         const userIds = usersData.map(u => u.id)
 
-        // Batch fetch all stats in 3 queries instead of 3*N queries
-        const [albumsResult, photosResult, followersResult] = await Promise.all([
-          supabase
-            .from('albums')
-            .select('user_id, country_code')
-            .in('user_id', userIds),
-          supabase
-            .from('photos')
-            .select('user_id')
-            .in('user_id', userIds),
-          supabase
-            .from('follows')
-            .select('following_id')
-            .in('following_id', userIds)
-            .eq('status', 'accepted')
-        ])
+        // Albums still need row data for the distinct-country count
+        const albumsResult = await supabase
+          .from('albums')
+          .select('user_id, country_code')
+          .in('user_id', userIds)
 
         // Count albums and unique countries per user
         const albumCounts = new Map<string, number>()
@@ -99,24 +90,13 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
           }
         })
 
-        // Count photos per user
-        const photoCounts = new Map<string, number>()
-        photosResult.data?.forEach(photo => {
-          photoCounts.set(photo.user_id, (photoCounts.get(photo.user_id) || 0) + 1)
-        })
-
-        // Count followers per user
-        const followerCounts = new Map<string, number>()
-        followersResult.data?.forEach(follow => {
-          followerCounts.set(follow.following_id, (followerCounts.get(follow.following_id) || 0) + 1)
-        })
-
-        // Combine data
+        // Combine data (photo/follower counts come from the embedded aggregates)
         const usersWithStats = usersData.map(user => {
+          const { photos, followers, ...rest } = user
           const albums_count = albumCounts.get(user.id) || 0
           const countries_count = countrySets.get(user.id)?.size || 0
-          const photos_count = photoCounts.get(user.id) || 0
-          const followers_count = followerCounts.get(user.id) || 0
+          const photos_count = photos?.[0]?.count ?? 0
+          const followers_count = followers?.[0]?.count ?? 0
 
           // Calculate score (weighted formula)
           const score =
@@ -126,7 +106,7 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             (followers_count * 5)
 
           return {
-            ...user,
+            ...rest,
             albums_count,
             countries_count,
             photos_count,

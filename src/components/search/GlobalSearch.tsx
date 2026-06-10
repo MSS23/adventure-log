@@ -42,9 +42,11 @@ export function GlobalSearch() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const searchIdRef = useRef(0);
   const supabase = createClient();
 
   const performSearch = useCallback(async (searchQuery: string) => {
+    const requestId = ++searchIdRef.current;
     setLoading(true);
 
     try {
@@ -106,19 +108,21 @@ export function GlobalSearch() {
         return 0;
       });
 
+      if (requestId !== searchIdRef.current) return;
       setResults(searchResults);
       setSelectedIndex(0);
     } catch (error) {
       log.error('Search error', { component: 'GlobalSearch', action: 'search' }, error as Error);
-      setResults([]);
+      if (requestId === searchIdRef.current) setResults([]);
     } finally {
-      setLoading(false);
+      if (requestId === searchIdRef.current) setLoading(false);
     }
   }, [user, supabase]);
 
   // Debounced search
   useEffect(() => {
     if (!query.trim() || !user) {
+      searchIdRef.current++;
       setResults([]);
       return;
     }

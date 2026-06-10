@@ -77,8 +77,8 @@ export function AlbumSuggestions() {
           date_start: suggestion.start_date,
           date_end: suggestion.end_date,
           location_name: suggestion.location_name,
-          location_lat: suggestion.latitude,
-          location_lng: suggestion.longitude,
+          latitude: suggestion.latitude,
+          longitude: suggestion.longitude,
           visibility: 'public',
           status: 'published',
         })

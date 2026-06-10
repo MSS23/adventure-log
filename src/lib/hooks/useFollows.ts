@@ -53,7 +53,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
   const [followers, setFollowers] = useState<Follower[]>([])
   const [following, setFollowing] = useState<Follower[]>([])
   const [pendingRequests, setPendingRequests] = useState<Follower[]>([])
-  const initialLoadDoneRef = useRef(false)
+  const loadedForUserIdRef = useRef<string | null>(null)
 
   const supabase = useMemo(() => createClient(), [])
 
@@ -357,8 +357,8 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
 
   // Initial data load - only run once per user session
   useEffect(() => {
-    if (user?.id && !initialLoadDoneRef.current) {
-      initialLoadDoneRef.current = true
+    if (user?.id && loadedForUserIdRef.current !== user.id) {
+      loadedForUserIdRef.current = user.id
       refreshStats()
       refreshFollowLists()
     }

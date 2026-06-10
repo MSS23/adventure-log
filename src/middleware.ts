@@ -288,8 +288,16 @@ export async function middleware(request: NextRequest) {
     const origin = request.headers.get('origin')
     const host = request.headers.get('host')
 
-    if (origin && host && !origin.includes(host)) {
-      return new NextResponse('Forbidden', { status: 403 })
+    if (origin && host) {
+      let originHost: string | null = null
+      try {
+        originHost = new URL(origin).host
+      } catch {
+        originHost = null
+      }
+      if (originHost !== host) {
+        return new NextResponse('Forbidden', { status: 403 })
+      }
     }
   }
 

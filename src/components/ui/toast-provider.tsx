@@ -92,13 +92,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const getStyles = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 border-green-200'
+        return 'bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-900/40'
       case 'error':
-        return 'bg-red-50 border-red-200'
+        return 'bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-900/40'
       case 'warning':
-        return 'bg-yellow-50 border-yellow-200'
+        return 'bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:border-yellow-900/40'
       case 'info':
-        return 'bg-olive-50 border-olive-200'
+        return 'bg-olive-50 border-olive-200 dark:bg-olive-950/30 dark:border-olive-900/40'
     }
   }
 
@@ -122,18 +122,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 {getIcon(toast.type)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-stone-900">
+                <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">
                   {toast.title}
                 </p>
                 {toast.description && (
-                  <p className="text-sm text-stone-600 mt-1">
+                  <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">
                     {toast.description}
                   </p>
                 )}
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="flex-shrink-0 text-stone-400 hover:text-stone-600 transition-colors"
+                className="flex-shrink-0 text-stone-400 hover:text-stone-600 dark:text-stone-500 dark:hover:text-stone-300 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>

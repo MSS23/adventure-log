@@ -83,7 +83,7 @@ const ActionButton = memo(
 )
 ActionButton.displayName = 'ActionButton'
 
-export const FeedItem = memo(({ album }: { album: FeedAlbum; currentUserId?: string }) => {
+export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; currentUserId?: string; priority?: boolean }) => {
   // Defensive fallback: the `user` relation can be missing at runtime even though
   // the type marks it required (Supabase join may return null). Guard against
   // accessing properties of undefined (e.g. display_name[0]).
@@ -202,6 +202,7 @@ export const FeedItem = memo(({ album }: { album: FeedAlbum; currentUserId?: str
               x: album.cover_photo_x_offset,
               y: album.cover_photo_y_offset,
             }}
+            priority={priority}
             onDoubleTap={() => {}}
           />
         </div>

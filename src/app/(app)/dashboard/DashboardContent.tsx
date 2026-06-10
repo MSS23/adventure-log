@@ -73,7 +73,7 @@ export default function DashboardContent({
     let cancelled = false
     ;(async () => {
       try {
-        const ids = recentAlbums.map((a) => a.id)
+        const ids = initialRecentAlbums.map((a) => a.id)
         if (ids.length === 0) return
         const { data } = await supabase
           .from('photos')
@@ -94,7 +94,7 @@ export default function DashboardContent({
     return () => {
       cancelled = true
     }
-  }, [supabase, recentAlbums])
+  }, [supabase, initialRecentAlbums])
 
   const firstName =
     (profile.display_name || profile.username || 'Explorer').split(' ')[0] || 'Explorer'

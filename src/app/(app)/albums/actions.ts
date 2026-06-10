@@ -394,10 +394,18 @@ export async function getUploadUrls(albumId: string, fileNames: string[]): Promi
       return { success: false, error: 'Not authorized to upload to this album' }
     }
 
+    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif']
+    for (const fileName of fileNames) {
+      const ext = fileName.split('.').pop()?.toLowerCase()
+      if (!ext || ext === fileName.toLowerCase() || !ALLOWED_EXTENSIONS.includes(ext)) {
+        return { success: false, error: `Unsupported file type: ${fileName}. Only JPG, PNG, WebP, and GIF are allowed.` }
+      }
+    }
+
     // Generate signed upload URLs
     const urls = await Promise.all(
       fileNames.map(async (fileName) => {
-        const fileExt = fileName.split('.').pop()
+        const fileExt = fileName.split('.').pop()!.toLowerCase()
         const uniqueFileName = `${userId}/${albumId}/${crypto.randomUUID()}.${fileExt}`
         const storagePath = `photos/${uniqueFileName}`
 

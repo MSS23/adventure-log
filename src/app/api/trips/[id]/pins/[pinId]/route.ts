@@ -14,13 +14,23 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  let body: Record<string, unknown>
   try {
-    const body = await request.json()
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  try {
     const updates: Record<string, unknown> = {}
     if (typeof body.name === 'string') updates.name = body.name.trim().slice(0, 200)
-    if (body.note !== undefined) updates.note = body.note
-    if (body.category !== undefined) updates.category = body.category
+    if (body.note === null || typeof body.note === 'string') updates.note = typeof body.note === 'string' ? body.note.slice(0, 2000) : null
+    if (typeof body.category === 'string') updates.category = body.category.slice(0, 50)
     if (typeof body.sort_order === 'number') updates.sort_order = body.sort_order
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
+    }
 
     const { data, error } = await supabase
       .from('trip_pins')

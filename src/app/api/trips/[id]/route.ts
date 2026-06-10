@@ -68,14 +68,25 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  let body: Record<string, unknown>
   try {
-    const body = await request.json()
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  try {
     const updates: Record<string, unknown> = {}
     if (typeof body.title === 'string') updates.title = body.title.trim().slice(0, 120)
-    if (body.description !== undefined) updates.description = body.description
-    if (body.start_date !== undefined) updates.start_date = body.start_date
-    if (body.end_date !== undefined) updates.end_date = body.end_date
-    if (body.cover_emoji !== undefined) updates.cover_emoji = body.cover_emoji
+    if (body.description === null || typeof body.description === 'string') updates.description = typeof body.description === 'string' ? body.description.slice(0, 2000) : null
+    const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
+    if (body.start_date === null || (typeof body.start_date === 'string' && ISO_DATE.test(body.start_date))) updates.start_date = body.start_date
+    if (body.end_date === null || (typeof body.end_date === 'string' && ISO_DATE.test(body.end_date))) updates.end_date = body.end_date
+    if (body.cover_emoji === null || (typeof body.cover_emoji === 'string' && body.cover_emoji.length <= 16)) updates.cover_emoji = body.cover_emoji
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
+    }
 
     const { data, error } = await supabase
       .from('trips')

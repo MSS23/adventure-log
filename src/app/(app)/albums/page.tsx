@@ -22,6 +22,8 @@ import { NoAlbumsEmptyState } from '@/components/ui/enhanced-empty-state'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 
+const photoCount = (album: Album) => (album.photos as unknown as { count: number }[] | undefined)?.[0]?.count ?? 0
+
 function AlbumsPageContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
@@ -73,12 +75,12 @@ function AlbumsPageContent() {
       setLoading(true)
       setError(null)
 
-      // Fetch all albums with photo IDs for counting
+      // Fetch all albums with photo counts
       const { data, error } = await supabase
         .from('albums')
         .select(`
           *,
-          photos(id)
+          photos(count)
         `)
         .eq('user_id', targetUserId)
         .order('created_at', { ascending: false })
@@ -95,8 +97,8 @@ function AlbumsPageContent() {
       }))
 
       // Separate drafts (0 photos) from published albums (1+ photos)
-      const publishedAlbums = allAlbums.filter(album => (album.photos?.length || 0) > 0)
-      const draftAlbums = allAlbums.filter(album => (album.photos?.length || 0) === 0)
+      const publishedAlbums = allAlbums.filter(album => photoCount(album) > 0)
+      const draftAlbums = allAlbums.filter(album => photoCount(album) === 0)
 
       setAlbums(publishedAlbums)
       setDrafts(draftAlbums)
@@ -137,7 +139,7 @@ function AlbumsPageContent() {
       case 'name-desc':
         return b.title.localeCompare(a.title)
       case 'photo-count':
-        return (b.photos?.length || 0) - (a.photos?.length || 0)
+        return photoCount(b) - photoCount(a)
       default:
         return 0
     }
@@ -691,6 +693,7 @@ function AlbumsPageContent() {
                               src={album.cover_photo_url}
                               alt={album.title}
                               fill
+                              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                               className={cn(
                                 instagramStyles.photoGrid,
                                 "transition-transform duration-500 group-hover:scale-110"
@@ -756,7 +759,7 @@ function AlbumsPageContent() {
                           <div className="absolute top-2 left-2">
                             <div className="bg-black/50 backdrop-blur-sm text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1 drop-shadow-sm">
                               <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white drop-shadow" />
-                              <span>{album.photos?.length || 0}</span>
+                              <span>{photoCount(album)}</span>
                             </div>
                           </div>
                         </div>

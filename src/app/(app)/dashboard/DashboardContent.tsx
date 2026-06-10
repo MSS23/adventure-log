@@ -27,6 +27,8 @@ interface RecentAlbum {
   id: string
   title: string
   cover_photo_url?: string | null
+  cover_photo_x_offset?: number | null
+  cover_photo_y_offset?: number | null
   location_name?: string | null
   country_code?: string | null
   date_start?: string | null
@@ -352,6 +354,7 @@ export default function DashboardContent({
                             fill
                             sizes="(max-width: 768px) 50vw, 33vw"
                             className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                            style={{ objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%` }}
                           />
                         )}
                         <div

@@ -233,6 +233,8 @@ export default function PublicAlbumPage() {
       <AlbumHero
         title={album.title}
         coverPhotoUrl={coverPhotoUrl}
+        coverXOffset={album.cover_photo_x_offset}
+        coverYOffset={album.cover_photo_y_offset}
         locationName={album.location_name}
         dateStart={album.date_start}
         dateEnd={album.date_end}

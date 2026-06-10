@@ -28,11 +28,13 @@ import {
   Globe,
   Users,
   Lock,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  Crop
 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
+import Image from 'next/image'
 import { albumSchema, AlbumFormData } from '@/lib/validations/album'
 import { Album } from '@/types/database'
 import { LocationDropdown } from '@/components/location/LocationDropdown'
@@ -43,6 +45,8 @@ import { PhotoGridEditor } from '@/components/photos/PhotoGridEditor'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
 import { Camera, ImagePlus } from 'lucide-react'
 import { CollaboratorManager } from '@/components/albums/CollaboratorManager'
+import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { deletePhoto as deletePhotoAction } from '../actions'
 
 interface LocationData {
@@ -70,6 +74,12 @@ export default function EditAlbumPage() {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [photosLoading, setPhotosLoading] = useState(false)
   const [selectedCoverPhoto, setSelectedCoverPhoto] = useState<string | null>(null)
+  const [coverPosition, setCoverPosition] = useState<{
+    position: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom'
+    xOffset: number
+    yOffset: number
+  }>({ position: 'center', xOffset: 50, yOffset: 50 })
+  const [cropEditorOpen, setCropEditorOpen] = useState(false)
   const supabase = createClient()
 
   const {
@@ -106,6 +116,11 @@ export default function EditAlbumPage() {
       setTags(albumData.tags || [])
       setShowExactDates(albumData.show_exact_dates !== false) // Default to true
       setSelectedCoverPhoto(albumData.cover_photo_url || null)
+      setCoverPosition({
+        position: albumData.cover_photo_position || 'center',
+        xOffset: albumData.cover_photo_x_offset ?? 50,
+        yOffset: albumData.cover_photo_y_offset ?? 50
+      })
 
       // Set form values
       setValue('title', albumData.title)
@@ -198,6 +213,10 @@ export default function EditAlbumPage() {
   }
 
   const handleSetCoverPhoto = (photoPath: string) => {
+    // A crop saved for the previous cover doesn't apply to a different image
+    if (photoPath !== selectedCoverPhoto) {
+      setCoverPosition({ position: 'center', xOffset: 50, yOffset: 50 })
+    }
     setSelectedCoverPhoto(photoPath)
     toast.success('Cover photo selected. Save changes to apply.')
   }
@@ -246,6 +265,9 @@ export default function EditAlbumPage() {
         show_exact_dates: showExactDates,
         tags: tags.length > 0 ? tags : null,
         cover_photo_url: selectedCoverPhoto,
+        cover_photo_position: coverPosition.position,
+        cover_photo_x_offset: coverPosition.xOffset,
+        cover_photo_y_offset: coverPosition.yOffset,
         updated_at: new Date().toISOString()
       }
 
@@ -655,6 +677,36 @@ export default function EditAlbumPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {selectedCoverPhoto && !photosLoading && (
+              <div className="mb-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Cover Preview</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCropEditorOpen(true)}
+                    className="gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200"
+                  >
+                    <Crop className="h-4 w-4" />
+                    Adjust Crop
+                  </Button>
+                </div>
+                <div className="relative aspect-[16/10] sm:max-w-md rounded-2xl overflow-hidden bg-muted border border-border">
+                  <Image
+                    src={getPhotoUrl(selectedCoverPhoto) || ''}
+                    alt="Album cover preview"
+                    fill
+                    className="object-cover"
+                    style={{ objectPosition: `${coverPosition.xOffset}% ${coverPosition.yOffset}%` }}
+                    sizes="(max-width: 640px) 100vw, 448px"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  This is how your cover appears in feeds and album previews. Use Adjust Crop if the framing cuts off the important part.
+                </p>
+              </div>
+            )}
             {photosLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                 {[...Array(6)].map((_, i) => (
@@ -757,6 +809,20 @@ export default function EditAlbumPage() {
       {/* Collaborators - outside form since it manages its own state */}
       {album && (
         <CollaboratorManager albumId={album.id} isOwner={album.user_id === user?.id} />
+      )}
+
+      {/* Cover crop editor - applied locally, persisted on Save Changes */}
+      {selectedCoverPhoto && (
+        <CoverPhotoPositionEditor
+          isOpen={cropEditorOpen}
+          onClose={() => setCropEditorOpen(false)}
+          imageUrl={getPhotoUrl(selectedCoverPhoto) || ''}
+          currentPosition={coverPosition}
+          onSave={(position) => {
+            setCoverPosition(position)
+            toast.success('Crop updated. Save changes to apply.')
+          }}
+        />
       )}
     </div>
   )

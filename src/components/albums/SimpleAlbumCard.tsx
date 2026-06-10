@@ -23,6 +23,7 @@ export function SimpleAlbumCard({ album, className }: SimpleAlbumCardProps) {
             alt={album.title}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            style={{ objectPosition: `${album.cover_photo_x_offset ?? 50}% ${album.cover_photo_y_offset ?? 50}%` }}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (

@@ -45,7 +45,7 @@ export default async function DashboardPage() {
       .eq('user_id', userId),
     supabase
       .from('albums')
-      .select('id, title, cover_photo_url, location_name, country_code, date_start, created_at, status')
+      .select('id, title, cover_photo_url, cover_photo_x_offset, cover_photo_y_offset, location_name, country_code, date_start, created_at, status')
       .eq('user_id', userId)
       .order('date_start', { ascending: false, nullsFirst: false })
       .limit(6)

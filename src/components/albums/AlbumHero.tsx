@@ -11,6 +11,8 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 interface AlbumHeroProps {
   title: string
   coverPhotoUrl?: string | null
+  coverXOffset?: number | null
+  coverYOffset?: number | null
   locationName?: string | null
   dateStart?: string | null
   dateEnd?: string | null
@@ -23,6 +25,8 @@ interface AlbumHeroProps {
 export function AlbumHero({
   title,
   coverPhotoUrl,
+  coverXOffset,
+  coverYOffset,
   locationName,
   dateStart,
   dateEnd,
@@ -82,6 +86,7 @@ export function AlbumHero({
             alt={title}
             fill
             className="object-cover"
+            style={{ objectPosition: `${coverXOffset ?? 50}% ${coverYOffset ?? 50}%` }}
             priority
             sizes="100vw"
           />
@@ -190,6 +195,8 @@ export function AlbumHero({
 export function AlbumHeroCompact({
   title,
   coverPhotoUrl,
+  coverXOffset,
+  coverYOffset,
   locationName,
   dateStart,
   className
@@ -214,6 +221,7 @@ export function AlbumHeroCompact({
           alt={title}
           fill
           className="object-cover"
+          style={{ objectPosition: `${coverXOffset ?? 50}% ${coverYOffset ?? 50}%` }}
           priority
           sizes="(max-width: 768px) 100vw, 80vw"
         />

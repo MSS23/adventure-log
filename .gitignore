@@ -134,3 +134,7 @@ Thumbs.db
 
 # Screenshots / temp captures
 screen/
+
+# Python bytecode (ui-ux-pro-max skill)
+__pycache__/
+*.pyc

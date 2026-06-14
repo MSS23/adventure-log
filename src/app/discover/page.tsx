@@ -15,7 +15,7 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useReducedMotion, MotionConfig } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { NumberCountUp } from '@/components/ui/number-count-up'
 import {
@@ -71,7 +71,6 @@ const SEED_PINS: PublicPin[] = [
 export default function DiscoverPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null)
-  const heroRef = useRef<HTMLDivElement | null>(null)
   const [mounted, setMounted] = useState(false)
   const [size, setSize] = useState({ w: 1200, h: 800 })
   const [pins, setPins] = useState<PublicPin[]>(SEED_PINS)
@@ -84,6 +83,7 @@ export default function DiscoverPage() {
   const { scrollY } = useScroll()
   const heroY = useTransform(scrollY, [0, 600], [0, -80])
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.2])
+  const prefersReduced = useReducedMotion()
 
   // Resize handling
   useEffect(() => {
@@ -144,6 +144,7 @@ export default function DiscoverPage() {
   }, [])
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="dark">
       <div className="min-h-screen bg-[#060a03] text-foreground overflow-x-hidden selection:bg-olive-500/30 selection:text-white">
         {/* Header */}
@@ -158,7 +159,7 @@ export default function DiscoverPage() {
               </span>
             </Link>
             <nav className="flex items-center gap-2">
-              <Link href="/sign-in">
+              <Link href="/login">
                 <Button
                   variant="ghost"
                   className="cursor-pointer text-white/70 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200"
@@ -166,7 +167,7 @@ export default function DiscoverPage() {
                   Sign in
                 </Button>
               </Link>
-              <Link href="/sign-up">
+              <Link href="/signup">
                 <Button className="cursor-pointer font-medium px-5 rounded-xl text-sm h-9">
                   Get started
                 </Button>
@@ -207,8 +208,7 @@ export default function DiscoverPage() {
 
           {/* Foreground content (parallax + fade on scroll) */}
           <motion.div
-            ref={heroRef}
-            style={{ y: heroY, opacity: heroOpacity }}
+            style={prefersReduced ? undefined : { y: heroY, opacity: heroOpacity }}
             className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-5 pt-24 pb-12"
           >
             <motion.span
@@ -247,7 +247,7 @@ export default function DiscoverPage() {
               transition={{ duration: 0.55, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
               className="mt-8 flex flex-col sm:flex-row items-center gap-3"
             >
-              <Link href="/sign-up" className="w-full sm:w-auto">
+              <Link href="/signup" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="coral"
@@ -260,7 +260,7 @@ export default function DiscoverPage() {
                   />
                 </Button>
               </Link>
-              <Link href="/sign-in" className="w-full sm:w-auto">
+              <Link href="/login" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="ghost"
@@ -316,6 +316,7 @@ export default function DiscoverPage() {
         </section>
       </div>
     </div>
+    </MotionConfig>
   )
 }
 

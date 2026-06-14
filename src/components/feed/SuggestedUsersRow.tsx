@@ -34,7 +34,7 @@ export const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: S
   // Vertical card for mobile scrollable row
   return (
     <div
-      className="flex-shrink-0 w-36 rounded-2xl border border-border bg-card p-3 text-center cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5"
+      className="flex-shrink-0 w-36 rounded-2xl border border-border bg-card p-4 text-center cursor-pointer shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:border-primary/30 hover:shadow-[var(--shadow-hover)] hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background"
     >
       <Link href={`/u/${user.username}`} className="block">
         <OptimizedAvatar

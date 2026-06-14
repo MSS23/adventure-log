@@ -14,8 +14,8 @@ import { log } from '@/lib/utils/logger'
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-olive-50 to-olive-50">
-      <Loader2 className="h-6 w-6 animate-spin text-olive-500" />
+    <div className="flex items-center justify-center w-full h-full bg-muted">
+      <Loader2 className="h-6 w-6 animate-spin text-primary" />
     </div>
   )
 })
@@ -31,9 +31,20 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null)
   const [mounted, setMounted] = useState(false)
+  // Resolve the warm "ivory" surface token at runtime so the GL canvas clear
+  // color follows the active theme (the prop needs a concrete color string, it
+  // can't take a Tailwind class). Falls back to the warm cream if unresolved.
+  const [canvasBg, setCanvasBg] = useState('#F7F2E7')
 
   useEffect(() => {
     setMounted(true)
+
+    if (typeof window !== 'undefined') {
+      const resolved = getComputedStyle(document.documentElement)
+        .getPropertyValue('--color-ivory')
+        .trim()
+      if (resolved) setCanvasBg(resolved)
+    }
 
     const currentGlobeRef = globeRef.current
 
@@ -110,8 +121,8 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
 
   if (!mounted) {
     return (
-      <div className={`bg-gradient-to-br from-olive-50 to-olive-50 flex items-center justify-center ${className}`}>
-        <Loader2 className="h-6 w-6 animate-spin text-olive-500" />
+      <div className={`bg-muted flex items-center justify-center ${className}`}>
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     )
   }
@@ -133,7 +144,7 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
         globeImageUrl="/earth-texture.jpg"
         bumpImageUrl="/earth-topology.png"
         backgroundImageUrl="/night-sky.png"
-        backgroundColor="#f8fafc"
+        backgroundColor={canvasBg}
 
         // Lighting settings to make the globe visible
         showAtmosphere={true}

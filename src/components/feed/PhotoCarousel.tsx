@@ -216,7 +216,7 @@ export function PhotoCarousel({
               e.preventDefault()
               scrollPrev()
             }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/65 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/65 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)]"
             aria-label="Previous photo"
           >
             <ChevronLeft className="h-4 w-4 text-white" />
@@ -238,7 +238,7 @@ export function PhotoCarousel({
               e.preventDefault()
               scrollNext()
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/65 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/65 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)]"
             aria-label="Next photo"
           >
             <ChevronRight className="h-4 w-4 text-white" />
@@ -248,11 +248,11 @@ export function PhotoCarousel({
 
       {/* Dot indicators - Smaller and positioned at bottom */}
       {photos.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1 px-2 py-1 rounded-full bg-black/35 backdrop-blur-sm">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1 px-2 py-1 rounded-full bg-black/45 backdrop-blur-sm">
           {photos.map((_, index) => (
             <motion.div
               key={index}
-              className="rounded-full bg-white"
+              className="rounded-full bg-[color:var(--color-olive-50)]"
               initial={false}
               animate={{
                 width: selectedIndex === index ? 12 : 4,

@@ -42,8 +42,10 @@ const priorityConfig: Record<Priority, { label: string; color: string; dot: stri
     dot: 'bg-muted-foreground/60',
   },
   medium: {
+    // Slightly deeper tint + border so the gold text reads ≥4.5:1 in both
+    // themes (light gold on ivory was the weak case at /15).
     label: 'Medium',
-    color: 'bg-[color:var(--color-gold)]/15 text-[color:var(--color-gold)] border border-[color:var(--color-gold)]/25',
+    color: 'bg-[color:var(--color-gold)]/20 text-[color:var(--color-gold)] border border-[color:var(--color-gold)]/35',
     dot: 'bg-[color:var(--color-gold)]',
   },
   high: {
@@ -277,7 +279,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
   const totalBucketList = items?.filter((i) => !i.completed_at).length ?? 0
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-6xl">
       {/* ── Walkthrough Tour ───────────────────────────────── */}
       <WalkthroughTour
         tourId="wishlist-tour"
@@ -295,7 +297,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
         )}
       </WalkthroughTour>
 
-      <div className="space-y-6 sm:space-y-8">
+      <div className="space-y-8">
         {/* ── Header ────────────────────────────────────────────── */}
         <div data-tour-step="wishlist-header">
           <PageHeader
@@ -314,6 +316,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                   }}
                   className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl cursor-pointer"
                   title="Take a tour"
+                  aria-label="Take a tour of the wishlist"
                 >
                   <HelpCircle className="h-5 w-5" />
                 </Button>
@@ -352,7 +355,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="overflow-hidden"
             >
-              <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-resting)]">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-primary">
                     <Sparkles className="h-4 w-4" />
@@ -486,12 +489,13 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
               action={activeFilter === 'all' ? { label: 'Add Destination', onClick: () => setShowAddForm(true) } : undefined}
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
               <AnimatePresence mode="popLayout">
                 {filteredItems.map((item, index) => (
                   <motion.div
                     key={item.id}
                     layout
+                    className="h-full"
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9, y: -10 }}
@@ -504,10 +508,10 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                   >
                     <div
                       className={cn(
-                        'group relative rounded-2xl border border-border bg-card transition-all duration-200',
+                        'group relative h-full rounded-2xl border border-border bg-card shadow-[var(--shadow-resting)] transition-all duration-200 ease-out',
                         item.completed_at
                           ? 'opacity-60'
-                          : 'hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5'
+                          : 'hover:border-primary/30 hover:shadow-[var(--shadow-hover)] hover:-translate-y-0.5'
                       )}
                     >
                       <div className="p-5">
@@ -584,6 +588,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                 onClick={() => handleMarkCompleted(item.id)}
                                 className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-primary hover:bg-primary/10 hover:text-primary cursor-pointer"
                                 title="Mark as visited (creates an album)"
+                                aria-label={`Mark ${item.location_name} as visited`}
                               >
                                 <Check className="h-4 w-4" />
                               </Button>
@@ -594,6 +599,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                               onClick={() => handleRemoveItem(item.id)}
                               className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                               title="Remove"
+                              aria-label={`Remove ${item.location_name} from wishlist`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -675,7 +681,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                     if (!partner) return null
 
                     return (
-                      <div className="rounded-2xl border border-border bg-card p-6">
+                      <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-resting)]">
                         <div className="space-y-4">
                           {/* Partner header */}
                           <div className="flex items-center justify-between flex-wrap gap-3">
@@ -718,7 +724,9 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => setExpandedPartner(null)}
-                                className="h-8 w-8 p-0 rounded-lg"
+                                className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl cursor-pointer"
+                                aria-label={`Close ${partner.display_name || partner.username}'s wishlist`}
+                                title="Close"
                               >
                                 <X className="h-4 w-4" />
                               </Button>

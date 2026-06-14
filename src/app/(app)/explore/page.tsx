@@ -32,7 +32,7 @@ function SectionHeader({
       {href && (
         <Link
           href={href}
-          className="group flex items-center gap-0.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          className="group flex items-center gap-0.5 rounded-full px-1 py-0.5 text-sm font-medium text-muted-foreground transition-colors cursor-pointer hover:text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
         >
           View all
           <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -73,7 +73,7 @@ export default function ExplorePage() {
       </header>
 
       {/* Search pill */}
-      <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-3 mb-8 transition-colors focus-within:border-ring">
+      <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-3 mb-8 shadow-[var(--shadow-resting)] transition-all duration-200 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
         <Search className="h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
         <input
           type="text"
@@ -82,12 +82,13 @@ export default function ExplorePage() {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder="Places, people, adventures…"
+          aria-label="Search destinations, people, and adventures"
           className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
         />
         {searchQuery ? (
           <button
             onClick={handleClearSearch}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center justify-center rounded-full p-1 text-muted-foreground transition-colors cursor-pointer hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
             aria-label="Clear search"
           >
             <X className="h-4 w-4" />

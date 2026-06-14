@@ -256,7 +256,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={groupBy}
-                  className="space-y-6"
+                  className="space-y-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.2 }}
@@ -267,7 +267,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                     return (
                       <motion.div
                         key={group.key}
-                        className="rounded-2xl border border-border bg-card overflow-hidden"
+                        className="rounded-2xl border border-border bg-card overflow-hidden shadow-[var(--shadow-resting)]"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -377,14 +377,17 @@ function AlbumCard({
 }) {
   return (
     <motion.div
-      className="group relative rounded-2xl border border-border bg-card overflow-hidden transition-all duration-200 hover:border-primary/30 hover:shadow-md"
+      className="group relative rounded-2xl border border-border bg-card overflow-hidden shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:border-primary/30 hover:shadow-[var(--shadow-hover)]"
       variants={{
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
       }}
       whileHover={prefersReducedMotion ? {} : { y: -2 }}
     >
-      <Link href={`/albums/${album.id}`}>
+      <Link
+        href={`/albums/${album.id}`}
+        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-2xl"
+      >
         {/* Album Cover */}
         <div className={cn(
           "relative overflow-hidden bg-muted",
@@ -416,7 +419,7 @@ function AlbumCard({
         </div>
 
         {/* Album Info */}
-        <div className={cn("p-3", compact ? "p-2.5" : "p-4")}>
+        <div className={cn(compact ? "p-3" : "p-4")}>
           <h3 className={cn(
             "font-heading font-semibold text-foreground truncate group-hover:text-primary transition-colors",
             compact ? "text-sm mb-0.5" : "mb-1"
@@ -452,10 +455,10 @@ function AlbumCard({
           }}
           className={cn(
             "p-2 rounded-full cursor-pointer",
-            "bg-background/90 backdrop-blur-sm shadow-md",
-            "hover:bg-accent/10 hover:scale-110",
-            "transition-all duration-200",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            "bg-background/90 backdrop-blur-sm shadow-[var(--shadow-overlay)]",
+            "hover:bg-accent/10 hover:scale-110 active:scale-[0.97]",
+            "transition-all duration-200 ease-out",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           )}
           whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
           title="Remove from saved"

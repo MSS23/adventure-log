@@ -10,9 +10,9 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        // Field-notebook card: flat, calm, bordered surface (shadow only on hover of interactive cards)
+        // Field-notebook card: warm bordered surface with a soft resting elevation
         "bg-card text-card-foreground",
-        "flex flex-col gap-6 rounded-2xl border border-border py-6 shadow-none",
+        "flex flex-col gap-6 rounded-2xl border border-border py-6 shadow-[var(--shadow-resting)]",
         className
       )}
       {...props}
@@ -35,20 +35,14 @@ const MotionCard = React.forwardRef<HTMLDivElement, MotionCardProps>(
       <motion.div
         ref={ref}
         data-slot="card"
-        whileHover={
-          flat
-            ? undefined
-            : {
-                y: -2,
-                boxShadow:
-                  "0 2px 4px rgba(26,20,14,0.05), 0 10px 24px rgba(26,20,14,0.08)",
-              }
-        }
+        whileHover={flat ? undefined : { y: -2 }}
         transition={{ type: "spring", stiffness: 320, damping: 24 }}
         className={cn(
           "bg-card text-card-foreground",
-          "flex flex-col gap-6 rounded-2xl border border-border py-6 shadow-none",
-          "transition-colors hover:border-primary/30",
+          "flex flex-col gap-6 rounded-2xl border border-border py-6 shadow-[var(--shadow-resting)]",
+          // theme-aware hover elevation (framer can't read CSS vars, so do it in CSS)
+          "transition-[box-shadow,border-color] duration-200",
+          flat ? "" : "hover:border-primary/30 hover:shadow-[var(--shadow-hover)]",
           "will-change-transform",
           className
         )}

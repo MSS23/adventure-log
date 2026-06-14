@@ -119,6 +119,12 @@
   --color-sky: #3F6BA3;
   --color-sky-tint: #DDE8F5;
   --color-stamp: #A2322B;
+
+  /* Elevation ramp — "Soft UI Evolution": resting → hover → overlay.
+     One consistent scale for every card/sheet/popover so depth never drifts. */
+  --shadow-resting: 0 1px 2px rgba(26, 20, 14, 0.04), 0 4px 16px rgba(26, 20, 14, 0.06);
+  --shadow-hover: 0 2px 4px rgba(26, 20, 14, 0.05), 0 12px 28px rgba(26, 20, 14, 0.10);
+  --shadow-overlay: 0 16px 48px rgba(26, 20, 14, 0.18);
 }
 
 .dark {
@@ -183,6 +189,12 @@
   --color-sky: #7AA3D4;
   --color-sky-tint: rgba(122, 163, 212, 0.14);
   --color-stamp: #D44F48;
+
+  /* Elevation ramp (dark) — deeper cast + faint top inner-highlight so cards
+     still read as raised against the near-black umber background. */
+  --shadow-resting: 0 1px 2px rgba(0, 0, 0, 0.40), 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 235, 200, 0.04);
+  --shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.45), 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 235, 200, 0.05);
+  --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.65);
 }
 
 @layer base {
@@ -821,8 +833,8 @@
 .al-card {
   background: var(--card);
   border: 1px solid var(--color-line-warm, var(--border));
-  border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(26, 20, 14, 0.04), 0 4px 16px rgba(26, 20, 14, 0.06);
+  border-radius: 16px;
+  box-shadow: var(--shadow-resting);
 }
 
 /* Primary CTA button — forest green (logo-derived) */

@@ -28,7 +28,7 @@ export function CountrySection({
   ).length
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-200 hover:border-primary/30">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-resting)] transition-[box-shadow,border-color] duration-200 hover:border-primary/30 hover:shadow-[var(--shadow-hover)]">
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}

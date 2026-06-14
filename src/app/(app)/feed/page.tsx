@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Loader2, Compass, Users } from 'lucide-react'
+import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { FeedItem, type FeedAlbum } from '@/components/feed/FeedPost'
@@ -353,47 +355,27 @@ export default function FeedPage() {
 }
 
 function EmptyState({ mode }: { mode: FeedMode }) {
+  const router = useRouter()
+
+  if (mode === 'following') {
+    return (
+      <EnhancedEmptyState
+        icon={<Users className="h-6 w-6" strokeWidth={1.6} />}
+        title="Your field is quiet"
+        description="Follow a few travelers to fill your feed — every adventure they log shows up here."
+        action={{ label: 'Find people to follow', onClick: () => router.push('/explore') }}
+        secondaryAction={{ label: 'Create album', onClick: () => router.push('/albums/new') }}
+      />
+    )
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-      <div
-        className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"
-        aria-hidden
-      >
-        {mode === 'following' ? (
-          <Users className="h-6 w-6" strokeWidth={1.6} />
-        ) : (
-          <Compass className="h-6 w-6" strokeWidth={1.6} />
-        )}
-      </div>
-      <h3 className="font-heading text-lg font-semibold text-foreground">
-        {mode === 'following' ? 'Your field is quiet' : 'Nothing public yet'}
-      </h3>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        {mode === 'following'
-          ? 'Follow a few travelers to fill your feed — every adventure they log shows up here.'
-          : 'Be the first to share a public adventure. Others will find it here once you post.'}
-      </p>
-      <div className="mt-5 flex gap-3 justify-center">
-        {mode === 'following' ? (
-          <>
-            <Button asChild size="pill">
-              <Link href="/explore">Find people to follow</Link>
-            </Button>
-            <Button asChild variant="outline" size="pill">
-              <Link href="/albums/new">Create album</Link>
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button asChild size="pill">
-              <Link href="/albums/new">Create album</Link>
-            </Button>
-            <Button asChild variant="outline" size="pill">
-              <Link href="/explore">Explore people</Link>
-            </Button>
-          </>
-        )}
-      </div>
-    </div>
+    <EnhancedEmptyState
+      icon={<Compass className="h-6 w-6" strokeWidth={1.6} />}
+      title="Nothing public yet"
+      description="Be the first to share a public adventure. Others will find it here once you post."
+      action={{ label: 'Create album', onClick: () => router.push('/albums/new') }}
+      secondaryAction={{ label: 'Explore people', onClick: () => router.push('/explore') }}
+    />
   )
 }

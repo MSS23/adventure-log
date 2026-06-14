@@ -117,95 +117,101 @@ export default function ProfileContent({
       {/* Profile Hero — compact cover + avatar + bio + follow counts */}
       <ProfileHero profile={profile} isOwnProfile={true} followStats={followStats} />
 
-      {/* Travel snapshot — 3 calm stat tiles */}
-      <div className="mt-6 mx-4 md:mx-0 grid grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
-          <p className="al-eyebrow">Countries</p>
-          <p className="al-stat-value text-2xl sm:text-3xl mt-1">{travelStats.countries}</p>
+      {/* Single section stack — consistent 32px rhythm, one horizontal inset */}
+      <div className="mt-8 mx-4 md:mx-0 space-y-8">
+        {/* Travel snapshot — 3 calm stat tiles */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-2xl border border-border bg-card p-5 text-center shadow-[var(--shadow-resting)]">
+            <p className="al-eyebrow">Countries</p>
+            <p className="al-stat-value text-2xl sm:text-3xl mt-1">{travelStats.countries}</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-5 text-center shadow-[var(--shadow-resting)]">
+            <p className="al-eyebrow">Cities</p>
+            <p className="al-stat-value text-2xl sm:text-3xl mt-1">{travelStats.cities}</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-5 text-center shadow-[var(--shadow-resting)]">
+            <p className="al-eyebrow">Albums</p>
+            <p className="al-stat-value text-2xl sm:text-3xl mt-1">{albums.length}</p>
+          </div>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
-          <p className="al-eyebrow">Cities</p>
-          <p className="al-stat-value text-2xl sm:text-3xl mt-1">{travelStats.cities}</p>
+
+        {/* Two things the user reaches for most — Passport & Wrapped */}
+        <div className="grid grid-cols-2 gap-3">
+          <FeatureTile
+            href="/passport"
+            icon={<Book className="h-5 w-5" />}
+            label="Passport"
+            hint="Stamps & countries"
+          />
+          <FeatureTile
+            href="/wrapped"
+            icon={<Sparkles className="h-5 w-5" />}
+            label="Wrapped"
+            hint="Your year in motion"
+          />
         </div>
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
-          <p className="al-eyebrow">Albums</p>
-          <p className="al-stat-value text-2xl sm:text-3xl mt-1">{albums.length}</p>
+
+        {/* Secondary tools — quiet, grouped, still one tap away */}
+        <div className="flex flex-wrap gap-2">
+          <QuietLink href="/wishlist" icon={<Star className="h-3.5 w-3.5" />} label="Wishlist" />
+          <QuietLink href="/saved" icon={<Bookmark className="h-3.5 w-3.5" />} label="Saved" />
+          <QuietLink href="/analytics" icon={<BarChart3 className="h-3.5 w-3.5" />} label="Analytics" />
+          <QuietLink href="/travel-twins" icon={<UsersIcon className="h-3.5 w-3.5" />} label="Travel Twins" />
         </div>
-      </div>
 
-      {/* Two things the user reaches for most — Passport & Wrapped */}
-      <div className="mt-6 mx-4 md:mx-0 grid grid-cols-2 gap-3">
-        <FeatureTile
-          href="/passport"
-          icon={<Book className="h-5 w-5" />}
-          label="Passport"
-          hint="Stamps & countries"
-        />
-        <FeatureTile
-          href="/wrapped"
-          icon={<Sparkles className="h-5 w-5" />}
-          label="Wrapped"
-          hint="Your year in motion"
-        />
-      </div>
+        {/* Simple tab pair — Adventures / Badges */}
+        <div role="tablist" aria-label="Profile sections" className="flex gap-1 border-b border-border">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'relative px-5 py-3 text-sm font-medium cursor-pointer transition-colors duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-t-xl',
+                activeTab === tab.id
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <span className="inline-flex items-center gap-2">
+                <tab.icon className="h-3.5 w-3.5" />
+                {tab.label}
+              </span>
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="profileTab"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-primary"
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
 
-      {/* Secondary tools — quiet, grouped, still one tap away */}
-      <div className="mt-4 mx-4 md:mx-0 flex flex-wrap gap-2">
-        <QuietLink href="/wishlist" icon={<Star className="h-3.5 w-3.5" />} label="Wishlist" />
-        <QuietLink href="/saved" icon={<Bookmark className="h-3.5 w-3.5" />} label="Saved" />
-        <QuietLink href="/analytics" icon={<BarChart3 className="h-3.5 w-3.5" />} label="Analytics" />
-        <QuietLink href="/travel-twins" icon={<UsersIcon className="h-3.5 w-3.5" />} label="Travel Twins" />
-      </div>
-
-      {/* Simple tab pair — Adventures / Badges */}
-      <div className="mt-8 mx-4 md:mx-0 flex gap-1 border-b border-border">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              'relative px-5 py-3 text-sm font-medium transition-colors duration-200',
-              activeTab === tab.id
-                ? 'text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <span className="inline-flex items-center gap-2">
-              <tab.icon className="h-3.5 w-3.5" />
-              {tab.label}
-            </span>
-            {activeTab === tab.id && (
-              <motion.div
-                layoutId="profileTab"
-                className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab content — single column, no sidebar clutter */}
-      <div className="mt-6 mx-4 md:mx-0">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.12 }}
-          >
-            {loading ? (
-              <AlbumGridShimmer count={6} />
-            ) : activeTab === 'albums' ? (
-              <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
-            ) : activeTab === 'badges' && userId ? (
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <AchievementsBadges userId={userId} showAll />
-              </div>
-            ) : null}
-          </motion.div>
-        </AnimatePresence>
+        {/* Tab content — single column, no sidebar clutter */}
+        <div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.12 }}
+            >
+              {loading ? (
+                <AlbumGridShimmer count={6} />
+              ) : activeTab === 'albums' ? (
+                <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
+              ) : activeTab === 'badges' && userId ? (
+                <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-resting)]">
+                  <AchievementsBadges userId={userId} showAll />
+                </div>
+              ) : null}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Invite Dialog stays mounted */}
@@ -229,7 +235,7 @@ function FeatureTile({
   return (
     <Link
       href={href}
-      className="group flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 cursor-pointer shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:border-primary/30 hover:shadow-[var(--shadow-hover)] hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
         {icon}
@@ -259,7 +265,7 @@ function QuietLink({
   return (
     <Link
       href={href}
-      className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground cursor-pointer shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:bg-muted hover:text-foreground hover:shadow-[var(--shadow-hover)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <span className="transition-colors duration-200 group-hover:text-primary">
         {icon}

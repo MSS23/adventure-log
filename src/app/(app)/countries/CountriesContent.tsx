@@ -91,9 +91,10 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
           <Input
             type="text"
             placeholder={`Search ${albumsByCountry.length} countries...`}
-            className="h-10 rounded-xl pl-10 pr-20"
+            className="h-10 rounded-full pl-10 pr-20"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search countries"
           />
           {searchQuery && (
             <button
@@ -126,25 +127,12 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
           })}
         </div>
       ) : searchQuery.trim() ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Search className="h-6 w-6" />
-          </div>
-          <h3 className="font-heading text-lg font-semibold text-foreground">
-            No matches found
-          </h3>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            We couldn&apos;t find any countries matching &quot;{searchQuery}&quot;
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSearchQuery('')}
-            className="mt-5 cursor-pointer"
-          >
-            Clear search
-          </Button>
-        </div>
+        <EnhancedEmptyState
+          icon={<Search className="h-12 w-12" />}
+          title="No matches found"
+          description={`We couldn't find any countries matching "${searchQuery}"`}
+          action={{ label: 'Clear search', onClick: () => setSearchQuery('') }}
+        />
       ) : albums.length === 0 ? (
         <EnhancedEmptyState
           icon={<Globe className="h-12 w-12" />}
@@ -153,17 +141,11 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
           action={{ label: 'Create Album', onClick: () => window.location.href = '/albums/new' }}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Globe className="h-6 w-6" />
-          </div>
-          <h3 className="font-heading text-lg font-semibold text-foreground">
-            Location Data Missing
-          </h3>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            Your albums don&apos;t have country information yet. Add location details to see them organized here.
-          </p>
-        </div>
+        <EnhancedEmptyState
+          icon={<Globe className="h-12 w-12" />}
+          title="Location Data Missing"
+          description="Your albums don't have country information yet. Add location details to see them organized here."
+        />
       )}
     </div>
   )

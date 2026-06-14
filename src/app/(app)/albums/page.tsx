@@ -267,9 +267,9 @@ function AlbumsPageContent() {
           <Skeleton className="h-10 w-24 rounded-xl" />
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
           {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className="aspect-square rounded-2xl" />
+            <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
           ))}
         </div>
       </div>
@@ -400,14 +400,13 @@ function AlbumsPageContent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
             {drafts.map((draft) => (
               <div
                 key={draft.id}
                 className={cn(
-                  "relative group rounded-2xl border border-border bg-card p-4",
-                  "transition-all duration-200 hover:border-primary/30 hover:shadow-md",
-                  selectionMode ? "cursor-pointer" : "cursor-pointer",
+                  "relative group rounded-2xl border border-border bg-card p-5 cursor-pointer",
+                  "shadow-[var(--shadow-resting)] transition-all duration-200 hover:border-primary/30 hover:shadow-[var(--shadow-hover)]",
                   selectedAlbums.has(draft.id) && "ring-2 ring-ring"
                 )}
                 onClick={(e) => {
@@ -461,6 +460,7 @@ function AlbumsPageContent() {
                         }}
                         className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         title="Delete draft"
+                        aria-label={`Delete draft ${draft.title}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -501,7 +501,7 @@ function AlbumsPageContent() {
         <>
           {/* Grid Header / Selection Bar */}
           {selectionMode ? (
-            <div className="p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 rounded-2xl border border-border bg-card">
+            <div className="p-4 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-10 rounded-2xl border border-border bg-card shadow-[var(--shadow-overlay)]">
               <div className="flex items-center gap-2 sm:gap-4">
                 <Button
                   size="sm"
@@ -550,7 +550,7 @@ function AlbumsPageContent() {
                       <AlertDialogAction
                         onClick={handleDeleteSelected}
                         disabled={deleting}
-                        className="bg-destructive hover:bg-destructive/90 text-white rounded-xl"
+                        className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
                       >
                         {deleting ? 'Deleting...' : 'Delete'}
                       </AlertDialogAction>
@@ -581,7 +581,7 @@ function AlbumsPageContent() {
           <AnimatePresence mode="wait">
             <motion.div
               key={searchQuery + sortBy}
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-2.5 md:gap-3 lg:gap-4"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4"
               initial="hidden"
               animate="visible"
               variants={gridVariants}
@@ -598,7 +598,7 @@ function AlbumsPageContent() {
                   >
                     {/* Square Album Cover */}
                     <div className={cn(
-                      "relative aspect-square overflow-hidden rounded-2xl bg-muted transition-all duration-200",
+                      "relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted shadow-[var(--shadow-resting)] transition-all duration-200",
                       isSelected && "ring-2 ring-ring scale-95"
                     )}>
                       {album.cover_photo_url ? (
@@ -629,7 +629,7 @@ function AlbumsPageContent() {
                           <motion.div
                             className={cn(
                               "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                              isSelected ? "bg-primary" : "bg-white/80 backdrop-blur-sm"
+                              isSelected ? "bg-primary" : "bg-card/80 backdrop-blur-sm"
                             )}
                             animate={isSelected ? { scale: [1, 1.2, 1] } : { scale: 1 }}
                             transition={{ duration: 0.2 }}
@@ -643,7 +643,7 @@ function AlbumsPageContent() {
                                 <CheckSquare className="h-4 w-4 text-primary-foreground" />
                               </motion.div>
                             ) : (
-                              <Square className="h-4 w-4 text-black/60" />
+                              <Square className="h-4 w-4 text-muted-foreground" />
                             )}
                           </motion.div>
                         </motion.div>
@@ -664,8 +664,8 @@ function AlbumsPageContent() {
                         "relative touch-manipulation",
                         "rounded-2xl overflow-hidden"
                       )}>
-                        {/* Square Album Cover */}
-                        <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted transition-shadow duration-200 group-hover:shadow-md">
+                        {/* Album Cover */}
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted shadow-[var(--shadow-resting)] transition-shadow duration-200 group-hover:shadow-[var(--shadow-hover)]">
                           {album.cover_photo_url ? (
                             <Image
                               src={album.cover_photo_url}
@@ -697,7 +697,7 @@ function AlbumsPageContent() {
                           {/* Hover overlay (desktop) */}
                           <div className="hidden md:flex absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex-col justify-between p-2">
                             <div className="flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              <div className="bg-black/60 rounded-full p-1.5">
+                              <div className="bg-black/55 backdrop-blur-sm rounded-full p-1.5">
                                 {getVisibilityIcon(album.visibility || album.privacy)}
                               </div>
                               {!isViewingOtherUser && (
@@ -709,6 +709,7 @@ function AlbumsPageContent() {
                                   }}
                                   className="bg-destructive/80 hover:bg-destructive backdrop-blur-sm text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                                   title="Delete album"
+                                  aria-label={`Delete ${album.title}`}
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
@@ -724,7 +725,8 @@ function AlbumsPageContent() {
                                 e.stopPropagation()
                                 setQuickDeleteAlbum(album)
                               }}
-                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/50 active:bg-destructive backdrop-blur-sm text-white/90 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10"
+                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/55 active:bg-destructive backdrop-blur-sm text-white/90 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                              aria-label={`Delete ${album.title}`}
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>
@@ -732,7 +734,7 @@ function AlbumsPageContent() {
 
                           {/* Photo count indicator (always visible) */}
                           <div className="absolute top-2 left-2">
-                            <div className="bg-black/50 backdrop-blur-sm text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1 drop-shadow-sm">
+                            <div className="bg-black/55 backdrop-blur-sm text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1 drop-shadow-sm">
                               <Camera className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white drop-shadow" />
                               <span>{photoCount(album)}</span>
                             </div>
@@ -764,7 +766,7 @@ function AlbumsPageContent() {
             <AlertDialogAction
               onClick={() => quickDeleteAlbum && handleQuickDelete(quickDeleteAlbum)}
               disabled={quickDeleting}
-              className="bg-destructive hover:bg-destructive/90 text-white rounded-xl"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
             >
               {quickDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
@@ -779,9 +781,9 @@ export default function AlbumsPage() {
   return (
     <Suspense fallback={
       <div className="space-y-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
           {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} className="aspect-square rounded-2xl" />
+            <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
           ))}
         </div>
       </div>

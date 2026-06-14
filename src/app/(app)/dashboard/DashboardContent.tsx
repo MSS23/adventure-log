@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { motion, MotionConfig } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -22,6 +23,9 @@ import {
 import { MemoryLaneCard } from '@/components/memories/MemoryLaneCard'
 import { CollaborationInvites } from '@/components/albums/CollaborationInvites'
 import { MotionList, MotionItem, MotionReveal } from '@/components/animations/MotionList'
+import { Button } from '@/components/ui/button'
+import { MotionCard } from '@/components/ui/card'
+import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import type { User } from '@/types/database'
 
 interface RecentAlbum {
@@ -246,34 +250,20 @@ export default function DashboardContent({
                   written in pins.
                 </em>
               </h2>
-              <div className="flex gap-3 mt-5">
-                <motion.div whileTap={{ scale: 0.96 }}>
-                  <Link
-                    href="/globe"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-shadow hover:shadow-[0_10px_28px_rgba(226,85,58,0.65)]"
-                    style={{
-                      background: '#E2553A',
-                      color: '#fff',
-                      boxShadow: '0 6px 18px rgba(226,85,58,0.55)',
-                    }}
-                  >
-                    <GlobeIcon className="h-3.5 w-3.5" strokeWidth={1.8} />
+              <div className="flex flex-wrap gap-3 mt-5">
+                <Button variant="coral" size="pill" asChild>
+                  <Link href="/globe">
+                    <GlobeIcon className="h-4 w-4" strokeWidth={1.8} />
                     Spin your globe
                   </Link>
-                </motion.div>
-                <motion.div whileTap={{ scale: 0.96 }}>
-                  <Link
-                    href="/wrapped"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-medium transition-colors hover:bg-white/[0.18]"
-                    style={{
-                      background: 'rgba(255,255,255,0.12)',
-                      color: '#fff',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                    }}
-                  >
-                    See Wrapped
-                  </Link>
-                </motion.div>
+                </Button>
+                <Button
+                  size="pill"
+                  asChild
+                  className="bg-white/[0.12] text-white border border-white/20 shadow-none hover:bg-white/[0.18] hover:text-white active:scale-[0.97] focus-visible:ring-offset-transparent"
+                >
+                  <Link href="/wrapped">See Wrapped</Link>
+                </Button>
               </div>
             </div>
           </motion.section>
@@ -344,12 +334,13 @@ export default function DashboardContent({
                   <MotionItem key={album.id}>
                     <Link
                       href={`/albums/${album.id}`}
-                      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label={`Open album ${album.title}`}
+                      className="group block cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <motion.div
                         whileHover={{ y: -2 }}
                         transition={{ type: 'spring', stiffness: 320, damping: 24 }}
-                        className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted mb-3 will-change-transform"
+                        className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted mb-3 shadow-[var(--shadow-resting)] transition-shadow duration-200 group-hover:shadow-[var(--shadow-hover)] will-change-transform"
                       >
                         {album.cover_photo_url && (
                           <Image
@@ -409,15 +400,16 @@ function QuickTile({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      aria-label={label}
+      className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-resting)] transition-all duration-200 hover:border-primary/30 hover:shadow-[var(--shadow-hover)] hover:-translate-y-0.5 active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-200 group-hover:scale-105">
+      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-200 group-hover:scale-105">
         {icon}
       </span>
       <span className="flex-1 text-sm font-semibold text-foreground">
         {label}
       </span>
-      <ArrowRight className="h-3 w-3 text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
+      <ArrowRight className="h-4 w-4 text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
     </Link>
   )
 }
@@ -465,7 +457,7 @@ function FirstRunGuide() {
         <MotionList className="grid grid-cols-1 sm:grid-cols-3 gap-4" stagger={0.06}>
           {loop.map((step, i) => (
             <MotionItem key={step.title}>
-              <div className="h-full rounded-2xl border border-border bg-card p-5">
+              <MotionCard flat className="h-full gap-0 py-0 p-5">
                 <div className="mb-3 flex items-center gap-3">
                   <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     {step.icon}
@@ -478,7 +470,7 @@ function FirstRunGuide() {
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {step.body}
                 </p>
-              </div>
+              </MotionCard>
             </MotionItem>
           ))}
         </MotionList>
@@ -486,7 +478,7 @@ function FirstRunGuide() {
 
       {/* Primary CTA — the one obvious next action */}
       <MotionReveal delay={0.1}>
-        <div className="rounded-2xl border border-border bg-card p-7 text-center sm:p-8">
+        <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-[var(--shadow-resting)] sm:p-8">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -499,15 +491,12 @@ function FirstRunGuide() {
           <p className="mx-auto mt-1 mb-5 max-w-md text-sm text-muted-foreground">
             Your world map is empty right now. Create one album and watch it come alive.
           </p>
-          <motion.div whileTap={{ scale: 0.96 }} className="inline-block">
-            <Link
-              href="/albums/new"
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
+          <Button variant="coral" asChild>
+            <Link href="/albums/new">
               <Calendar className="h-4 w-4" strokeWidth={1.8} />
               Create your first album
             </Link>
-          </motion.div>
+          </Button>
 
           {/* Low-friction starting points */}
           <div className="mt-6">
@@ -517,7 +506,7 @@ function FirstRunGuide() {
                 <Link
                   key={s}
                   href="/albums/new"
-                  className="rounded-full border border-border bg-background px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted/60"
+                  className="cursor-pointer rounded-full border border-border bg-background px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {s}
                 </Link>
@@ -531,27 +520,16 @@ function FirstRunGuide() {
 }
 
 function EmptyAlbums() {
+  const router = useRouter()
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-        className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary"
-      >
-        <MapPin className="h-6 w-6" strokeWidth={1.8} />
-      </motion.div>
-      <h4 className="font-heading text-lg font-semibold text-foreground">No albums yet</h4>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        Your first trip starts with a single photo.
-      </p>
-      <Link
-        href="/albums/new"
-        className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Calendar className="h-3.5 w-3.5" />
-        Create your first album
-      </Link>
-    </div>
+    <EnhancedEmptyState
+      icon={<MapPin className="h-6 w-6" strokeWidth={1.8} />}
+      title="No albums yet"
+      description="Your first trip starts with a single photo."
+      action={{
+        label: 'Create your first album',
+        onClick: () => router.push('/albums/new'),
+      }}
+    />
   )
 }

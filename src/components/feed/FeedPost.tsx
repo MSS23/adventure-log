@@ -70,7 +70,8 @@ const ActionButton = memo(
       whileTap={{ scale: 0.92 }}
       aria-label={label}
       className={cn(
-        'inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200',
+        'inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full transition-colors duration-200 cursor-pointer',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         isActive
           ? 'text-accent'
           : 'text-muted-foreground hover:text-primary hover:bg-muted',
@@ -135,7 +136,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
   }
 
   return (
-    <article className="relative overflow-hidden rounded-2xl border border-border bg-card">
+    <article className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-resting)] transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-hover)]">
       {/* Byline — avatar, name, location chip, date */}
       <header className="px-5 pt-4 pb-3 flex items-center gap-3">
         <UserAvatarLink user={user}>
@@ -170,7 +171,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
         {album.location && (
           <Link
             href={userGlobeHref}
-            className="group inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors duration-200 hover:bg-primary/15"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors duration-200 hover:bg-primary/15 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             title={`Open ${user.display_name || user.username}'s globe`}
           >
             <MapPin className="w-3 h-3" strokeWidth={2.2} aria-hidden />
@@ -217,13 +218,13 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
       </div>
 
       {/* Action row — minimal, typographic */}
-      <div className="px-5 py-2 flex items-center justify-between border-t border-border">
+      <div className="px-5 py-2.5 flex items-center justify-between border-t border-border">
         <div className="flex items-center gap-1">
           <LikeButton albumId={album.id} showCount={false} size="md" />
           <Link
             href={`/albums/${album.id}#comments`}
             aria-label="View comments"
-            className="inline-flex items-center justify-center w-10 h-10 rounded-full text-muted-foreground hover:text-primary hover:bg-muted transition-colors duration-200"
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full text-muted-foreground hover:text-primary hover:bg-muted transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <MessageCircle className="h-5 w-5" strokeWidth={1.7} />
           </Link>

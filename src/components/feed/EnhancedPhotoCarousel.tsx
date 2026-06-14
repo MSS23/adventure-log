@@ -254,7 +254,7 @@ export function EnhancedPhotoCarousel({
               e.stopPropagation()
               prevPhoto()
             }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/55 hover:bg-black/70 text-white flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/55 hover:bg-black/70 text-white flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)]"
             aria-label="Previous photo"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -274,7 +274,7 @@ export function EnhancedPhotoCarousel({
               e.stopPropagation()
               nextPhoto()
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/55 hover:bg-black/70 text-white flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/55 hover:bg-black/70 text-white flex items-center justify-center opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)]"
             aria-label="Next photo"
           >
             <ChevronRight className="h-5 w-5" />
@@ -292,7 +292,7 @@ export function EnhancedPhotoCarousel({
                 e.stopPropagation()
                 goToPhoto(index)
               }}
-              className="rounded-full bg-white/80 hover:bg-white transition-colors"
+              className="rounded-full bg-[color:var(--color-olive-50)]/80 hover:bg-[color:var(--color-olive-50)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)] focus-visible:ring-offset-1 focus-visible:ring-offset-black/40 cursor-pointer"
               initial={false}
               animate={{
                 width: currentIndex === index ? 16 : 6,

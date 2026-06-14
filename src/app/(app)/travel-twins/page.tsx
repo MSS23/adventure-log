@@ -144,7 +144,7 @@ export default function TravelTwinsPage() {
                         {twin.display_name || twin.username}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {twin.overlap_count} shared • {overlapPct}% match
+                        {overlapPct}% match
                       </div>
                     </div>
                   </div>
@@ -175,9 +175,7 @@ export default function TravelTwinsPage() {
                           {twin.display_name || twin.username}
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                          You&apos;ve both been to {twin.overlap_count}{' '}
-                          {twin.overlap_count === 1 ? 'country' : 'countries'} — they&apos;ve been to{' '}
-                          {twin.their_country_count} total
+                          You share a lot of ground — here&apos;s where your journeys overlap.
                         </p>
                       </div>
                       <FollowButton userId={twin.user_id} />

@@ -23,7 +23,6 @@ import { RelatedAlbums } from '@/components/albums/RelatedAlbums'
 import { useLikes, useComments } from '@/lib/hooks/useSocial'
 import { useFavorites } from '@/lib/hooks/useFavorites'
 import { ShareButton } from '@/components/albums/ShareButton'
-import { SocialShareButtons } from '@/components/albums/SocialShareButtons'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
@@ -369,35 +368,37 @@ export default function AlbumDetailPage() {
   }
 
   if (loading) {
+    // Mirror the real single-column layout (max-w-4xl) so there's no width jump
+    // or column collapse when content loads.
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
           <motion.div
-            className="space-y-8"
+            className="space-y-5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-4">
-                <AnimatedSkeleton className="aspect-[4/3] w-full rounded-2xl" variant="rounded" />
-                <div className="flex gap-2">
-                  {[...Array(4)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 24 }}
-                      className="flex-1"
-                    >
-                      <AnimatedSkeleton className="aspect-square w-full rounded-lg" variant="rounded" />
-                    </motion.div>
-                  ))}
-                </div>
+            {/* Author row */}
+            <div className="flex items-center gap-3">
+              <AnimatedSkeleton className="h-10 w-10 rounded-full" variant="rounded" />
+              <div className="space-y-1.5">
+                <AnimatedSkeleton className="h-3.5 w-32 rounded" variant="rounded" />
+                <AnimatedSkeleton className="h-3 w-20 rounded" variant="rounded" />
               </div>
-              <div className="lg:col-span-1">
-                <AnimatedSkeleton className="h-96 w-full rounded-xl" variant="rounded" />
-              </div>
+            </div>
+            {/* Title + meta */}
+            <div className="space-y-2">
+              <AnimatedSkeleton className="h-8 w-3/4 rounded" variant="rounded" />
+              <AnimatedSkeleton className="h-4 w-40 rounded" variant="rounded" />
+            </div>
+            {/* Gallery */}
+            <AnimatedSkeleton className="aspect-[4/3] w-full rounded-2xl" variant="rounded" />
+            {/* Engagement bar */}
+            <div className="flex gap-6 border-y border-border py-3">
+              {[...Array(4)].map((_, i) => (
+                <AnimatedSkeleton key={i} className="h-5 w-12 rounded" variant="rounded" />
+              ))}
             </div>
           </motion.div>
         </div>
@@ -810,22 +811,6 @@ export default function AlbumDetailPage() {
               </div>
             </motion.div>
 
-            {/* ── Social Share Buttons ── */}
-            <motion.div
-              className="py-3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <p className="text-xs font-medium text-muted-foreground mb-2">Share this album</p>
-              <SocialShareButtons
-                albumId={album.id}
-                albumTitle={album.title}
-                albumCoverUrl={album.cover_photo_url || undefined}
-                locationName={album.location_name || undefined}
-              />
-            </motion.div>
-
             <LiveViewers albumId={album.id} userId={user?.id} />
 
             {/* ── Comments ── */}
@@ -892,7 +877,19 @@ export default function AlbumDetailPage() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-          <div className="grid grid-cols-5 gap-1">
+          <div
+            className="grid gap-1"
+            style={{
+              // Size columns to the actual number of visible actions (3–6) so
+              // a non-owner viewing a geotagged album never overflows the row.
+              gridTemplateColumns: `repeat(${
+                3 +
+                (!isOwner ? 1 : 0) +
+                (album.latitude && album.longitude ? 1 : 0) +
+                (!isOwner && user ? 1 : 0)
+              }, minmax(0, 1fr))`,
+            }}
+          >
             <motion.button
               onClick={handleLikeClick}
               className={cn(

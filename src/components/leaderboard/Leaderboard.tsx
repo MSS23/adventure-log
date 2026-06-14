@@ -177,7 +177,7 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
       case 'followers':
         return 'Followers'
       default:
-        return 'Points'
+        return 'Score'
     }
   }
 

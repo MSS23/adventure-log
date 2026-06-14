@@ -35,7 +35,7 @@ export default function LeaderboardPage() {
         {/* Metric Selector */}
         <div className="flex flex-wrap gap-2">
           {[
-            { value: 'score', label: 'Overall Score' },
+            { value: 'score', label: 'Adventure Score' },
             { value: 'albums', label: 'Most Albums' },
             { value: 'countries', label: 'Most Countries' },
             { value: 'photos', label: 'Most Photos' },
@@ -63,19 +63,9 @@ export default function LeaderboardPage() {
 
         {/* Info Footer */}
         <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <p className="al-eyebrow mb-2">How rankings work</p>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>
-              <strong className="font-semibold text-foreground">Overall Score:</strong> Calculated from albums (10 pts), countries visited (15 pts),
-              photos uploaded (2 pts), and followers (5 pts)
-            </p>
-            <p>
-              <strong className="font-semibold text-foreground">Other Metrics:</strong> Ranked by the specific count (albums, countries, photos, or followers)
-            </p>
-            <p className="text-xs text-muted-foreground mt-3">
-              Only public profiles are included in rankings. Rankings update in real-time.
-            </p>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Only public profiles appear on the leaderboard. Rankings update in real-time as the community keeps exploring.
+          </p>
         </div>
       </div>
     </div>

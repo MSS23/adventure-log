@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
 import { MEMBER_COLOR_PALETTE, type Trip, type TripMember, type TripPin } from '@/types/trips'
@@ -88,10 +89,10 @@ export default function TripDetailPage() {
   // Transient action error (e.g. check-in) surfaced to the user
   const [actionError, setActionError] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (silent = false) => {
     if (!tripId) return
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
       const res = await apiFetch(`/api/trips/${tripId}`)
       const data = await res.json()
       if (res.ok) {
@@ -102,12 +103,36 @@ export default function TripDetailPage() {
     } catch (error) {
       log.error('Trip load failed', { component: 'TripDetail', action: 'load', tripId }, error as Error)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [tripId])
 
   useEffect(() => {
     if (user && tripId) load()
+  }, [user, tripId, load])
+
+  // Live sync: when a collaborator adds/edits/removes a pin — or members
+  // change (new collaborator, recolor) — silently refetch so everyone sees the
+  // same board without a manual reload.
+  useEffect(() => {
+    if (!user || !tripId) return
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`trip-${tripId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'trip_pins', filter: `trip_id=eq.${tripId}` },
+        () => load(true),
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'trip_members', filter: `trip_id=eq.${tripId}` },
+        () => load(true),
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [user, tripId, load])
 
   // Auto-dismiss transient action errors

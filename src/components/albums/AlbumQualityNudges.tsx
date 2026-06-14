@@ -113,24 +113,17 @@ export function AlbumQualityNudges({ album, photos, isOwner }: Props) {
   if (dismissed || nudges.length === 0) return null
 
   return (
-    <div
-      className="relative rounded-2xl p-5 mb-5"
-      style={{
-        background: 'var(--color-gold-tint)',
-        border: '1px solid var(--color-gold)',
-      }}
-    >
+    <div className="relative rounded-2xl p-5 mb-5 border border-amber-500/20 bg-amber-500/10">
       <button
         onClick={() => setDismissed(true)}
         aria-label="Dismiss"
-        className="absolute top-3 right-3 p-1 rounded-full hover:bg-white/40 transition-colors"
-        style={{ color: 'var(--color-ink-soft)' }}
+        className="absolute top-3 right-3 p-1 rounded-full text-muted-foreground hover:bg-foreground/10 transition-colors"
       >
         <X className="h-3.5 w-3.5" />
       </button>
 
       <div className="flex items-center gap-2 mb-2">
-        <Sparkles className="h-4 w-4" style={{ color: 'var(--color-gold)' }} />
+        <Sparkles className="h-4 w-4 text-amber-500" />
         <p className="al-eyebrow">Polish this album</p>
       </div>
 
@@ -138,13 +131,9 @@ export function AlbumQualityNudges({ album, photos, isOwner }: Props) {
         {nudges.map((n) => (
           <li
             key={n.key}
-            className="flex items-start gap-2.5 text-sm leading-relaxed"
-            style={{ color: 'var(--color-ink-soft)' }}
+            className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground/80"
           >
-            <span
-              className="flex-shrink-0 mt-0.5"
-              style={{ color: 'var(--color-gold)' }}
-            >
+            <span className="flex-shrink-0 mt-0.5 text-amber-500">
               {n.icon}
             </span>
             <span>{n.text}</span>

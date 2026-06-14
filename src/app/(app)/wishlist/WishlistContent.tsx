@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 type FilterTab = 'all' | 'high' | 'completed'
 type Priority = 'low' | 'medium' | 'high'
@@ -296,59 +297,49 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
 
       <div className="space-y-6 sm:space-y-8">
         {/* ── Header ────────────────────────────────────────────── */}
-        <motion.div
-          data-tour-step="wishlist-header"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <header className="space-y-1">
-              <p className="al-eyebrow">Bucket list</p>
-              <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
-                <Star className="h-6 w-6 text-accent" />
-                Wishlist
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {totalBucketList} destination{totalBucketList !== 1 ? 's' : ''} on your bucket list.
-              </p>
-            </header>
+        <div data-tour-step="wishlist-header">
+          <PageHeader
+            eyebrow="Bucket list"
+            title={<>Wishlist</>}
+            icon={<Star className="h-7 w-7 text-[color:var(--color-coral)]" />}
+            subtitle={`${totalBucketList} destination${totalBucketList !== 1 ? 's' : ''} on your bucket list`}
+            actions={
+              <>
+                {/* Help / restart tour button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    document.getElementById('tour-restart-trigger')?.click()
+                  }}
+                  className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl cursor-pointer"
+                  title="Take a tour"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                </Button>
 
-            <div className="flex items-center gap-2">
-              {/* Help / restart tour button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  document.getElementById('tour-restart-trigger')?.click()
-                }}
-                className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl cursor-pointer"
-                title="Take a tour"
-              >
-                <HelpCircle className="h-5 w-5" />
-              </Button>
-
-              <Button
-                data-tour-step="add-destination-btn"
-                variant={showAddForm ? 'secondary' : 'coral'}
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="gap-2 shrink-0 rounded-full"
-              >
-                {showAddForm ? (
-                  <>
-                    <X className="h-4 w-4" />
-                    Cancel
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4" />
-                    Add Destination
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </motion.div>
+                <Button
+                  data-tour-step="add-destination-btn"
+                  variant={showAddForm ? 'secondary' : 'coral'}
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="gap-2 shrink-0 rounded-full"
+                >
+                  {showAddForm ? (
+                    <>
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4" />
+                      Add Destination
+                    </>
+                  )}
+                </Button>
+              </>
+            }
+          />
+        </div>
 
         {/* ── Add Destination Form ──────────────────────────────── */}
         <AnimatePresence>

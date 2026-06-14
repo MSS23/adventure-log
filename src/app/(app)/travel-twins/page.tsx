@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 interface Twin {
   user_id: string
@@ -84,13 +85,12 @@ export default function TravelTwinsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      <header className="mb-8 space-y-1">
-        <p className="al-eyebrow">Discover · Your Constellation</p>
-        <h1 className="al-display text-3xl md:text-4xl">Travel Twins</h1>
-        <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
-          Travelers whose destinations overlap with yours. Discover the places they&apos;ve been that you haven&apos;t.
-        </p>
-      </header>
+      <PageHeader
+        className="mb-8"
+        eyebrow="Discover · Your Constellation"
+        title="Travel Twins"
+        subtitle="Travelers whose destinations overlap with yours. Discover the places they’ve been that you haven’t."
+      />
 
       {loading ? (
         <div className="flex justify-center py-20">

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useFavorites } from '@/lib/hooks/useFavorites'
-import { Loader2, Bookmark, Compass, MapPin, Camera, Heart, User, Globe, ChevronDown, ChevronRight, LayoutGrid, FolderOpen } from 'lucide-react'
+import { Bookmark, Compass, MapPin, Camera, Heart, User, Globe, ChevronDown, ChevronRight, LayoutGrid, FolderOpen } from 'lucide-react'
 import { NoSavedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -14,6 +14,7 @@ import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 export interface SavedAlbum {
   id: string
@@ -136,28 +137,24 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
     <div className="mx-auto w-full max-w-6xl">
       <div className="space-y-8">
         {/* Page Header */}
-        <motion.div
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        >
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <header className="min-w-0 space-y-1">
-              <p className="al-eyebrow">Library</p>
-              <h1 className="al-display text-3xl md:text-4xl">Saved</h1>
-              <p className="text-sm text-muted-foreground">
-                {savedAlbums.length} album{savedAlbums.length !== 1 ? 's' : ''} saved
-                {viewMode === 'collections' && ` · ${collections.length} collection${collections.length !== 1 ? 's' : ''}`}
-              </p>
-            </header>
+        <PageHeader
+          eyebrow="Library"
+          title="Saved"
+          subtitle={
+            <>
+              {savedAlbums.length} album{savedAlbums.length !== 1 ? 's' : ''} saved
+              {viewMode === 'collections' && ` · ${collections.length} collection${collections.length !== 1 ? 's' : ''}`}
+            </>
+          }
+          actions={
             <Link href="/explore" className="shrink-0">
               <Button variant="outline" size="sm" className="gap-2 cursor-pointer">
                 <Compass className="h-4 w-4" />
                 <span className="hidden xs:inline sm:inline">Explore</span>
               </Button>
             </Link>
-          </div>
-        </motion.div>
+          }
+        />
 
         {/* Empty State */}
         {savedAlbums.length === 0 ? (

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
 import { Search, Globe, Plus } from 'lucide-react'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
+import { PageHeader } from '@/components/layout/PageHeader'
 import Link from 'next/link'
 
 interface CountriesContentProps {
@@ -64,24 +65,24 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
 
   return (
     <div className="space-y-8">
-      {/* Page Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <header className="min-w-0 space-y-1">
-          <p className="al-eyebrow">Atlas</p>
-          <h1 className="al-display text-3xl md:text-4xl">Countries</h1>
-          <p className="text-sm text-muted-foreground">
-            {albums.length > 0
-              ? `${albums.length} album${albums.length === 1 ? '' : 's'} across ${albumsByCountry.length} countries`
-              : 'Start your journey, one country at a time.'}
-          </p>
-        </header>
-        <Button asChild className="w-full sm:w-auto">
-          <Link href="/albums/new">
-            <Plus className="h-4 w-4 mr-2" />
-            New Album
-          </Link>
-        </Button>
-      </div>
+      {/* Page Header — shared Back + Home navigation */}
+      <PageHeader
+        eyebrow="Atlas"
+        title="Countries"
+        subtitle={
+          albums.length > 0
+            ? `${albums.length} album${albums.length === 1 ? '' : 's'} across ${albumsByCountry.length} countries`
+            : 'Start your journey, one country at a time.'
+        }
+        actions={
+          <Button asChild>
+            <Link href="/albums/new">
+              <Plus className="h-4 w-4 mr-2" />
+              New Album
+            </Link>
+          </Button>
+        }
+      />
 
       {/* Search */}
       {albums.length > 0 && (

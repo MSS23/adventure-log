@@ -3,16 +3,14 @@
 import { useAuth } from '@/components/auth/AuthProvider'
 import { AchievementsDisplay } from '@/components/achievements/AchievementsDisplay'
 import { Trophy } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 export default function AchievementsPage() {
   const router = useRouter()
   const { user, authLoading, profileLoading } = useAuth()
-  const prefersReducedMotion = useReducedMotion()
   const isAuthLoading = authLoading || profileLoading
 
   if (!isAuthLoading && !user) {
@@ -32,18 +30,12 @@ export default function AchievementsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6">
       {/* Editorial header */}
-      <motion.header
-        className="mb-8 space-y-1"
-        initial={prefersReducedMotion ? {} : { opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-      >
-        <p className="al-eyebrow">Level · Wanderer</p>
-        <h1 className="al-display text-3xl md:text-4xl">Achievements</h1>
-        <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
-          Earn badges by exploring the world and sharing your adventures.
-        </p>
-      </motion.header>
+      <PageHeader
+        className="mb-8"
+        eyebrow="Level · Wanderer"
+        title="Achievements"
+        subtitle="Earn badges by exploring the world and sharing your adventures."
+      />
 
       {/* Achievements Content */}
       {isAuthLoading ? (

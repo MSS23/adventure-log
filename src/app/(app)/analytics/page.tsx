@@ -24,6 +24,7 @@ import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -460,18 +461,12 @@ export default function AnalyticsPage() {
     <ErrorBoundary>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6">
         {/* Page Header */}
-        <motion.div
+        <PageHeader
           className="mb-6"
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-        >
-          <p className="al-eyebrow mb-1">Dashboard</p>
-          <h1 className="al-display text-3xl md:text-4xl">Analytics</h1>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
-            Your travel numbers, mapped out.
-          </p>
-        </motion.div>
+          eyebrow="Insights"
+          title="Analytics"
+          subtitle="Your travel numbers, mapped out."
+        />
 
         {/* ── Stats Grid ── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">

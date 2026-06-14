@@ -16,6 +16,7 @@ import {
 import { motion } from 'framer-motion'
 import QRCode from 'qrcode'
 import { StreakBadge } from '@/components/profile/StreakBadge'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // ---------------------------------------------------------------------------
 // Country-to-continent mapping
@@ -522,11 +523,8 @@ export default function TravelPassportPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24 pt-4 sm:pt-8">
-      {/* Editorial header */}
-      <div className="mb-6">
-        <p className="al-eyebrow mb-1">Document</p>
-        <h1 className="al-display text-3xl md:text-4xl">Passport</h1>
-      </div>
+      {/* Editorial header — shared Back + Home navigation */}
+      <PageHeader eyebrow="Document" title="Passport" className="mb-6" />
 
       {/* ── Leather passport book ── */}
       <motion.div

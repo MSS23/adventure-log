@@ -14,6 +14,9 @@ import {
   BookOpen,
   Plus,
   ChevronRight,
+  Bookmark,
+  Star,
+  MapPin,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
@@ -37,6 +40,12 @@ const mainNavItems: NavItem[] = [
   { name: 'Globe', href: '/globe', icon: Globe },
   { name: 'Albums', href: '/albums', icon: BookOpen },
   { name: 'Trips', href: '/trips', icon: MapIcon },
+]
+
+const libraryNavItems: NavItem[] = [
+  { name: 'Saved', href: '/saved', icon: Bookmark },
+  { name: 'Wishlist', href: '/wishlist', icon: Star },
+  { name: 'Countries', href: '/countries', icon: MapPin },
 ]
 
 const bottomNavItems: NavItem[] = [
@@ -240,7 +249,34 @@ export function Sidebar() {
 
           {/* Main navigation */}
           <nav aria-label="Main navigation" className="px-3 space-y-0.5">
+            <motion.p
+              className="al-eyebrow px-3 pb-1.5 text-[color:var(--color-muted-warm)]"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, ease: EDITORIAL_EASE, delay: 0.03 }}
+            >
+              Browse
+            </motion.p>
             {mainNavItems.map((item, i) => renderNavItem(item, i))}
+          </nav>
+
+          {/* Library navigation — personal collections */}
+          <nav aria-label="Library navigation" className="px-3 space-y-0.5 mt-5">
+            <motion.p
+              className="al-eyebrow px-3 pb-1.5 text-[color:var(--color-muted-warm)]"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                duration: 0.4,
+                ease: EDITORIAL_EASE,
+                delay: 0.05 + mainNavItems.length * 0.04,
+              }}
+            >
+              Library
+            </motion.p>
+            {libraryNavItems.map((item, i) =>
+              renderNavItem(item, mainNavItems.length + i),
+            )}
           </nav>
 
           {/* Spacer */}
@@ -248,7 +284,9 @@ export function Sidebar() {
 
           {/* Bottom navigation */}
           <nav aria-label="Secondary navigation" className="px-3 space-y-0.5 pb-3">
-            {bottomNavItems.map((item, i) => renderNavItem(item, mainNavItems.length + i))}
+            {bottomNavItems.map((item, i) =>
+              renderNavItem(item, mainNavItems.length + libraryNavItems.length + i),
+            )}
           </nav>
 
           {/* User card */}

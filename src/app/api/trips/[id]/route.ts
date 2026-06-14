@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getTripAccess } from '@/lib/trips/authorize'
 import { log } from '@/lib/utils/logger'
 
 export async function GET(
@@ -32,6 +33,13 @@ export async function GET(
 
     if (tripError) throw tripError
     if (!trip) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+    // Only the owner, an explicit member, or anyone (if the trip is public)
+    // may read the itinerary, member list, and pins.
+    const access = await getTripAccess(supabase, id, userId)
+    if (!access.isMember && !access.isPublic) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
 
     const { data: members, error: memErr } = await supabase
       .from('trip_members')
@@ -76,6 +84,11 @@ export async function PATCH(
   }
 
   try {
+    // Only the owner may edit a trip.
+    const access = await getTripAccess(supabase, id, userId)
+    if (!access.exists) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (!access.isOwner) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
     const updates: Record<string, unknown> = {}
     if (typeof body.title === 'string') updates.title = body.title.trim().slice(0, 120)
     if (body.description === null || typeof body.description === 'string') updates.description = typeof body.description === 'string' ? body.description.slice(0, 2000) : null
@@ -116,6 +129,11 @@ export async function DELETE(
   }
 
   try {
+    // Only the owner may delete a trip.
+    const access = await getTripAccess(supabase, id, userId)
+    if (!access.exists) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (!access.isOwner) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
     const { error } = await supabase.from('trips').delete().eq('id', id)
     if (error) throw error
     return NextResponse.json({ ok: true })

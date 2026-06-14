@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -25,6 +27,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set())
   const [loadingFollows, setLoadingFollows] = useState<Set<string>>(new Set())
   const { user } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     async function fetchCreators() {
@@ -81,8 +84,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
 
   const handleFollowToggle = async (creatorId: string) => {
     if (!user) {
-      // Redirect to Clerk sign-in if not authenticated
-      window.location.href = '/sign-in'
+      router.push('/login')
       return
     }
 
@@ -107,6 +109,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
             action: 'handleFollowToggle',
             creatorId
           }, error)
+          toast.error('Could not unfollow. Please try again.')
           return
         }
 
@@ -131,10 +134,12 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
             action: 'handleFollowToggle',
             creatorId
           }, error)
+          toast.error('Could not follow. Please try again.')
           return
         }
 
         setFollowingIds(prev => new Set(prev).add(creatorId))
+        toast.success('Followed')
       }
     } catch (err) {
       log.error('Error toggling follow', {

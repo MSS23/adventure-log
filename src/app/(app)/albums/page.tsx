@@ -127,13 +127,18 @@ function AlbumsPageContent() {
     album.country_code?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  // Use the travel date for chronological sorting (falls back to upload time),
+  // so a trip from years ago doesn't jump to the top just because it was uploaded today.
+  const travelTime = (album: Album) =>
+    new Date(album.date_start ?? album.created_at).getTime()
+
   // Sort albums based on selected sort option
   const sortedAlbums = [...filteredAlbums].sort((a, b) => {
     switch (sortBy) {
       case 'date-desc':
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        return travelTime(b) - travelTime(a)
       case 'date-asc':
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        return travelTime(a) - travelTime(b)
       case 'name-asc':
         return a.title.localeCompare(b.title)
       case 'name-desc':

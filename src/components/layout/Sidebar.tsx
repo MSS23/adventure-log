@@ -79,10 +79,8 @@ export function Sidebar() {
     if (loggingOut) return
     setLoggingOut(true)
     try {
-      // Clerk's signOut handles its own post-logout redirect (configured via
-      // ClerkProvider's `afterSignOutUrl`/middleware). The previous Supabase
-      // implementation manually pushed to /login — that route is now a redirect
-      // shim, so we delegate entirely to Clerk via AuthProvider.signOut.
+      // AuthProvider.signOut clears session/profile state and then hard-navigates
+      // to /login, so no manual redirect is needed here.
       await signOut()
     } catch (error) {
       log.error('Error logging out', { component: 'Sidebar', action: 'logout' }, error as Error)

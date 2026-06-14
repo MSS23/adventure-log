@@ -102,20 +102,24 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
       return { success: true, albumDeleted: true }
     }
 
-    // Check if deleted photo was the cover photo
-    const photoUrl = photo.file_path
+    // Check if deleted photo was the cover photo.
+    // Covers are stored as raw file paths, but legacy rows may hold a full
+    // public URL — match against both so the cover is always replaced.
+    const photoFullUrl = photo.file_path
       ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${photo.file_path}`
       : null
 
-    if (photoAlbum.cover_photo_url === photoUrl) {
-      // Cover photo was deleted — pick the next photo as cover
-      const newCoverUrl = remainingPhotos[0].file_path
-        ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${remainingPhotos[0].file_path}`
-        : null
+    const deletedPhotoWasCover =
+      photoAlbum.cover_photo_url != null &&
+      (photoAlbum.cover_photo_url === photo.file_path ||
+        photoAlbum.cover_photo_url === photoFullUrl)
 
+    if (deletedPhotoWasCover) {
+      // Cover photo was deleted — promote the next photo to cover.
+      // Store the raw file path (the convention getPhotoUrl() expects).
       await supabase
         .from('albums')
-        .update({ cover_photo_url: newCoverUrl })
+        .update({ cover_photo_url: remainingPhotos[0].file_path ?? null })
         .eq('id', albumId)
     }
 

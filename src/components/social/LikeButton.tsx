@@ -70,6 +70,8 @@ export function LikeButton({
       <div className="relative">
         <motion.button
           onClick={handleClick}
+          aria-label={isLiked ? 'Unlike' : 'Like'}
+          aria-pressed={isLiked}
           className={cn(
             "min-w-[44px] min-h-[44px] p-2.5 sm:p-2 -m-2 rounded-full transition-colors duration-200 touch-manipulation flex items-center justify-center",
             isLiked ? "hover:bg-accent/10 active:bg-accent/20" : "hover:bg-muted active:bg-muted/80",
@@ -121,6 +123,8 @@ export function LikeButton({
         <Button
           variant={isLiked ? "default" : "outline"}
           size="sm"
+          aria-label={isLiked ? 'Unlike' : 'Like'}
+          aria-pressed={isLiked}
           className={cn(
             "rounded-xl transition-all duration-200",
             isLiked

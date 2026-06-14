@@ -44,9 +44,19 @@ function extractCoordsFromUrl(url: string): { lat: number; lng: number } | null 
   return null
 }
 
+// Only these hosts are ever fetched server-side when expanding a short link.
+// Without this allowlist, an attacker could craft a URL whose host is internal
+// (e.g. the cloud metadata endpoint) but whose path contains "goo.gl/maps",
+// turning this into a server-side request forgery (SSRF) primitive.
+const SHORT_LINK_HOSTS = new Set(['maps.app.goo.gl', 'goo.gl', 'www.google.com', 'maps.google.com'])
+
 async function resolveShortUrl(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url, { method: 'GET', redirect: 'follow' })
+    const parsed = new URL(url)
+    if (parsed.protocol !== 'https:' || !SHORT_LINK_HOSTS.has(parsed.hostname)) {
+      return null
+    }
+    const res = await fetch(parsed.toString(), { method: 'GET', redirect: 'follow' })
     return res.url
   } catch {
     return null

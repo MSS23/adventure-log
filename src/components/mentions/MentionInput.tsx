@@ -161,6 +161,7 @@ export function MentionInput({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
+        aria-label={placeholder || 'Write a comment'}
         disabled={disabled}
         maxLength={maxLength}
         rows={rows}

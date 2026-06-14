@@ -751,6 +751,7 @@ export default function EditAlbumPage() {
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 placeholder="Add a tag"
+                aria-label="Add a tag"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault()
@@ -758,7 +759,7 @@ export default function EditAlbumPage() {
                   }
                 }}
               />
-              <Button type="button" onClick={addTag} variant="outline">
+              <Button type="button" onClick={addTag} variant="outline" aria-label="Add tag">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>

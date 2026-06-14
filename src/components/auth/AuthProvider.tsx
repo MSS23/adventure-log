@@ -297,11 +297,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       inFlightFetches.current.clear()
 
       resetNavigationState()
-      if (typeof window !== 'undefined') {
-        window.scrollTo({ top: 0, behavior: 'instant' })
-      }
 
       log.info('User signed out', { component: 'AuthProvider', action: 'signOut' })
+
+      // Hard-navigate to login so every logout entry point redirects
+      // consistently and all in-memory auth/profile state is fully torn down.
+      if (typeof window !== 'undefined') {
+        window.location.assign('/login')
+      }
     } catch (error) {
       log.error(
         'Sign out failed',

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getTripAccess } from '@/lib/trips/authorize'
 import { parsePlaceInput } from '@/lib/trips/parse-place'
 import { log } from '@/lib/utils/logger'
 
@@ -16,6 +17,13 @@ export async function POST(
   }
 
   try {
+    // Only the owner or an editor member may add pins.
+    const access = await getTripAccess(supabase, tripId, userId)
+    if (!access.exists) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (!access.isOwner && access.role !== 'editor') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const body = await request.json()
     const originUrl = request.nextUrl.origin
 

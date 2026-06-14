@@ -231,7 +231,11 @@ export async function POST(request: NextRequest) {
         notes: body.notes ? String(body.notes).slice(0, 2000) : null,
         priority,
         source,
-        shared_by_user_id: body.shared_by_user_id || null,
+        // Attribution ("suggested by …") is only ever set server-side by the
+        // /api/wishlist/suggest route after a mutual-follow check. Never trust a
+        // client-supplied shared_by_user_id here — it would let a user fake a
+        // suggestion as coming from a friend.
+        shared_by_user_id: null,
       })
       .select('*')
       .single()

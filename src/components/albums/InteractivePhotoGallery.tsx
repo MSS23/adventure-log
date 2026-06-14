@@ -122,8 +122,12 @@ export function InteractivePhotoGallery({
         <div className={cn("relative group", className)}>
           <div className="overflow-hidden rounded-2xl bg-muted">
             <motion.div
-              className="relative aspect-[3/4] sm:aspect-[4/3] cursor-pointer"
+              role="button"
+              tabIndex={0}
+              aria-label={`Open photo${photo.caption ? `: ${photo.caption}` : ''}`}
+              className="relative aspect-[3/4] sm:aspect-[4/3] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
               onClick={() => openLightbox(0)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(0) } }}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
               transition={{ duration: 0.3 }}
@@ -226,8 +230,12 @@ export function InteractivePhotoGallery({
               return (
                 <motion.div
                   key={photo.id}
-                  className="flex-[0_0_100%] min-w-0 relative aspect-[3/4] sm:aspect-[4/3] cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open photo ${index + 1}${photo.caption ? `: ${photo.caption}` : ''}`}
+                  className="flex-[0_0_100%] min-w-0 relative aspect-[3/4] sm:aspect-[4/3] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
                   onClick={() => openLightbox(index)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(index) } }}
                   whileHover={{ scale: 1.01 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -508,6 +516,9 @@ function Lightbox({
 
   return (
     <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${albumTitle} photo viewer`}
       className="fixed inset-0 z-50 bg-black/95"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -526,6 +537,7 @@ function Lightbox({
         <div className="flex items-center gap-2">
           <motion.button
             onClick={toggleZoom}
+            aria-label={scale > 1 ? 'Zoom out' : 'Zoom in'}
             className="p-2.5 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -534,6 +546,7 @@ function Lightbox({
           </motion.button>
           <motion.button
             onClick={onClose}
+            aria-label="Close photo viewer"
             className="p-2.5 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -581,6 +594,7 @@ function Lightbox({
         <>
           <motion.button
             onClick={handlePrev}
+            aria-label="Previous photo"
             className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors border border-white/20"
             whileHover={{ scale: 1.1, x: -4 }}
             whileTap={{ scale: 0.9 }}
@@ -589,6 +603,7 @@ function Lightbox({
           </motion.button>
           <motion.button
             onClick={handleNext}
+            aria-label="Next photo"
             className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors border border-white/20"
             whileHover={{ scale: 1.1, x: 4 }}
             whileTap={{ scale: 0.9 }}
@@ -612,6 +627,8 @@ function Lightbox({
                     setPosition({ x: 0, y: 0 })
                     onIndexChange(index)
                   }}
+                  aria-label={`View photo ${index + 1}`}
+                  aria-current={currentIndex === index}
                   className={cn(
                     "flex-shrink-0 relative w-16 h-12 rounded-lg overflow-hidden transition-all",
                     currentIndex === index

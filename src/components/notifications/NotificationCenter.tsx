@@ -251,7 +251,12 @@ export function NotificationCenter() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative h-9 w-9 p-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+          className="relative h-9 w-9 p-0"
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge
@@ -279,7 +284,7 @@ export function NotificationCenter() {
               </Button>
             )}
             <Link href="/settings/notifications">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button variant="ghost" size="sm" aria-label="Notification settings" className="h-8 w-8 p-0">
                 <Settings className="h-4 w-4" />
               </Button>
             </Link>

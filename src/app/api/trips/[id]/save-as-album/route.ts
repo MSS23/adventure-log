@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getTripAccess } from '@/lib/trips/authorize'
 import { log } from '@/lib/utils/logger'
 
 /**
@@ -22,6 +23,11 @@ export async function POST(
   }
 
   try {
+    // Only the owner or a member may convert a trip into an album.
+    const access = await getTripAccess(supabase, tripId, userId)
+    if (!access.exists) return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+    if (!access.isMember) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
     const { data: trip, error: tripErr } = await supabase
       .from('trips')
       .select('*')
@@ -71,11 +77,13 @@ export async function POST(
 
     if (albumErr) throw albumErr
 
-    // Mark trip as completed
-    await supabase
-      .from('trips')
-      .update({ status: 'completed' })
-      .eq('id', tripId)
+    // Mark trip as completed (owner only).
+    if (access.isOwner) {
+      await supabase
+        .from('trips')
+        .update({ status: 'completed' })
+        .eq('id', tripId)
+    }
 
     return NextResponse.json({ album })
   } catch (error) {

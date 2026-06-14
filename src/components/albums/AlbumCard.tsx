@@ -16,6 +16,8 @@ interface AlbumCardProps {
 }
 
 export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }: AlbumCardProps) {
+  const coverUrl = album.cover_photo_url ? getPhotoUrl(album.cover_photo_url) : null
+
   return (
     <motion.div
       className={cn("group", className)}
@@ -34,9 +36,9 @@ export const AlbumCard = memo(function AlbumCard({ album, className, index = 0 }
       >
         {/* Image container */}
         <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted transition-shadow duration-200 group-hover:shadow-md">
-          {album.cover_photo_url ? (
+          {coverUrl ? (
             <Image
-              src={getPhotoUrl(album.cover_photo_url) || ''}
+              src={coverUrl}
               alt={album.title}
               fill
               className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"

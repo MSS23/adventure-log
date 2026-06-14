@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { UserPlus, UserCheck, Clock, UserX, Sparkles } from 'lucide-react'
@@ -67,6 +68,7 @@ export function FollowButton({
   showText = true
 }: FollowButtonProps) {
   const { user } = useAuth()
+  const router = useRouter()
   const { followStatus, follow, unfollow, loading } = useFollows(userId)
   const [localLoading, setLocalLoading] = useState(false)
   const [optimisticStatus, setOptimisticStatus] = useState(followStatus)
@@ -88,37 +90,31 @@ export function FollowButton({
 
     // Don't allow clicking if not logged in
     if (!user) {
-      window.location.href = '/sign-in'
+      router.push('/login')
       return
     }
 
     setLocalLoading(true)
 
+    // Act on the status we're currently displaying (optimisticStatus), so the
+    // action and the optimistic UI never disagree under rapid clicks / realtime updates.
+    const current = optimisticStatus
+    const isUndoing = current === 'following' || current === 'pending'
+
     // Optimistic update for better UX
-    const wasNotFollowing = optimisticStatus === 'not_following'
-    if (optimisticStatus === 'following') {
-      setOptimisticStatus('not_following')
-    } else if (optimisticStatus === 'pending') {
-      setOptimisticStatus('not_following')
-    } else {
-      setOptimisticStatus('pending')
-    }
+    setOptimisticStatus(isUndoing ? 'not_following' : 'pending')
 
     try {
-      if (followStatus === 'following') {
-        await unfollow(userId)
-      } else if (followStatus === 'pending') {
-        await unfollow(userId) // Cancel request
+      if (isUndoing) {
+        await unfollow(userId) // Unfollow or cancel a pending request
       } else {
         await follow(userId)
         // Show burst animation on successful follow
-        if (wasNotFollowing) {
-          setShowBurst(true)
-        }
+        setShowBurst(true)
       }
     } catch {
       // Revert optimistic update on error
-      setOptimisticStatus(followStatus)
+      setOptimisticStatus(current)
     } finally {
       setLocalLoading(false)
     }

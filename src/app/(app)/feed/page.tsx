@@ -27,6 +27,7 @@ export default function FeedPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
+  const [loadError, setLoadError] = useState(false)
 
   const supabase = useMemo(() => createClient(), [])
   const { users: suggestedUsers } = useSuggestedUsers(user?.id, 6)
@@ -37,6 +38,7 @@ export default function FeedPage() {
     try {
       if (nextPage === 0) setLoading(true)
       else setLoadingMore(true)
+      setLoadError(false)
 
       let userIds: string[] | null = null
 
@@ -76,7 +78,12 @@ export default function FeedPage() {
         .range(nextPage * PAGE_SIZE, nextPage * PAGE_SIZE + PAGE_SIZE - 1)
 
       if (mode === 'following' && userIds && userIds.length > 0) {
-        query = query.in('user_id', userIds)
+        // Never surface a followed user's PRIVATE albums. Show their public
+        // and friends-only posts; always show the current user's own posts
+        // (covers the brand-new-account bootstrap above).
+        query = query
+          .in('user_id', userIds)
+          .or(`visibility.in.(public,friends),user_id.eq.${user.id}`)
       } else if (mode === 'discover') {
         query = query.eq('visibility', 'public').neq('user_id', user.id)
       }
@@ -157,6 +164,9 @@ export default function FeedPage() {
       setPage(nextPage)
     } catch (error) {
       log.error('Feed load failed', { component: 'Feed', action: 'load', userId: user.id }, error as Error)
+      // Only surface a full-page error when the initial load fails; a failed
+      // "load more" leaves the already-shown posts intact.
+      if (replace) setLoadError(true)
     } finally {
       setLoading(false)
       setLoadingMore(false)
@@ -288,6 +298,19 @@ export default function FeedPage() {
 
       {loading ? (
         <FeedSkeleton />
+      ) : loadError && albums.length === 0 ? (
+        <div className="flex flex-col items-center px-6 py-16 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive" aria-hidden>
+            <Compass className="h-6 w-6" strokeWidth={1.6} />
+          </div>
+          <h3 className="font-heading text-lg font-semibold text-foreground">Couldn&apos;t load your feed</h3>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            Something went wrong reaching the server. Check your connection and try again.
+          </p>
+          <Button size="pill" className="mt-5" onClick={() => loadFeed(0, true)}>
+            Try again
+          </Button>
+        </div>
       ) : albums.length === 0 ? (
         <EmptyState mode={mode} />
       ) : (

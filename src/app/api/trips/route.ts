@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
 import { log } from '@/lib/utils/logger'
 
 export async function GET() {
@@ -67,7 +68,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title is required (1–120 chars)' }, { status: 400 })
     }
 
-    const { data, error } = await supabase
+    // Insert with the service-role client: the live `trips` INSERT RLS policy was
+    // lost during the Clerk auth migration, so the RLS-bound client is rejected
+    // even for a legitimate owner insert. Safe here because owner_id is forced to
+    // the authenticated session user (never client-supplied). See migration 41
+    // for the corrective RLS policy.
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Server not configured' }, { status: 500 })
+    }
+
+    const { data, error } = await supabaseAdmin
       .from('trips')
       .insert({
         owner_id: userId,

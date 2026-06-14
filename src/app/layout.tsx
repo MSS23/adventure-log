@@ -110,6 +110,11 @@ export const metadata: Metadata = {
   classification: 'Travel Social Platform',
   referrer: 'origin-when-cross-origin',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/icons/icon-192x192.png',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

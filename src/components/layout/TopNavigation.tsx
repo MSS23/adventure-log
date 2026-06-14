@@ -31,6 +31,9 @@ export function TopNavigation() {
         className={cn(
           'sticky top-0 z-50 w-full border-b transition-shadow duration-300',
           'bg-[color:var(--color-ivory)]/85 backdrop-blur-xl border-[color:var(--color-line-warm)]',
+          // Fill the iOS status-bar / notch area in standalone PWA mode so the
+          // header content isn't drawn under the Dynamic Island.
+          'pt-[env(safe-area-inset-top)]',
           scrolled && 'shadow-[0_8px_24px_-12px_rgba(26,20,14,0.12)]',
         )}
       >

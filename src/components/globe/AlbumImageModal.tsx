@@ -387,11 +387,16 @@ export function AlbumImageModal({
       <AnimatePresence>
         {isOpen && isMobile && (
           <motion.div
-            initial={{ y: '100%' }}
+            initial={{ y: '110%' }}
             animate={{ y: 0 }}
-            exit={{ y: '100%' }}
+            exit={{ y: '110%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed bottom-[56px] left-0 right-0 z-[100] bg-white dark:bg-[#111] rounded-t-2xl shadow-2xl border-t border-stone-200 dark:border-stone-800 max-h-[35vh] overflow-y-auto"
+            // Float as a card ABOVE the "places I've been" filmstrip (which sits
+            // ~160px up from the viewport bottom) so the popup never covers it.
+            // The offset clears the bottom nav (56px) + filmstrip (~96px) + gap,
+            // plus the iOS home-indicator safe area.
+            className="fixed left-2 right-2 z-[100] bg-white dark:bg-[#111] rounded-2xl shadow-2xl border border-stone-200 dark:border-stone-800 max-h-[40vh] overflow-y-auto"
+            style={{ bottom: 'calc(172px + env(safe-area-inset-bottom, 0px))' }}
           >
             {/* Handle + close */}
             <div className="sticky top-0 z-10 bg-white dark:bg-[#111] px-3 pt-2 pb-1 flex items-center justify-between">

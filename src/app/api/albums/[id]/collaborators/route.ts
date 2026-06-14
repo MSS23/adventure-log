@@ -1,0 +1,134 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { log } from '@/lib/utils/logger'
+
+const VALID_ROLES = ['contributor', 'editor', 'viewer'] as const
+type Role = (typeof VALID_ROLES)[number]
+
+/**
+ * Invite a collaborator to an album AND notify them.
+ *
+ * Centralizes the invite so both invite UIs (CollaborativeAlbum dialog and
+ * CollaboratorManager) get identical behavior:
+ *  - only the album owner may invite
+ *  - the invitee is resolved by user id OR username/email
+ *  - the album_collaborators row and the in-app notification are created
+ *    together, server-side. The notification is written with the service-role
+ *    client because it targets ANOTHER user's row (the invitee), which the
+ *    client-side RLS context can't reliably insert.
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id: albumId } = await params
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const userId = user?.id
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Server not configured for invitations' }, { status: 500 })
+  }
+
+  let body: { userId?: string; query?: string; role?: string }
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const role: Role = VALID_ROLES.includes(body.role as Role) ? (body.role as Role) : 'contributor'
+
+  try {
+    // Only the album owner may invite collaborators.
+    const { data: album } = await supabase
+      .from('albums')
+      .select('id, title, user_id')
+      .eq('id', albumId)
+      .maybeSingle()
+
+    if (!album) return NextResponse.json({ error: 'Album not found' }, { status: 404 })
+    if (album.user_id !== userId) {
+      return NextResponse.json({ error: 'Only the album owner can invite collaborators' }, { status: 403 })
+    }
+
+    // Resolve the invitee — by explicit id, or by username/email lookup.
+    let inviteeId = body.userId?.trim() || null
+    if (!inviteeId) {
+      const q = body.query?.trim()
+      if (!q) return NextResponse.json({ error: 'Provide a user id, username, or email' }, { status: 400 })
+      const { data: found } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .or(`username.eq.${q},email.eq.${q}`)
+        .maybeSingle()
+      if (!found) return NextResponse.json({ error: 'No user found with that username or email' }, { status: 404 })
+      inviteeId = found.id
+    }
+
+    if (inviteeId === userId) {
+      return NextResponse.json({ error: 'You already own this album' }, { status: 400 })
+    }
+
+    // Create the invite (service role — owner already authorized above).
+    const { data: collaborator, error: inviteError } = await supabaseAdmin
+      .from('album_collaborators')
+      .insert({
+        album_id: albumId,
+        user_id: inviteeId,
+        role,
+        status: 'pending',
+        invited_by: userId,
+      })
+      .select('*, user:user_id(id, username, display_name, avatar_url)')
+      .single()
+
+    if (inviteError) {
+      if (inviteError.code === '23505') {
+        return NextResponse.json({ error: 'This user is already a collaborator' }, { status: 409 })
+      }
+      throw inviteError
+    }
+
+    // Notify the invitee (best-effort — never fail the invite over a notification).
+    try {
+      const { data: inviter } = await supabaseAdmin
+        .from('users')
+        .select('display_name, username')
+        .eq('id', userId)
+        .maybeSingle()
+      const inviterName = inviter?.display_name || inviter?.username || 'Someone'
+
+      await supabaseAdmin.from('notifications').insert({
+        user_id: inviteeId,
+        sender_id: userId,
+        type: 'album_invite',
+        title: 'Album invitation',
+        message: `${inviterName} invited you to collaborate on "${album.title}"`,
+        link: '/dashboard',
+        metadata: { album_id: albumId, collaborator_id: collaborator.id },
+      })
+    } catch (notifyErr) {
+      log.error(
+        'Invite created but notification failed',
+        { component: 'api/albums/collaborators', action: 'notify', albumId, inviteeId },
+        notifyErr as Error,
+      )
+    }
+
+    return NextResponse.json({ collaborator }, { status: 201 })
+  } catch (error) {
+    log.error(
+      'Failed to invite collaborator',
+      { component: 'api/albums/collaborators', action: 'invite', albumId, userId },
+      error as Error,
+    )
+    return NextResponse.json({ error: 'Failed to send invitation' }, { status: 500 })
+  }
+}

@@ -20,6 +20,7 @@ import {
   Share2,
 } from 'lucide-react'
 import { MemoryLaneCard } from '@/components/memories/MemoryLaneCard'
+import { CollaborationInvites } from '@/components/albums/CollaborationInvites'
 import { MotionList, MotionItem, MotionReveal } from '@/components/animations/MotionList'
 import type { User } from '@/types/database'
 
@@ -303,6 +304,9 @@ export default function DashboardContent({
               </MotionItem>
             </MotionList>
           </section>
+
+          {/* Pending album collaboration invites (self-hides when none) */}
+          <CollaborationInvites />
 
           {/* On this day */}
           <MotionReveal delay={0.15}>

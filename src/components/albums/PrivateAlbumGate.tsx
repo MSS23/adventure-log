@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Lock, UserPlus, LogIn, Users, Globe } from 'lucide-react'
+import { Lock, UserPlus, LogIn, Users, Globe, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
@@ -18,6 +18,8 @@ interface PrivateAlbumGateProps {
   visibilityLevel: 'private' | 'friends'
   isLoggedIn: boolean
   onRequestAccess?: () => void
+  requesting?: boolean
+  requested?: boolean
   className?: string
 }
 
@@ -30,6 +32,8 @@ export function PrivateAlbumGate({
   visibilityLevel,
   isLoggedIn,
   onRequestAccess,
+  requesting = false,
+  requested = false,
   className
 }: PrivateAlbumGateProps) {
   const imageUrl = coverPhotoUrl?.startsWith('http')
@@ -196,7 +200,7 @@ export function PrivateAlbumGate({
         >
           {!isLoggedIn ? (
             <>
-              <Link href="/sign-in" className="block">
+              <Link href="/login" className="block">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -207,7 +211,7 @@ export function PrivateAlbumGate({
                   </Button>
                 </motion.div>
               </Link>
-              <Link href="/sign-up" className="block">
+              <Link href="/signup" className="block">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -223,15 +227,21 @@ export function PrivateAlbumGate({
             </>
           ) : visibilityLevel === 'friends' && onRequestAccess ? (
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={requested ? {} : { scale: 1.02 }}
+              whileTap={requested ? {} : { scale: 0.98 }}
             >
               <Button
                 onClick={onRequestAccess}
-                className="w-full bg-olive-500 hover:bg-olive-600 text-white"
+                disabled={requesting || requested}
+                className="w-full bg-olive-500 hover:bg-olive-600 text-white disabled:opacity-100"
               >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Request to Follow
+                {requesting ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending request…</>
+                ) : requested ? (
+                  <><Check className="h-4 w-4 mr-2" />Request sent</>
+                ) : (
+                  <><UserPlus className="h-4 w-4 mr-2" />Request to Follow</>
+                )}
               </Button>
             </motion.div>
           ) : (

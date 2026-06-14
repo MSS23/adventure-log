@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { useFollows } from '@/lib/hooks/useFollows'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -37,7 +39,11 @@ interface AlbumOwner {
 
 export default function PublicAlbumPage() {
   const params = useParams()
+  const router = useRouter()
   const { user: currentUser } = useAuth()
+  const { follow } = useFollows()
+  const [requesting, setRequesting] = useState(false)
+  const [requested, setRequested] = useState(false)
   const [album, setAlbum] = useState<Album | null>(null)
   const [photos, setPhotos] = useState<Photo[]>([])
   const [owner, setOwner] = useState<AlbumOwner | null>(null)
@@ -92,12 +98,14 @@ export default function PublicAlbumPage() {
         }
 
         if (currentUser.id !== fetchedAlbum.user_id) {
-          // Check friendship
+          // Check friendship — only an ACCEPTED follow grants access; a pending
+          // request must wait for the owner to approve it.
           const { data: followData } = await supabase
             .from('follows')
             .select('id')
             .eq('follower_id', currentUser.id)
             .eq('following_id', fetchedAlbum.user_id)
+            .eq('status', 'accepted')
             .maybeSingle()
 
           if (!followData) {
@@ -142,6 +150,45 @@ export default function PublicAlbumPage() {
   useEffect(() => {
     loadAlbum()
   }, [loadAlbum])
+
+  // "Request access" to a friends-only album = send a follow request to the
+  // owner. If the owner has a public profile the follow is auto-accepted and we
+  // reload to reveal the album; if private, it stays pending until they approve.
+  const handleRequestAccess = useCallback(async () => {
+    if (!currentUser) {
+      router.push('/login')
+      return
+    }
+    if (!owner || requesting || requested) return
+
+    setRequesting(true)
+    try {
+      await follow(owner.id)
+
+      const { data: followRow } = await supabase
+        .from('follows')
+        .select('status')
+        .eq('follower_id', currentUser.id)
+        .eq('following_id', owner.id)
+        .maybeSingle()
+
+      if (followRow?.status === 'accepted') {
+        toast.success('Access granted — opening the album')
+        loadAlbum()
+      } else {
+        setRequested(true)
+        toast.success('Request sent — you’ll get access once they accept')
+      }
+    } catch (err) {
+      log.error('Failed to request album access', {
+        component: 'PublicAlbumPage',
+        albumId: params.id as string,
+      }, err as Error)
+      toast.error('Could not send your request. Please try again.')
+    } finally {
+      setRequesting(false)
+    }
+  }, [currentUser, owner, requesting, requested, follow, supabase, loadAlbum, router, params.id])
 
   const currentUrl = typeof window !== 'undefined' ? window.location.href : ''
 
@@ -215,12 +262,9 @@ export default function PublicAlbumPage() {
         ownerAvatarUrl={owner?.avatar_url}
         visibilityLevel={album.visibility === 'friends' ? 'friends' : 'private'}
         isLoggedIn={!!currentUser}
-        onRequestAccess={() => {
-          // TODO: Implement follow/request access functionality
-          if (owner) {
-            window.location.href = `/profile/${owner.id}`
-          }
-        }}
+        requesting={requesting}
+        requested={requested}
+        onRequestAccess={handleRequestAccess}
       />
     )
   }

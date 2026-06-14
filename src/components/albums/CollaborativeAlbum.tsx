@@ -19,7 +19,6 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { useToast } from '@/components/ui/toast-provider'
-import { useAuth } from '@/components/auth/AuthProvider'
 
 interface Collaborator {
   id: string
@@ -47,7 +46,6 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
   const [inviteEmail, setInviteEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
-  const { user } = useAuth()
   const { success, error: showError } = useToast()
   const supabase = createClient()
 
@@ -92,46 +90,30 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
   }
 
   const handleInvite = async () => {
-    if (!inviteEmail.trim()) return
+    const query = inviteEmail.trim()
+    if (!query) return
 
     try {
       setSending(true)
 
-      // Find user by email or username
-      const { data: invitedUser, error: userError } = await supabase
-        .from('users')
-        .select('id, username, display_name, avatar_url')
-        .or(`email.eq.${inviteEmail},username.eq.${inviteEmail}`)
-        .single()
+      // The server route resolves the user by username/email, verifies album
+      // ownership, creates the invite, and notifies the invitee — all in one
+      // authorized step.
+      const res = await fetch(`/api/albums/${albumId}/collaborators`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, role: 'editor' }),
+      })
+      const json = await res.json().catch(() => ({}))
 
-      if (userError || !invitedUser) {
-        showError('User not found', 'No user found with that email or username')
+      if (!res.ok) {
+        showError('Invitation failed', json.error || 'Could not send invitation. Please try again.')
         return
       }
 
-      // Check if already a collaborator
-      const existing = collaborators.find(c => c.user_id === invitedUser.id)
-      if (existing) {
-        showError('Already invited', 'This user is already a collaborator')
-        return
-      }
-
-      // Create invitation
-      const { error: inviteError } = await supabase
-        .from('album_collaborators')
-        .insert({
-          album_id: albumId,
-          user_id: invitedUser.id,
-          role: 'editor',
-          status: 'pending',
-          invited_by: user?.id
-        })
-
-      if (inviteError) throw inviteError
-
-      // TODO: Send notification to invited user
-
-      success('Invitation sent', `Invited ${invitedUser.display_name} to collaborate`)
+      const invitedName =
+        json.collaborator?.user?.display_name || json.collaborator?.user?.username || 'them'
+      success('Invitation sent', `Invited ${invitedName} to collaborate`)
       setInviteEmail('')
       fetchCollaborators()
     } catch (err) {

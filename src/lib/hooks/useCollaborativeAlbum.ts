@@ -88,23 +88,22 @@ export function useCollaborativeAlbum(albumId: string | undefined) {
     async (userId: string, role: 'contributor' | 'editor' | 'viewer' = 'contributor') => {
       if (!albumId || !user) throw new Error('Not authenticated')
 
-      const { data, error } = await supabase
-        .from('album_collaborators')
-        .insert({
-          album_id: albumId,
-          user_id: userId,
-          role,
-          invited_by: user.id,
-          status: 'pending',
-        })
-        .select('*, user:user_id(id, username, display_name, avatar_url)')
-        .single()
+      // Go through the server route so the invite AND the in-app notification
+      // to the invitee are created together (the notification needs the
+      // service-role client to write another user's row).
+      const res = await fetch(`/api/albums/${albumId}/collaborators`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, role }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Failed to send invitation')
 
-      if (error) throw error
+      const data = json.collaborator
       setCollaborators((prev) => [...prev, data])
       return data
     },
-    [albumId, user, supabase]
+    [albumId, user]
   )
 
   const removeCollaborator = useCallback(

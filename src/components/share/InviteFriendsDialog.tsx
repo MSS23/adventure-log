@@ -74,9 +74,10 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
           {/* Header */}
           <div className="relative bg-primary px-6 py-8 text-primary-foreground">
             <button
+              type="button"
               onClick={onClose}
               aria-label="Close"
-              className="absolute top-4 right-4 p-2 hover:bg-primary-foreground/15 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/70"
+              className="absolute top-4 right-4 inline-flex h-11 w-11 items-center justify-center hover:bg-primary-foreground/15 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/70 active:scale-[0.97]"
             >
               <X className="h-5 w-5" />
             </button>

@@ -181,10 +181,11 @@ export function GlobeControls({
 
                   return (
                     <button
+                      type="button"
                       key={preset.id}
                       onClick={() => handleZoomPreset(preset)}
                       className={cn(
-                        'w-full px-3 py-2 flex items-center gap-2 text-left text-sm transition-colors',
+                        'w-full px-3 py-2 flex items-center gap-2 text-left text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset',
                         isActive
                           ? 'bg-olive-50 dark:bg-olive-950/20 text-olive-700 font-medium'
                           : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/[0.06]'

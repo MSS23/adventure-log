@@ -68,7 +68,7 @@ export default function NewAlbumPage() {
             type="button"
             onClick={() => setMode('quick')}
             className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97]',
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               mode === 'quick'
                 ? 'bg-foreground text-background'
                 : 'text-muted-foreground hover:text-foreground'
@@ -81,7 +81,7 @@ export default function NewAlbumPage() {
             type="button"
             onClick={() => setMode('full')}
             className={cn(
-              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97]',
+              'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               mode === 'full'
                 ? 'bg-foreground text-background'
                 : 'text-muted-foreground hover:text-foreground'

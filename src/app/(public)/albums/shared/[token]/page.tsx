@@ -263,6 +263,7 @@ export default function SharedAlbumPage() {
                   </p>
                   {album.description.length > 200 && (
                     <button
+                      type="button"
                       onClick={() => setShowFullDescription(!showFullDescription)}
                       className="cursor-pointer text-primary hover:text-primary/80 text-sm font-medium mt-2 flex items-center gap-1 transition-colors duration-200 py-1 px-2 -ml-2 rounded-lg hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                     >

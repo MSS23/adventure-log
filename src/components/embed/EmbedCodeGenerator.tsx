@@ -56,10 +56,11 @@ export function EmbedCodeGenerator({ username, displayName }: EmbedCodeGenerator
             const Icon = preset.icon
             return (
               <button
+                type="button"
                 key={i}
                 onClick={() => setSelectedPreset(i)}
                 className={cn(
-                  'flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 border transition-all duration-200 text-center',
+                  'flex flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 border transition-all duration-200 ease-out text-center outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]',
                   selectedPreset === i
                     ? 'bg-olive-50 dark:bg-olive-500/10 border-olive-300 dark:border-olive-500/30 text-olive-700 dark:text-olive-400'
                     : 'bg-white dark:bg-stone-800/50 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600'

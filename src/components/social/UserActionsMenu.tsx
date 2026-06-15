@@ -54,7 +54,7 @@ export function UserActionsMenu({
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${className || ''}`}
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] ${className || ''}`}
             aria-label="User actions"
           >
             <MoreHorizontal className="h-5 w-5" />

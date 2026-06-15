@@ -397,11 +397,13 @@ function PhotoCard({
         >
           {onSetCover && !isCover && (
             <button
+              type="button"
+              aria-label="Set as cover"
               onClick={(e) => {
                 e.stopPropagation()
                 onSetCover()
               }}
-              className="p-2 bg-primary text-primary-foreground rounded-lg shadow-sm hover:bg-primary/90 transition-colors"
+              className="flex items-center justify-center min-h-10 min-w-10 bg-primary text-primary-foreground rounded-lg shadow-sm hover:bg-primary/90 transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               title="Set as cover"
             >
               <Star className="h-4 w-4" />
@@ -409,11 +411,13 @@ function PhotoCard({
           )}
           {onDelete && (
             <button
+              type="button"
+              aria-label="Delete photo"
               onClick={(e) => {
                 e.stopPropagation()
                 onDelete()
               }}
-              className="p-2 bg-destructive text-white rounded-lg shadow-sm hover:bg-destructive/90 transition-colors"
+              className="flex items-center justify-center min-h-10 min-w-10 bg-destructive text-white rounded-lg shadow-sm hover:bg-destructive/90 transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               title="Delete photo"
             >
               <Trash2 className="h-4 w-4" />

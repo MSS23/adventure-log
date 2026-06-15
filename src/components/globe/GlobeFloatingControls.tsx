@@ -91,8 +91,9 @@ export function GlobeFloatingControls({
                 <p className="text-xs mt-2 opacity-75">Try again or search for a location manually.</p>
               </div>
               <button
+                type="button"
                 onClick={onClearLocation}
-                className="text-white/80 hover:text-white transition-colors"
+                className="flex items-center justify-center min-h-10 min-w-10 rounded-lg text-white/80 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 aria-label="Dismiss"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,8 +121,9 @@ export function GlobeFloatingControls({
                 </p>
               </div>
               <button
+                type="button"
                 onClick={onClearLocation}
-                className="text-white/80 hover:text-white transition-colors"
+                className="flex items-center justify-center min-h-10 min-w-10 rounded-lg text-white/80 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 aria-label="Dismiss"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

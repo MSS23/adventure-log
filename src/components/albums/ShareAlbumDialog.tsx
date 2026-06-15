@@ -315,8 +315,9 @@ export function ShareAlbumDialog({ albumId, albumTitle, trigger }: ShareAlbumDia
                       </div>
                       {!share.shared_with_user_id && (
                         <button
+                          type="button"
                           onClick={() => copyShareLink(share.share_token)}
-                          className="text-xs text-olive-600 hover:underline mt-1 flex items-center gap-1"
+                          className="text-xs text-olive-600 hover:underline mt-1 inline-flex items-center gap-1 min-h-11 rounded-lg transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         >
                           {copied ? (
                             <>

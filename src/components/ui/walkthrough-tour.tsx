@@ -462,8 +462,9 @@ export function WalkthroughTour({
                       {currentStep + 1} of {steps.length}
                     </span>
                     <button
+                      type="button"
                       onClick={() => endTour(false)}
-                      className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       aria-label="Close tour"
                     >
                       <X className="h-4 w-4" />
@@ -490,24 +491,27 @@ export function WalkthroughTour({
                   {/* Navigation */}
                   <div className="flex items-center justify-between gap-2">
                     <button
+                      type="button"
                       onClick={() => endTour(false)}
-                      className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       Skip tour
                     </button>
                     <div className="flex items-center gap-2">
                       {!isFirst && (
                         <button
+                          type="button"
                           onClick={() => goToStep(currentStep - 1)}
-                          className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         >
                           <ChevronLeft className="h-3.5 w-3.5" />
                           Back
                         </button>
                       )}
                       <button
+                        type="button"
                         onClick={() => goToStep(currentStep + 1)}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 ease-out active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       >
                         {isLast ? (
                           'Got it!'
@@ -527,14 +531,15 @@ export function WalkthroughTour({
               <div className="flex justify-center gap-1.5 mt-3">
                 {steps.map((_, i) => (
                   <button
+                    type="button"
                     key={i}
                     onClick={() => goToStep(i)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                    className={`h-1.5 rounded-full transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                       i === currentStep
                         ? 'w-6 bg-primary'
                         : i < currentStep
                           ? 'w-1.5 bg-primary/40'
-                          : 'w-1.5 bg-white/40'
+                          : 'w-1.5 bg-muted-foreground/30'
                     }`}
                     aria-label={`Go to step ${i + 1}`}
                   />
@@ -565,8 +570,9 @@ export function TourTriggerButton({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 transition-colors"
+      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 transition-colors active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <Sparkles className="h-4 w-4" />
       {label}

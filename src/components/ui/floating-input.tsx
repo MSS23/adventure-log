@@ -118,7 +118,9 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="p-1 text-muted-foreground/70 hover:text-foreground transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
+                className="inline-flex h-10 w-10 -mr-1.5 items-center justify-center rounded-lg text-muted-foreground/70 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                 tabIndex={-1}
               >
                 {showPassword ? (

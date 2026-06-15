@@ -52,9 +52,10 @@ export function BackLink({
 
   return (
     <button
+      type="button"
       onClick={goBack}
       className={cn(
-        'inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer',
+        'inline-flex items-center gap-1.5 min-h-11 rounded-lg text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         className
       )}
     >

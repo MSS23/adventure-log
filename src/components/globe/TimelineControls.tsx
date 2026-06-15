@@ -260,10 +260,11 @@ export function TimelineControls({
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-56 sm:max-h-48 overflow-y-auto">
                     {timeline.map((entry, index) => (
                       <button
+                        type="button"
                         key={entry.id}
                         onClick={() => onSeek(index)}
                         className={cn(
-                          "p-3 rounded-lg text-left transition-all duration-200 hover:shadow-md min-h-[80px]",
+                          "p-3 rounded-lg text-left transition-all duration-200 hover:shadow-md min-h-[80px] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                           progress.segment === index
                             ? "bg-olive-100 dark:bg-olive-950/30 border-2 border-olive-300 shadow-md"
                             : "bg-stone-50 dark:bg-white/[0.04] hover:bg-stone-100 dark:hover:bg-white/[0.06] border border-stone-200 dark:border-white/[0.10]"

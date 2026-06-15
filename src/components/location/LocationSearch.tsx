@@ -276,8 +276,9 @@ export function LocationSearch({
             {query && (
               <button
                 type="button"
+                aria-label="Clear location"
                 onClick={clearLocation}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-stone-100 dark:hover:bg-white/[0.06] rounded"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-stone-100 dark:hover:bg-white/[0.06] rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-[0.97]"
               >
                 <X className="h-3 w-3 text-stone-700 dark:text-stone-300" />
               </button>
@@ -313,6 +314,7 @@ export function LocationSearch({
               <p>{error}</p>
               {error.includes('internet connection') && (
                 <button
+                  type="button"
                   onClick={() => {
                     setError(null)
                     setRetryAttempts(0)
@@ -320,7 +322,7 @@ export function LocationSearch({
                       searchLocations(query)
                     }
                   }}
-                  className="mt-1 text-red-700 underline hover:no-underline"
+                  className="mt-1 text-red-700 underline hover:no-underline rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                 >
                   Try again
                 </button>
@@ -347,7 +349,7 @@ export function LocationSearch({
               <button
                 key={result.place_id}
                 type="button"
-                className="w-full text-left p-3 hover:bg-stone-50 dark:hover:bg-white/[0.06] rounded-md transition-colors"
+                className="w-full text-left p-3 hover:bg-stone-50 dark:hover:bg-white/[0.06] rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
                 onClick={() => selectLocation(result)}
               >
                 <div className="flex items-start gap-3">

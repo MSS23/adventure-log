@@ -59,8 +59,9 @@ export function GlobeStatsOverlay({
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-[10px] font-semibold text-white/80 uppercase tracking-wider">Stats</h3>
               <button
+                type="button"
                 onClick={() => setShowStatsOverlay(false)}
-                className="text-white/40 hover:text-white/70 text-xs cursor-pointer transition-colors duration-200 py-1 px-1.5 rounded"
+                className="text-white/40 hover:text-white/70 text-xs cursor-pointer transition-colors duration-200 py-1 px-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
               >
                 close
               </button>
@@ -94,8 +95,10 @@ export function GlobeStatsOverlay({
           </div>
         ) : (
           <button
+            type="button"
+            aria-label="Show travel stats"
             onClick={() => setShowStatsOverlay(true)}
-            className="bg-black/60 backdrop-blur-xl rounded-full p-2.5 border border-white/[0.08] shadow-lg hover:bg-black/70 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-olive-500"
+            className="bg-black/60 backdrop-blur-xl rounded-full p-2.5 border border-white/[0.08] shadow-lg hover:bg-black/70 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
             title="Show travel stats"
           >
             <BarChart3 className="h-4 w-4 text-olive-400" />

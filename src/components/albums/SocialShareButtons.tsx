@@ -126,14 +126,15 @@ export function SocialShareButtons({
         const Icon = option.icon
         return (
           <button
+            type="button"
             key={option.name}
             onClick={option.action}
             className={cn(
               'flex items-center justify-center w-10 h-10 rounded-full',
               'border border-stone-200 dark:border-stone-700',
               'text-stone-500 dark:text-stone-400',
-              'transition-all duration-200',
-              'focus:outline-none focus:ring-2 focus:ring-olive-500/50 focus:ring-offset-1',
+              'transition-all duration-200 ease-out active:scale-[0.97]',
+              'outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               option.hoverColor
             )}
             aria-label={option.ariaLabel}

@@ -86,9 +86,12 @@ export function GlobePageHeader({
             {isOwnProfile && (
               <div className="flex bg-stone-100 dark:bg-stone-800 rounded-lg p-0.5 flex-shrink-0">
                 <button
+                  type="button"
+                  aria-label="My Globe"
+                  aria-pressed={!exploreMode}
                   onClick={() => setExploreMode(false)}
                   className={cn(
-                    "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1 min-h-[32px] cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
+                    "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1 min-h-[32px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]",
                     !exploreMode
                       ? "bg-white dark:bg-stone-700 shadow-sm text-olive-700 dark:text-olive-400"
                       : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
@@ -98,9 +101,12 @@ export function GlobePageHeader({
                   <span className="hidden lg:inline">My Globe</span>
                 </button>
                 <button
+                  type="button"
+                  aria-label="Explore"
+                  aria-pressed={exploreMode}
                   onClick={() => setExploreMode(true)}
                   className={cn(
-                    "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1 min-h-[32px] cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
+                    "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1 min-h-[32px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]",
                     exploreMode
                       ? "bg-white dark:bg-stone-700 shadow-sm text-olive-700 dark:text-olive-400"
                       : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
@@ -152,7 +158,7 @@ export function GlobePageHeader({
             {availableYears.length > 0 && !exploreMode && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[32px]">
+                  <button type="button" aria-label="Filter by year" className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[32px]">
                     <Calendar className="h-3.5 w-3.5" />
                     <span>{selectedYear ? selectedYear : 'All'}</span>
                     <ChevronDown className="h-3 w-3" />
@@ -184,10 +190,12 @@ export function GlobePageHeader({
               <div className="hidden xl:flex items-center -space-x-2 mr-1">
                 {friends.slice(0, 4).map((friend) => (
                   <button
+                    type="button"
                     key={friend.id}
                     onClick={() => onViewFriendGlobe(friend.id)}
-                    className="relative group cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 rounded-full"
+                    className="relative group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-full active:scale-[0.97]"
                     title={friend.display_name}
+                    aria-label={`View ${friend.display_name}'s globe`}
                   >
                     <Avatar className="h-8 w-8 ring-2 ring-white dark:ring-[#111111] hover:ring-olive-400 transition-all hover:scale-110 hover:z-10">
                       <AvatarImage
@@ -225,17 +233,20 @@ export function GlobePageHeader({
 
             {isOwnProfile && !exploreMode && (
               <button
+                type="button"
+                aria-pressed={showWishlist}
                 onClick={() => {
                   setShowWishlist(!showWishlist)
                   setWishlistPrompt(null)
                 }}
                 className={cn(
-                  "relative flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
+                  "relative flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]",
                   showWishlist
                     ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
                     : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
                 )}
                 title={showWishlist ? 'Hide Wishlist' : 'Show Wishlist'}
+                aria-label={showWishlist ? 'Hide wishlist' : 'Show wishlist'}
               >
                 {showWishlist ? (
                   <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />

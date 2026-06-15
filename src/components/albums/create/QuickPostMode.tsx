@@ -208,7 +208,7 @@ export function QuickPostMode({
               <button
                 type="button"
                 onClick={onSwitchToFull}
-                className="flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-primary transition-all duration-200 py-2 cursor-pointer hover:translate-x-0.5"
+                className="flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-primary transition-all duration-200 py-2 cursor-pointer hover:translate-x-0.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Need more options? Switch to Full Album
                 <ChevronRight className="h-3.5 w-3.5" />

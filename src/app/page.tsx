@@ -276,7 +276,7 @@ export default function HomePage() {
             type="button"
             onClick={() => document.getElementById('stats')?.scrollIntoView({ behavior: 'smooth' })}
             aria-label="Scroll to learn more"
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 p-2 rounded-full opacity-40 hover:opacity-80 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 p-2.5 rounded-full opacity-40 hover:opacity-80 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03] active:scale-[0.97]"
           >
             <ChevronDown className="h-5 w-5 text-stone-400 animate-bounce" />
           </button>

@@ -92,10 +92,11 @@ export function FeedFilters({
           return (
             <motion.button
               key={option.id}
+              type="button"
               onClick={() => handleFilterClick(option.id)}
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200',
-                'border',
+                'border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 isActive
                   ? 'bg-primary text-primary-foreground border-primary'
                   : 'bg-card text-muted-foreground border-border hover:border-primary/30 hover:bg-muted hover:text-foreground'
@@ -115,10 +116,13 @@ export function FeedFilters({
         {showSort && (
           <div className="relative ml-auto">
             <motion.button
+              type="button"
+              aria-label="Sort"
               onClick={() => setShowSortMenu(!showSortMenu)}
               className={cn(
                 'flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors duration-200',
                 'border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 showSortMenu && 'bg-muted text-foreground'
               )}
               whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
@@ -143,9 +147,10 @@ export function FeedFilters({
                   {sortOptions.map((option) => (
                     <button
                       key={option.id}
+                      type="button"
                       onClick={() => handleSortClick(option.id)}
                       className={cn(
-                        'w-full px-4 py-2 text-left text-sm transition-colors',
+                        'w-full px-4 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50',
                         activeSort === option.id
                           ? 'bg-primary/10 text-primary font-medium'
                           : 'text-foreground hover:bg-muted'
@@ -172,8 +177,9 @@ export function FeedFilters({
             {filterOptions.find((f) => f.id === activeFilter)?.description}
           </span>
           <button
+            type="button"
             onClick={() => onFilterChange('all')}
-            className="p-1 hover:bg-primary/15 rounded-full transition-colors"
+            className="flex items-center justify-center min-h-10 min-w-10 hover:bg-primary/15 rounded-full transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="Clear filter"
           >
             <X className="h-4 w-4 text-primary" />
@@ -206,12 +212,14 @@ export function FeedFiltersMobile({
         return (
           <motion.button
             key={option.id}
+            type="button"
             onClick={() => {
               triggerSelection()
               onFilterChange(option.id)
             }}
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors duration-200',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               isActive
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground'

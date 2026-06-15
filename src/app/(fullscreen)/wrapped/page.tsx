@@ -249,9 +249,10 @@ export default function WrappedPage() {
       <div className="absolute top-4 left-4 z-50">
         <div className="flex bg-white/10 backdrop-blur-sm rounded-full p-0.5">
           <button
+            type="button"
             onClick={() => switchMode('year')}
             className={cn(
-              'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
+              'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 flex items-center gap-1 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
               mode === 'year'
                 ? 'bg-white text-black'
                 : 'text-white/70 hover:text-white'
@@ -261,9 +262,10 @@ export default function WrappedPage() {
             {currentYear}
           </button>
           <button
+            type="button"
             onClick={() => switchMode('all')}
             className={cn(
-              'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
+              'cursor-pointer px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none min-h-[44px]',
               mode === 'all'
                 ? 'bg-white text-black'
                 : 'text-white/70 hover:text-white'

@@ -206,6 +206,7 @@ export function AchievementsDisplay({ className }: AchievementsDisplayProps) {
           >
             {/* Category Header */}
             <button
+              type="button"
               onClick={() => toggleCategory(categoryKey)}
               className="w-full flex items-center justify-between p-4 cursor-pointer transition-colors duration-200 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring active:scale-[0.99]"
             >

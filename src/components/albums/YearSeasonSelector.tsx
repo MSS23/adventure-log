@@ -141,6 +141,7 @@ export function YearSeasonSelector({
                       className={cn(
                         'w-full px-4 py-2.5 text-left transition-colors',
                         'hover:bg-olive-50 dark:hover:bg-white/[0.06]',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-olive-500/40',
                         year === y ? 'bg-olive-50 dark:bg-white/[0.06] text-olive-700 font-medium' : 'text-stone-700 dark:text-stone-300'
                       )}
                     >

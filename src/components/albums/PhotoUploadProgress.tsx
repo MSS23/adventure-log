@@ -92,11 +92,14 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
                 </div>
               </div>
               <button
+                type="button"
+                aria-label={isMinimized ? 'Expand upload details' : 'Collapse upload details'}
+                aria-expanded={!isMinimized}
                 onClick={(e) => {
                   e.stopPropagation()
                   setIsMinimized(!isMinimized)
                 }}
-                className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300"
+                className="flex items-center justify-center min-h-10 min-w-10 rounded-lg text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {isMinimized ? '▲' : '▼'}
               </button>
@@ -180,12 +183,13 @@ export function PhotoUploadProgress({ uploads, onClose, className }: PhotoUpload
                 className="mt-4 pt-4 border-t dark:border-white/[0.08]"
               >
                 <button
+                  type="button"
                   onClick={onClose}
                   className={cn(
-                    'w-full py-2 rounded-lg font-medium text-sm transition-colors',
+                    'w-full py-2 rounded-lg font-medium text-sm transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                     hasErrors
-                      ? 'bg-red-100 dark:bg-red-950/30 text-red-700 hover:bg-red-200'
-                      : 'bg-green-100 dark:bg-green-950/30 text-green-700 hover:bg-green-200'
+                      ? 'bg-red-100 dark:bg-red-950/30 text-red-700 hover:bg-red-200 focus-visible:ring-red-500/50'
+                      : 'bg-green-100 dark:bg-green-950/30 text-green-700 hover:bg-green-200 focus-visible:ring-green-500/50'
                   )}
                 >
                   {hasErrors ? 'Some uploads failed' : 'All uploads complete'}

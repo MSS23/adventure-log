@@ -122,11 +122,12 @@ export default function TravelTwinsPage() {
                 : 0
               return (
                 <button
+                  type="button"
                   key={twin.user_id}
                   onClick={() => setSelectedTwinId(twin.user_id)}
                   className={cn(
-                    'w-full text-left p-3 rounded-xl border transition-colors duration-200 cursor-pointer',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    'w-full text-left p-3 rounded-xl border transition-colors duration-200 cursor-pointer active:scale-[0.99]',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                     isSelected
                       ? 'border-accent/40 bg-accent/10'
                       : 'border-border bg-card hover:bg-muted/60'

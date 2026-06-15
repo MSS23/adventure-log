@@ -102,8 +102,9 @@ export function OnboardingFlow() {
               Step {currentStep + 1} of {steps.length}
             </span>
             <button
+              type="button"
               onClick={handleSkip}
-              className="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+              className="text-sm text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors rounded-lg active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Skip tour
             </button>
@@ -210,9 +211,10 @@ export function OnboardingFlow() {
           {steps.map((_, index) => (
             <button
               key={index}
+              type="button"
               onClick={() => setCurrentStep(index)}
               className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300",
+                "w-2 h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 index === currentStep
                   ? "bg-olive-600 w-8"
                   : "bg-stone-400 dark:bg-white/[0.10] hover:bg-stone-500 dark:hover:bg-white/[0.14]"

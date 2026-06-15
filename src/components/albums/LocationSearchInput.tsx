@@ -39,7 +39,7 @@ export function LocationSearchInput({
               type="button"
               onClick={onAutoFill}
               disabled={isAutoFilling}
-              className="text-xs text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors disabled:opacity-50"
+              className="rounded-md text-xs text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               {isAutoFilling ? 'Extracting...' : 'Auto-fill from Photos'}
             </button>

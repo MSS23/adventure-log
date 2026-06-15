@@ -284,12 +284,13 @@ export default function NotificationsPage() {
 
                 {/* Delete button */}
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation()
                     e.preventDefault()
                     deleteNotification(notification.id)
                   }}
-                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 p-2 hover:bg-destructive/10 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:opacity-100 active:scale-[0.9]"
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 p-2.5 hover:bg-destructive/10 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:opacity-100 active:scale-[0.9]"
                   title="Delete notification"
                   aria-label="Delete notification"
                 >

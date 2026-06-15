@@ -115,9 +115,10 @@ export function AlbumQualityNudges({ album, photos, isOwner }: Props) {
   return (
     <div className="relative rounded-2xl p-5 mb-5 border border-amber-500/20 bg-amber-500/10">
       <button
+        type="button"
         onClick={() => setDismissed(true)}
         aria-label="Dismiss"
-        className="absolute top-3 right-3 p-1 rounded-full text-muted-foreground hover:bg-foreground/10 transition-colors"
+        className="absolute top-3 right-3 p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors active:scale-[0.90] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <X className="h-3.5 w-3.5" />
       </button>

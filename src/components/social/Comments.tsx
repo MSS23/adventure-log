@@ -182,7 +182,8 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                   transition={{ delay: 0.3 }}
                 >
                   <button
-                    className="text-sm text-primary hover:underline font-semibold px-4"
+                    type="button"
+                    className="text-sm text-primary hover:underline font-semibold px-4 py-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     onClick={() => setShowAll(!showAll)}
                   >
                     {showAll

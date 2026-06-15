@@ -47,8 +47,10 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
         />
         {filters.query && (
           <button
+            type="button"
+            aria-label="Clear search"
             onClick={() => updateFilter('query', '')}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -218,8 +220,10 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
                   <Badge variant="secondary" className="gap-1">
                     From: {new Date(filters.dateRange.from).toLocaleDateString()}
                     <button
+                      type="button"
+                      aria-label="Remove from-date filter"
                       onClick={() => updateFilter('dateRange', { ...filters.dateRange, from: undefined })}
-                      className="ml-1 transition-colors hover:text-destructive"
+                      className="ml-1 transition-colors hover:text-destructive rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -229,8 +233,10 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
                   <Badge variant="secondary" className="gap-1">
                     To: {new Date(filters.dateRange.to).toLocaleDateString()}
                     <button
+                      type="button"
+                      aria-label="Remove to-date filter"
                       onClick={() => updateFilter('dateRange', { ...filters.dateRange, to: undefined })}
-                      className="ml-1 transition-colors hover:text-destructive"
+                      className="ml-1 transition-colors hover:text-destructive rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -241,8 +247,10 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
                     <MapPin className="h-3 w-3" />
                     {location}
                     <button
+                      type="button"
+                      aria-label={`Remove ${location} filter`}
                       onClick={() => removeLocationFilter(location)}
-                      className="ml-1 transition-colors hover:text-destructive"
+                      className="ml-1 transition-colors hover:text-destructive rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                     >
                       <X className="h-3 w-3" />
                     </button>

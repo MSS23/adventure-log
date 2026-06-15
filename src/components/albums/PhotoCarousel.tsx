@@ -86,9 +86,10 @@ export function PhotoCarousel({
             {photos.map((_, idx) => (
               <button
                 key={idx}
+                type="button"
                 onClick={() => onPhotoChange(idx)}
                 className={cn(
-                  "w-2 h-2 rounded-full transition-all duration-200",
+                  "w-2 h-2 rounded-full transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
                   idx === currentIndex
                     ? "bg-white w-8"
                     : "bg-white/60 hover:bg-white/80"
@@ -105,8 +106,9 @@ export function PhotoCarousel({
         <>
           {/* Previous Button */}
           <button
+            type="button"
             className={cn(
-              "absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 md:w-10 md:h-10 rounded-full bg-white/90 dark:bg-white/[0.12] hover:bg-white dark:hover:bg-white/[0.20] flex items-center justify-center shadow-lg transition-all",
+              "absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 md:w-10 md:h-10 rounded-full bg-white/90 dark:bg-white/[0.12] hover:bg-white dark:hover:bg-white/[0.20] flex items-center justify-center shadow-lg transition-all duration-200 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
               !canGoPrevious && "opacity-50 cursor-not-allowed"
             )}
             onClick={handlePrevious}
@@ -118,8 +120,9 @@ export function PhotoCarousel({
 
           {/* Next Button */}
           <button
+            type="button"
             className={cn(
-              "absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 md:w-10 md:h-10 rounded-full bg-white/90 dark:bg-white/[0.12] hover:bg-white dark:hover:bg-white/[0.20] flex items-center justify-center shadow-lg transition-all",
+              "absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-12 sm:h-12 md:w-10 md:h-10 rounded-full bg-white/90 dark:bg-white/[0.12] hover:bg-white dark:hover:bg-white/[0.20] flex items-center justify-center shadow-lg transition-all duration-200 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
               !canGoNext && "opacity-50 cursor-not-allowed"
             )}
             onClick={handleNext}

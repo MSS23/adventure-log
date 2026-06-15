@@ -34,10 +34,11 @@ export function ThumbnailStrip({
 
           return (
             <button
+              type="button"
               key={photo.id}
               onClick={() => onThumbnailClick(index)}
               className={cn(
-                "relative flex-1 min-w-[60px] aspect-square rounded-lg overflow-hidden transition-all duration-200",
+                "relative flex-1 min-w-[60px] aspect-square rounded-lg overflow-hidden transition-all duration-200 ease-out active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 isActive
                   ? "ring-2 ring-olive-500"
                   : "hover:opacity-90"

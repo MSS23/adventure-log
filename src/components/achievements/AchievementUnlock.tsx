@@ -209,7 +209,9 @@ export function AchievementUnlock({
           >
             {/* Close button */}
             <motion.button
-              className="absolute top-0 right-0 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors"
+              type="button"
+              aria-label="Close"
+              className="absolute top-0 right-0 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               onClick={onClose}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -355,9 +357,11 @@ export function AchievementBadge({
       whileTap={{ scale: 0.95 }}
     >
       <button
+        type="button"
+        aria-label={achievement.title}
         onClick={onClick}
         className={cn(
-          'rounded-full flex items-center justify-center transition-colors duration-200',
+          'rounded-full flex items-center justify-center transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           badgeSizes[size],
           styles.badge,
           onClick && 'cursor-pointer'

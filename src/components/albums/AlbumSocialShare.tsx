@@ -121,8 +121,10 @@ export function AlbumSocialShare({
         transition={{ delay: 0.5 }}
       >
         <motion.button
+          type="button"
+          aria-label="Share this album"
           onClick={handleNativeShare}
-          className="w-14 h-14 rounded-full bg-olive-500 text-white shadow-lg flex items-center justify-center"
+          className="w-14 h-14 rounded-full bg-olive-500 text-white shadow-lg flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -160,8 +162,9 @@ export function AlbumSocialShare({
 
         <div className="flex gap-2 mt-4">
           <motion.button
+            type="button"
             onClick={handleCopyLink}
-            className="flex-1 flex items-center justify-center gap-2 p-3 bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300 rounded-xl hover:bg-stone-200 dark:hover:bg-white/[0.08] transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 p-3 bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300 rounded-xl hover:bg-stone-200 dark:hover:bg-white/[0.08] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -179,8 +182,10 @@ export function AlbumSocialShare({
           </motion.button>
 
           <motion.button
+            type="button"
+            aria-label="Show QR code"
             onClick={() => setShowQR(true)}
-            className="p-3 bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300 rounded-xl hover:bg-stone-200 dark:hover:bg-white/[0.08] transition-colors"
+            className="p-3 bg-stone-100 dark:bg-white/[0.06] text-stone-700 dark:text-stone-300 rounded-xl hover:bg-stone-200 dark:hover:bg-white/[0.08] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -208,8 +213,10 @@ export function AlbumSocialShare({
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Scan QR Code</h3>
                   <button
+                    type="button"
+                    aria-label="Close QR code"
                     onClick={() => setShowQR(false)}
-                    className="p-1 rounded-full hover:bg-stone-100 dark:hover:bg-white/[0.06]"
+                    className="flex items-center justify-center min-h-10 min-w-10 rounded-full hover:bg-stone-100 dark:hover:bg-white/[0.06] transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -261,9 +268,11 @@ export function AlbumSocialShare({
         ))}
 
         <motion.button
+          type="button"
+          aria-label="Copy link"
           onClick={handleCopyLink}
           className={cn(
-            "p-2 rounded-full transition-all",
+            "flex items-center justify-center min-h-10 min-w-10 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             copied
               ? "bg-green-100 dark:bg-green-950/30 text-green-600"
               : "bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-white/[0.08]"
@@ -276,8 +285,10 @@ export function AlbumSocialShare({
         </motion.button>
 
         <motion.button
+          type="button"
+          aria-label="Show QR code"
           onClick={() => setShowQR(true)}
-          className="p-2 rounded-full bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-white/[0.08] transition-colors"
+          className="flex items-center justify-center min-h-10 min-w-10 rounded-full bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-white/[0.08] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.95 }}
           title="Show QR Code"

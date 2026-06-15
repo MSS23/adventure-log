@@ -47,7 +47,10 @@ export function SimpleAlbumCard({ album, className }: SimpleAlbumCardProps) {
 
       {/* View Album Button */}
       <Link href={`/albums/${album.id}`} className="block">
-        <button className="al-btn-coral w-full px-4 py-2 font-medium">
+        <button
+          type="button"
+          className="al-btn-coral w-full px-4 py-2 font-medium transition-all duration-200 ease-out active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
           View Album
         </button>
       </Link>

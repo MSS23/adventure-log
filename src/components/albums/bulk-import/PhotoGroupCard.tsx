@@ -167,8 +167,10 @@ export function PhotoGroupCard({
                       sizes="(max-width: 640px) 25vw, (max-width: 768px) 16vw, 12.5vw"
                     />
                     <button
+                      type="button"
+                      aria-label={`Remove ${photo.file.name}`}
                       onClick={() => onRemovePhoto(group.id, photo.id)}
-                      className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-90"
+                      className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-90 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <X className="h-3 w-3" />
                     </button>

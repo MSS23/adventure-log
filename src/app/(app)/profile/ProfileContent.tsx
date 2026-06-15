@@ -163,6 +163,7 @@ export default function ProfileContent({
         <div role="tablist" aria-label="Profile sections" className="flex gap-1 border-b border-border">
           {tabs.map((tab) => (
             <button
+              type="button"
               key={tab.id}
               role="tab"
               aria-selected={activeTab === tab.id}

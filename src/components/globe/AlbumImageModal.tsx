@@ -256,7 +256,9 @@ export function AlbumImageModal({
                   }}
                 >
                   <motion.button
-                    className="absolute bottom-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg"
+                    type="button"
+                    aria-label="Zoom photo"
+                    className="absolute bottom-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                   >
@@ -270,8 +272,10 @@ export function AlbumImageModal({
             {photos.length > 1 && (
               <>
                 <motion.button
+                  type="button"
+                  aria-label="Previous photo"
                   className={cn(
-                    "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md",
+                    "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
                     currentPhotoIndex === 0 ? "opacity-30 cursor-default" : "hover:bg-white"
                   )}
                   onClick={(e) => { e.stopPropagation(); navigatePhoto('prev') }}
@@ -282,8 +286,10 @@ export function AlbumImageModal({
                   <ChevronLeft className="h-4 w-4 text-stone-700 dark:text-stone-300" />
                 </motion.button>
                 <motion.button
+                  type="button"
+                  aria-label="Next photo"
                   className={cn(
-                    "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md",
+                    "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
                     currentPhotoIndex === photos.length - 1 ? "opacity-30 cursor-default" : "hover:bg-white"
                   )}
                   onClick={(e) => { e.stopPropagation(); navigatePhoto('next') }}
@@ -313,7 +319,8 @@ export function AlbumImageModal({
         {!isMultiCity && primaryCity && (
           <Link href={`/albums/${primaryCity.id}`} className="block">
             <motion.button
-              className="w-full py-2.5 bg-olive-600 hover:bg-olive-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 text-sm transition-colors"
+              type="button"
+              className="w-full py-2.5 bg-olive-600 hover:bg-olive-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
             >
               <ExternalLink className="h-4 w-4" />
@@ -328,7 +335,7 @@ export function AlbumImageModal({
             <div className="flex flex-wrap gap-1.5">
               {cluster.cities.map((city) => (
                 <Link key={city.id} href={`/albums/${city.id}`}>
-                  <button className="px-2.5 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors">
+                  <button type="button" className="px-2.5 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]">
                     {city.name.split(',')[0]}
                   </button>
                 </Link>
@@ -343,8 +350,10 @@ export function AlbumImageModal({
         <div className="px-3 lg:px-5 pb-3 border-t border-stone-100 dark:border-stone-800 pt-2">
           <div className="flex items-center justify-between">
             <motion.button
+              type="button"
+              aria-label="Previous location"
               className={cn(
-                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
                 canGoPrevious
                   ? "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
                   : "text-stone-300 dark:text-stone-600 cursor-default"
@@ -362,8 +371,10 @@ export function AlbumImageModal({
             </span>
 
             <motion.button
+              type="button"
+              aria-label="Next location"
               className={cn(
-                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
                 canGoNext
                   ? "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
                   : "text-stone-300 dark:text-stone-600 cursor-default"
@@ -409,8 +420,10 @@ export function AlbumImageModal({
                 </h2>
               </div>
               <button
+                type="button"
+                aria-label="Close"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shrink-0"
+                className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -536,8 +549,9 @@ export function AlbumImageModal({
               )}
 
               <button
+                type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg transition-colors flex-shrink-0"
+                className="p-1.5 rounded-lg transition-colors flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
                 style={{ color: 'var(--color-muted-warm)' }}
                 aria-label="Close"
               >

@@ -42,9 +42,10 @@ export function UserSuggestionDropdown({
       {users.map((user, index) => (
         <button
           key={user.id}
+          type="button"
           onClick={() => onSelectUser(user)}
           className={`
-            w-full px-4 py-2 flex items-center gap-3 hover:bg-muted/60 transition-colors
+            w-full px-4 py-2 flex items-center gap-3 hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50
             ${index === selectedIndex ? 'bg-primary/10' : ''}
           `}
         >

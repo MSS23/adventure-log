@@ -34,8 +34,10 @@ export function GlobeWishlistPrompt({ prompt, onConfirm, onDismiss }: GlobeWishl
             <span className="text-xs font-semibold text-amber-300">Add to Wishlist?</span>
           </div>
           <button
+            type="button"
+            aria-label="Dismiss"
             onClick={onDismiss}
-            className="text-white/40 hover:text-white/70 transition-colors duration-200 cursor-pointer p-1 rounded min-w-[28px] min-h-[28px] flex items-center justify-center"
+            className="text-white/40 hover:text-white/70 transition-colors duration-200 cursor-pointer rounded-lg min-w-10 min-h-10 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -51,9 +53,10 @@ export function GlobeWishlistPrompt({ prompt, onConfirm, onDismiss }: GlobeWishl
               {prompt.locationName}
             </p>
             <button
+              type="button"
               onClick={onConfirm}
               disabled={prompt.adding}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold transition-colors duration-200 disabled:opacity-50 cursor-pointer active:scale-[0.97] min-h-[36px]"
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold transition-colors duration-200 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:scale-[0.97] min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               {prompt.adding ? (
                 <Loader2 className="h-3 w-3 animate-spin" />

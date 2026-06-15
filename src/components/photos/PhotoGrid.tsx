@@ -361,11 +361,12 @@ function PhotoGridItem({
           <Camera className="h-8 w-8 text-stone-700 dark:text-stone-300 mb-2" />
           <p className="text-sm text-stone-800 dark:text-stone-200 mb-2">Failed to load</p>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation()
               retryImageLoad()
             }}
-            className="text-sm bg-stone-600 text-white px-2 py-1 rounded hover:bg-stone-700 transition-colors relative z-[2]"
+            className="text-sm bg-secondary text-secondary-foreground px-2 py-1 rounded-lg hover:bg-secondary/80 transition-colors relative z-[2] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
           >
             Retry
           </button>
@@ -416,11 +417,12 @@ function PhotoGridItem({
         <div className="absolute top-1 right-1 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 focus-within:opacity-100 transition-all z-[20]">
           {onSetCover && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 onSetCover()
               }}
-              className="bg-olive-600 text-white px-3 py-2 rounded text-sm hover:bg-olive-700 focus:bg-olive-700 shadow-lg font-medium min-h-[40px] md:min-h-[32px] min-w-[80px] md:min-w-[70px] touch-manipulation"
+              className="bg-olive-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-olive-700 focus:bg-olive-700 shadow-lg font-medium min-h-[40px] md:min-h-[32px] min-w-[80px] md:min-w-[70px] touch-manipulation transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
               aria-label="Set as cover photo"
             >
               Set Cover
@@ -430,9 +432,10 @@ function PhotoGridItem({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button
+                  type="button"
                   onClick={(e) => e.stopPropagation()}
                   disabled={isDeleting}
-                  className="bg-red-600 text-white p-2 rounded text-sm hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center"
+                  className="bg-red-600 text-white p-2 rounded-lg text-sm hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed disabled:pointer-events-none shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
                   title="Delete photo"
                   aria-label="Delete photo"
                 >
@@ -474,9 +477,10 @@ function PhotoGridItem({
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <button
+              type="button"
               onClick={(e) => e.stopPropagation()}
               disabled={isDeleting}
-              className="absolute top-1 right-1 bg-red-600 text-white p-2 rounded text-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed z-[20] shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center"
+              className="absolute top-1 right-1 bg-red-600 text-white p-2 rounded-lg text-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:opacity-100 focus:opacity-100 transition-all hover:bg-red-700 focus:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed disabled:pointer-events-none z-[20] shadow-lg min-h-[40px] md:min-h-[32px] min-w-[40px] md:min-w-[32px] touch-manipulation flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
               title="Delete photo"
               aria-label="Delete cover photo"
             >

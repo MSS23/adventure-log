@@ -486,10 +486,11 @@ export default function TripDetailPage() {
             <span className="text-xs text-muted-foreground mr-1">My color:</span>
             {MEMBER_COLOR_PALETTE.map((color) => (
               <button
+                type="button"
                 key={color}
                 onClick={() => handleChangeColor(myMember.id, color)}
                 className={cn(
-                  'w-5 h-5 rounded-full transition-transform',
+                  'w-5 h-5 rounded-full transition-transform outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                   myMember.color === color
                     ? 'ring-2 ring-ring ring-offset-2 ring-offset-background scale-110'
                     : 'hover:scale-110'

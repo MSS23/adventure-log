@@ -338,13 +338,15 @@ export function NotificationCenter() {
 
                   {/* Delete button */}
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation()
                       e.preventDefault()
                       deleteNotification(notification.id)
                     }}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-destructive/10 rounded-full"
+                    className="absolute top-2 right-2 inline-flex h-9 w-9 items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-destructive/10 rounded-full focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50 active:scale-[0.97]"
                     title="Delete notification"
+                    aria-label="Delete notification"
                   >
                     <Trash2 className="h-3.5 w-3.5 text-destructive" />
                   </button>

@@ -459,7 +459,7 @@ export default function SettingsPage() {
               <Label htmlFor="current-password" className="text-xs font-medium text-foreground">Current password</Label>
               <div className="relative">
                 <Input id="current-password" type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="min-h-[44px] text-sm pr-11" />
-                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-9 w-9 grid place-items-center cursor-pointer rounded-xl transition-colors duration-200 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword} aria-controls="current-password">
+                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-10 w-10 grid place-items-center cursor-pointer rounded-xl transition-colors duration-200 hover:bg-muted outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword} aria-controls="current-password">
                   {showCurrentPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                 </button>
               </div>
@@ -468,7 +468,7 @@ export default function SettingsPage() {
               <Label htmlFor="new-password" className="text-xs font-medium text-foreground">New password</Label>
               <div className="relative">
                 <Input id="new-password" type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="min-h-[44px] text-sm pr-11" />
-                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-9 w-9 grid place-items-center cursor-pointer rounded-xl transition-colors duration-200 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword} aria-controls="new-password">
+                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-10 w-10 grid place-items-center cursor-pointer rounded-xl transition-colors duration-200 hover:bg-muted outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword} aria-controls="new-password">
                   {showNewPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
                 </button>
               </div>

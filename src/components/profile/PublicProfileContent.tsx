@@ -506,6 +506,7 @@ export function PublicProfileContent({
         {/* ───────── Report User ───────── */}
         <div className="mb-10 flex justify-center">
           <button
+            type="button"
             onClick={() => setReportOpen(true)}
             className="cursor-pointer flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors duration-200 py-2 px-3 rounded-xl hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none min-h-[44px]"
           >

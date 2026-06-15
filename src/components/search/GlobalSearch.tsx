@@ -211,11 +211,13 @@ export function GlobalSearch() {
         />
         {query && (
           <button
+            type="button"
+            aria-label="Clear search"
             onClick={() => {
               setQuery('');
               setResults([]);
             }}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute right-1.5 top-1/2 transform -translate-y-1/2 flex items-center justify-center min-h-10 min-w-10 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <X className="h-4 w-4" />
           </button>
@@ -237,9 +239,10 @@ export function GlobalSearch() {
               {results.map((result, index) => (
                 <button
                   key={`${result.type}-${result.id}`}
+                  type="button"
                   onClick={() => handleSelect(result)}
                   className={cn(
-                    'w-full px-4 py-3 flex items-center gap-3 hover:bg-muted/60 transition-colors text-left',
+                    'w-full px-4 py-3 flex items-center gap-3 hover:bg-muted/60 transition-colors text-left focus-visible:outline-none focus-visible:bg-muted/60 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50',
                     index === selectedIndex && 'bg-primary/10'
                   )}
                 >

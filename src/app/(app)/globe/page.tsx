@@ -248,8 +248,9 @@ function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExpl
     <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
       <div className="pointer-events-auto bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-6 sm:p-8 max-w-sm mx-4 text-center shadow-2xl relative">
         <button
+          type="button"
           onClick={onDismiss}
-          className="absolute top-3 right-3 p-2 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="absolute top-3 right-3 p-2 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="Dismiss"
         >
           <span className="text-lg">&times;</span>
@@ -269,8 +270,9 @@ function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExpl
             </Button>
           </Link>
           <button
+            type="button"
             onClick={onExplore}
-            className="text-xs text-white/50 hover:text-white/80 transition-colors duration-200 py-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500 rounded-lg"
+            className="text-xs text-white/50 hover:text-white/80 transition-colors duration-200 py-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-lg"
           >
             or explore other travelers&apos; globes
           </button>

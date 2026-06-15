@@ -59,11 +59,12 @@ export function CoverPhotoSelector({
 
             <button
               type="button"
+              aria-label={`Remove photo ${index + 1}`}
               onClick={(e) => {
                 e.stopPropagation()
                 onRemovePhoto(index)
               }}
-              className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-[0.90] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <X className="h-3 w-3" />
             </button>

@@ -269,10 +269,11 @@ export function GlobeSearch({
             >
               {results.map((result, index) => (
                 <button
+                  type="button"
                   key={result.id}
                   onClick={() => handleResultSelect(result)}
                   className={cn(
-                    'w-full p-3 sm:p-4 text-left hover:bg-stone-50 dark:hover:bg-white/[0.06] active:bg-stone-100 dark:active:bg-white/[0.08] border-b border-stone-100 dark:border-white/[0.08] last:border-b-0 transition-colors touch-manipulation min-h-16',
+                    'w-full p-3 sm:p-4 text-left hover:bg-stone-50 dark:hover:bg-white/[0.06] active:bg-stone-100 dark:active:bg-white/[0.08] border-b border-stone-100 dark:border-white/[0.08] last:border-b-0 transition-colors touch-manipulation min-h-16 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset',
                     selectedIndex === index && 'bg-olive-50 dark:bg-olive-950/30'
                   )}
                   role="option"

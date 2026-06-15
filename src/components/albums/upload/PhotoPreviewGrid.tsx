@@ -308,11 +308,13 @@ export function PhotoPreviewGrid({
                               {/* Remove Button */}
                               {!photo.uploading && !photo.uploaded && !bulkEditMode && (
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     onRemovePhoto(photo.id)
                                   }}
-                                  className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-90"
+                                  aria-label="Remove photo"
+                                  className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out cursor-pointer hover:scale-110 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                                 >
                                   <X className="h-4 w-4" />
                                 </button>

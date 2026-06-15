@@ -26,22 +26,23 @@ export function ProfileTabs({
   const visibleTabs = tabs.filter(tab => !tab.hidden)
 
   return (
-    <div className="border-b border-stone-200">
+    <div className="border-b border-border">
       <div className="flex gap-8">
         {visibleTabs.map((tab) => (
           <button
             key={tab.id}
+            type="button"
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "pb-3 px-1 text-sm font-medium transition-colors relative",
+              "pb-3 px-1 text-sm font-medium transition-colors relative rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               activeTab === tab.id
-                ? "text-olive-600"
-                : "text-stone-600 hover:text-stone-900"
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             {tab.label}
             {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-olive-500"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary"></div>
             )}
           </button>
         ))}

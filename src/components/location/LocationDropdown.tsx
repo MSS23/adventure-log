@@ -372,7 +372,7 @@ export function LocationDropdown({
             <button
               type="button"
               onMouseDown={(e) => { e.preventDefault(); clearLocation() }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-md hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-[0.97]"
               aria-label="Clear"
             >
               <X className="h-4 w-4 text-stone-400 dark:text-stone-500" />
@@ -427,7 +427,7 @@ export function LocationDropdown({
                   key={result.place_id}
                   type="button"
                   onMouseDown={(e) => { e.preventDefault(); selectLocation(result) }}
-                  className="w-full text-left px-3 py-3 hover:bg-olive-50 dark:hover:bg-olive-900/20 active:bg-olive-100 dark:active:bg-olive-900/30 transition-colors border-b border-stone-100 dark:border-stone-800 last:border-b-0 flex items-start gap-3"
+                  className="w-full text-left px-3 py-3 hover:bg-olive-50 dark:hover:bg-olive-900/20 active:bg-olive-100 dark:active:bg-olive-900/30 transition-colors border-b border-stone-100 dark:border-stone-800 last:border-b-0 flex items-start gap-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
                 >
                   <MapPin className="h-4 w-4 text-olive-500 mt-0.5 shrink-0" />
                   <span className="text-sm text-stone-800 dark:text-stone-200 leading-snug">
@@ -466,8 +466,9 @@ export function LocationDropdown({
                   <button
                     key={dest.name}
                     type="button"
+                    aria-label={`${dest.name}, ${dest.country}`}
                     onMouseDown={(e) => { e.preventDefault(); selectPopularDestination(dest) }}
-                    className="text-left px-3 py-2.5 hover:bg-olive-50 dark:hover:bg-olive-900/20 active:bg-olive-100 dark:active:bg-olive-900/30 transition-colors border-b border-stone-100 dark:border-stone-800 sm:odd:border-r flex items-center gap-2.5"
+                    className="text-left px-3 py-2.5 hover:bg-olive-50 dark:hover:bg-olive-900/20 active:bg-olive-100 dark:active:bg-olive-900/30 transition-colors border-b border-stone-100 dark:border-stone-800 sm:odd:border-r flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
                   >
                     <span className="text-base leading-none">{dest.emoji}</span>
                     <div className="min-w-0">

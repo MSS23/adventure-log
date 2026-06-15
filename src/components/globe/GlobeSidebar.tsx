@@ -66,8 +66,10 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
         <button
+          type="button"
+          aria-label="Close album panel"
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-colors duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]"
         >
           <X className="h-4 w-4" />
         </button>
@@ -176,8 +178,10 @@ export function MobileFeaturedAlbum({ album, isOwnProfile, onClose }: MobileFeat
           <ArrowRight className="h-3 w-3" />
         </Link>
         <button
+          type="button"
+          aria-label="Dismiss featured album"
           onClick={onClose}
-          className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors duration-200 flex-shrink-0 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors duration-200 flex-shrink-0 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -299,18 +303,20 @@ export function GlobeAlbumFilmstrip({
         {/* Scroll arrows (desktop only) */}
         {canLeft && (
           <button
+            type="button"
             onClick={() => nudge(-1)}
             aria-label="Scroll albums left"
-            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/80 items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500"
+            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/80 items-center justify-center transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
         )}
         {canRight && (
           <button
+            type="button"
             onClick={() => nudge(1)}
             aria-label="Scroll albums right"
-            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/80 items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500"
+            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/80 items-center justify-center transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -326,10 +332,12 @@ export function GlobeAlbumFilmstrip({
           {virtualize && leftSpacer > 0 && <div aria-hidden className="flex-shrink-0" style={{ width: leftSpacer }} />}
           {visibleAlbums.map((album) => (
             <button
+              type="button"
               key={album.id}
               onClick={() => onAlbumClick(album.id)}
               role="option"
               aria-selected={selectedAlbumId === album.id}
+              aria-label={album.title}
               className={cn(
                 "snap-start flex-shrink-0 rounded-lg overflow-hidden transition-all duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-olive-500",
                 selectedAlbumId === album.id
@@ -381,9 +389,11 @@ export function GlobeAlbumFilmstrip({
               )}
               {wishlistItems.map((item) => (
                 <button
+                  type="button"
                   key={item.id}
                   onClick={() => onWishlistItemClick(item)}
-                  className="flex-shrink-0 w-[56px] md:w-[64px] rounded-lg overflow-hidden transition-all duration-200 hover:ring-1 hover:ring-amber-400/40 opacity-70 hover:opacity-100 group cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500"
+                  aria-label={`Wishlist: ${item.location_name}`}
+                  className="flex-shrink-0 w-[56px] md:w-[64px] rounded-lg overflow-hidden transition-all duration-200 hover:ring-1 hover:ring-amber-400/40 opacity-70 hover:opacity-100 group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                 >
                   <div className="relative aspect-square bg-gradient-to-br from-amber-900/50 to-amber-950/50 flex items-center justify-center">
                     <Star className="h-4 w-4 text-amber-400/60 fill-amber-400/20 group-hover:fill-amber-400/50 transition-colors" />

@@ -19,8 +19,8 @@ export function StatsCard({
   const content = (
     <CardContent className="p-6">
       <div>
-        <p className="text-3xl font-bold text-stone-900">{value}</p>
-        <p className="text-sm text-stone-600 mt-1">{label}</p>
+        <p className="text-3xl font-bold text-foreground">{value}</p>
+        <p className="text-sm text-muted-foreground mt-1">{label}</p>
       </div>
     </CardContent>
   )
@@ -28,13 +28,14 @@ export function StatsCard({
   if (onClick) {
     return (
       <button
+        type="button"
         onClick={onClick}
         className={cn(
-          "w-full text-left transition-all hover:shadow-md",
+          "w-full text-left rounded-2xl transition-all duration-200 hover:shadow-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           className
         )}
       >
-        <Card className="border border-stone-200 shadow-sm rounded-2xl">
+        <Card className="border border-border shadow-sm rounded-2xl">
           {content}
         </Card>
       </button>
@@ -42,7 +43,7 @@ export function StatsCard({
   }
 
   return (
-    <Card className={cn("border border-stone-200 shadow-sm rounded-2xl", className)}>
+    <Card className={cn("border border-border shadow-sm rounded-2xl", className)}>
       {content}
     </Card>
   )

@@ -209,31 +209,37 @@ export function SocialLinksEditor({
                     autoFocus
                   />
                   <button
+                    type="button"
+                    aria-label={`Save ${platform.label} link`}
                     onClick={() => {
                       triggerSelection()
                       setEditingPlatform(null)
                     }}
-                    className="p-1.5 rounded-lg bg-olive-500 text-white hover:bg-olive-600"
+                    className="p-1.5 rounded-lg bg-olive-500 text-white hover:bg-olive-600 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
                   >
                     <Check className="h-4 w-4" />
                   </button>
                   <button
+                    type="button"
+                    aria-label={`Clear ${platform.label} link`}
                     onClick={() => {
                       handleLinkChange(platform.id, '')
                       setEditingPlatform(null)
                     }}
-                    className="p-1.5 rounded-lg bg-stone-200 dark:bg-white/[0.08] text-stone-600 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-white/[0.06]"
+                    className="p-1.5 rounded-lg bg-stone-200 dark:bg-white/[0.08] text-stone-600 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-white/[0.06] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
                 <button
+                  type="button"
+                  aria-label={hasValue ? `Edit ${platform.label} link` : `Add ${platform.label} link`}
                   onClick={() => {
                     triggerSelection()
                     setEditingPlatform(platform.id)
                   }}
-                  className="flex-1 text-left"
+                  className="flex-1 text-left rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {hasValue ? (
                     <span className="text-sm text-stone-700 dark:text-stone-300">{currentValue}</span>

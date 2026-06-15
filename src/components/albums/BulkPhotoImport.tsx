@@ -105,8 +105,9 @@ export function BulkPhotoImport() {
               <div className="flex-1">
                 <p>{error}</p>
                 <button
+                  type="button"
                   onClick={() => setError(null)}
-                  className="text-destructive underline text-xs mt-1 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                  className="rounded-sm text-destructive underline text-xs mt-1 cursor-pointer hover:opacity-80 transition-opacity duration-200 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Dismiss
                 </button>

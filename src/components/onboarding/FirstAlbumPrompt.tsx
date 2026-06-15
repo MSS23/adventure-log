@@ -24,8 +24,10 @@ export function FirstAlbumPrompt({ hasAlbums, onDismiss }: FirstAlbumPromptProps
     <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#111111] border border-stone-200/50 dark:border-white/[0.06]">
       {/* Dismiss button */}
       <button
+        type="button"
         onClick={handleDismiss}
-        className="absolute top-4 right-4 z-10 p-1.5 rounded-full text-stone-400 hover:text-stone-600 dark:text-stone-500 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+        aria-label="Dismiss"
+        className="absolute top-4 right-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
       >
         <X className="h-4 w-4" />
       </button>

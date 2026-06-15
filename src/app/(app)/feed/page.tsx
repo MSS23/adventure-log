@@ -209,10 +209,11 @@ export default function FeedPage() {
             role="tablist"
           >
             <button
+              type="button"
               role="tab"
               aria-selected={mode === 'following'}
               onClick={() => setMode('following')}
-              className={`relative pb-1.5 text-xs font-semibold tracking-wide uppercase transition-colors ${
+              className={`relative pb-1.5 text-xs font-semibold tracking-wide uppercase transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                 mode === 'following'
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
@@ -224,10 +225,11 @@ export default function FeedPage() {
               )}
             </button>
             <button
+              type="button"
               role="tab"
               aria-selected={mode === 'discover'}
               onClick={() => setMode('discover')}
-              className={`relative pb-1.5 text-xs font-semibold tracking-wide uppercase transition-colors ${
+              className={`relative pb-1.5 text-xs font-semibold tracking-wide uppercase transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                 mode === 'discover'
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground'

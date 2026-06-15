@@ -568,7 +568,7 @@ export default function AlbumDetailPage() {
                   >
                     {shareCopied ? <><Check className="h-3 w-3" /> Copied</> : <><Share2 className="h-3 w-3" /> Share</>}
                   </Button>
-                  <button onClick={() => setShowSharePrompt(false)} className="text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] p-1 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
+                  <button type="button" aria-label="Dismiss share prompt" onClick={() => setShowSharePrompt(false)} className="text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] p-1 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
@@ -734,6 +734,8 @@ export default function AlbumDetailPage() {
               <div className="flex items-center gap-4">
                 {/* Like */}
                 <button
+                  type="button"
+                  aria-label={isLiked ? 'Unlike album' : 'Like album'}
                   onClick={handleLikeClick}
                   className={cn(
                     "flex items-center gap-1.5 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1",
@@ -746,6 +748,8 @@ export default function AlbumDetailPage() {
 
                 {/* Comment */}
                 <button
+                  type="button"
+                  aria-label="View comments"
                   onClick={handleCommentClick}
                   className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
                 >
@@ -766,6 +770,8 @@ export default function AlbumDetailPage() {
                 {/* Globe */}
                 {album.latitude && album.longitude && (
                   <button
+                    type="button"
+                    aria-label="View on globe"
                     onClick={handleGlobeClick}
                     className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
                   >
@@ -779,6 +785,8 @@ export default function AlbumDetailPage() {
                 {/* Save */}
                 {!isOwner && (
                   <button
+                    type="button"
+                    aria-label={isSaved ? 'Remove from saved' : 'Save album'}
                     onClick={handleSaveClick}
                     className={cn(
                       "transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1",
@@ -792,6 +800,8 @@ export default function AlbumDetailPage() {
                 {/* Report */}
                 {!isOwner && user && (
                   <button
+                    type="button"
+                    aria-label="Report album"
                     onClick={() => setReportOpen(true)}
                     className="text-muted-foreground hover:text-destructive transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1"
                     title="Report album"

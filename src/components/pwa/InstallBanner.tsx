@@ -209,8 +209,9 @@ export function InstallBanner() {
                       <div className="flex items-center justify-between">
                         <h3 className="font-bold text-lg">How to Install</h3>
                         <button
+                          type="button"
                           onClick={handleDismiss}
-                          className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                          className="flex items-center justify-center min-h-11 min-w-11 hover:bg-white/20 rounded-lg transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                           aria-label="Close"
                         >
                           <X className="h-5 w-5" />
@@ -362,8 +363,9 @@ export function InstallBanner() {
 
                       {/* Close button */}
                       <button
+                        type="button"
                         onClick={handleDismiss}
-                        className="p-1 hover:bg-white/20 rounded-lg transition-colors flex-shrink-0"
+                        className="flex items-center justify-center min-h-11 min-w-11 hover:bg-white/20 rounded-lg transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent flex-shrink-0"
                         aria-label="Close"
                       >
                         <X className="h-5 w-5" />

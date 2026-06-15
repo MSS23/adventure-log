@@ -87,8 +87,9 @@ export default function ExplorePage() {
         />
         {searchQuery ? (
           <button
+            type="button"
             onClick={handleClearSearch}
-            className="flex items-center justify-center rounded-full p-1 text-muted-foreground transition-colors cursor-pointer hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+            className="flex items-center justify-center rounded-full p-1.5 text-muted-foreground transition-colors cursor-pointer hover:text-foreground hover:bg-muted active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
             aria-label="Clear search"
           >
             <X className="h-4 w-4" />

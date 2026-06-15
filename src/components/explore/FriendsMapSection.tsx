@@ -348,9 +348,11 @@ export function FriendsMapSection() {
         <div className="px-4 py-2.5 flex items-center gap-0.5 overflow-x-auto scrollbar-hide border-t border-border">
           {friendLegend.map((friend) => (
             <button
+              type="button"
               key={friend.id}
               onClick={() => handleFriendClick(friend.id)}
-              className="relative shrink-0 p-1 rounded-full hover:bg-muted/60 transition-colors group"
+              className="relative shrink-0 flex items-center justify-center min-h-11 min-w-11 p-1 rounded-full hover:bg-muted/60 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-[0.97] group"
+              aria-label={`${friend.displayName}, ${friend.count} trip${friend.count > 1 ? 's' : ''}`}
               title={`${friend.displayName} — ${friend.count} trip${friend.count > 1 ? 's' : ''}`}
             >
               <div className="relative">

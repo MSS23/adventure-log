@@ -193,8 +193,9 @@ export function ActivityFeed() {
         <div className="text-center py-4">
           <p className="text-sm text-muted-foreground mb-3">{error}</p>
           <button
+            type="button"
             onClick={() => fetchActivities()}
-            className="text-sm text-primary hover:underline font-medium"
+            className="inline-flex items-center justify-center min-h-11 rounded-lg px-3 text-sm text-primary hover:underline font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             Try again
           </button>

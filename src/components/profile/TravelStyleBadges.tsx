@@ -253,8 +253,9 @@ export function TravelStyleBadges({
         </span>
         {selectedStyles.length > 0 && (
           <button
+            type="button"
             onClick={() => onChange?.([])}
-            className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-400 text-xs"
+            className="text-xs text-muted-foreground hover:text-foreground rounded-md px-1.5 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             Clear all
           </button>
@@ -271,10 +272,11 @@ export function TravelStyleBadges({
             return (
               <motion.button
                 key={style.id}
+                type="button"
                 onClick={() => handleToggle(style.id)}
                 disabled={!isSelected && !canSelect}
                 className={cn(
-                  'inline-flex items-center rounded-full border font-medium transition-all',
+                  'inline-flex items-center rounded-full border font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed',
                   sizeClasses[size],
                   isSelected
                     ? cn(style.bgColor, style.color, 'shadow-sm')

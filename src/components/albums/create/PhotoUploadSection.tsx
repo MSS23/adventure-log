@@ -139,7 +139,7 @@ export function PhotoUploadSection({
             <button
               type="button"
               onClick={onClearFileErrors}
-              className="text-[color:var(--color-gold)] hover:opacity-80 text-xs mt-2 underline cursor-pointer transition-all duration-200"
+              className="text-[color:var(--color-gold)] hover:opacity-80 text-xs mt-2 underline cursor-pointer transition-all duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Dismiss
             </button>
@@ -201,13 +201,14 @@ export function PhotoUploadSection({
                       )}
                       <motion.button
                         type="button"
+                        aria-label="Adjust cover position"
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
                         onClick={(e) => {
                           e.stopPropagation()
                           onOpenPositionEditor()
                         }}
-                        className="absolute bottom-1.5 left-1.5 bg-black/70 hover:bg-black text-white text-[10px] font-medium px-2 py-1 rounded-full shadow-lg flex items-center gap-1 backdrop-blur-sm"
+                        className="absolute bottom-1.5 left-1.5 bg-black/70 hover:bg-black text-white text-[10px] font-medium px-2 py-1 rounded-full shadow-lg flex items-center gap-1 backdrop-blur-sm active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                       >
                         <Move className="h-2.5 w-2.5" />
                         Adjust

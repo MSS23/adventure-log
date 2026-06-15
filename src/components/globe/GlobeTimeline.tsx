@@ -40,9 +40,10 @@ export function GlobeTimeline({
           <div className="flex flex-wrap justify-center gap-3">
             {/* All Years Button */}
             <button
+              type="button"
               onClick={() => handleEffectiveYearChange(null)}
               className={cn(
-                "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
+                "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900",
                 !effectiveSelectedYear
                   ? "bg-gradient-to-br from-olive-500 to-olive-500 shadow-lg shadow-olive-500/30 scale-105 hover:shadow-xl hover:shadow-olive-500/40"
                   : "bg-stone-800/80 hover:bg-stone-700/80 border border-stone-600/50 hover:border-stone-500"
@@ -77,9 +78,10 @@ export function GlobeTimeline({
               return (
                 <button
                   key={year}
+                  type="button"
                   onClick={() => handleYearChange(year)}
                   className={cn(
-                    "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden",
+                    "group relative px-6 py-3.5 rounded-2xl transition-all duration-300 min-w-[110px] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900",
                     isSelected
                       ? "bg-gradient-to-br from-olive-500 via-pink-500 to-rose-500 shadow-lg shadow-olive-500/30 scale-105 hover:shadow-xl hover:shadow-olive-500/40"
                       : "bg-stone-800/80 hover:bg-stone-700/80 border border-stone-600/50 hover:border-stone-500"

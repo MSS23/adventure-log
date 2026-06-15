@@ -258,8 +258,9 @@ export function TrendingDestinations() {
         {/* Left Arrow */}
         {scrollPosition > 0 && (
           <button
+            type="button"
             onClick={() => handleScroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/55 p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center min-h-10 min-w-10 rounded-full bg-black/55 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/70 active:scale-[0.97] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             aria-label="Scroll left"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -331,8 +332,9 @@ export function TrendingDestinations() {
 
         {/* Right Arrow */}
         <button
+          type="button"
           onClick={() => handleScroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/55 p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center min-h-10 min-w-10 rounded-full bg-black/55 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/70 active:scale-[0.97] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           aria-label="Scroll right"
         >
           <ChevronRight className="h-5 w-5" />

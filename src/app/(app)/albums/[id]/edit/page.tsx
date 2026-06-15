@@ -401,6 +401,7 @@ export default function EditAlbumPage() {
     return (
       <div className="space-y-8">
         <button
+          type="button"
           onClick={() => router.back()}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
         >
@@ -432,6 +433,7 @@ export default function EditAlbumPage() {
     return (
       <div className="space-y-8">
         <button
+          type="button"
           onClick={() => router.back()}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
         >
@@ -458,6 +460,7 @@ export default function EditAlbumPage() {
       {/* Header */}
       <div className="space-y-4">
         <button
+          type="button"
           onClick={() => router.back()}
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md p-1 -m-1"
         >
@@ -771,6 +774,7 @@ export default function EditAlbumPage() {
                     {tag}
                     <button
                       type="button"
+                      aria-label={`Remove tag ${tag}`}
                       onClick={() => removeTag(tag)}
                       className="ml-1 hover:text-destructive cursor-pointer transition-all duration-200 active:scale-[0.9] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-sm"
                     >

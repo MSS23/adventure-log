@@ -28,11 +28,12 @@ export function ThemeToggle() {
 
   return (
     <button
+      type="button"
       onClick={toggleTheme}
       className="relative flex items-center justify-center w-9 h-9 rounded-xl
         bg-muted hover:bg-border/70 dark:hover:bg-muted/70
         text-muted-foreground hover:text-foreground
-        transition-colors duration-200
+        transition-colors duration-200 active:scale-[0.97]
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
         focus-visible:ring-offset-background"
       title={config.nextLabel}
@@ -62,10 +63,12 @@ export function ThemeToggleWithLabel() {
         return (
           <button
             key={value}
+            type="button"
             onClick={() => setTheme(value)}
             className={`
               relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
-              transition-all duration-200
+              transition-all duration-200 active:scale-[0.97]
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background
               ${isActive
                 ? 'text-primary bg-card shadow-sm dark:bg-background dark:shadow-none'
                 : 'text-muted-foreground hover:text-foreground'

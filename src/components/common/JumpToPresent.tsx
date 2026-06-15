@@ -74,8 +74,9 @@ export function JumpToPresentFAB({
           )}
         >
           <button
+            type="button"
             onClick={onJump}
-            className="relative flex items-center justify-center w-14 h-14 bg-olive-600 hover:bg-olive-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all active:scale-95"
+            className="relative flex items-center justify-center w-14 h-14 bg-olive-600 hover:bg-olive-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 ease-out active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="Jump to present"
           >
             <ArrowUp className="h-6 w-6" />

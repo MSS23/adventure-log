@@ -226,10 +226,12 @@ export function LocationPreview({
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
                       {location.favoritePhotoUrls.map((_, index) => (
                         <button
+                          type="button"
                           key={index}
                           onClick={() => setCurrentPhotoIndex(index)}
+                          aria-label={`View photo ${index + 1}`}
                           className={cn(
-                            'w-2 h-2 rounded-full transition-all',
+                            'w-2 h-2 rounded-full transition-all outline-none focus-visible:ring-2 focus-visible:ring-white/70',
                             index === currentPhotoIndex
                               ? 'bg-white'
                               : 'bg-white/50 hover:bg-white/75'

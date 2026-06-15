@@ -65,6 +65,7 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
       <div className="space-y-2">
         {suggestions.slice(0, 5).map((suggestion) => (
           <button
+            type="button"
             key={suggestion.id}
             onClick={() => onSelectLocation({
               name: suggestion.name,
@@ -72,7 +73,7 @@ export function LocationSuggestions({ onSelectLocation, className }: LocationSug
               longitude: suggestion.longitude,
               countryCode: suggestion.countryCode
             })}
-            className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-olive-50 to-olive-50 dark:from-olive-950/20 dark:to-olive-950/20 hover:from-olive-100 hover:to-olive-100 dark:hover:from-olive-950/30 dark:hover:to-olive-950/30 rounded-lg transition-all duration-200 group border border-olive-100 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]"
+            className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-olive-50 to-olive-50 dark:from-olive-950/20 dark:to-olive-950/20 hover:from-olive-100 hover:to-olive-100 dark:hover:from-olive-950/30 dark:hover:to-olive-950/30 rounded-lg transition-all duration-200 ease-out active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background group border border-olive-100 dark:border-white/[0.08] hover:border-olive-300 dark:hover:border-white/[0.12]"
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className="p-2 bg-olive-100 dark:bg-olive-950/30 rounded-lg group-hover:bg-olive-200 dark:group-hover:bg-olive-950/40 transition-colors">

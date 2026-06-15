@@ -624,12 +624,13 @@ export default function TripDetailPage() {
                       </div>
                       <div className="flex flex-col gap-1">
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleCheckIn(pin.id, Boolean(pin.visited_at))
                           }}
                           className={cn(
-                            'p-1 rounded-md transition-colors',
+                            'flex items-center justify-center h-8 w-8 rounded-md transition-colors active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                             pin.visited_at
                               ? 'text-primary hover:bg-primary/10'
                               : 'text-muted-foreground hover:bg-muted'
@@ -641,11 +642,12 @@ export default function TripDetailPage() {
                         </button>
                         {canDelete && (
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleDeletePin(pin.id)
                             }}
-                            className="p-1 rounded-md text-destructive transition-colors hover:bg-destructive/10"
+                            className="flex items-center justify-center h-8 w-8 rounded-md text-destructive transition-colors hover:bg-destructive/10 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                             aria-label="Delete pin"
                           >
                             <Trash2 className="h-3.5 w-3.5" />

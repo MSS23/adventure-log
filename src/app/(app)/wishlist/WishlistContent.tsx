@@ -640,7 +640,10 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
               {travelPartners.map((partner) => (
                 <button
                   key={partner.id}
+                  type="button"
                   onClick={() => handleExpandPartner(partner.id)}
+                  aria-label={`View ${partner.display_name || partner.username}'s wishlist`}
+                  aria-pressed={expandedPartner === partner.id}
                   className={cn(
                     'flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none min-w-[44px] min-h-[44px]',
                     expandedPartner === partner.id

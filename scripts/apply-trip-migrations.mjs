@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * One-shot runner for Trip Planner migrations (26 + 27).
+ * One-shot runner for the Trip Planner migrations (26, 27, 28, 29, 40, 41).
  *
  * Strategy:
  *   1. If SUPABASE_ACCESS_TOKEN is set → use the Supabase Management API
@@ -38,6 +38,12 @@ const MIGRATIONS = [
   '27_trip_planner_phase2.sql',
   '28_feature_batch_2.sql',
   '29_moderation_and_errors.sql',
+  // 40 enables Supabase Realtime on trip_pins/trip_members — without it the
+  // collaborative live-sync (the headline of Trip Planner) silently never
+  // fires. 41 restores the trips INSERT RLS policy lost in the Clerk auth
+  // migration. Both are idempotent, so re-running the whole batch is safe.
+  '40_trip_realtime.sql',
+  '41_fix_trips_insert_policy.sql',
 ]
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL

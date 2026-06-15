@@ -453,12 +453,13 @@ function AlbumsPageContent() {
                         </Button>
                       </Link>
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault()
                           e.stopPropagation()
                           setQuickDeleteAlbum(draft)
                         }}
-                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        className="flex items-center justify-center min-h-11 min-w-11 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200 cursor-pointer active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         title="Delete draft"
                         aria-label={`Delete draft ${draft.title}`}
                       >
@@ -702,12 +703,13 @@ function AlbumsPageContent() {
                               </div>
                               {!isViewingOtherUser && (
                                 <button
+                                  type="button"
                                   onClick={(e) => {
                                     e.preventDefault()
                                     e.stopPropagation()
                                     setQuickDeleteAlbum(album)
                                   }}
-                                  className="bg-destructive/80 hover:bg-destructive backdrop-blur-sm text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                                  className="bg-destructive/80 hover:bg-destructive backdrop-blur-sm text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                                   title="Delete album"
                                   aria-label={`Delete ${album.title}`}
                                 >
@@ -720,12 +722,13 @@ function AlbumsPageContent() {
                           {/* Quick delete button (mobile) - subtle, bottom-right */}
                           {!isViewingOtherUser && (
                             <button
+                              type="button"
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
                                 setQuickDeleteAlbum(album)
                               }}
-                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/55 active:bg-destructive backdrop-blur-sm text-white/90 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/55 active:bg-destructive backdrop-blur-sm text-white/90 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                               aria-label={`Delete ${album.title}`}
                             >
                               <Trash2 className="h-3 w-3" />

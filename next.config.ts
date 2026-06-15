@@ -179,7 +179,31 @@ const nextConfig: NextConfig = {
   // Headers for security and performance (disabled for mobile builds)
   ...(!isMobile && {
     async headers() {
+      // Content-Security-Policy, emitted in Report-Only mode so violations are
+      // reported (browser console / report-uri) without blocking anything.
+      // Validate against real traffic, then rename the header below to
+      // 'Content-Security-Policy' to enforce. Origins cover Supabase, Vercel
+      // Analytics, Sentry, Mapbox, OpenWeather and OSM/Nominatim.
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      const cspReportOnly = [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' data: https://fonts.gstatic.com",
+        "img-src 'self' data: blob: https:",
+        `connect-src 'self' ${supabaseUrl} https://*.supabase.co wss: https://api.openweathermap.org https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com https://nominatim.openstreetmap.org https://*.ingest.sentry.io https://*.sentry.io https://va.vercel-scripts.com`,
+        "worker-src 'self' blob:",
+        "child-src 'self' blob:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+      ].join('; ')
+
       const securityHeaders = [
+        {
+          key: 'Content-Security-Policy-Report-Only',
+          value: cspReportOnly,
+        },
         {
           key: 'Strict-Transport-Security',
           value: 'max-age=31536000; includeSubDomains; preload',

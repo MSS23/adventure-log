@@ -166,7 +166,10 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
               {/* View Toggle */}
               <div className="flex items-center rounded-xl border border-border bg-card p-1">
                 <button
+                  type="button"
                   onClick={() => setViewMode('grid')}
+                  aria-label="Grid view"
+                  aria-pressed={viewMode === 'grid'}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]',
                     viewMode === 'grid'
@@ -178,7 +181,10 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                   <span className="hidden sm:inline">All</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setViewMode('collections')}
+                  aria-label="Collections view"
+                  aria-pressed={viewMode === 'collections'}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]',
                     viewMode === 'collections'
@@ -274,7 +280,9 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                       >
                         {/* Collection Header */}
                         <button
+                          type="button"
                           onClick={() => toggleGroup(group.key)}
+                          aria-expanded={!isCollapsed}
                           className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/60 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3">
@@ -448,6 +456,7 @@ function AlbumCard({
       {/* Remove from Saved Button */}
       <div className="absolute top-2 right-2 z-10">
         <motion.button
+          type="button"
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()

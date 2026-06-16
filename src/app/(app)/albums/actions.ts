@@ -651,10 +651,10 @@ export async function deletePhoto(photoId: string): Promise<{ success: boolean; 
       return { success: false, error: 'Authentication required' }
     }
 
-    // m35 rewrote delete_photo_from_album as (p_photo_id UUID, p_album_id UUID)
-    // and now resolves the caller via clerk_user_id() inside the function — so
-    // we no longer pass p_user_id, but we DO need to look up the album_id since
-    // the function uses it as part of its WHERE clause for the DELETE.
+    // delete_photo_from_album takes (p_photo_id UUID, p_album_id UUID) and
+    // resolves the caller via auth.uid() inside the function — so we don't pass
+    // a user id, but we DO need to look up the album_id since the function uses
+    // it as part of its WHERE clause for the DELETE.
     const { data: photoRow, error: photoLookupError } = await supabase
       .from('photos')
       .select('album_id')

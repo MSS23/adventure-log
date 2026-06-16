@@ -179,15 +179,23 @@ const nextConfig: NextConfig = {
   // Headers for security and performance (disabled for mobile builds)
   ...(!isMobile && {
     async headers() {
-      // Content-Security-Policy, emitted in Report-Only mode so violations are
-      // reported (browser console / report-uri) without blocking anything.
-      // Validate against real traffic, then rename the header below to
-      // 'Content-Security-Policy' to enforce. Origins cover Supabase, Vercel
+      // Content-Security-Policy (enforced). Origins cover Supabase, Vercel
       // Analytics, Sentry, Mapbox, OpenWeather and OSM/Nominatim.
+      //
+      // script-src: 'unsafe-inline' is still required (Next.js inline bootstrap
+      // + the inline theme script in layout.tsx; a full nonce migration is a
+      // separate follow-up). 'unsafe-eval' is only allowed in development —
+      // Next.js dev/HMR needs it — and is dropped in production. We allow
+      // 'wasm-unsafe-eval' in production so libraries that compile WebAssembly
+      // keep working without re-enabling JS eval.
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-      const cspReportOnly = [
+      const isDev = process.env.NODE_ENV !== 'production'
+      const scriptSrc = isDev
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com"
+        : "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://va.vercel-scripts.com"
+      const csp = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+        scriptSrc,
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' data: https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
@@ -201,8 +209,8 @@ const nextConfig: NextConfig = {
 
       const securityHeaders = [
         {
-          key: 'Content-Security-Policy-Report-Only',
-          value: cspReportOnly,
+          key: 'Content-Security-Policy',
+          value: csp,
         },
         {
           key: 'Strict-Transport-Security',

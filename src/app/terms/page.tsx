@@ -18,7 +18,7 @@ export default function TermsPage() {
           Home
         </Link>
 
-        <p className="al-eyebrow mt-8 mb-1">Last updated · April 2026</p>
+        <p className="al-eyebrow mt-8 mb-1">Last updated · June 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Terms of Service</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
           By creating an Adventure Log account you agree to these terms. They cover what you can do with the service and what we ask of you in return.
@@ -66,7 +66,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="9. Contact">
-          <p>Questions about these Terms? Email <a className="text-primary underline" href="mailto:hello@adventure-log.app">hello@adventure-log.app</a>.</p>
+          <p>Questions about these Terms? Email <a className="text-primary underline" href="mailto:legal@adventurelog.app">legal@adventurelog.app</a>.</p>
         </Section>
       </div>
     </div>

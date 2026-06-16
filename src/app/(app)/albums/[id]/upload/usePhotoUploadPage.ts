@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { extractPhotoExif, type ExifData } from '@/lib/utils/exif-extraction'
+import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
+import { uploadPhotoFile } from '@/lib/api/upload'
 import { hashFile } from '@/lib/utils/file-hash'
 import { Toast } from '@capacitor/toast'
 import type { Album, Photo } from '@/types/database'
@@ -260,17 +262,14 @@ export function usePhotoUploadPage() {
           prev.map(p => (p.id === photo.id ? { ...p, uploading: true, progress: 0 } : p))
         )
 
-        const fileExt = photo.file.name.split('.').pop()
-        const fileName = `${album.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
+        // Strip GPS/EXIF + resize before upload (privacy: no hidden location data)
+        const preparedFile = await prepareImageForUpload(photo.file)
+        const fileExt = preparedFile.name.split('.').pop()
+        const fallbackPath = `${album.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
 
-        const { error: uploadError } = await supabase.storage
-          .from('photos')
-          .upload(fileName, photo.file, {
-            cacheControl: '3600',
-            upsert: false
-          })
-
-        if (uploadError) throw uploadError
+        // Upload via the server gatekeeper (auth + rate limit + ownership +
+        // optional content moderation), falling back to direct upload.
+        const fileName = await uploadPhotoFile(album.id, preparedFile, fallbackPath)
 
         setPhotos(prev =>
           prev.map(p => (p.id === photo.id ? { ...p, progress: 50 } : p))
@@ -287,13 +286,11 @@ export function usePhotoUploadPage() {
         }
 
         if (photo.exif) {
-          photoData.exif_data = photo.exif
-
-          if (photo.exif.location?.latitude && photo.exif.location?.longitude) {
-            photoData.latitude = photo.exif.location.latitude
-            photoData.longitude = photo.exif.location.longitude
-            photoData.altitude = photo.exif.location.altitude || null
-          }
+          // Persist non-location EXIF only. GPS is intentionally NOT stored and
+          // is stripped from the image file itself (see prepareImageForUpload).
+          photoData.exif_data = photo.exif.location
+            ? { ...photo.exif, location: undefined }
+            : photo.exif
 
           if (photo.exif.camera?.make || photo.exif.camera?.model) {
             photoData.camera_make = photo.exif.camera.make || null

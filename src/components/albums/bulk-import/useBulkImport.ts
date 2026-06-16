@@ -7,6 +7,8 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { extractPhotoExif } from '@/lib/utils/exif-extraction'
+import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
+import { uploadPhotoFile } from '@/lib/api/upload'
 import type { ProcessedPhoto, PhotoGroup, Stage } from './types'
 import {
   groupPhotosByTrip,
@@ -359,21 +361,21 @@ export function useBulkImport() {
         // Upload photos
         for (let i = 0; i < group.photos.length; i++) {
           const photo = group.photos[i]
-          const fileExt = photo.file.name.split('.').pop() || 'jpg'
-          const fileName = `${album.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
+          // Strip GPS/EXIF + resize before upload. The album pin is set from the
+          // group center above; per-photo GPS is never stored or kept in the file.
+          const preparedFile = await prepareImageForUpload(photo.file)
+          const fileExt = preparedFile.name.split('.').pop() || 'jpg'
+          const fallbackPath = `${album.id}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
 
-          const { error: uploadError } = await supabase.storage
-            .from('photos')
-            .upload(fileName, photo.file, {
-              cacheControl: '3600',
-              upsert: false,
-            })
-
-          if (uploadError) {
+          // Upload via the server gatekeeper, falling back to direct upload.
+          let fileName: string
+          try {
+            fileName = await uploadPhotoFile(album.id, preparedFile, fallbackPath)
+          } catch (uploadError) {
             log.error('Failed to upload photo', {
               component: 'BulkPhotoImport',
               fileName: photo.file.name,
-              error: uploadError.message,
+              error: uploadError instanceof Error ? uploadError.message : String(uploadError),
             })
             // Continue with remaining photos
             continue
@@ -388,10 +390,9 @@ export function useBulkImport() {
             created_at: new Date().toISOString(),
           }
 
-          if (photo.lat !== null && photo.lng !== null) {
-            photoData.latitude = photo.lat
-            photoData.longitude = photo.lng
-          }
+          // Per-photo GPS is intentionally not persisted (stripped on upload).
+          // The album-level pin (latitude/longitude/location_name) comes from
+          // the group center computed above.
 
           if (photo.exif?.dateTime?.dateTimeOriginal) {
             photoData.taken_at = photo.exif.dateTime.dateTimeOriginal

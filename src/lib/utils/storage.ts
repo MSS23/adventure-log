@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { log } from './logger'
 import { moderateImage } from '@/lib/services/moderation'
+import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 
 export interface StorageBucketConfig {
   id: string
@@ -422,12 +423,15 @@ export const uploadPhoto = async (file: File, userId?: string): Promise<string> 
     throw new StorageError(modResult.reason || 'This file did not pass our content checks.', 'MODERATION_FAILED')
   }
 
+  // Strip GPS/EXIF + resize before upload (privacy)
+  const prepared = await prepareImageForUpload(file)
+
   // Fix path duplication: don't add "photos/" prefix since bucket is already "photos"
-  const filePath = storageHelper.generateUniqueFilePath(file.name, userId)
+  const filePath = storageHelper.generateUniqueFilePath(prepared.name, userId)
   log.info('Generated file path', { component: 'Storage', action: 'upload-photo', filePath })
 
   try {
-    const result = await storageHelper.uploadWithRetry('photos', filePath, file)
+    const result = await storageHelper.uploadWithRetry('photos', filePath, prepared)
     log.info('uploadPhoto success', { component: 'Storage', action: 'upload-photo-success', result })
     return result
   } catch (error) {
@@ -437,15 +441,19 @@ export const uploadPhoto = async (file: File, userId?: string): Promise<string> 
 }
 
 export const uploadAvatar = async (file: File, userId: string): Promise<string> => {
+  // Strip GPS/EXIF + resize before upload (privacy)
+  const prepared = await prepareImageForUpload(file)
   // Don't add "avatars/" prefix since bucket is already "avatars"
-  const filePath = storageHelper.generateUniqueFilePath(file.name, userId)
-  return storageHelper.uploadWithRetry('avatars', filePath, file)
+  const filePath = storageHelper.generateUniqueFilePath(prepared.name, userId)
+  return storageHelper.uploadWithRetry('avatars', filePath, prepared)
 }
 
 export const uploadCoverPhoto = async (file: File, userId: string): Promise<string> => {
+  // Strip GPS/EXIF + resize before upload (privacy)
+  const prepared = await prepareImageForUpload(file)
   // Don't add "covers/" prefix since bucket is already "covers"
-  const filePath = storageHelper.generateUniqueFilePath(file.name, userId)
-  return storageHelper.uploadWithRetry('covers', filePath, file)
+  const filePath = storageHelper.generateUniqueFilePath(prepared.name, userId)
+  return storageHelper.uploadWithRetry('covers', filePath, prepared)
 }
 
 export const deleteCoverPhoto = async (publicUrl: string): Promise<void> => {

@@ -12,14 +12,9 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const OAUTH_REDIRECT_SCHEME = 'com.adventurelog.app';
 
 // Hostnames the WebView is allowed to navigate to without leaving the app.
-// Clerk loads its `clerk.browser.js` runtime from `*.clerk.accounts.dev` (dev)
-// or `*.clerk.com` (prod), so the WebView needs to whitelist them or the JS
-// loader will be blocked by Capacitor's default same-origin navigation guard.
-// Supabase needs to be reachable for queries; same for the Mapbox tile API.
+// SSO providers (Google/Apple/Discord) need to be reachable for the OAuth
+// redirect; Supabase for queries/auth; Mapbox for the tile API.
 const ALLOWED_NAVIGATION = [
-  '*.clerk.accounts.dev',
-  '*.clerk.com',
-  '*.accounts.dev',
   'accounts.google.com',
   'appleid.apple.com',
   'discord.com',

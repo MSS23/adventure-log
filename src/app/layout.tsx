@@ -9,7 +9,7 @@ import { ToastProvider } from "@/components/ui/toast-provider";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { validateEnv } from "@/lib/utils/env";
 import { initializeEnvironmentValidation } from "@/lib/utils/environment-validator";
-import { Analytics } from '@vercel/analytics/react';
+import { AnalyticsConsent } from "@/components/legal/AnalyticsConsent";
 import { ThemedToaster } from "@/components/ui/ThemedToaster";
 import { GlobalMotionConfig } from "@/components/providers/GlobalMotionConfig";
 
@@ -199,7 +199,7 @@ export default function RootLayout({
                     <ConditionalAuthProvider>
                       <ServiceWorkerRegistration />
                       <main id="main-content">{children}</main>
-                      <Analytics />
+                      <AnalyticsConsent />
                     </ConditionalAuthProvider>
                   </ToastProvider>
                   <ThemedToaster />

@@ -19,6 +19,7 @@ function SignupForm() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [ageConfirmed, setAgeConfirmed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [checkEmail, setCheckEmail] = useState(false)
@@ -26,6 +27,12 @@ function SignupForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    if (!ageConfirmed) {
+      setError('Please confirm you meet the minimum age and accept the Terms and Privacy Policy.')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -136,6 +143,22 @@ function SignupForm() {
             />
           </div>
 
+          <div className="flex items-start gap-2.5">
+            <input
+              id="age-consent"
+              type="checkbox"
+              required
+              checked={ageConfirmed}
+              onChange={(e) => setAgeConfirmed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <label htmlFor="age-consent" className="text-xs leading-relaxed text-muted-foreground">
+              I am at least 16 years old (or the minimum age required in my country) and I agree to the{' '}
+              <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>{' '}and{' '}
+              <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+            </label>
+          </div>
+
           {error && (
             <p
               role="alert"
@@ -147,7 +170,7 @@ function SignupForm() {
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={loading || !ageConfirmed}
             className="w-full"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}

@@ -468,6 +468,7 @@ export default function HomePage() {
               <Link href="/discover" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Discover</Link>
               <Link href="/privacy" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Privacy</Link>
               <Link href="/terms" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Terms</Link>
+              <Link href="/cookies" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Cookies</Link>
               <Link href="/contact" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Contact</Link>
             </nav>
             <div className="text-xs text-stone-600">

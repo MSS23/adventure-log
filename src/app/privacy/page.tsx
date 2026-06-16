@@ -18,15 +18,16 @@ export default function PrivacyPage() {
           Home
         </Link>
 
-        <p className="al-eyebrow mt-8 mb-1">Last updated · April 2026</p>
+        <p className="al-eyebrow mt-8 mb-1">Last updated · June 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Privacy Policy</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
-          Adventure Log helps you document and share your travels. This policy explains what we collect, why, and what your rights are. We wrote it to be readable — no dark patterns.
+          Adventure Log helps you document and share your travels. This policy explains what we collect, why, and what your rights are. We wrote it to be readable — no dark patterns. It works alongside our <Link href="/terms" className="text-primary underline">Terms of Service</Link> and <Link href="/cookies" className="text-primary underline">Cookie Policy</Link>.
         </p>
 
         <Section title="1. What we collect">
           <p>When you create an account we store your email address and whatever profile fields you choose to fill in (username, display name, bio, avatar, location, privacy preference).</p>
-          <p>When you log a trip we store the photos you upload, the locations and dates attached to them, and any captions or descriptions you add.</p>
+          <p>When you log a trip we store the photos you upload, the locations and dates you attach to an album, and any captions or descriptions you add.</p>
+          <p><strong>Photo location data:</strong> photos often contain hidden GPS coordinates and other camera metadata (EXIF). To protect you, we <strong>strip GPS/location metadata from every photo as it is uploaded</strong> — it is not stored and is not embedded in the image other people can view or download. Location on the map comes only from the place you choose for an album, not from your photos&rsquo; hidden data.</p>
           <p>We collect minimal device information (browser, OS, approximate region inferred from IP) to keep the service running, detect abuse, and debug errors. We do <strong>not</strong> use third-party ad trackers.</p>
         </Section>
 
@@ -45,35 +46,41 @@ export default function PrivacyPage() {
           <p>Your globe, passport, and stats visibility mirror the visibility of the albums that feed into them.</p>
         </Section>
 
-        <Section title="4. Third-party services we rely on">
+        <Section title="4. Analytics, error monitoring &amp; cookies">
+          <p>We use <strong>privacy-friendly, cookieless</strong> product analytics (Vercel Web Analytics) to understand aggregate usage, and <strong>Sentry</strong> for error monitoring so we can fix crashes. Sentry may record a limited session replay to reproduce bugs — text is masked and images/media are blocked.</p>
+          <p>Where required (e.g. in the EU/UK), analytics and session-replay are <strong>off until you consent</strong> via the cookie banner, and you can change your choice any time. We use only essential cookies/local storage (your session, theme, and consent choice) without asking. See our <Link href="/cookies" className="text-primary underline">Cookie Policy</Link> for details.</p>
+        </Section>
+
+        <Section title="5. Third-party services we rely on">
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Supabase</strong> — database, file storage, authentication.</li>
-            <li><strong>Vercel</strong> — hosting and edge delivery.</li>
+            <li><strong>Vercel</strong> — hosting, edge delivery, and cookieless analytics.</li>
+            <li><strong>Sentry</strong> — error and performance monitoring.</li>
             <li><strong>OpenStreetMap / Nominatim</strong> — reverse geocoding (we never send your identity with these requests).</li>
             <li><strong>Google / Discord / Apple</strong> — only when you choose SSO, for sign-in only.</li>
             <li><strong>Mapbox</strong> — map tiles, if enabled.</li>
           </ul>
         </Section>
 
-        <Section title="5. Your rights">
+        <Section title="6. Your rights">
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong>Access</strong> — you can download all your data from Settings → Export (coming soon; email us meanwhile).</li>
-            <li><strong>Deletion</strong> — Settings → Delete Account permanently removes your account and associated content.</li>
-            <li><strong>Rectification</strong> — edit your profile, albums, captions any time.</li>
-            <li><strong>Objection / portability</strong> — contact us and we will comply with GDPR and CCPA requests within 30 days.</li>
+            <li><strong>Access &amp; portability</strong> — download all your data from <strong>Settings → Export your data</strong> as a JSON file.</li>
+            <li><strong>Deletion</strong> — <strong>Settings → Delete Account</strong> removes your account; data is purged within 30 days (see Retention).</li>
+            <li><strong>Rectification</strong> — edit your profile, albums, and captions any time.</li>
+            <li><strong>Objection / restriction</strong> — contact us and we will comply with GDPR, UK GDPR, and CCPA requests within 30 days. You also have the right to lodge a complaint with your local data protection authority.</li>
           </ul>
         </Section>
 
-        <Section title="6. Children">
-          <p>Adventure Log is not directed at children under 13. If we learn we have collected information from a child under 13, we will delete it promptly.</p>
+        <Section title="7. Children">
+          <p>Adventure Log is not directed at children. You must be at least 13 years old to use it (16 in the EEA/UK, or the minimum age required by your local law). If we learn we have collected personal information from a child below the applicable age, we will delete it promptly.</p>
         </Section>
 
-        <Section title="7. Retention">
+        <Section title="8. Retention">
           <p>We keep your data as long as your account exists. Deleted accounts are purged from production within 30 days; database backups may retain encrypted copies for up to 90 days before being overwritten.</p>
         </Section>
 
-        <Section title="8. Contact">
-          <p>Questions about this policy or a privacy request? Email <a className="text-primary underline" href="mailto:privacy@adventure-log.app">privacy@adventure-log.app</a>.</p>
+        <Section title="9. Contact">
+          <p>Questions about this policy or a privacy request? Email <a className="text-primary underline" href="mailto:privacy@adventurelog.app">privacy@adventurelog.app</a>.</p>
         </Section>
 
         <p className="text-xs text-muted-foreground mt-10">

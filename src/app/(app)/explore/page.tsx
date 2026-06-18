@@ -9,6 +9,7 @@ import { FriendsMapSection } from '@/components/explore/FriendsMapSection'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
 import { FeaturedDestinationSection } from '@/components/explore/FeaturedDestinationSection'
+import { RecommendationsSection } from '@/components/explore/RecommendationsSection'
 import { ExploreSearchResults } from '@/components/explore/ExploreSearchResults'
 import { Leaderboard } from '@/components/leaderboard/Leaderboard'
 
@@ -153,12 +154,26 @@ export default function ExplorePage() {
               <CreatorsToFollowSection limit={4} />
             </motion.section>
 
+            {/* Top Recommendations */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.24 }}
+            >
+              <SectionHeader
+                eyebrow="Recommended"
+                title="Top recommendations"
+                href="/explore/recommendations"
+              />
+              <RecommendationsSection limit={3} />
+            </motion.section>
+
             {/* Leaderboard */}
             <motion.section
               className="pb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.24 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
             >
               <SectionHeader
                 eyebrow="Leaderboard"

@@ -221,6 +221,31 @@ export interface Like {
   user?: User;
 }
 
+// Place recommendations (crowdsourced pre-trip research) — see migration 43
+export type PlaceType = 'eat' | 'visit' | 'stay' | 'activity';
+
+export interface PlaceRecommendation {
+  id: string;
+  created_by: string;
+  title: string;
+  place_type: PlaceType;
+  tip?: string | null;
+  city: string;
+  country_code?: string | null;
+  location_name?: string | null;
+  latitude: number;
+  longitude: number;
+  bump_count: number;
+  created_at: string;
+  updated_at: string;
+  // Derived per-request (not columns): whether the current viewer has bumped
+  has_bumped?: boolean;
+  // Relations - multiple possible relation names for compatibility
+  user?: User;
+  users?: User;
+  profiles?: User;
+}
+
 // Comments table (polymorphic)
 export interface Comment {
   id: string;

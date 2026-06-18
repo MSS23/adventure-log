@@ -20,6 +20,7 @@
     "migrate:trips": "node -r dotenv/config scripts/apply-trip-migrations.mjs dotenv_config_path=.env.local",
     "migrate:trips:print": "node -r dotenv/config scripts/apply-trip-migrations.mjs --print dotenv_config_path=.env.local",
     "migrate:trips:check": "node -r dotenv/config scripts/apply-trip-migrations.mjs --check dotenv_config_path=.env.local",
+    "migrate:recs": "node -r dotenv/config scripts/apply-migration.mjs 43_place_recommendations.sql dotenv_config_path=.env.local",
     "mobile:build": "node scripts/mobile-build.mjs",
     "mobile:sync": "npx cap sync",
     "mobile:dev": "npm run mobile:build && npx cap open android",

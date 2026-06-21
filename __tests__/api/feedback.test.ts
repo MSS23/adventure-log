@@ -76,6 +76,14 @@ describe('/api/feedback POST', () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
     mockDiscord.mockResolvedValue(false)
     mockLinear.mockResolvedValue(null)
+    // Default: the RLS-bound client persists the feedback row (no service-role key needed).
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'feedback') {
+        return { insert: () => ({ select: () => ({ single: async () => ({ data: { id: 'fb_1' }, error: null }) }) }) }
+      }
+      // users profile lookup
+      return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) }
+    })
   })
 
   it('returns 429 when rate limited', async () => {
@@ -118,14 +126,38 @@ describe('/api/feedback POST', () => {
     expect(data.ok).toBe(true)
     expect(mockDiscord).toHaveBeenCalledTimes(1)
     expect(mockLinear).toHaveBeenCalledTimes(1)
-    // No service-role key -> nothing persisted -> id is null
-    expect(data.id).toBeNull()
+    // Persisted via the RLS-bound client even without a service-role key.
+    expect(data.id).toBe('fb_1')
+  })
+
+  it('persists via the service-role client when the RLS write is rejected', async () => {
+    // RLS-bound insert fails, admin client available -> falls back to admin.
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'feedback') {
+        return { insert: () => ({ select: () => ({ single: async () => ({ data: null, error: { message: 'row-level security' } }) }) }) }
+      }
+      return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) }
+    })
+    mockAdmin = {
+      from: () => ({
+        insert: () => ({ select: () => ({ single: async () => ({ data: { id: 'fb_admin' }, error: null }) }) }),
+        update: () => ({ eq: async () => ({ error: null }) }),
+      }),
+    }
+
+    const res = await POST(postReq({ category: 'bug', message: 'fallback path works' }))
+    const data = await res.json()
+    expect(res.status).toBe(201)
+    expect(data.id).toBe('fb_admin')
   })
 
   it('attaches the username for a signed-in user', async () => {
     mockGetUser.mockResolvedValueOnce({ data: { user: { id: 'user-1' } }, error: null })
-    mockFrom.mockReturnValueOnce({
-      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { username: 'jane' }, error: null }) }) }),
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'feedback') {
+        return { insert: () => ({ select: () => ({ single: async () => ({ data: { id: 'fb_1' }, error: null }) }) }) }
+      }
+      return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { username: 'jane' }, error: null }) }) }) }
     })
 
     const res = await POST(postReq({ category: 'praise', message: 'love this app so much' }))

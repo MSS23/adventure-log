@@ -60,27 +60,43 @@ export async function POST(request: NextRequest) {
     userId: user?.id ?? null,
   }
 
-  // 1) Durable record first (needs the service-role key; non-fatal if absent).
+  // 1) Durable record first. Persist via the user-scoped (RLS-bound) client so
+  //    feedback is stored even when SUPABASE_SERVICE_ROLE_KEY is not configured;
+  //    the feedback_insert_own policy permits a signed-in or anonymous self-insert.
+  //    Fall back to the service-role client if the RLS write is rejected.
   let feedbackId: string | undefined
-  if (supabaseAdmin) {
-    const { data: row, error } = await supabaseAdmin
-      .from('feedback')
-      .insert({
-        user_id: payload.userId,
-        email: payload.email,
-        category: payload.category,
-        message: payload.message,
-        page_url: payload.pageUrl,
-        user_agent: payload.userAgent,
-        app_version: payload.appVersion,
-      })
-      .select('id')
-      .single()
-    if (error) {
-      log.warn('Failed to persist feedback row', { component: 'FeedbackAPI', action: 'insert', error: error.message })
+  const insertRow = {
+    user_id: payload.userId,
+    email: payload.email,
+    category: payload.category,
+    message: payload.message,
+    page_url: payload.pageUrl,
+    user_agent: payload.userAgent,
+    app_version: payload.appVersion,
+  }
+
+  const { data: row, error } = await supabase
+    .from('feedback')
+    .insert(insertRow)
+    .select('id')
+    .single()
+  if (error) {
+    if (supabaseAdmin) {
+      const { data: adminRow, error: adminError } = await supabaseAdmin
+        .from('feedback')
+        .insert(insertRow)
+        .select('id')
+        .single()
+      if (adminError) {
+        log.warn('Failed to persist feedback row', { component: 'FeedbackAPI', action: 'insert', error: adminError.message })
+      } else {
+        feedbackId = adminRow.id
+      }
     } else {
-      feedbackId = row.id
+      log.warn('Failed to persist feedback row', { component: 'FeedbackAPI', action: 'insert', error: error.message })
     }
+  } else {
+    feedbackId = row.id
   }
 
   // 2) Best-effort fan-out to Discord + Linear in parallel.

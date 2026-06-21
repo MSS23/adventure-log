@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import { useFavorites, type Favorite } from '@/lib/hooks/useFavorites'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-import { log } from '@/lib/utils/logger'
 
 interface FavoriteButtonProps {
   targetId: string
@@ -35,32 +34,16 @@ export function FavoriteButton({
   disabled = false,
   onToggle
 }: FavoriteButtonProps) {
-  const { isFavorited, toggleFavorite, getFavoritesCount, loading, checkOwnership } = useFavorites({
+  const { isFavorited, toggleFavorite, getFavoritesCount, loading } = useFavorites({
     targetType,
     autoFetch: true
   })
 
   const [isAnimating, setIsAnimating] = useState(false)
-  const [isOwnContent, setIsOwnContent] = useState(false)
   const favorited = isFavorited(targetId, targetType)
   const count = showCount ? getFavoritesCount(targetType) : 0
 
-  // Check ownership on mount
-  useEffect(() => {
-    const checkContentOwnership = async () => {
-      try {
-        const isOwner = await checkOwnership(targetId, targetType)
-        setIsOwnContent(isOwner)
-      } catch (error) {
-        log.error('Error checking content ownership', { component: 'FavoriteButton', action: 'check-ownership' }, error as Error)
-        setIsOwnContent(false)
-      }
-    }
-
-    checkContentOwnership()
-  }, [targetId, targetType, checkOwnership])
-
-  const isDisabled = disabled || isOwnContent
+  const isDisabled = disabled
 
   const handleClick = async () => {
     if (isDisabled || isAnimating) return
@@ -101,10 +84,6 @@ export function FavoriteButton({
   const getLabel = () => {
     if (!showLabel) return null
 
-    if (isOwnContent) {
-      return 'Cannot favorite own content'
-    }
-
     switch (targetType) {
       case 'photo':
         return favorited ? 'Favorited' : 'Add to favorites'
@@ -124,16 +103,14 @@ export function FavoriteButton({
         size={size}
         onClick={handleClick}
         disabled={isDisabled || loading || isAnimating}
-        title={isOwnContent ? 'Cannot favorite your own content' : undefined}
         className={cn(
           'relative overflow-hidden transition-colors',
           favorited && variant === 'ghost' && 'text-accent hover:text-accent hover:bg-accent/10',
           favorited && variant === 'outline' && 'border-accent/30 text-accent hover:bg-accent/10',
           favorited && variant === 'default' && 'bg-accent hover:bg-accent/90 text-accent-foreground',
-          isOwnContent && 'opacity-50 cursor-not-allowed',
           className
         )}
-        aria-label={isOwnContent ? 'Cannot favorite your own content' : `${favorited ? 'Remove from' : 'Add to'} ${targetType} favorites`}
+        aria-label={`${favorited ? 'Remove from' : 'Add to'} ${targetType} favorites`}
       >
         {/* Heart icon with animation */}
         <motion.div

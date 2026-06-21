@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { log } from '@/lib/utils/logger'
+import { getAppScrollTop, scrollAppTo } from '@/lib/utils/app-scroll'
 
 interface NavigationState {
   scrollPosition: number
@@ -137,7 +138,7 @@ export function useSmartNavigation(fallbackRoute: string = '/feed') {
   const saveScrollPosition = useCallback((customState?: Record<string, unknown>) => {
     if (typeof window === 'undefined') return
 
-    const scrollY = window.scrollY
+    const scrollY = getAppScrollTop()
     const state: NavigationState = {
       scrollPosition: scrollY,
       timestamp: Date.now(),
@@ -185,10 +186,7 @@ export function useSmartNavigation(fallbackRoute: string = '/feed') {
     if (state) {
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
-        window.scrollTo({
-          top: state.scrollPosition,
-          behavior: 'instant' as ScrollBehavior
-        })
+        scrollAppTo(state.scrollPosition, 'instant' as ScrollBehavior)
 
         log.info('Scroll position restored', {
           component: 'useSmartNavigation',

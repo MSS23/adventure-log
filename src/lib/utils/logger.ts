@@ -70,6 +70,35 @@ class Logger {
     return `[${entry.timestamp}] ${levelName}${contextStr}: ${entry.message}`
   }
 
+  /**
+   * Coerce an arbitrary thrown value into a real Error instance.
+   *
+   * Supabase's PostgrestError (and similar) is a plain object
+   * `{ code, details, hint, message }` — not an Error. Passing it straight to
+   * Sentry.captureException yields the useless "Object captured as exception
+   * with keys: code, details, hint, message" title with no stack. This wraps
+   * such objects in an Error whose message embeds the code so issues are
+   * legible and groupable, while preserving the original as `cause`.
+   */
+  private toError(error: Error | unknown): Error {
+    if (error instanceof Error) return error
+
+    if (typeof error === 'object' && error !== null) {
+      const e = error as Record<string, unknown>
+      const message = typeof e.message === 'string' ? e.message : JSON.stringify(error)
+      const wrapped = new Error(e.code ? `[${e.code}] ${message}` : message, { cause: error })
+      // Surface common Postgrest fields as Sentry-visible properties.
+      // Cast through `unknown` — TS won't convert Error → Record directly.
+      const extra = wrapped as unknown as Record<string, unknown>
+      if (e.code) extra.code = e.code
+      if (e.details) extra.details = e.details
+      if (e.hint) extra.hint = e.hint
+      return wrapped
+    }
+
+    return new Error(String(error))
+  }
+
   private formatError(error: Error | unknown): string | Error {
     if (error instanceof Error) {
       return error
@@ -176,7 +205,7 @@ class Logger {
         const Sentry = await import('@sentry/nextjs').catch(() => null)
         if (Sentry) {
           if (error) {
-            Sentry.captureException(error, {
+            Sentry.captureException(this.toError(error), {
               level: this.levelToSentryLevel(level),
               tags: {
                 component: context?.component,

@@ -386,18 +386,32 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Mobile bottom padding: nav (56px) + safe-area + breathing room */
+  /* App-shell scroll region (the locked middle). */
   .main-content-area {
-    /* pb-24 (96px) in tailwind handles most cases; this adds safe-area */
-    /* App-shell guard: clip anything that would push past the viewport edge so
-       page content stays locked between the screen sides at every breakpoint.
-       `clip` (not `hidden`) avoids creating a scroll container, so sticky
-       headers and the page's own vertical scroll keep working. */
+    /* Clip anything that would push past the viewport edge so page content
+       stays locked between the screen sides at every breakpoint. `clip` (not
+       `hidden`) on the cross axis doesn't interfere with this element's own
+       vertical scrolling. The mobile bottom clearance for the fixed tab bar is
+       handled by the inner container's padding (safe-area aware), so it isn't
+       duplicated here. */
     overflow-x: clip;
   }
-  @media (max-width: 1023px) {
-    .main-content-area {
-      padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important;
+
+  /* Inside the locked shell the page scrolls in this region, not the window,
+     so a page's `min-h-screen` (100vh) is taller than the region by the header
+     height + container padding and would force a small scroll on every page.
+     Re-base it to fill the *visible region* instead. It stays a minimum, so
+     genuinely tall pages still scroll normally; this only stops short pages
+     from scrolling and keeps `min-h-screen` centering helpers vertically
+     centered within what's actually on screen. */
+  .main-content-area .min-h-screen {
+    /* mobile: minus top nav (~3.5rem) + container pt-4/pb + safe-area */
+    min-height: calc(100dvh - 3.5rem - 7rem - env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 1024px) {
+    .main-content-area .min-h-screen {
+      /* desktop: no top nav; container pt-8 + pb-8 = 4rem */
+      min-height: calc(100dvh - 4rem);
     }
   }
 
@@ -655,6 +669,10 @@
     overflow-x: clip;
     max-width: 100%;
     position: relative;
+    /* Lock the page to the device: no rubber-band bounce / browser
+       pull-to-refresh chaining past the app's own scroll regions. Makes the
+       installed PWA feel anchored to the screen instead of floating. */
+    overscroll-behavior-y: none;
   }
 
   /* Heart animation */

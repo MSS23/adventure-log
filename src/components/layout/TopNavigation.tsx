@@ -9,6 +9,7 @@ import { NetworkStatusIndicator } from '@/components/pwa/NetworkStatusIndicator'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { FeedbackLauncher } from '@/components/feedback/FeedbackLauncher'
 import { cn } from '@/lib/utils'
+import { getAppScrollTop, onAppScroll } from '@/lib/utils/app-scroll'
 
 const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
@@ -16,10 +17,10 @@ export function TopNavigation() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4)
+    // The app shell scrolls an inner region, not the window — observe that.
+    const onScroll = () => setScrolled(getAppScrollTop() > 4)
     onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return onAppScroll(onScroll)
   }, [])
 
   return (

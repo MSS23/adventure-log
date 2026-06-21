@@ -77,14 +77,13 @@ export default function EditProfilePage() {
 
       if (!cancelled) setCheckingUsername(true)
       try {
+        // SECURITY DEFINER RPC: case-insensitive and unaffected by RLS, so it
+        // can't show a false "available" for a handle held by a private account.
         const { data, error } = await supabase
-          .from('users')
-          .select('id')
-          .eq('username', name)
-          .maybeSingle()
+          .rpc('is_username_available', { p_username: name })
 
         if (error) throw error
-        if (!cancelled) setUsernameAvailable(!data)
+        if (!cancelled) setUsernameAvailable(data === true)
       } catch (err) {
         log.error('Error checking username', { component: 'EditProfile' }, err instanceof Error ? err : new Error(String(err)))
         if (!cancelled) setUsernameAvailable(null)
@@ -123,10 +122,21 @@ export default function EditProfilePage() {
       setLoading(true)
       setError(null)
 
-      if (data.username !== profile?.username && usernameAvailable === false) {
-        setError('This username is already taken.')
-        setLoading(false)
-        return
+      // Re-check at submit time to close the gap between the debounced check and
+      // save (someone else could have claimed it in between). If the RPC itself
+      // can't be reached we don't block — the unique index (23505 below) is the
+      // authoritative backstop.
+      if (data.username !== profile?.username) {
+        const { data: available, error: availError } = await supabase
+          .rpc('is_username_available', { p_username: data.username })
+        if (availError) {
+          log.warn('Username availability re-check failed; relying on DB constraint', { component: 'EditProfile', action: 'precheck' })
+        } else if (!available) {
+          setError('This username is already taken.')
+          setUsernameAvailable(false)
+          setLoading(false)
+          return
+        }
       }
 
       let avatarUrl = profile?.avatar_url
@@ -159,7 +169,17 @@ export default function EditProfilePage() {
         })
         .eq('id', user?.id)
 
-      if (error) throw error
+      if (error) {
+        // 23505 = unique_violation: the case-insensitive username index (or the
+        // legacy UNIQUE constraint) caught a collision the pre-check missed.
+        if ((error as { code?: string }).code === '23505') {
+          setError('This username is already taken.')
+          setUsernameAvailable(false)
+          setLoading(false)
+          return
+        }
+        throw error
+      }
 
       await refreshProfile()
       router.push('/profile')

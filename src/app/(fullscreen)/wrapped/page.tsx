@@ -177,7 +177,7 @@ export default function WrappedPage() {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white p-8">
         <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
-          <Link href="/dashboard" aria-label="Back to home">
+          <Link href="/feed" aria-label="Back to home">
             <Button
               variant="ghost"
               size="icon"
@@ -225,7 +225,7 @@ export default function WrappedPage() {
     <div className="fixed inset-0 bg-black overflow-hidden">
       {/* Home + close buttons */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
-        <Link href="/dashboard" aria-label="Back to home">
+        <Link href="/feed" aria-label="Back to home">
           <Button
             variant="ghost"
             size="icon"
@@ -659,7 +659,7 @@ export default function WrappedPage() {
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Replay
                 </Button>
-                <Link href="/dashboard">
+                <Link href="/feed">
                   <Button
                     variant="ghost"
                     className="cursor-pointer text-white/65 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"

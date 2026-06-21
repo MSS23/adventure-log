@@ -11,7 +11,7 @@ export const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: S
   if (variant === 'horizontal') {
     return (
       <div className="flex items-center gap-3 rounded-xl px-2 py-2.5 -mx-2 transition-colors hover:bg-muted/60">
-        <Link href={`/u/${user.username}`}>
+        <Link href={`/profile/${user.username}`}>
           <OptimizedAvatar
             src={user.avatar_url || undefined}
             alt={user.display_name || user.username}
@@ -21,7 +21,7 @@ export const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: S
           />
         </Link>
         <div className="flex-1 min-w-0">
-          <Link href={`/u/${user.username}`} className="text-sm font-semibold text-foreground hover:text-primary transition-colors truncate block">
+          <Link href={`/profile/${user.username}`} className="text-sm font-semibold text-foreground hover:text-primary transition-colors truncate block">
             {user.display_name || user.username}
           </Link>
           <p className="text-xs text-muted-foreground">{user.album_count} {user.album_count === 1 ? 'album' : 'albums'}</p>
@@ -36,7 +36,7 @@ export const SuggestedUserCard = memo(({ user, variant = 'vertical' }: { user: S
     <div
       className="flex-shrink-0 w-36 rounded-2xl border border-border bg-card p-4 text-center cursor-pointer shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:border-primary/30 hover:shadow-[var(--shadow-hover)] hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background"
     >
-      <Link href={`/u/${user.username}`} className="block">
+      <Link href={`/profile/${user.username}`} className="block">
         <OptimizedAvatar
           src={user.avatar_url || undefined}
           alt={user.display_name || user.username}

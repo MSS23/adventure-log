@@ -257,7 +257,7 @@ export default function FeedPage() {
               return (
                 <Link
                   key={u.id}
-                  href={`/u/${u.username}`}
+                  href={`/profile/${u.username}`}
                   className="flex flex-col items-center gap-1.5 min-w-[60px] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
                   aria-label={`View ${name}'s profile`}
                 >

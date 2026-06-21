@@ -18,8 +18,10 @@ import {
   Star,
   MapPin,
   LayoutDashboard,
+  MessageSquarePlus,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useEffect, useMemo } from 'react'
 import { log } from '@/lib/utils/logger'
@@ -63,6 +65,7 @@ export function Sidebar() {
   const { user, profile, signOut } = useAuth()
 
   const [countryCount, setCountryCount] = useState<number | null>(null)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -289,6 +292,27 @@ export function Sidebar() {
             {bottomNavItems.map((item, i) =>
               renderNavItem(item, mainNavItems.length + libraryNavItems.length + i),
             )}
+
+            {/* Send feedback — opens the feedback dialog inline (not a route) */}
+            <motion.button
+              type="button"
+              onClick={() => setFeedbackOpen(true)}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                duration: 0.4,
+                ease: EDITORIAL_EASE,
+                delay:
+                  0.05 +
+                  (mainNavItems.length + libraryNavItems.length + bottomNavItems.length) * 0.04,
+              }}
+              className="w-full flex items-center gap-3 px-3 py-[9px] rounded-xl transition-colors duration-200 text-[color:var(--color-ink-soft)] hover:bg-white/60 dark:hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]/60"
+            >
+              <div className="relative flex items-center justify-center w-[18px] h-[18px] text-[color:var(--color-ink-soft)]">
+                <MessageSquarePlus className="h-[18px] w-[18px]" strokeWidth={1.6} />
+              </div>
+              <span className="relative text-[14px] font-medium">Send feedback</span>
+            </motion.button>
           </nav>
 
           {/* User card */}
@@ -350,6 +374,8 @@ export function Sidebar() {
           </div>
         </div>
       </aside>
+
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </MotionConfig>
   )
 }

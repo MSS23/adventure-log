@@ -8,6 +8,15 @@ if (!supabaseUrl) {
   throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable')
 }
 
+// True when a Postgres/PostgREST error is a row-level-security rejection
+// (insufficient_privilege). Server routes use this to decide whether to retry a
+// write with the service-role client as a fallback.
+export function isRlsError(error: unknown): boolean {
+  const e = error as { code?: string; message?: string } | null
+  if (!e) return false
+  return e.code === '42501' || (typeof e.message === 'string' && /row-level security/i.test(e.message))
+}
+
 // Admin client with service role key for server-side operations
 export const supabaseAdmin = supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey, {

@@ -1,13 +1,26 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import DashboardContent from './DashboardContent'
+import DashboardLoading from './loading'
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardData />
+    </Suspense>
+  )
+}
+
+async function DashboardData() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const userId = user?.id
+  // Read the user id from verified JWT claims instead of a round-trip to the
+  // Supabase Auth server. Middleware already validated the session this request
+  // and every query below is user-scoped + RLS-protected.
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const userId = claimsData?.claims?.sub
   if (!userId) {
     redirect('/login')
   }

@@ -67,11 +67,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })) || []
 
-    // Fetch public user profiles
+    // Fetch public user profiles. Only privacy_level='public' qualifies — this
+    // mirrors the albums_public_read RLS definition exactly (NULL is NOT public),
+    // so we never advertise a private/unset-privacy profile to crawlers.
     const { data: users } = await supabase
       .from('users')
       .select('username, updated_at')
-      .or('privacy_level.eq.public,privacy_level.is.null')
+      .eq('privacy_level', 'public')
       .order('updated_at', { ascending: false })
       .limit(5000)
 

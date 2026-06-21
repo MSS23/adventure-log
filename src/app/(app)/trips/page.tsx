@@ -37,6 +37,9 @@ export default function TripsPage() {
   const [endDate, setEndDate] = useState('')
   const [createError, setCreateError] = useState<string | null>(null)
 
+  // Today in the user's local timezone as YYYY-MM-DD — used to block past dates.
+  const todayStr = new Date().toLocaleDateString('en-CA')
+
   const load = async () => {
     try {
       setLoading(true)
@@ -72,6 +75,21 @@ export default function TripsPage() {
   const handleCreate = async () => {
     if (!title.trim()) return
     setCreateError(null)
+
+    // Dates must be today or later, and the range must make sense.
+    if (startDate && startDate < todayStr) {
+      setCreateError('Start date can’t be in the past.')
+      return
+    }
+    if (endDate && endDate < todayStr) {
+      setCreateError('End date can’t be in the past.')
+      return
+    }
+    if (startDate && endDate && endDate < startDate) {
+      setCreateError('End date must be on or after the start date.')
+      return
+    }
+
     try {
       setCreating(true)
       const res = await apiFetch('/api/trips', {
@@ -173,11 +191,11 @@ export default function TripsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium">Start date</label>
-                  <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                  <Input type="date" min={todayStr} value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                 </div>
                 <div>
                   <label className="text-sm font-medium">End date</label>
-                  <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                  <Input type="date" min={startDate || todayStr} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                 </div>
               </div>
             </div>

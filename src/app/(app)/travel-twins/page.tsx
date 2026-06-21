@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Loader2, Users, MapPin } from 'lucide-react'
+import { Loader2, Users, MapPin, Lock } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -25,6 +25,7 @@ interface Twin {
   overlap_count: number
   their_country_count: number
   my_country_count: number
+  privacy_level: string | null
 }
 
 interface Recommendation {
@@ -107,7 +108,7 @@ export default function TravelTwinsPage() {
             No travel twins yet
           </h2>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            Create albums with location data, or wait for more public travelers to match your footprint.
+            Create albums with location data, or wait for more travelers to match your footprint.
           </p>
           <Button asChild variant="coral" className="mt-5">
             <Link href="/explore">Explore travelers</Link>
@@ -143,8 +144,13 @@ export default function TravelTwinsPage() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm text-foreground truncate">
-                        {getDisplayName(twin.display_name, twin.username)}
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-sm text-foreground truncate">
+                          {getDisplayName(twin.display_name, twin.username)}
+                        </span>
+                        {twin.privacy_level === 'private' && (
+                          <Lock className="h-3 w-3 shrink-0 text-muted-foreground" aria-label="Private account" />
+                        )}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {overlapPct}% match
@@ -171,12 +177,19 @@ export default function TravelTwinsPage() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <Link
-                          href={`/u/${twin.username}`}
-                          className="font-heading font-semibold text-lg text-foreground hover:text-accent transition-colors"
-                        >
-                          {getDisplayName(twin.display_name, twin.username)}
-                        </Link>
+                        <div className="flex items-center gap-1.5">
+                          <Link
+                            href={`/profile/${twin.username}`}
+                            className="font-heading font-semibold text-lg text-foreground hover:text-accent transition-colors"
+                          >
+                            {getDisplayName(twin.display_name, twin.username)}
+                          </Link>
+                          {twin.privacy_level === 'private' && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                              <Lock className="h-2.5 w-2.5" /> Private
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           You share a lot of ground — here&apos;s where your journeys overlap.
                         </p>
@@ -196,7 +209,19 @@ export default function TravelTwinsPage() {
                 <Loader2 className="h-5 w-5 animate-spin text-accent" />
               </div>
             ) : recommendations.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-6">No new places to suggest right now.</p>
+              twins.find((t) => t.user_id === selectedTwinId)?.privacy_level === 'private' ? (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Lock className="h-5 w-5" />
+                  </div>
+                  <p className="font-heading text-sm font-semibold text-foreground">This traveler is private</p>
+                  <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                    Follow them and wait for approval to see the places they&apos;ve been.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground py-6">No new places to suggest right now.</p>
+              )
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {recommendations.map((rec) => (

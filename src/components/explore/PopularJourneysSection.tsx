@@ -36,15 +36,20 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         setIsLoading(true)
         setError(null)
 
-        // Fetch albums sorted by created date (most recent first) with public visibility
+        // Popular journeys is a PUBLIC discovery surface: only show public
+        // albums that belong to public accounts. The `!inner` join + filter on
+        // `users.privacy_level` makes that explicit at the query level (and is
+        // belt-and-suspenders with the albums_public_read RLS policy, which
+        // already requires a public owner).
         const { data, error: fetchError } = await supabase
           .from('albums')
           .select(`
             *,
-            users!albums_user_id_fkey(id, username, display_name, avatar_url),
+            users!albums_user_id_fkey!inner(id, username, display_name, avatar_url, privacy_level),
             photos(id, file_path)
           `)
           .eq('visibility', 'public')
+          .eq('users.privacy_level', 'public')
           .order('created_at', { ascending: false })
           .limit(limit)
 

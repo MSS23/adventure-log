@@ -6,8 +6,11 @@ import { FeedbackDialog } from './FeedbackDialog'
 import { cn } from '@/lib/utils'
 
 interface FeedbackLauncherProps {
-  /** Visual style of the trigger. `inline` is a normal button; `fab` is a floating pill. */
-  variant?: 'inline' | 'fab'
+  /**
+   * Visual style of the trigger. `inline` is a normal button; `fab` is a
+   * floating pill; `icon` is a compact icon-only button for nav bars.
+   */
+  variant?: 'inline' | 'fab' | 'icon'
   className?: string
   label?: string
 }
@@ -21,7 +24,20 @@ export function FeedbackLauncher({ variant = 'inline', className, label = 'Send 
 
   return (
     <>
-      {variant === 'fab' ? (
+      {variant === 'icon' ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          title={label}
+          aria-label={label}
+          className={cn(
+            'relative flex items-center justify-center w-9 h-9 rounded-xl bg-muted hover:bg-border/70 dark:hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-colors duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            className
+          )}
+        >
+          <MessageSquarePlus className="w-[18px] h-[18px]" strokeWidth={1.8} />
+        </button>
+      ) : variant === 'fab' ? (
         <button
           type="button"
           onClick={() => setOpen(true)}

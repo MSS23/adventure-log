@@ -1,12 +1,25 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { log } from '@/lib/utils/logger'
 import SavedContent, { type SavedAlbum } from './SavedContent'
+import SavedLoading from './loading'
 
-export default async function SavedPage() {
+export default function SavedPage() {
+  return (
+    <Suspense fallback={<SavedLoading />}>
+      <SavedData />
+    </Suspense>
+  )
+}
+
+async function SavedData() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const userId = user?.id
+  // Read the user id from verified JWT claims instead of a round-trip to the
+  // Supabase Auth server. Middleware already validated the session this request
+  // and every query below is user-scoped + RLS-protected.
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const userId = claimsData?.claims?.sub
   if (!userId) {
     redirect('/login')
   }

@@ -11,7 +11,7 @@ export default async function EmbedPage({
 
   const { data: user } = await supabase
     .from('users')
-    .select('id, username, display_name')
+    .select('id, username, display_name, privacy_level')
     .eq('username', username)
     .single()
 
@@ -28,13 +28,26 @@ export default async function EmbedPage({
     )
   }
 
-  const { data: albums } = await supabase
-    .from('albums')
-    .select('id, title, location_name, country_code, latitude, longitude')
-    .eq('user_id', user.id)
-    .eq('visibility', 'public')
-    .not('latitude', 'is', null)
-    .not('longitude', 'is', null)
+  // Public, third-party-embeddable map: only public accounts expose locations.
+  // For any non-public account we skip the query and render an empty map
+  // (explicit guard so the embed is safe regardless of RLS state).
+  const { data: albums } =
+    user.privacy_level === 'public'
+      ? await supabase
+          .from('albums')
+          .select('id, title, location_name, country_code, latitude, longitude')
+          .eq('user_id', user.id)
+          .eq('visibility', 'public')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+      : { data: [] as Array<{
+          id: string
+          title: string
+          location_name: string | null
+          country_code: string | null
+          latitude: number | null
+          longitude: number | null
+        }> }
 
   const locations = (albums || []).map(a => ({
     id: a.id,

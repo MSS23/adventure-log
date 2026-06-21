@@ -84,7 +84,10 @@ export function PublicProfileContent({
   totalDistance,
 }: PublicProfileContentProps) {
   const displayName = user.display_name || user.username
-  const isPrivate = user.privacy_level === 'private'
+  // Any non-public account (private or friends-only) hides its albums from
+  // non-followers. RLS already returns zero albums here; this just shows the
+  // correct "follow to see" lock instead of an empty-state.
+  const isPrivate = user.privacy_level !== 'public'
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedEmbed, setCopiedEmbed] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)

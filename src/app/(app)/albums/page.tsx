@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2, CheckSquare, Square, ArrowUpDown } from 'lucide-react'
+import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2, CheckSquare, Square, ArrowUpDown, Images } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
@@ -330,6 +330,18 @@ function AlbumsPageContent() {
         </header>
 
         <div className="flex items-center gap-2">
+          {!isViewingOtherUser && !selectionMode && (
+            <Link href="/organize">
+              <Button
+                size="sm"
+                variant="outline"
+                className="cursor-pointer"
+              >
+                <Images className="h-4 w-4 mr-1" />
+                Organize
+              </Button>
+            </Link>
+          )}
           {!isViewingOtherUser && (albums.length > 0 || drafts.length > 0) && !selectionMode && (
             <Button
               size="sm"

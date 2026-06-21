@@ -38,8 +38,47 @@ export async function PATCH(
       updates.priority = body.priority
     }
     if (body.completed_at !== undefined) updates.completed_at = body.completed_at
-    if (body.location_name !== undefined) updates.location_name = body.location_name
+    if (body.location_name !== undefined) {
+      const name = String(body.location_name).trim().slice(0, 200)
+      if (!name) {
+        return NextResponse.json({ error: 'Location name is required' }, { status: 400 })
+      }
+      updates.location_name = name
+    }
     if (body.country_code !== undefined) updates.country_code = body.country_code
+    if (body.latitude !== undefined) {
+      const lat = Number(body.latitude)
+      if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+        return NextResponse.json({ error: 'Invalid latitude' }, { status: 400 })
+      }
+      updates.latitude = lat
+    }
+    if (body.longitude !== undefined) {
+      const lng = Number(body.longitude)
+      if (!Number.isFinite(lng) || lng < -180 || lng > 180) {
+        return NextResponse.json({ error: 'Invalid longitude' }, { status: 400 })
+      }
+      updates.longitude = lng
+    }
+    if (body.checklist !== undefined) {
+      if (!Array.isArray(body.checklist)) {
+        return NextResponse.json({ error: 'Checklist must be an array' }, { status: 400 })
+      }
+      // Normalize each row: keep a stable id, plain-text label (≤200 chars),
+      // and a boolean done flag. Drop blanks; cap the list to keep rows sane.
+      const checklist = body.checklist
+        .slice(0, 50)
+        .map((raw: unknown) => {
+          const row = (raw ?? {}) as Record<string, unknown>
+          const text = String(row.text ?? '').trim().slice(0, 200)
+          if (!text) return null
+          const id =
+            typeof row.id === 'string' && row.id ? row.id : crypto.randomUUID()
+          return { id, text, done: Boolean(row.done) }
+        })
+        .filter(Boolean)
+      updates.checklist = checklist
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(
@@ -59,6 +98,12 @@ export async function PATCH(
     if (error) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Wishlist item not found' }, { status: 404 })
+      }
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { error: 'That destination is already on your wishlist' },
+          { status: 409 }
+        )
       }
       log.error('Error updating wishlist item', {
         component: 'WishlistAPI',

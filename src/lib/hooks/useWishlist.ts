@@ -6,6 +6,12 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
 
+export interface ChecklistItem {
+  id: string
+  text: string
+  done: boolean
+}
+
 export interface WishlistItem {
   id: string
   user_id: string
@@ -18,6 +24,7 @@ export interface WishlistItem {
   source: 'manual' | 'from_album' | 'shared'
   shared_by_user_id: string | null
   shared_by?: { username: string; display_name: string | null } | null
+  checklist: ChecklistItem[] | null
   created_at: string
   completed_at: string | null
 }
@@ -45,6 +52,9 @@ interface UpdateItemParams {
   completed_at?: string | null
   location_name?: string
   country_code?: string | null
+  latitude?: number
+  longitude?: number
+  checklist?: ChecklistItem[]
 }
 
 interface SuggestParams {

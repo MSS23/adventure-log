@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getTripAccess } from '@/lib/trips/authorize'
 import { suggestRoute } from '@/lib/trips/suggest-route'
 import { log } from '@/lib/utils/logger'
 
@@ -16,6 +17,14 @@ export async function POST(
   }
 
   try {
+    // Mirror the GET route's access contract instead of relying on RLS alone:
+    // a non-member must not be able to enumerate a private trip's pins.
+    const access = await getTripAccess(supabase, id, userId)
+    if (!access.exists) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (!access.isMember && !access.isPublic) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+
     const { data: pins, error } = await supabase
       .from('trip_pins')
       .select('*')

@@ -48,10 +48,25 @@ export async function POST(
       typeof body.longitude === 'number' &&
       typeof body.name === 'string'
     ) {
+      // Validate coordinate ranges here so out-of-range / NaN / Infinity values
+      // return a 400 instead of tripping the DB CHECK constraints (lat ∈ [-90,90],
+      // lng ∈ [-180,180]) and surfacing as an opaque 500.
+      const lat = body.latitude
+      const lng = body.longitude
+      if (
+        !Number.isFinite(lat) || lat < -90 || lat > 90 ||
+        !Number.isFinite(lng) || lng < -180 || lng > 180
+      ) {
+        return NextResponse.json({ error: 'Coordinates out of range' }, { status: 400 })
+      }
+      const name = body.name.trim().slice(0, 200)
+      if (!name) {
+        return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+      }
       parsed = {
-        name: body.name.trim().slice(0, 200),
-        latitude: body.latitude,
-        longitude: body.longitude,
+        name,
+        latitude: lat,
+        longitude: lng,
         address: body.address || null,
         source_url: body.source_url || null,
       }
@@ -75,7 +90,7 @@ export async function POST(
         trip_id: tripId,
         user_id: userId,
         name: parsed.name,
-        note: body.note || null,
+        note: typeof body.note === 'string' ? body.note.slice(0, 1000) : null,
         latitude: parsed.latitude,
         longitude: parsed.longitude,
         address: parsed.address,

@@ -80,7 +80,7 @@ export default function ResetPasswordUpdatePage() {
         return
       }
       setDone(true)
-      setTimeout(() => router.push('/dashboard'), 1500)
+      setTimeout(() => router.push('/feed'), 1500)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     } finally {

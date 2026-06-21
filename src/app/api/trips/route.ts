@@ -3,6 +3,21 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { log } from '@/lib/utils/logger'
 
+// The trip tables may not exist yet on a Supabase project where migrations
+// 26/27 haven't been applied. That is the ONLY case where the client should
+// show the "launching soon" wall — every other failure is a real, transient
+// error that deserves an error state + retry, not a fake "coming soon".
+function isMissingTable(error: unknown): boolean {
+  const e = error as { code?: string; message?: string } | null
+  if (!e) return false
+  // 42P01 = undefined_table (Postgres); PGRST205 = relation not found (PostgREST)
+  return (
+    e.code === '42P01' ||
+    e.code === 'PGRST205' ||
+    (typeof e.message === 'string' && /does not exist|could not find the table/i.test(e.message))
+  )
+}
+
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -48,6 +63,12 @@ export async function GET() {
 
     return NextResponse.json({ trips: enriched })
   } catch (error) {
+    if (isMissingTable(error)) {
+      return NextResponse.json(
+        { error: 'Trip planner is not provisioned yet', code: 'NOT_PROVISIONED' },
+        { status: 503 }
+      )
+    }
     log.error('Failed to list trips', { component: 'api/trips', action: 'list', userId }, error as Error)
     return NextResponse.json({ error: 'Failed to load trips' }, { status: 500 })
   }
@@ -82,7 +103,7 @@ export async function POST(request: NextRequest) {
       .insert({
         owner_id: userId,
         title,
-        description: body.description || null,
+        description: typeof body.description === 'string' ? body.description.slice(0, 500) : null,
         start_date: body.start_date || null,
         end_date: body.end_date || null,
         cover_emoji: body.cover_emoji || '🗺️',
@@ -101,6 +122,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ trip: data }, { status: 201 })
   } catch (error) {
+    if (isMissingTable(error)) {
+      return NextResponse.json(
+        { error: 'Trip planner is not provisioned yet', code: 'NOT_PROVISIONED' },
+        { status: 503 }
+      )
+    }
     log.error('Failed to create trip', { component: 'api/trips', action: 'create', userId }, error as Error)
     return NextResponse.json({ error: 'Failed to create trip' }, { status: 500 })
   }

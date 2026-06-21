@@ -17,6 +17,7 @@ import {
   Bookmark,
   Star,
   MapPin,
+  LayoutDashboard,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
@@ -36,6 +37,7 @@ const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
 const mainNavItems: NavItem[] = [
   { name: 'Feed', href: '/feed', icon: Home },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Explore', href: '/explore', icon: Compass },
   { name: 'Globe', href: '/globe', icon: Globe },
   { name: 'Albums', href: '/albums', icon: BookOpen },
@@ -199,7 +201,7 @@ export function Sidebar() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: EDITORIAL_EASE }}
           >
-            <Link href="/dashboard" className="flex items-center gap-2.5 group">
+            <Link href="/feed" className="flex items-center gap-2.5 group">
               <motion.div
                 whileHover={{ rotate: -8, scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

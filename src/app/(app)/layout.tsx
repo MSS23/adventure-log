@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { usePathname } from 'next/navigation'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
@@ -25,6 +26,12 @@ export default function AppLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+  // The globe page has its own "+" add button in the header and a full-width
+  // album filmstrip docked to the bottom; the global FAB would both duplicate
+  // that action and cover the filmstrip, so hide it there.
+  const hideFab = pathname?.startsWith('/globe')
+
   return (
     <ProtectedRoute>
       <PWAProvider>
@@ -50,10 +57,13 @@ export default function AppLayout({
           {/* Bottom navigation for mobile */}
           <BottomNavigation />
 
-          {/* Floating action button - mobile only */}
-          <div className="lg:hidden">
-            <FloatingActionButton />
-          </div>
+          {/* Floating action button - mobile only (hidden on the globe page,
+              which has its own add button + bottom filmstrip) */}
+          {!hideFab && (
+            <div className="lg:hidden">
+              <FloatingActionButton />
+            </div>
+          )}
 
           {/* Offline queue status */}
           <OfflineQueueIndicator />

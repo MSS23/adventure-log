@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { LayoutDashboard, Settings, LogOut, Camera, Bookmark, Star, MapPin, MessageSquarePlus } from 'lucide-react'
+import { LayoutDashboard, Settings, LogOut, Camera, Bookmark, Star, MapPin, MessageSquarePlus, User } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { getAvatarUrl } from '@/lib/utils/avatar'
@@ -57,16 +57,23 @@ export function UserNav() {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href="/albums" className="flex items-center">
-            <Camera className="mr-2 h-4 w-4" />
-            <span>My Albums</span>
+          <Link href="/dashboard" className="flex items-center">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <Link href="/profile" className="flex items-center">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/albums" className="flex items-center">
+            <Camera className="mr-2 h-4 w-4" />
+            <span>My Albums</span>
           </Link>
         </DropdownMenuItem>
 

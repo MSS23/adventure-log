@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     const { data: user } = await supabase
       .from('users')
-      .select('display_name, username, avatar_url')
+      .select('display_name, username, avatar_url, privacy_level')
       .eq('id', userId)
       .single()
 
@@ -79,10 +79,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    // This is an unauthenticated, shareable card. Only public accounts get a
+    // populated card; private/friends accounts return 404 rather than leak
+    // aggregate stats. (RLS already gates the album rows, but this endpoint is
+    // public so we make the privacy contract explicit and RLS-independent.)
+    if (user.privacy_level !== 'public') {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     const { data: albums } = await supabase
       .from('albums')
       .select('country_code, location_name, id, latitude, longitude, date_start, created_at')
       .eq('user_id', userId)
+      .eq('visibility', 'public')
       .neq('status', 'draft')
 
     const { count: photoCount } = await supabase

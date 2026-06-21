@@ -161,16 +161,31 @@ export function useGlobePageData() {
 
         setProfileUser(userData)
 
-        if (userData?.privacy_level === 'private' && !isOwn) {
-          setIsPrivateAccount(true)
-          setLoading(false)
-          return
-        }
+        // Restricted (private/friends) accounts only reveal their globe to the
+        // owner or to an ACCEPTED follower. A non-follower gets the locked
+        // screen; an accepted follower falls through and RLS
+        // (albums_follower_read) returns the account's non-private albums.
+        const isRestricted =
+          userData?.privacy_level === 'private' || userData?.privacy_level === 'friends'
 
-        if (userData?.privacy_level === 'friends' && !isOwn) {
-          setIsPrivateAccount(true)
-          setLoading(false)
-          return
+        if (isRestricted && !isOwn) {
+          let isAcceptedFollower = false
+          if (user?.id) {
+            const { data: followRow } = await supabase
+              .from('follows')
+              .select('status')
+              .eq('follower_id', user.id)
+              .eq('following_id', targetUserId)
+              .eq('status', 'accepted')
+              .maybeSingle()
+            isAcceptedFollower = !!followRow
+          }
+
+          if (!isAcceptedFollower) {
+            setIsPrivateAccount(true)
+            setLoading(false)
+            return
+          }
         }
 
         const { data, error } = await supabase

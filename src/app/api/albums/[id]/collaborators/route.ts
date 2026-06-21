@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { supabaseAdmin, isRlsError } from '@/lib/supabase/admin'
 import { log } from '@/lib/utils/logger'
 
 const VALID_ROLES = ['contributor', 'editor', 'viewer'] as const
@@ -32,10 +32,6 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!supabaseAdmin) {
-    return NextResponse.json({ error: 'Server not configured for invitations' }, { status: 500 })
-  }
-
   let body: { userId?: string; query?: string; role?: string }
   try {
     body = await request.json()
@@ -59,15 +55,25 @@ export async function POST(
     }
 
     // Resolve the invitee — by explicit id, or by username/email lookup.
+    // The lookup uses the RLS-bound client (user profiles are public-read); if a
+    // service-role key happens to be configured we retry through it so that
+    // email-based lookups still resolve even where email isn't publicly selectable.
     let inviteeId = body.userId?.trim() || null
     if (!inviteeId) {
       const q = body.query?.trim()
       if (!q) return NextResponse.json({ error: 'Provide a user id, username, or email' }, { status: 400 })
-      const { data: found } = await supabaseAdmin
+      let { data: found } = await supabase
         .from('users')
         .select('id')
         .or(`username.eq.${q},email.eq.${q}`)
         .maybeSingle()
+      if (!found && supabaseAdmin) {
+        ;({ data: found } = await supabaseAdmin
+          .from('users')
+          .select('id')
+          .or(`username.eq.${q},email.eq.${q}`)
+          .maybeSingle())
+      }
       if (!found) return NextResponse.json({ error: 'No user found with that username or email' }, { status: 404 })
       inviteeId = found.id
     }
@@ -76,18 +82,31 @@ export async function POST(
       return NextResponse.json({ error: 'You already own this album' }, { status: 400 })
     }
 
-    // Create the invite (service role — owner already authorized above).
-    const { data: collaborator, error: inviteError } = await supabaseAdmin
+    // Create the invite. The "Album owners can manage collaborators" RLS policy
+    // (migration 15) lets the authenticated owner insert this row directly, so no
+    // service-role key is needed; we retry with the admin client only if RLS
+    // rejects the insert and a key is configured. Ownership was verified above.
+    const invitePayload = {
+      album_id: albumId,
+      user_id: inviteeId,
+      role,
+      status: 'pending',
+      invited_by: userId,
+    }
+    const inviteSelect = '*, user:user_id(id, username, display_name, avatar_url)'
+    let { data: collaborator, error: inviteError } = await supabase
       .from('album_collaborators')
-      .insert({
-        album_id: albumId,
-        user_id: inviteeId,
-        role,
-        status: 'pending',
-        invited_by: userId,
-      })
-      .select('*, user:user_id(id, username, display_name, avatar_url)')
+      .insert(invitePayload)
+      .select(inviteSelect)
       .single()
+
+    if (inviteError && isRlsError(inviteError) && supabaseAdmin) {
+      ;({ data: collaborator, error: inviteError } = await supabaseAdmin
+        .from('album_collaborators')
+        .insert(invitePayload)
+        .select(inviteSelect)
+        .single())
+    }
 
     if (inviteError) {
       if (inviteError.code === '23505') {
@@ -97,23 +116,31 @@ export async function POST(
     }
 
     // Notify the invitee (best-effort — never fail the invite over a notification).
+    // The notification targets the invitee's row (user_id ≠ caller), which RLS may
+    // block; try the RLS client first, then the service-role client when one is
+    // configured. If neither can write it, the invite still succeeds.
     try {
-      const { data: inviter } = await supabaseAdmin
+      const { data: inviter } = await supabase
         .from('users')
         .select('display_name, username')
         .eq('id', userId)
         .maybeSingle()
       const inviterName = inviter?.display_name || inviter?.username || 'Someone'
 
-      await supabaseAdmin.from('notifications').insert({
+      const notification = {
         user_id: inviteeId,
         sender_id: userId,
         type: 'album_invite',
         title: 'Album invitation',
         message: `${inviterName} invited you to collaborate on "${album.title}"`,
         link: '/dashboard',
-        metadata: { album_id: albumId, collaborator_id: collaborator.id },
-      })
+        metadata: { album_id: albumId, collaborator_id: collaborator!.id },
+      }
+
+      const { error: notifyError } = await supabase.from('notifications').insert(notification)
+      if (notifyError && supabaseAdmin) {
+        await supabaseAdmin.from('notifications').insert(notification)
+      }
     } catch (notifyErr) {
       log.error(
         'Invite created but notification failed',

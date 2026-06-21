@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { supabaseAdmin, isRlsError } from '@/lib/supabase/admin'
 import { log } from '@/lib/utils/logger'
 
 const UUID_REGEX =
@@ -26,13 +26,19 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!supabaseAdmin) {
-    return NextResponse.json({ error: 'Server not configured' }, { status: 500 })
-  }
+  // All operations here are user-scoped (read public recs; manage the caller's own
+  // bump where user_id = auth.uid()), so the RLS-bound client handles them without
+  // any service-role key. The denormalized bump_count is maintained by a trigger
+  // that updates the recommendation row even when it's owned by someone else — that
+  // cross-owner UPDATE requires the trigger to be SECURITY DEFINER (migration
+  // 49_place_rec_bump_security_definer.sql). With that migration applied, bumping
+  // works fully without the key. We retry on the rare RLS rejection with the admin
+  // client when one happens to be configured.
+  const db = supabase
 
   try {
     // 404 if the recommendation doesn't exist.
-    const { data: rec, error: recError } = await supabaseAdmin
+    const { data: rec, error: recError } = await db
       .from('place_recommendations')
       .select('id')
       .eq('id', id)
@@ -43,7 +49,7 @@ export async function POST(
     }
 
     // Does the current user already have a bump on this rec?
-    const { data: existing, error: existingError } = await supabaseAdmin
+    const { data: existing, error: existingError } = await db
       .from('place_recommendation_bumps')
       .select('id')
       .eq('recommendation_id', id)
@@ -53,16 +59,27 @@ export async function POST(
 
     let bumped: boolean
     if (existing) {
-      const { error: deleteError } = await supabaseAdmin
+      let { error: deleteError } = await db
         .from('place_recommendation_bumps')
         .delete()
         .eq('id', existing.id)
+      if (deleteError && isRlsError(deleteError) && supabaseAdmin) {
+        ;({ error: deleteError } = await supabaseAdmin
+          .from('place_recommendation_bumps')
+          .delete()
+          .eq('id', existing.id))
+      }
       if (deleteError) throw deleteError
       bumped = false
     } else {
-      const { error: insertError } = await supabaseAdmin
+      let { error: insertError } = await db
         .from('place_recommendation_bumps')
         .insert({ recommendation_id: id, user_id: userId })
+      if (insertError && isRlsError(insertError) && supabaseAdmin) {
+        ;({ error: insertError } = await supabaseAdmin
+          .from('place_recommendation_bumps')
+          .insert({ recommendation_id: id, user_id: userId }))
+      }
       if (insertError) {
         // Gracefully handle the UNIQUE(recommendation_id, user_id) race: a
         // concurrent insert means a bump already exists, so treat as bumped.
@@ -77,7 +94,7 @@ export async function POST(
     }
 
     // The DB trigger maintains bump_count; re-read the authoritative value.
-    const { data: updated, error: countError } = await supabaseAdmin
+    const { data: updated, error: countError } = await db
       .from('place_recommendations')
       .select('bump_count')
       .eq('id', id)

@@ -9,6 +9,7 @@ export interface SuggestedUser {
   display_name: string | null
   avatar_url: string | null
   album_count: number
+  privacy_level?: string | null
 }
 
 export interface PopularDestination {
@@ -34,39 +35,35 @@ export function useSuggestedUsers(userId: string | undefined, limit = 5) {
     const supabase = createClient()
 
     try {
-      // Get IDs the user already follows
-      const { data: following } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', userId)
-        .in('status', ['accepted', 'pending'])
+      // Suggest travelers with content — including PRIVATE accounts. A private
+      // account's albums are hidden from us by RLS, so we can't count them
+      // client-side; the SECURITY DEFINER RPC counts non-private published
+      // albums server-side and already excludes the caller + anyone they
+      // follow or have a pending request to. Clicking a private suggestion
+      // lands on their locked profile, where they can send a follow request.
+      const { data, error } = await supabase.rpc('get_suggested_travelers', {
+        _user_id: userId,
+        _limit: limit,
+      })
 
-      const followedIds = following?.map(f => f.following_id) || []
-      const excludeIds = [userId, ...followedIds]
-
-      // Get users with public albums, ordered by album count
-      const { data } = await supabase
-        .from('users')
-        .select(`
-          id, username, display_name, avatar_url,
-          albums!albums_user_id_fkey(id)
-        `)
-        .eq('privacy_level', 'public')
-        .not('id', 'in', `(${excludeIds.join(',')})`)
-        .limit(limit + 10) // Fetch extra in case some have no albums
+      if (error) throw error
 
       if (data) {
-        const mapped: SuggestedUser[] = data
-          .map(u => ({
-            id: u.id,
-            username: u.username,
-            display_name: u.display_name,
-            avatar_url: u.avatar_url,
-            album_count: (u.albums as unknown as Array<{ id: string }>)?.length || 0,
-          }))
-          .filter(u => u.album_count > 0)
-          .sort((a, b) => b.album_count - a.album_count)
-          .slice(0, limit)
+        const mapped: SuggestedUser[] = (data as Array<{
+          id: string
+          username: string
+          display_name: string | null
+          avatar_url: string | null
+          privacy_level: string | null
+          album_count: number
+        }>).map(u => ({
+          id: u.id,
+          username: u.username,
+          display_name: u.display_name,
+          avatar_url: u.avatar_url,
+          album_count: Number(u.album_count) || 0,
+          privacy_level: u.privacy_level,
+        }))
 
         setUsers(mapped)
       }

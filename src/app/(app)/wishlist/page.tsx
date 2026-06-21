@@ -1,13 +1,26 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { log } from '@/lib/utils/logger'
 import type { WishlistItem, TravelPartner } from '@/lib/hooks/useWishlist'
 import WishlistContent from './WishlistContent'
+import WishlistLoading from './loading'
 
-export default async function WishlistPage() {
+export default function WishlistPage() {
+  return (
+    <Suspense fallback={<WishlistLoading />}>
+      <WishlistData />
+    </Suspense>
+  )
+}
+
+async function WishlistData() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const userId = user?.id
+  // Read the user id from verified JWT claims instead of a round-trip to the
+  // Supabase Auth server. Middleware already validated the session this request
+  // and every query below is user-scoped + RLS-protected.
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const userId = claimsData?.claims?.sub
   if (!userId) {
     redirect('/login')
   }

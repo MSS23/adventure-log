@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { supabaseAdmin, isRlsError } from '@/lib/supabase/admin'
 import { sanitizeText } from '@/lib/utils/input-validation'
 import { log } from '@/lib/utils/logger'
 import type { PlaceRecommendation, PlaceType } from '@/types/database'
@@ -176,28 +176,36 @@ export async function POST(request: NextRequest) {
       locationName = sanitizeText(body.location_name.toString().trim()) || null
     }
 
-    // Insert via the service-role client so created_by is forced to the
-    // authenticated session user (never client-supplied), mirroring the trips
-    // POST pattern.
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Server not configured' }, { status: 500 })
+    const insertPayload = {
+      created_by: userId,
+      title,
+      place_type: placeType,
+      tip,
+      city,
+      country_code: countryCode,
+      location_name: locationName,
+      latitude,
+      longitude,
     }
 
-    const { data, error } = await supabaseAdmin
+    // Prefer the RLS-bound client: the `place_recs_insert_own` policy (migration
+    // 43) accepts a legitimate owner insert (created_by = auth.uid()) with no
+    // service-role key. Only if RLS rejects it AND a key is configured do we retry
+    // with the admin client. created_by is forced to the session user, never
+    // client-supplied, so the admin path can't be used to post as someone else.
+    let { data, error } = await supabase
       .from('place_recommendations')
-      .insert({
-        created_by: userId,
-        title,
-        place_type: placeType,
-        tip,
-        city,
-        country_code: countryCode,
-        location_name: locationName,
-        latitude,
-        longitude,
-      })
+      .insert(insertPayload)
       .select()
       .single()
+
+    if (error && isRlsError(error) && supabaseAdmin) {
+      ;({ data, error } = await supabaseAdmin
+        .from('place_recommendations')
+        .insert(insertPayload)
+        .select()
+        .single())
+    }
 
     if (error) throw error
 

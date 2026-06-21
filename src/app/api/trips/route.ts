@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase/admin'
+import { supabaseAdmin, isRlsError } from '@/lib/supabase/admin'
 import { log } from '@/lib/utils/logger'
 
 // The trip tables may not exist yet on a Supabase project where migrations
@@ -16,6 +16,22 @@ function isMissingTable(error: unknown): boolean {
     e.code === 'PGRST205' ||
     (typeof e.message === 'string' && /does not exist|could not find the table/i.test(e.message))
   )
+}
+
+// Accepts an HTML <input type="date"> value (YYYY-MM-DD) and confirms it's a real date.
+function isValidDateStr(s: unknown): s is string {
+  return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s))
+}
+
+// Earliest date a new trip is allowed to start/end on, as YYYY-MM-DD.
+// We anchor to UTC and apply a one-day grace window so that a legitimate
+// "today" selection is never falsely rejected for users whose local date is
+// still behind UTC. The accurate "no past dates" enforcement lives client-side
+// (it uses the browser's local date); this is the server-side backstop.
+function minAllowedTripDate(): string {
+  const d = new Date()
+  d.setUTCDate(d.getUTCDate() - 1)
+  return d.toISOString().slice(0, 10)
 }
 
 export async function GET() {
@@ -89,27 +105,55 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title is required (1–120 chars)' }, { status: 400 })
     }
 
-    // Insert with the service-role client: the live `trips` INSERT RLS policy was
-    // lost during the Clerk auth migration, so the RLS-bound client is rejected
-    // even for a legitimate owner insert. Safe here because owner_id is forced to
-    // the authenticated session user (never client-supplied). See migration 41
-    // for the corrective RLS policy.
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: 'Server not configured' }, { status: 500 })
+    const startDate = body.start_date || null
+    const endDate = body.end_date || null
+
+    // Validate any supplied dates: real dates, not in the past, and a sane range.
+    if (startDate && !isValidDateStr(startDate)) {
+      return NextResponse.json({ error: 'Please enter a valid start date.' }, { status: 400 })
+    }
+    if (endDate && !isValidDateStr(endDate)) {
+      return NextResponse.json({ error: 'Please enter a valid end date.' }, { status: 400 })
+    }
+    const floor = minAllowedTripDate()
+    if (startDate && startDate < floor) {
+      return NextResponse.json({ error: 'Start date can’t be in the past.' }, { status: 400 })
+    }
+    if (endDate && endDate < floor) {
+      return NextResponse.json({ error: 'End date can’t be in the past.' }, { status: 400 })
+    }
+    if (startDate && endDate && endDate < startDate) {
+      return NextResponse.json({ error: 'End date must be on or after the start date.' }, { status: 400 })
     }
 
-    const { data, error } = await supabaseAdmin
+    const insertPayload = {
+      owner_id: userId,
+      title,
+      description: typeof body.description === 'string' ? body.description.slice(0, 500) : null,
+      start_date: startDate,
+      end_date: endDate,
+      cover_emoji: body.cover_emoji || '🗺️',
+    }
+
+    // Prefer the RLS-bound client: with the `trips_insert_own` policy (migrations
+    // 26/41) in place, a legitimate owner insert (owner_id = auth.uid()) succeeds
+    // without any service-role key. Only if RLS rejects the insert AND a
+    // service-role key is configured do we retry with the admin client. owner_id
+    // is forced to the authenticated session user, never client-supplied, so the
+    // admin path can't be abused to create trips for someone else.
+    let { data, error } = await supabase
       .from('trips')
-      .insert({
-        owner_id: userId,
-        title,
-        description: typeof body.description === 'string' ? body.description.slice(0, 500) : null,
-        start_date: body.start_date || null,
-        end_date: body.end_date || null,
-        cover_emoji: body.cover_emoji || '🗺️',
-      })
+      .insert(insertPayload)
       .select()
       .single()
+
+    if (error && isRlsError(error) && supabaseAdmin) {
+      ;({ data, error } = await supabaseAdmin
+        .from('trips')
+        .insert(insertPayload)
+        .select()
+        .single())
+    }
 
     if (error) throw error
 

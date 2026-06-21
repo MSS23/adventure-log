@@ -7,6 +7,7 @@ import { UserNav } from './UserNav'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { NetworkStatusIndicator } from '@/components/pwa/NetworkStatusIndicator'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { FeedbackLauncher } from '@/components/feedback/FeedbackLauncher'
 import { cn } from '@/lib/utils'
 
 const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
@@ -69,6 +70,7 @@ export function TopNavigation() {
           <nav aria-label="User actions" className="flex items-center gap-1">
             <ThemeToggle />
             <NetworkStatusIndicator />
+            <FeedbackLauncher variant="icon" label="Send feedback" />
             <NotificationCenter />
             <UserNav />
           </nav>

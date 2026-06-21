@@ -12,6 +12,7 @@ import { Loader2, MailCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 
 function SignupForm() {
   const router = useRouter()
@@ -177,6 +178,24 @@ function SignupForm() {
             {loading ? 'Creating account…' : 'Sign up'}
           </Button>
         </form>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-card px-2 text-xs uppercase tracking-wide text-muted-foreground">
+              or
+            </span>
+          </div>
+        </div>
+
+        <GoogleSignInButton next={searchParams.get('redirectTo')} disabled={!ageConfirmed} />
+        {!ageConfirmed && (
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            Confirm the age &amp; terms checkbox above to continue with Google.
+          </p>
+        )}
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{' '}

@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 
 function LoginForm() {
   const router = useRouter()
@@ -124,6 +125,25 @@ function LoginForm() {
             {loading ? 'Signing in…' : 'Sign in'}
           </Button>
         </form>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-card px-2 text-xs uppercase tracking-wide text-muted-foreground">
+              or
+            </span>
+          </div>
+        </div>
+
+        <GoogleSignInButton next={searchParams.get('redirectTo')} />
+
+        <p className="mt-4 text-center text-[11px] leading-relaxed text-muted-foreground">
+          By continuing you agree to our{' '}
+          <Link href="/terms" className="hover:underline">Terms</Link>{' '}and{' '}
+          <Link href="/privacy" className="hover:underline">Privacy Policy</Link>.
+        </p>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}

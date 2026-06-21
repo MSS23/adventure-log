@@ -129,6 +129,20 @@ function isProtectedPage(pathname: string): boolean {
 function isDataRequest(request: NextRequest): boolean {
   const headers = request.headers
 
+  // RSC navigation & prefetch requests (fired by next/link clicks and
+  // router.push) are client-side *navigations*, not data fetches: the App
+  // Router transparently follows a 307 redirect on them (to /login), but it
+  // cannot parse a JSON 401 — the navigation silently fails and the target
+  // page never loads, leaving the user on a dead shell.
+  //
+  // Next.js strips the `RSC` / `Next-Router-*` headers before middleware runs,
+  // so we can't key off those. The reliable signal that survives is the RSC
+  // payload content type, `Accept: text/x-component`. Treat it as a navigation
+  // and let the redirect path below handle it.
+  if ((headers.get('accept') ?? '').includes('text/x-component')) {
+    return false
+  }
+
   const dest = headers.get('sec-fetch-dest')
   if (dest && dest !== 'document' && dest !== 'iframe') {
     return true

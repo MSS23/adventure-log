@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { Dialog, DialogContent, DialogDescription } from '@/components/ui/dialog'
 import { EnhancedLightbox } from '@/components/photos/EnhancedLightbox'
 import { Photo } from '@/types/database'
 import { CityCluster } from '@/types/globe'
@@ -11,15 +10,11 @@ import {
   Calendar,
   Camera,
   ExternalLink,
-  ChevronLeft,
-  ChevronRight,
-  ZoomIn,
   X
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
 // Helper function to get photo source URL
@@ -33,16 +28,6 @@ interface AlbumImageModalProps {
   isOpen: boolean
   onClose: () => void
   cluster: CityCluster | null
-  // Journey progression props (optional)
-  showProgressionControls?: boolean
-  currentLocationIndex?: number
-  totalLocations?: number
-  progressionMode?: 'auto' | 'manual'
-  onNextLocation?: () => void
-  onPreviousLocation?: () => void
-  onContinueJourney?: () => void
-  canGoNext?: boolean
-  canGoPrevious?: boolean
 }
 
 // Helper function to convert photo URLs to Photo objects
@@ -61,45 +46,10 @@ function createPhotoFromUrl(url: string, index: number, albumId: string): Photo 
   }
 }
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
-  }
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: 'spring' as const, stiffness: 300, damping: 24 }
-  }
-}
-
-const badgeVariants = {
-  hidden: { opacity: 0, scale: 0.8, y: 10 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { type: 'spring' as const, stiffness: 400, damping: 20 }
-  }
-}
-
 export function AlbumImageModal({
   isOpen,
   onClose,
   cluster,
-  showProgressionControls = false,
-  currentLocationIndex = 0,
-  totalLocations = 0,
-  onNextLocation,
-  onPreviousLocation,
-  canGoNext = false,
-  canGoPrevious = false
 }: AlbumImageModalProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [selectedPhotoId, setSelectedPhotoId] = useState<string>()
@@ -160,11 +110,6 @@ export function AlbumImageModal({
     return allPhotos
   }, [cluster])
 
-  const handlePhotoClick = useCallback((photoId: string) => {
-    setSelectedPhotoId(photoId)
-    setLightboxOpen(true)
-  }, [])
-
   const handleLightboxClose = useCallback(() => {
     setLightboxOpen(false)
     setSelectedPhotoId(undefined)
@@ -172,28 +117,6 @@ export function AlbumImageModal({
       document.body.style.pointerEvents = ''
     }, 100)
   }, [])
-
-  const navigatePhoto = useCallback((direction: 'next' | 'prev') => {
-    setCurrentPhotoIndex(prev => {
-      if (direction === 'next') return Math.min(prev + 1, photos.length - 1)
-      return Math.max(prev - 1, 0)
-    })
-  }, [photos.length])
-
-  // Keyboard navigation for photos
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen || lightboxOpen) return
-
-      if (e.key === 'ArrowLeft') {
-        setCurrentPhotoIndex(prev => Math.max(0, prev - 1))
-      } else if (e.key === 'ArrowRight') {
-        setCurrentPhotoIndex(prev => Math.min(photos.length - 1, prev + 1))
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, lightboxOpen, photos.length])
 
   // Format date - must be called before early return to follow hooks rules
   const visitDate = cluster?.cities[0]?.visitDate
@@ -213,226 +136,8 @@ export function AlbumImageModal({
   const primaryCity = cluster.cities[0]
   const currentPhoto = photos[currentPhotoIndex]
 
-  // ── Shared album content (used by both mobile and desktop) ──
-  const albumContent = (
-    <>
-      {/* Photo */}
-      {photos.length > 0 && currentPhoto && (
-        <div className="px-3 lg:px-5 pt-2 lg:pt-0">
-          <div className="relative aspect-[16/9] lg:aspect-[16/10] max-h-[20vh] lg:max-h-none rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-lg group">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentPhotoIndex}
-                initial={prefersReducedMotion ? {} : { opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={prefersReducedMotion ? {} : { opacity: 0, x: -30 }}
-                transition={{ duration: 0.2 }}
-                className="absolute inset-0"
-              >
-                {getPhotoSrc(currentPhoto.file_path) ? (
-                  <Image
-                    src={getPhotoSrc(currentPhoto.file_path)}
-                    alt={`Photo ${currentPhotoIndex + 1}`}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 1024px) 100vw, 800px"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handlePhotoClick(currentPhoto.id)
-                    }}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <Camera className="h-12 w-12 text-stone-300" />
-                  </div>
-                )}
-
-                {/* Hover overlay with zoom icon */}
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handlePhotoClick(currentPhoto.id)
-                  }}
-                >
-                  <motion.button
-                    type="button"
-                    aria-label="Zoom photo"
-                    className="absolute bottom-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
-                    whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                  >
-                    <ZoomIn className="h-4 w-4 text-stone-700 dark:text-stone-300" />
-                  </motion.button>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Navigation arrows */}
-            {photos.length > 1 && (
-              <>
-                <motion.button
-                  type="button"
-                  aria-label="Previous photo"
-                  className={cn(
-                    "absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
-                    currentPhotoIndex === 0 ? "opacity-30 cursor-default" : "hover:bg-white"
-                  )}
-                  onClick={(e) => { e.stopPropagation(); navigatePhoto('prev') }}
-                  disabled={currentPhotoIndex === 0}
-                  whileHover={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 1.1 }}
-                  whileTap={prefersReducedMotion || currentPhotoIndex === 0 ? {} : { scale: 0.9 }}
-                >
-                  <ChevronLeft className="h-4 w-4 text-stone-700 dark:text-stone-300" />
-                </motion.button>
-                <motion.button
-                  type="button"
-                  aria-label="Next photo"
-                  className={cn(
-                    "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
-                    currentPhotoIndex === photos.length - 1 ? "opacity-30 cursor-default" : "hover:bg-white"
-                  )}
-                  onClick={(e) => { e.stopPropagation(); navigatePhoto('next') }}
-                  disabled={currentPhotoIndex === photos.length - 1}
-                  whileHover={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 1.1 }}
-                  whileTap={prefersReducedMotion || currentPhotoIndex === photos.length - 1 ? {} : { scale: 0.9 }}
-                >
-                  <ChevronRight className="h-4 w-4 text-stone-700 dark:text-stone-300" />
-                </motion.button>
-              </>
-            )}
-
-            {/* Photo counter */}
-            {photos.length > 1 && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full">
-                <span className="text-xs text-white font-medium tabular-nums">
-                  {currentPhotoIndex + 1} / {photos.length}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* View Album CTA */}
-      <div className="px-3 lg:px-5 pb-3 lg:pb-5 pt-2">
-        {!isMultiCity && primaryCity && (
-          <Link href={`/albums/${primaryCity.id}`} className="block">
-            <motion.button
-              type="button"
-              className="w-full py-2.5 bg-olive-600 hover:bg-olive-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-            >
-              <ExternalLink className="h-4 w-4" />
-              View Full Album
-            </motion.button>
-          </Link>
-        )}
-
-        {isMultiCity && (
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-stone-500 dark:text-stone-400">View albums:</p>
-            <div className="flex flex-wrap gap-1.5">
-              {cluster.cities.map((city) => (
-                <Link key={city.id} href={`/albums/${city.id}`}>
-                  <button type="button" className="px-2.5 py-1.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]">
-                    {city.name.split(',')[0]}
-                  </button>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Journey progression controls */}
-      {showProgressionControls && totalLocations > 1 && (
-        <div className="px-3 lg:px-5 pb-3 border-t border-stone-100 dark:border-stone-800 pt-2">
-          <div className="flex items-center justify-between">
-            <motion.button
-              type="button"
-              aria-label="Previous location"
-              className={cn(
-                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
-                canGoPrevious
-                  ? "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
-                  : "text-stone-300 dark:text-stone-600 cursor-default"
-              )}
-              onClick={onPreviousLocation}
-              disabled={!canGoPrevious}
-              whileTap={prefersReducedMotion || !canGoPrevious ? {} : { scale: 0.98 }}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </motion.button>
-
-            <span className="text-xs text-stone-400 dark:text-stone-500 tabular-nums">
-              {currentLocationIndex + 1} / {totalLocations}
-            </span>
-
-            <motion.button
-              type="button"
-              aria-label="Next location"
-              className={cn(
-                "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none",
-                canGoNext
-                  ? "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
-                  : "text-stone-300 dark:text-stone-600 cursor-default"
-              )}
-              onClick={onNextLocation}
-              disabled={!canGoNext}
-              whileTap={prefersReducedMotion || !canGoNext ? {} : { scale: 0.98 }}
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </motion.button>
-          </div>
-        </div>
-      )}
-    </>
-  )
-
   return (
     <>
-      {/* ── Mobile: fixed bottom panel (no Dialog) ── */}
-      <AnimatePresence>
-        {isOpen && isMobile && (
-          <motion.div
-            initial={{ y: '110%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '110%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            // Float as a card ABOVE the "places I've been" filmstrip (which sits
-            // ~160px up from the viewport bottom) so the popup never covers it.
-            // The offset clears the bottom nav (56px) + filmstrip (~96px) + gap,
-            // plus the iOS home-indicator safe area.
-            className="fixed left-2 right-2 z-[100] bg-white dark:bg-[#111] rounded-2xl shadow-2xl border border-stone-200 dark:border-stone-800 max-h-[34vh] overflow-y-auto"
-            style={{ bottom: 'calc(172px + env(safe-area-inset-bottom, 0px))' }}
-          >
-            {/* Handle + close */}
-            <div className="sticky top-0 z-10 bg-white dark:bg-[#111] px-3 pt-2 pb-1 flex items-center justify-between">
-              <div className="flex items-center gap-2 min-w-0">
-                <MapPin className="h-4 w-4 text-olive-600 dark:text-olive-400 shrink-0" />
-                <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">
-                  {isMultiCity
-                    ? `${cluster.cities.length} places near ${primaryCity.name.split(',')[0]}`
-                    : primaryCity.name}
-                </h2>
-              </div>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={onClose}
-                className="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            {albumContent}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ── Desktop: compact glance bar ──
           Single row, non-scrollable, ~96px tall. Cover thumbnail + title
           + meta + one CTA + close. Full album lives at /albums/[id]. */}

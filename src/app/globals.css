@@ -389,6 +389,11 @@
   /* Mobile bottom padding: nav (56px) + safe-area + breathing room */
   .main-content-area {
     /* pb-24 (96px) in tailwind handles most cases; this adds safe-area */
+    /* App-shell guard: clip anything that would push past the viewport edge so
+       page content stays locked between the screen sides at every breakpoint.
+       `clip` (not `hidden`) avoids creating a scroll container, so sticky
+       headers and the page's own vertical scroll keep working. */
+    overflow-x: clip;
   }
   @media (max-width: 1023px) {
     .main-content-area {
@@ -637,10 +642,18 @@
     }
   }
 
-  /* Prevent horizontal scroll */
+  /* Prevent horizontal scroll on every screen size.
+     `overflow-x: hidden` alone is unreliable on iOS / standalone PWAs: per spec
+     it forces the cross axis to compute as `auto`, which turns the root into a
+     scroll container the browser will still let you pan sideways (the "elements
+     go off-screen and I have to drag across" bug). `overflow-x: clip` does NOT
+     create a scroll container, so overflowing content is clipped and nothing
+     can be dragged off the edge. `hidden` stays first as a fallback for the few
+     engines that don't support `clip`. */
   html, body {
     overflow-x: hidden;
-    max-width: 100vw;
+    overflow-x: clip;
+    max-width: 100%;
     position: relative;
   }
 

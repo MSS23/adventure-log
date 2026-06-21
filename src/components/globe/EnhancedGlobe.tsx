@@ -79,7 +79,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     userInteracting, setUserInteracting,
     showSearch, setShowSearch,
     showStaticConnections, setShowStaticConnections, setArcsKey,
-    progressionMode, currentLocationIndex,
+    currentLocationIndex,
     showCurrentLocation, currentLocation,
     locationLoading, locationError, permissionStatus, clearLocation,
     effectivePerformanceMode, performanceConfig, globeImageUrl, rendererConfig,
@@ -88,8 +88,6 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     availableYears, timelineLoading, timelineError,
     effectiveSelectedYear, handleEffectiveYearChange, refreshData, getYearData,
     locations,
-    chronologicalAlbums, currentAlbumIndex,
-    navigateToNextAlbum, navigateToPreviousAlbum, resumeJourney,
     isPlaying, currentFlightState, destinationCameraPosition,
     handleYearChange, handleSearchResult,
     handleCityClick, handleClusterClick, handleLocationToggle,
@@ -588,15 +586,6 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           }
         }}
         cluster={selectedCluster}
-        showProgressionControls={chronologicalAlbums.length > 1}
-        currentLocationIndex={currentAlbumIndex}
-        totalLocations={chronologicalAlbums.length}
-        progressionMode={progressionMode}
-        onNextLocation={navigateToNextAlbum}
-        onPreviousLocation={navigateToPreviousAlbum}
-        onContinueJourney={resumeJourney}
-        canGoNext={currentAlbumIndex < chronologicalAlbums.length - 1}
-        canGoPrevious={currentAlbumIndex > 0}
       />
 
     </div>

@@ -362,7 +362,7 @@ export function NotificationCenter() {
         {/* Footer */}
         {notifications.length > 0 && (
           <div className="p-3 border-t border-border bg-muted/40">
-            <Link href="/notifications" onClick={() => setOpen(false)}>
+            <Link href="/activity" onClick={() => setOpen(false)}>
               <Button variant="ghost" className="w-full text-sm font-medium text-primary hover:text-primary hover:bg-primary/10" size="sm">
                 View all
               </Button>

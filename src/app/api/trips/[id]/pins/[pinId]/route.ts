@@ -32,7 +32,7 @@ export async function PATCH(
 
     const updates: Record<string, unknown> = {}
     if (typeof body.name === 'string') updates.name = body.name.trim().slice(0, 200)
-    if (body.note === null || typeof body.note === 'string') updates.note = typeof body.note === 'string' ? body.note.slice(0, 2000) : null
+    if (body.note === null || typeof body.note === 'string') updates.note = typeof body.note === 'string' ? body.note.slice(0, 1000) : null
     if (typeof body.category === 'string') updates.category = body.category.slice(0, 50)
     if (typeof body.sort_order === 'number') updates.sort_order = body.sort_order
 

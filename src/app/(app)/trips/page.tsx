@@ -28,6 +28,7 @@ export default function TripsPage() {
   const [trips, setTrips] = useState<TripListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [unavailable, setUnavailable] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const [creating, setCreating] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -39,19 +40,26 @@ export default function TripsPage() {
   const load = async () => {
     try {
       setLoading(true)
+      setLoadError(false)
       const res = await apiFetch('/api/trips')
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
         setTrips(data.trips || [])
         setUnavailable(false)
-      } else if (res.status === 500 || res.status === 503) {
-        // Most common cause: the trips/trip_pins tables haven't been
-        // applied to this Supabase project. Show a friendly "coming
-        // soon" state instead of a database error to end users.
+      } else if (res.status === 503 && data.code === 'NOT_PROVISIONED') {
+        // The trips/trip_pins tables haven't been applied to this Supabase
+        // project yet. Show a friendly "launching soon" state. This is the
+        // ONLY case that should hide the feature — gated on the explicit code
+        // so a transient 500 no longer masquerades as "coming soon".
         setUnavailable(true)
+      } else {
+        // Any other failure is a real, recoverable error — surface it with a
+        // retry rather than a fake empty/coming-soon state.
+        setLoadError(true)
       }
     } catch (error) {
       log.error('Failed to load trips list', { component: 'TripsPage', action: 'load' }, error as Error)
+      setLoadError(true)
     } finally {
       setLoading(false)
     }
@@ -81,7 +89,7 @@ export default function TripsPage() {
         // Surface a useful, specific message instead of silent failure
         if (res.status === 401) {
           setCreateError('You need to log in again to create a trip.')
-        } else if (res.status === 500 || res.status === 503) {
+        } else if (res.status === 503 && data.code === 'NOT_PROVISIONED') {
           // Same migration-missing case as in load(); also dev-facing
           // CLI guidance must NEVER reach end users.
           setUnavailable(true)
@@ -198,6 +206,24 @@ export default function TripsPage() {
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
+      ) : loadError ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4">
+            <MapIcon className="h-6 w-6" />
+          </div>
+          <h3 className="font-heading text-lg font-semibold text-foreground">
+            Couldn&apos;t load your trips
+          </h3>
+          <p className="mt-1 max-w-md text-sm text-muted-foreground">
+            Something went wrong reaching the server. Your trips are safe — this is
+            usually temporary.
+          </p>
+          <div className="mt-5">
+            <Button onClick={() => load()}>
+              Try again
+            </Button>
+          </div>
+        </div>
       ) : unavailable ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
@@ -212,9 +238,9 @@ export default function TripsPage() {
             wishlists from your dashboard.
           </p>
           <div className="mt-5">
-            <Link href="/dashboard">
+            <Link href="/feed">
               <Button>
-                Back to dashboard
+                Back to home
               </Button>
             </Link>
           </div>

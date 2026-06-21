@@ -91,7 +91,7 @@ export async function PATCH(
 
     const updates: Record<string, unknown> = {}
     if (typeof body.title === 'string') updates.title = body.title.trim().slice(0, 120)
-    if (body.description === null || typeof body.description === 'string') updates.description = typeof body.description === 'string' ? body.description.slice(0, 2000) : null
+    if (body.description === null || typeof body.description === 'string') updates.description = typeof body.description === 'string' ? body.description.slice(0, 500) : null
     const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
     if (body.start_date === null || (typeof body.start_date === 'string' && ISO_DATE.test(body.start_date))) updates.start_date = body.start_date
     if (body.end_date === null || (typeof body.end_date === 'string' && ISO_DATE.test(body.end_date))) updates.end_date = body.end_date

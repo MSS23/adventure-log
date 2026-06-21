@@ -111,7 +111,11 @@ export const metadata: Metadata = {
   referrer: 'origin-when-cross-origin',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icons/icon-192x192.png',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icons/icon-192x192.png', type: 'image/png', sizes: '192x192' },
+    ],
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },

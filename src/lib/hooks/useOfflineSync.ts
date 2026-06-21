@@ -236,7 +236,7 @@ export function useOfflineSync() {
         try {
           await processUpload(item)
         } catch (err) {
-          log.error(`Failed to process upload ${item.upload_id}`, { component: 'useOfflineSync', action: 'process-upload' }, err as Error)
+          log.error(`Failed to process upload ${item.id}`, { component: 'useOfflineSync', action: 'process-upload' }, err as Error)
           // Update status to failed
           await supabase
             .from('upload_queue')
@@ -245,7 +245,7 @@ export function useOfflineSync() {
               error_message: err instanceof Error ? err.message : 'Upload failed',
               retry_count: item.retry_count + 1
             })
-            .eq('id', item.upload_id)
+            .eq('id', item.id)
         }
       }
 

@@ -133,7 +133,7 @@ export default async function PublicProfilePage({
             This profile doesn&apos;t exist or has been removed.
           </p>
           <Link
-            href="/sign-up"
+            href="/signup"
             className="al-btn-coral inline-flex items-center justify-center px-7 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] focus-visible:ring-offset-2"
           >
             Start your own Adventure Log

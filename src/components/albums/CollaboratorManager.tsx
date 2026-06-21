@@ -18,7 +18,8 @@ import {
 } from '@/components/ui/select'
 import { Users, UserPlus, X, Search, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { log } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 
@@ -260,13 +261,13 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
                     >
                       <div className="flex items-center gap-2">
                         <Avatar className="h-7 w-7">
-                          <AvatarImage src={getPhotoUrl(friend.avatar_url) || undefined} />
+                          <AvatarImage src={getAvatarUrl(friend.avatar_url, friend.username)} />
                           <AvatarFallback className="text-[10px] bg-stone-200 dark:bg-stone-700">
-                            {friend.display_name?.[0] || friend.username?.[0] || '?'}
+                            {getDisplayInitial(friend.display_name, friend.username)}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm text-stone-600 dark:text-stone-400">
-                          {friend.display_name || friend.username}
+                          {getDisplayName(friend.display_name, friend.username)}
                         </span>
                       </div>
                       <span className="text-xs text-stone-400">Already invited</span>
@@ -281,14 +282,14 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
                     >
                       <div className="flex items-center gap-2">
                         <Avatar className="h-7 w-7">
-                          <AvatarImage src={getPhotoUrl(friend.avatar_url) || undefined} />
+                          <AvatarImage src={getAvatarUrl(friend.avatar_url, friend.username)} />
                           <AvatarFallback className="text-[10px] bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400">
-                            {friend.display_name?.[0] || friend.username?.[0] || '?'}
+                            {getDisplayInitial(friend.display_name, friend.username)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="text-sm font-medium text-stone-800 dark:text-stone-200">
-                            {friend.display_name || friend.username}
+                            {getDisplayName(friend.display_name, friend.username)}
                           </p>
                           <p className="text-xs text-stone-500 dark:text-stone-400">
                             @{friend.username}
@@ -346,14 +347,14 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={getPhotoUrl(collab.user?.avatar_url) || undefined} />
+                    <AvatarImage src={getAvatarUrl(collab.user?.avatar_url, collab.user?.username)} />
                     <AvatarFallback className="bg-olive-100 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400 text-xs font-medium">
-                      {collab.user?.display_name?.[0] || collab.user?.username?.[0] || '?'}
+                      {getDisplayInitial(collab.user?.display_name, collab.user?.username)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="text-sm font-medium text-stone-800 dark:text-stone-200">
-                      {collab.user?.display_name || collab.user?.username || 'Unknown'}
+                      {getDisplayName(collab.user?.display_name, collab.user?.username)}
                     </p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
                       {getRoleLabel(collab.role)}

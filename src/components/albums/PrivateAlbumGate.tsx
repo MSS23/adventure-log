@@ -349,7 +349,7 @@ export function CompactPrivateGate({
       </p>
 
       {!isLoggedIn ? (
-        <Link href="/sign-in">
+        <Link href="/login">
           <Button size="sm">Log in to view</Button>
         </Link>
       ) : visibilityLevel === 'friends' && onRequestAccess ? (

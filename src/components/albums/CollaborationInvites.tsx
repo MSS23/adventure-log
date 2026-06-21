@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Check, X, MapPin, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { toast } from 'sonner'
 import { log } from '@/lib/utils/logger'
 import Link from 'next/link'
@@ -106,15 +108,15 @@ export function CollaborationInvites({ className }: CollaborationInvitesProps) {
                 {/* Inviter info */}
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <Avatar className="h-4 w-4">
-                    <AvatarImage src={getPhotoUrl(inviter?.avatar_url) || undefined} />
+                    <AvatarImage src={getAvatarUrl(inviter?.avatar_url, inviter?.username)} />
                     <AvatarFallback className="text-[6px] bg-stone-200 dark:bg-stone-700">
-                      {inviter?.display_name?.[0] || inviter?.username?.[0] || '?'}
+                      {getDisplayInitial(inviter?.display_name, inviter?.username)}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-xs text-stone-500 dark:text-stone-400">
                     Invited by{' '}
                     <span className="font-medium text-stone-700 dark:text-stone-300">
-                      {inviter?.display_name || inviter?.username || 'someone'}
+                      {getDisplayName(inviter?.display_name, inviter?.username, 'someone')}
                     </span>
                   </span>
                 </div>

@@ -38,9 +38,13 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
   const el = document.createElement('div')
   // Cheap (far-zoom) clustered dots are intentionally smaller and lighter than
   // full photo pins — a dot + count badge, no emoji, no photo thumbnail.
-  const pinSize = data.isCheap
+  // Wishlist pins are a compact marker (not a full photo pin), so they get a
+  // smaller dedicated size rather than the 50px album-pin minimum.
+  const pinSize = data.isWishlist
     ? Math.max(data.size * 14, 28)
-    : Math.max(data.size * 24, 50)
+    : data.isCheap
+      ? Math.max(data.size * 14, 28)
+      : Math.max(data.size * 24, 50)
 
   el.style.cssText = `
     position: relative;
@@ -79,7 +83,7 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         animation: pulse-wishlist 2.6s ease-in-out infinite;
       ">
-        <svg width="${Math.max(pinSize * 0.5, 24)}" height="${Math.max(pinSize * 0.5, 24)}" viewBox="0 0 24 24" fill="rgba(254, 243, 199, 0.95)" stroke="rgba(180, 83, 9, 0.9)" stroke-width="1.4" stroke-linejoin="round" style="pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));">
+        <svg width="${Math.max(pinSize * 0.5, 13)}" height="${Math.max(pinSize * 0.5, 13)}" viewBox="0 0 24 24" fill="rgba(254, 243, 199, 0.95)" stroke="rgba(180, 83, 9, 0.9)" stroke-width="1.4" stroke-linejoin="round" style="pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
         <div class="wishlist-pin-label" style="

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import {
@@ -14,6 +13,7 @@ import {
   Star,
   Bookmark,
   Users as UsersIcon,
+  UserPlus,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Album, User } from '@/types/database'
@@ -55,7 +55,6 @@ export default function ProfileContent({
   initialCountryCodes,
   initialTravelStats,
 }: ProfileContentProps) {
-  const { user: currentUser } = useAuth()
   const [albums, setAlbums] = useState<Album[]>(initialAlbums)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
@@ -63,18 +62,23 @@ export default function ProfileContent({
   const [, setCountryCodes] = useState<string[]>(initialCountryCodes)
   const [travelStats, setTravelStats] = useState(initialTravelStats)
   const [showInvite, setShowInvite] = useState(false)
+  const fetchingRef = useRef(false)
   const supabase = createClient()
 
-  const fetchUserData = useCallback(async () => {
-    if (!currentUser) return
+  // Refetch keys off the server-provided userId (the user this page renders),
+  // never the client auth context — so the stats can't drift to another user.
+  // `silent` skips the loading shimmer for background refreshes.
+  const fetchUserData = useCallback(async ({ silent = false } = {}) => {
+    if (!userId || fetchingRef.current) return
+    fetchingRef.current = true
 
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
 
       const { data: albumsData, error: albumsError } = await supabase
         .from('albums')
         .select('*, photos(id)')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
       if (albumsError) throw albumsError
@@ -84,8 +88,8 @@ export default function ProfileContent({
       const totalPhotos = publishedAlbums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)
 
       const [followersResult, followingResult] = await Promise.all([
-        supabase.from('follows').select('id', { count: 'exact' }).eq('following_id', currentUser.id).eq('status', 'accepted'),
-        supabase.from('follows').select('id', { count: 'exact' }).eq('follower_id', currentUser.id).eq('status', 'accepted'),
+        supabase.from('follows').select('id', { count: 'exact' }).eq('following_id', userId).eq('status', 'accepted'),
+        supabase.from('follows').select('id', { count: 'exact' }).eq('follower_id', userId).eq('status', 'accepted'),
       ])
 
       setFollowStats({
@@ -101,16 +105,18 @@ export default function ProfileContent({
     } catch (err) {
       log.error('Error fetching user data', { component: 'ProfileContent' }, err instanceof Error ? err : new Error(String(err)))
     } finally {
-      setLoading(false)
+      fetchingRef.current = false
+      if (!silent) setLoading(false)
     }
-  }, [currentUser, supabase])
+  }, [userId, supabase])
 
-  // Refetch when returning to the tab
+  // Quietly refresh when returning to the tab — no skeleton flash over
+  // already-rendered, server-provided content.
   useEffect(() => {
-    const handleVisibility = () => { if (!document.hidden && currentUser) fetchUserData() }
+    const handleVisibility = () => { if (!document.hidden) fetchUserData({ silent: true }) }
     document.addEventListener('visibilitychange', handleVisibility)
     return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [currentUser, fetchUserData])
+  }, [fetchUserData])
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -157,6 +163,16 @@ export default function ProfileContent({
           <QuietLink href="/saved" icon={<Bookmark className="h-3.5 w-3.5" />} label="Saved" />
           <QuietLink href="/analytics" icon={<BarChart3 className="h-3.5 w-3.5" />} label="Analytics" />
           <QuietLink href="/travel-twins" icon={<UsersIcon className="h-3.5 w-3.5" />} label="Travel Twins" />
+          <button
+            type="button"
+            onClick={() => setShowInvite(true)}
+            className="group inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground cursor-pointer shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:bg-muted hover:text-foreground hover:shadow-[var(--shadow-hover)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <span className="transition-colors duration-200 group-hover:text-primary">
+              <UserPlus className="h-3.5 w-3.5" />
+            </span>
+            Invite friends
+          </button>
         </div>
 
         {/* Simple tab pair — Adventures / Badges */}

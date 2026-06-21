@@ -33,6 +33,8 @@ import {
   Bell,
   UserCog,
   ChevronRight,
+  MessageSquarePlus,
+  MessageCircle,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -40,7 +42,10 @@ import { uploadCoverPhoto, deleteCoverPhoto } from '@/lib/utils/storage'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { FollowRequests } from '@/components/social/FollowRequests'
 import { FollowLists } from '@/components/social/FollowLists'
+import { FeedbackLauncher } from '@/components/feedback/FeedbackLauncher'
 import { cn } from '@/lib/utils'
+
+const DISCORD_INVITE_URL = process.env.NEXT_PUBLIC_DISCORD_INVITE_URL
 
 export default function SettingsPage() {
   const { user, profile, signOut, refreshProfile } = useAuth()
@@ -151,6 +156,16 @@ export default function SettingsPage() {
       if (passwordData.newPassword.length < 8) throw new Error('Password must be at least 8 characters')
 
       if (!user) throw new Error('Account is still loading. Try again in a moment.')
+
+      // Re-authenticate with the current password so the field actually
+      // verifies identity rather than being collected and ignored.
+      if (!passwordData.currentPassword) throw new Error('Enter your current password')
+      if (!user.email) throw new Error('Account email unavailable. Please sign in again.')
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: passwordData.currentPassword,
+      })
+      if (reauthError) throw new Error('Current password is incorrect')
 
       const { error: updateError } = await supabase.auth.updateUser({
         password: passwordData.newPassword,
@@ -277,7 +292,7 @@ export default function SettingsPage() {
 
   const privacyOptions = [
     { value: 'public', label: 'Public', desc: 'Anyone can see your profile', icon: Globe },
-    { value: 'friends', label: 'Friends only', desc: 'Only followers can see your content', icon: Users },
+    { value: 'friends', label: 'Followers only', desc: 'Only people who follow you can see your content', icon: Users },
     { value: 'private', label: 'Private', desc: 'Only you can see your content', icon: Lock },
   ]
 
@@ -319,7 +334,7 @@ export default function SettingsPage() {
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-semibold text-foreground">Edit profile</span>
-            <span className="block text-xs text-muted-foreground mt-0.5">Name, username, bio, photo, links</span>
+            <span className="block text-xs text-muted-foreground mt-0.5">Name, username, bio, avatar, links</span>
           </span>
           <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
         </Link>
@@ -384,6 +399,9 @@ export default function SettingsPage() {
                 <Input id="home-country" value={homeLocationData.country} onChange={(e) => setHomeLocationData(prev => ({ ...prev, country: e.target.value }))} placeholder="United Kingdom" className="min-h-[44px] text-sm" />
               </div>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Different from the location shown on your profile — only used to measure distance traveled.
+            </p>
             <Button size="sm" onClick={updateHomeLocation} disabled={loading || (!homeLocationData.city && !homeLocationData.country)} className="min-h-[44px] px-5 cursor-pointer">
               {loading ? 'Saving…' : 'Save location'}
             </Button>
@@ -491,6 +509,27 @@ export default function SettingsPage() {
               <Download className="h-4 w-4 mr-1.5" />
               {loading ? 'Preparing…' : 'Download data'}
             </Button>
+          </div>
+        </Card>
+
+        {/* ── HELP & FEEDBACK ─────────────────────────────────── */}
+        <SectionHeader title="Help & feedback" className="pt-3" />
+
+        <Card>
+          <CardHead icon={MessageSquarePlus} title="Send feedback" subtitle="Report a bug or suggest an idea — it reaches the team directly" />
+          <div className="p-5 flex flex-wrap gap-2">
+            <FeedbackLauncher label="Share feedback" />
+            {DISCORD_INVITE_URL && (
+              <a
+                href={DISCORD_INVITE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 min-h-[44px] text-sm font-medium text-foreground transition-all duration-200 cursor-pointer hover:border-primary/30 hover:bg-muted/60 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <MessageCircle className="h-4 w-4 text-primary" />
+                Join our Discord
+              </a>
+            )}
           </div>
         </Card>
 

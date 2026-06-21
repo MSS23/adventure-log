@@ -9,6 +9,8 @@ import { Heart, MessageCircle, Globe, ChevronDown, Edit, Trash2, MapPin, Calenda
 import { ShareButton } from './ShareButton'
 import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { cn } from '@/lib/utils'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -160,9 +162,9 @@ export function AlbumInfoSidebar({
           <div className="flex items-center gap-3">
             <UserAvatarLink user={albumUser}>
               <Avatar className="h-11 w-11 ring-2 ring-white dark:ring-white/[0.08] shadow-md">
-                <AvatarImage src={albumUser.avatar_url || undefined} />
+                <AvatarImage src={getAvatarUrl(albumUser.avatar_url, albumUser.username)} />
                 <AvatarFallback className="bg-gradient-to-br from-olive-400 to-olive-500 text-white text-sm font-semibold">
-                  {albumUser.display_name?.[0] || albumUser.username?.[0] || 'U'}
+                  {getDisplayInitial(albumUser.display_name, albumUser.username)}
                 </AvatarFallback>
               </Avatar>
             </UserAvatarLink>

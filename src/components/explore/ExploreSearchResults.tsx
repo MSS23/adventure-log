@@ -7,6 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AlbumFavoriteButton } from '@/components/ui/favorite-button'
 import { log } from '@/lib/utils/logger'
@@ -176,11 +177,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                 <Avatar className="h-16 w-16 mb-3">
                   <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={user.display_name || user.username} />
                   <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
-                    {user.display_name?.[0] || user.username?.[0] || 'U'}
+                    {getDisplayInitial(user.display_name, user.username)}
                   </AvatarFallback>
                 </Avatar>
                 <p className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors text-sm text-center truncate w-full">
-                  {user.display_name}
+                  {getDisplayName(user.display_name, user.username)}
                 </p>
                 <p className="font-mono text-[11px] tracking-wide text-muted-foreground truncate w-full text-center">
                   @{user.username}
@@ -246,11 +247,11 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={getAvatarUrl(albumUser.avatar_url, albumUser.username)} alt={albumUser.display_name || albumUser.username} />
                             <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                              {albumUser.display_name?.[0] || 'U'}
+                              {getDisplayInitial(albumUser.display_name, albumUser.username)}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-xs text-muted-foreground">
-                            by {albumUser.display_name}
+                            by {getDisplayName(albumUser.display_name, albumUser.username)}
                           </span>
                         </div>
                       )}

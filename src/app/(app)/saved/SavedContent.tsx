@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useFavorites } from '@/lib/hooks/useFavorites'
-import { Bookmark, Compass, MapPin, Camera, Heart, User, Globe, ChevronDown, ChevronRight, LayoutGrid, FolderOpen } from 'lucide-react'
+import { Bookmark, Compass, MapPin, Camera, Heart, User, Users, Globe, ChevronDown, ChevronRight, LayoutGrid, FolderOpen, Filter, TrendingUp, X } from 'lucide-react'
 import { NoSavedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -31,9 +31,10 @@ export interface SavedAlbum {
     avatar_url: string | null
   } | null
   savedAt: string
+  popularity: number
 }
 
-type SortMode = 'recent' | 'username' | 'location'
+type SortMode = 'recent' | 'popular' | 'username' | 'location'
 type ViewMode = 'grid' | 'collections'
 type GroupBy = 'location' | 'username'
 
@@ -60,6 +61,16 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [groupBy, setGroupBy] = useState<GroupBy>('location')
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
+  // Filters: narrow the visible set by who saved-from and where. Built from the
+  // saved set itself so we only ever offer users/countries that actually appear.
+  const [filterUser, setFilterUser] = useState<string>('all')
+  const [filterCountry, setFilterCountry] = useState<string>('all')
+
+  const hasActiveFilters = filterUser !== 'all' || filterCountry !== 'all'
+  const clearFilters = () => {
+    setFilterUser('all')
+    setFilterCountry('all')
+  }
 
   // Handle removing an album from saved
   const handleRemove = async (albumId: string) => {
@@ -76,12 +87,53 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
     })
   }
 
+  // Filter options derived from the saved set (only surface what's present)
+  const userOptions = useMemo(() => {
+    const map = new Map<string, { username: string; label: string }>()
+    for (const album of savedAlbums) {
+      const username = album.user?.username
+      if (!username || map.has(username)) continue
+      map.set(username, { username, label: album.user?.display_name || `@${username}` })
+    }
+    return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label))
+  }, [savedAlbums])
+
+  const countryOptions = useMemo(() => {
+    const map = new Map<string, { key: string; label: string; flag?: string }>()
+    for (const album of savedAlbums) {
+      const code = album.country_code?.toUpperCase()
+      const label = getCountryLabel(album)
+      const key = code || label.toLowerCase()
+      if (map.has(key)) continue
+      map.set(key, { key, label, flag: code ? getFlagEmoji(code) : undefined })
+    }
+    return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label))
+  }, [savedAlbums])
+
+  // Apply active filters before sorting / grouping
+  const filteredAlbums = useMemo(() => {
+    return savedAlbums.filter((album) => {
+      if (filterUser !== 'all' && album.user?.username !== filterUser) return false
+      if (filterCountry !== 'all') {
+        const code = album.country_code?.toUpperCase()
+        const key = code || getCountryLabel(album).toLowerCase()
+        if (key !== filterCountry) return false
+      }
+      return true
+    })
+  }, [savedAlbums, filterUser, filterCountry])
+
   // Sort albums based on selected mode
   const sortedAlbums = useMemo(() => {
-    const sorted = [...savedAlbums]
+    const sorted = [...filteredAlbums]
     switch (sortMode) {
       case 'recent':
         return sorted.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime())
+      case 'popular':
+        return sorted.sort((a, b) => {
+          if (b.popularity !== a.popularity) return b.popularity - a.popularity
+          return new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
+        })
       case 'username':
         return sorted.sort((a, b) => {
           const nameA = a.user?.display_name || a.user?.username || ''
@@ -97,13 +149,13 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
       default:
         return sorted
     }
-  }, [savedAlbums, sortMode])
+  }, [filteredAlbums, sortMode])
 
   // Auto-collections: group albums by country or username
   const collections = useMemo((): CollectionGroup[] => {
     const groups = new Map<string, CollectionGroup>()
 
-    for (const album of savedAlbums) {
+    for (const album of filteredAlbums) {
       let key: string
       let label: string
       let flag: string | undefined
@@ -131,7 +183,7 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
       if (b.albums.length !== a.albums.length) return b.albums.length - a.albums.length
       return a.label.localeCompare(b.label)
     })
-  }, [savedAlbums, groupBy])
+  }, [filteredAlbums, groupBy])
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -207,6 +259,9 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                     <SelectItem value="recent">
                       <span className="flex items-center gap-2"><Bookmark className="h-3.5 w-3.5" /> Recently Saved</span>
                     </SelectItem>
+                    <SelectItem value="popular">
+                      <span className="flex items-center gap-2"><TrendingUp className="h-3.5 w-3.5" /> Most Popular</span>
+                    </SelectItem>
                     <SelectItem value="username">
                       <span className="flex items-center gap-2"><User className="h-3.5 w-3.5" /> By User</span>
                     </SelectItem>
@@ -231,6 +286,88 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                 </Select>
               )}
             </div>
+
+            {/* Filter Bar — only render filters that have something to choose from */}
+            {(userOptions.length > 1 || countryOptions.length > 1) && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Filter className="h-3.5 w-3.5" />
+                  Filter
+                </span>
+
+                {/* By User */}
+                {userOptions.length > 1 && (
+                  <Select value={filterUser} onValueChange={setFilterUser}>
+                    <SelectTrigger className="w-[160px] h-9">
+                      <span className="flex items-center gap-2 truncate">
+                        <Users className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <SelectValue placeholder="All users" />
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All users</SelectItem>
+                      {userOptions.map((u) => (
+                        <SelectItem key={u.username} value={u.username}>
+                          {u.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {/* By Country */}
+                {countryOptions.length > 1 && (
+                  <Select value={filterCountry} onValueChange={setFilterCountry}>
+                    <SelectTrigger className="w-[180px] h-9">
+                      <span className="flex items-center gap-2 truncate">
+                        <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <SelectValue placeholder="All countries" />
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All countries</SelectItem>
+                      {countryOptions.map((c) => (
+                        <SelectItem key={c.key} value={c.key}>
+                          <span className="flex items-center gap-2">
+                            {c.flag && <span>{c.flag}</span>}
+                            {c.label}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    Clear
+                  </button>
+                )}
+
+                <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+                  {filteredAlbums.length} shown
+                </span>
+              </div>
+            )}
+
+            {/* No albums match the active filters */}
+            {filteredAlbums.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border bg-card/50 py-16 text-center">
+                <Filter className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />
+                <p className="mb-4 text-sm text-muted-foreground">
+                  No saved albums match these filters.
+                </p>
+                <Button variant="outline" size="sm" onClick={clearFilters} className="cursor-pointer">
+                  Clear filters
+                </Button>
+              </div>
+            ) : (
+            <>
 
             {/* Flat Grid View */}
             {viewMode === 'grid' && (
@@ -343,6 +480,8 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
                 </motion.div>
               </AnimatePresence>
             )}
+            </>
+            )}
           </>
         )}
       </div>
@@ -422,6 +561,14 @@ function AlbumCard({
           {album.country_code && (
             <div className="absolute top-2 left-2 text-lg drop-shadow-md">
               {getFlagEmoji(album.country_code.toUpperCase())}
+            </div>
+          )}
+
+          {/* Popularity badge (total likes) */}
+          {album.popularity > 0 && (
+            <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-background/90 px-2 py-0.5 text-xs font-medium text-foreground shadow-[var(--shadow-overlay)] backdrop-blur-sm">
+              <Heart className="h-3 w-3 fill-[currentColor] text-accent" />
+              <span className="tabular-nums">{album.popularity}</span>
             </div>
           )}
         </div>

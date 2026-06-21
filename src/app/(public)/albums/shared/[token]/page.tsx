@@ -150,7 +150,7 @@ export default function SharedAlbumPage() {
             {error || 'This share link may have expired or been revoked.'}
           </p>
           <div className="flex justify-center gap-3">
-            <Link href="/sign-up">
+            <Link href="/signup">
               <Button className="cursor-pointer">
                 Join Adventure Log
               </Button>
@@ -425,7 +425,7 @@ export default function SharedAlbumPage() {
                 Create beautiful albums like this one, pin your journeys on an interactive
                 globe, and share them with the world — free, forever.
               </p>
-              <Link href="/sign-up">
+              <Link href="/signup">
                 <Button variant="coral" className="cursor-pointer font-semibold px-8">
                   Start your free Adventure Log
                 </Button>

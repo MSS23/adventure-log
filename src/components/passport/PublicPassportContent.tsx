@@ -9,7 +9,8 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName } from '@/lib/utils/display-name'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -153,7 +154,7 @@ export function PublicPassportContent({
   user, countryCodes, cities, totalPhotos, totalDistance,
   followerCount, continentsVisited, personality, firstTrip, latestTrip, memberSince
 }: Props) {
-  const displayName = user.display_name || user.username
+  const displayName = getDisplayName(user.display_name, user.username)
   const [copied, setCopied] = useState(false)
   const worldPercent = (countryCodes.length / 195) * 100
   const searchParams = useSearchParams()
@@ -227,7 +228,7 @@ export function PublicPassportContent({
         <div className="relative max-w-3xl mx-auto px-6 pt-12 pb-20 text-center">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.1 }}>
             <Avatar className="w-24 h-24 mx-auto mb-4 ring-2 ring-white/20">
-              <AvatarImage src={getPhotoUrl(user.avatar_url) || undefined} alt={displayName} />
+              <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={displayName} />
               <AvatarFallback className="text-2xl bg-olive-700 text-white font-heading">
                 {displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -520,7 +521,7 @@ export function PublicPassportContent({
               Adventure Log
             </Link>
           </p>
-          <Link href="/sign-up">
+          <Link href="/signup">
             <Button variant="coral" className="cursor-pointer px-8 gap-2">
               Create Your Profile
               <ArrowRight className="h-4 w-4" />

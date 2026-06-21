@@ -6,11 +6,19 @@
 // Bump this version on any deploy that must invalidate stale caches for
 // returning visitors. The activate handler deletes every cache whose name
 // doesn't match the current set, so changing the suffix purges old content.
-const CACHE_VERSION = 'v12'
+const CACHE_VERSION = 'v13'
 const CACHE_NAME = `adventure-log-${CACHE_VERSION}`
 const STATIC_CACHE = `adventure-log-static-${CACHE_VERSION}`
 const DYNAMIC_CACHE = `adventure-log-dynamic-${CACHE_VERSION}`
 const IMAGE_CACHE = `adventure-log-images-${CACHE_VERSION}`
+
+// Verbose lifecycle logging is gated behind this flag so the service worker is
+// quiet in production DevTools. Flip to true when debugging caching/sync under
+// Application → Service Workers.
+const SW_DEBUG = false
+const swLog = (...args) => {
+  if (SW_DEBUG) console.log(...args)
+}
 
 // Static files to cache immediately
 const STATIC_FILES = [
@@ -47,13 +55,13 @@ const CACHE_DURATION = {
 
 // Install event - cache static files
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...')
+  swLog('Service Worker: Installing...')
 
   event.waitUntil(
     Promise.all([
       // Cache static files
       caches.open(STATIC_CACHE).then((cache) => {
-        console.log('Service Worker: Caching static files')
+        swLog('Service Worker: Caching static files')
         return cache.addAll(STATIC_FILES)
       }),
 
@@ -65,7 +73,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...')
+  swLog('Service Worker: Activating...')
 
   event.waitUntil(
     Promise.all([
@@ -76,7 +84,7 @@ self.addEventListener('activate', (event) => {
             if (cacheName !== STATIC_CACHE &&
                 cacheName !== DYNAMIC_CACHE &&
                 cacheName !== IMAGE_CACHE) {
-              console.log('Service Worker: Deleting old cache:', cacheName)
+              swLog('Service Worker: Deleting old cache:', cacheName)
               return caches.delete(cacheName)
             }
           })
@@ -143,7 +151,7 @@ async function handleImageRequest(request) {
 
     return networkResponse
   } catch (error) {
-    console.log('Service Worker: Image request failed, returning cached version')
+    swLog('Service Worker: Image request failed, returning cached version')
     const cached = await caches.match(request)
     return cached || new Response('', { status: 408, statusText: 'Request failed' })
   }
@@ -162,7 +170,7 @@ async function handleAPIRequest(request) {
 
     return networkResponse
   } catch (error) {
-    console.log('Service Worker: API request failed, checking cache')
+    swLog('Service Worker: API request failed, checking cache')
 
     const cache = await caches.open(DYNAMIC_CACHE)
     const cachedResponse = await cache.match(request)
@@ -216,7 +224,7 @@ async function handleNavigationRequest(request) {
 
     return networkResponse
   } catch (error) {
-    console.log('Service Worker: Navigation request failed, checking cache')
+    swLog('Service Worker: Navigation request failed, checking cache')
 
     // Try cache
     const cachedResponse = await caches.match(request)
@@ -269,7 +277,7 @@ function isStaticAsset(request) {
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
-  console.log('Service Worker: Background sync triggered', event.tag)
+  swLog('Service Worker: Background sync triggered', event.tag)
 
   if (event.tag === 'background-sync-albums') {
     event.waitUntil(syncOfflineAlbums())
@@ -281,7 +289,7 @@ self.addEventListener('sync', (event) => {
 // Sync offline album creations
 async function syncOfflineAlbums() {
   try {
-    console.log('Service Worker: Syncing offline albums')
+    swLog('Service Worker: Syncing offline albums')
 
     // Get offline data from IndexedDB or localStorage
     const offlineAlbums = await getOfflineData('albums')
@@ -310,18 +318,18 @@ async function syncOfflineAlbums() {
           })
         }
       } catch (error) {
-        console.log('Service Worker: Failed to sync album:', album.id, error)
+        swLog('Service Worker: Failed to sync album:', album.id, error)
       }
     }
   } catch (error) {
-    console.log('Service Worker: Background sync failed:', error)
+    swLog('Service Worker: Background sync failed:', error)
   }
 }
 
 // Sync offline photo uploads
 async function syncOfflinePhotos() {
   try {
-    console.log('Service Worker: Syncing offline photos')
+    swLog('Service Worker: Syncing offline photos')
 
     const offlinePhotos = await getOfflineData('photos')
 
@@ -349,11 +357,11 @@ async function syncOfflinePhotos() {
           })
         }
       } catch (error) {
-        console.log('Service Worker: Failed to sync photo:', photo.id, error)
+        swLog('Service Worker: Failed to sync photo:', photo.id, error)
       }
     }
   } catch (error) {
-    console.log('Service Worker: Photo sync failed:', error)
+    swLog('Service Worker: Photo sync failed:', error)
   }
 }
 
@@ -406,7 +414,7 @@ async function getOfflineData(type) {
       db.close()
     }
   } catch (error) {
-    console.log('Service Worker: Failed to read offline data:', error)
+    swLog('Service Worker: Failed to read offline data:', error)
     return []
   }
 }
@@ -428,14 +436,14 @@ async function removeOfflineData(type, id) {
     }
     return true
   } catch (error) {
-    console.log('Service Worker: Failed to remove offline data:', type, id, error)
+    swLog('Service Worker: Failed to remove offline data:', type, id, error)
     return false
   }
 }
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push notification received')
+  swLog('Service Worker: Push notification received')
 
   let notificationData = {
     title: 'Adventure Log',
@@ -449,7 +457,7 @@ self.addEventListener('push', (event) => {
     try {
       notificationData = { ...notificationData, ...event.data.json() }
     } catch (error) {
-      console.log('Service Worker: Failed to parse push data')
+      swLog('Service Worker: Failed to parse push data')
     }
   }
 
@@ -476,7 +484,7 @@ self.addEventListener('push', (event) => {
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification clicked')
+  swLog('Service Worker: Notification clicked')
 
   event.notification.close()
 
@@ -501,4 +509,4 @@ self.addEventListener('notificationclick', (event) => {
   }
 })
 
-console.log('Service Worker: Loaded and ready')
+swLog('Service Worker: Loaded and ready')

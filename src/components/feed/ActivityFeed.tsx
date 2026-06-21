@@ -8,6 +8,8 @@ import { Heart, Camera, UserPlus, Trophy, Flame } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { log } from '@/lib/utils/logger'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 
 interface Activity {
   id: string
@@ -123,7 +125,7 @@ export function ActivityFeed() {
       case 'album':
         return (
           <>
-            <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
+            <span className="font-semibold">{getDisplayName(activity.user.display_name, activity.user.username)}</span>
             {' visited '}
             <span className="font-semibold text-primary">{activity.target?.location || activity.target?.title}</span>
           </>
@@ -131,21 +133,21 @@ export function ActivityFeed() {
       case 'like':
         return (
           <>
-            <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
+            <span className="font-semibold">{getDisplayName(activity.user.display_name, activity.user.username)}</span>
             {' loved an album'}
           </>
         )
       case 'follow':
         return (
           <>
-            <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
+            <span className="font-semibold">{getDisplayName(activity.user.display_name, activity.user.username)}</span>
             {' started following someone'}
           </>
         )
       case 'achievement':
         return (
           <>
-            <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
+            <span className="font-semibold">{getDisplayName(activity.user.display_name, activity.user.username)}</span>
             {' unlocked '}
             <span className="font-semibold text-[color:var(--color-gold)]">{activity.metadata?.achievement_name}</span>
           </>
@@ -153,7 +155,7 @@ export function ActivityFeed() {
       case 'milestone':
         return (
           <>
-            <span className="font-semibold">{activity.user.display_name || activity.user.username}</span>
+            <span className="font-semibold">{getDisplayName(activity.user.display_name, activity.user.username)}</span>
             {' reached '}
             <span className="font-semibold text-primary">{activity.metadata?.count} countries!</span>
           </>
@@ -220,9 +222,9 @@ export function ActivityFeed() {
             <div key={activity.id} className="flex items-start gap-3 group">
               <Link href={`/profile/${activity.user.username}`}>
                 <Avatar className="h-8 w-8 ring-2 ring-background group-hover:ring-primary/20 transition-all duration-200">
-                  <AvatarImage src={activity.user.avatar_url || undefined} />
+                  <AvatarImage src={getAvatarUrl(activity.user.avatar_url, activity.user.username)} />
                   <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                    {(activity.user.display_name || activity.user.username)[0]?.toUpperCase()}
+                    {getDisplayInitial(activity.user.display_name, activity.user.username)}
                   </AvatarFallback>
                 </Avatar>
               </Link>

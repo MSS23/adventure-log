@@ -11,25 +11,30 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { LayoutDashboard, Settings, LogOut, Camera, Bookmark, Star, MapPin } from 'lucide-react'
+import { LayoutDashboard, Settings, LogOut, Camera, Bookmark, Star, MapPin, MessageSquarePlus } from 'lucide-react'
 import Link from 'next/link'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { useState } from 'react'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
+import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
 
 export function UserNav() {
   const { user, profile, signOut } = useAuth()
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   if (!user) return null
 
-  const initials = profile?.name
-    ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase()
-    : user.email?.substring(0, 2).toUpperCase() || 'U'
+  const initials =
+    profile?.display_name || profile?.username
+      ? getDisplayInitial(profile.display_name, profile.username)
+      : user.email?.substring(0, 2).toUpperCase() || 'U'
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full p-0">
           <Avatar className="h-9 w-9 sm:h-10 sm:w-10">
-            <AvatarImage src={getPhotoUrl(profile?.avatar_url, 'avatars') || ''} alt={profile?.name || 'User'} />
+            <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} alt={profile?.name || 'User'} />
             <AvatarFallback className="text-xs sm:text-sm">{initials}</AvatarFallback>
           </Avatar>
         </Button>
@@ -39,7 +44,9 @@ export function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {profile?.name || user.email?.split('@')[0]}
+              {profile?.display_name || profile?.username
+                ? getDisplayName(profile.display_name, profile.username)
+                : user.email?.split('@')[0]}
             </p>
             <p className="text-sm leading-none text-muted-foreground">
               {user.email}
@@ -95,8 +102,19 @@ export function UserNav() {
           </Link>
         </DropdownMenuItem>
 
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onSelect={(e) => {
+            e.preventDefault()
+            setFeedbackOpen(true)
+          }}
+        >
+          <MessageSquarePlus className="mr-2 h-4 w-4" />
+          <span>Send feedback</span>
+        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem
           className="cursor-pointer text-destructive focus:text-destructive"
           onClick={signOut}
@@ -105,6 +123,8 @@ export function UserNav() {
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </DropdownMenu>
   )
 }

@@ -9,7 +9,7 @@
  *   - route handlers under `src/app/api/**` (38 routes)
  *   - server actions (`'use server'` files in src/app/actions/ and (app)/.../actions.ts)
  *   - `runtime = 'edge'` OG image generators (opengraph-image.tsx, twitter-image.tsx)
- *   - `src/middleware.ts` (Clerk middleware needs an active server)
+ *   - `src/middleware.ts` (Supabase session middleware needs an active server)
  *   - root `instrumentation.ts` (Sentry server bootstrap)
  *
  * Next.js does NOT (as of 15.5.x) provide a per-route `excludeFromExport` knob
@@ -82,8 +82,7 @@ const MOBILE_REMOVE_PATTERNS = [
   // OG image routes use `runtime = 'edge'` and dynamically render.
   'src/app/opengraph-image.tsx',
   'src/app/twitter-image.tsx',
-  // Clerk middleware (now at src/middleware.ts so Next.js detects it) and
-  // instrumentation — server-only.
+  // Supabase session middleware and instrumentation — server-only.
   'src/middleware.ts',
   'instrumentation.ts',
   // ────────────────────────────────────────────────────────────────────
@@ -109,19 +108,18 @@ const MOBILE_REMOVE_PATTERNS = [
   'src/app/(public)/t/[slug]/page.tsx',
   'src/app/(public)/u/[username]/page.tsx',
   'src/app/(public)/u/[username]/passport/page.tsx',
-  // Clerk catch-all pages — Clerk's hosted UI handles auth in the WebView via
-  // the SDK directly; the catch-all routes are SSR-rendered by Clerk and
-  // can't be exported. Sign-in/up flow on mobile uses Clerk's React SDK
-  // directly. (Native OAuth via system browser was prototyped in
-  // src/lib/auth/clerk-capacitor.ts — removed pending an active wire-up.)
+  // Optional catch-all auth routes — `output: 'export'` requires
+  // generateStaticParams() on dynamic routes, which these backward-compat
+  // redirect shims don't provide. They just bounce old /sign-in and /sign-up
+  // links to the canonical Supabase /login and /signup routes.
   'src/app/sign-in/[[...sign-in]]/page.tsx',
   'src/app/sign-up/[[...sign-up]]/page.tsx',
   // ────────────────────────────────────────────────────────────────────
-  // Server-Component pages that pre-fetch with `auth()` from
-  // `@clerk/nextjs/server` and Supabase server-side. These call
-  // `headers()` transitively, which static export forbids. The mobile
-  // shell omits them; their `*Content.tsx` client siblings can still be
-  // wired into a client-only page wrapper in a follow-up.
+  // Server-Component pages that pre-fetch with the Supabase server client
+  // (`createClient()` from `@/lib/supabase/server`). These call `cookies()`
+  // /`headers()` transitively, which static export forbids. The mobile shell
+  // omits them; their `*Content.tsx` client siblings can still be wired into a
+  // client-only page wrapper in a follow-up.
   //
   // KNOWN MISSING ON MOBILE: dashboard, wishlist, saved, countries, profile.
   // These are core surfaces — porting them to client-only fetch
@@ -132,10 +130,8 @@ const MOBILE_REMOVE_PATTERNS = [
   'src/app/(app)/profile/page.tsx',
   'src/app/(app)/saved/page.tsx',
   'src/app/(app)/countries/page.tsx',
-  // Server-component login redirect — uses `searchParams` to forward the
-  // `redirect=` query param to Clerk's hosted sign-in. Static export forbids
-  // `searchParams` access. Mobile uses Clerk's React SDK directly, not this
-  // bounce route.
+  // Login page — kept out of the static shell for now. A client-only mobile
+  // auth flow (Supabase email/password via apiFetch) is a tracked follow-up.
   'src/app/(auth)/login/page.tsx',
 ]
 
@@ -148,15 +144,6 @@ const MOBILE_REMOVE_PATTERNS = [
  *
  * The mobile UI shouldn't call our own stubbed actions; the stub error
  * message tells the developer to wire the call through `apiFetch()` instead.
- *
- * The Clerk SDK entries are necessary because `@clerk/nextjs` ships internal
- * server-action modules (server-actions.js, keyless-actions.js) with
- * `'use server'` directives baked into node_modules. Even though our pages
- * never call these directly, Next.js detects them in any page that imports
- * from `@clerk/nextjs` (which is most of the app) and refuses to ship under
- * `output: 'export'`. The stub exports the same names without the directive,
- * so they're treated as plain async functions and skipped by the static
- * exporter's serverActionsManifest check.
  *
  * Each entry: { original: <path>, stub: <path-in-mobile-stubs/> }
  * Both are project-root-relative.
@@ -182,23 +169,6 @@ const MOBILE_STUB_REPLACEMENTS = [
   {
     original: 'src/app/(app)/albums/[id]/actions.ts',
     stub: 'scripts/mobile-stubs/app-albums-id-actions.ts',
-  },
-  // Clerk SDK server-action modules — see commentary above.
-  {
-    original: 'node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js',
-    stub: 'scripts/mobile-stubs/clerk-actions-stub.js',
-  },
-  {
-    original: 'node_modules/@clerk/nextjs/dist/esm/app-router/keyless-actions.js',
-    stub: 'scripts/mobile-stubs/clerk-actions-stub.js',
-  },
-  {
-    original: 'node_modules/@clerk/nextjs/dist/cjs/app-router/server-actions.js',
-    stub: 'scripts/mobile-stubs/clerk-actions-stub.cjs.js',
-  },
-  {
-    original: 'node_modules/@clerk/nextjs/dist/cjs/app-router/keyless-actions.js',
-    stub: 'scripts/mobile-stubs/clerk-actions-stub.cjs.js',
   },
 ]
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -188,7 +188,7 @@ export function NotificationSettings() {
     {
       key: 'follows_enabled',
       icon: UserPlus,
-      title: 'New Followers',
+      title: 'New followers',
       description: 'When someone starts following you',
       color: 'text-primary'
     }
@@ -213,11 +213,8 @@ export function NotificationSettings() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="h-5 w-5" />
-          Notification Preferences
+          Notification preferences
         </CardTitle>
-        <CardDescription>
-          Choose which activities you want to be notified about
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Push Notifications */}
@@ -246,33 +243,44 @@ export function NotificationSettings() {
 
         {/* Notification Types */}
         <div className="space-y-1">
-          {notificationTypes.map((type) => (
-            <div
-              key={type.key}
-              className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition-colors duration-200 hover:bg-muted/60"
-            >
-              <div className="flex items-center gap-3 flex-1">
-                <type.icon className={`h-5 w-5 ${type.color}`} />
-                <div className="flex-1">
-                  <Label htmlFor={type.key} className="font-medium cursor-pointer text-foreground">
-                    {type.title}
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {type.description}
-                  </p>
+          {notificationTypes.map((type) => {
+            const key = type.key as keyof NotificationPreferences
+            const checked = preferences[key]
+            return (
+              <div
+                key={type.key}
+                role="switch"
+                aria-checked={checked}
+                tabIndex={0}
+                onClick={() => updatePreference(key, !checked)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    updatePreference(key, !checked)
+                  }
+                }}
+                className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 min-h-[44px] cursor-pointer transition-colors duration-200 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  <type.icon className={`h-5 w-5 ${type.color}`} aria-hidden="true" />
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">{type.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {type.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <Switch
-                id={type.key}
-                checked={preferences[type.key as keyof NotificationPreferences]}
-                onCheckedChange={(checked) =>
-                  updatePreference(type.key as keyof NotificationPreferences, checked)
-                }
-                className="cursor-pointer"
-              />
-            </div>
-          ))}
+                {/* Visual only — the whole row is the control. */}
+                <Switch
+                  checked={checked}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className="pointer-events-none"
+                />
+              </div>
+            )
+          })}
         </div>
 
         {/* Info Box */}

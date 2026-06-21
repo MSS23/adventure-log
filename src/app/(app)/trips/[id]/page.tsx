@@ -31,6 +31,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
@@ -474,7 +476,7 @@ export default function TripDetailPage() {
                 className="inline-block w-3 h-3 rounded-full mr-2"
                 style={{ backgroundColor: member.color }}
               />
-              {member.user?.display_name || member.user?.username || 'Unknown'}
+              {getDisplayName(member.user?.display_name, member.user?.username)}
               {isMe && <span className="ml-1 text-xs opacity-60">(you)</span>}
               <span className="ml-1.5 text-xs opacity-70">{count}</span>
             </Button>
@@ -602,13 +604,13 @@ export default function TripDetailPage() {
                         )}
                         <div className="flex items-center gap-2 mt-1">
                           <Avatar className="h-4 w-4">
-                            <AvatarImage src={member?.user?.avatar_url || undefined} />
+                            <AvatarImage src={getAvatarUrl(member?.user?.avatar_url, member?.user?.username)} />
                             <AvatarFallback className="text-[10px]">
-                              {(member?.user?.display_name || member?.user?.username || '?')[0]}
+                              {getDisplayInitial(member?.user?.display_name, member?.user?.username)}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-xs text-muted-foreground">
-                            {member?.user?.display_name || member?.user?.username || 'Unknown'}
+                            {getDisplayName(member?.user?.display_name, member?.user?.username)}
                           </span>
                           {pin.source_url && (
                             <a
@@ -785,7 +787,7 @@ export default function TripDetailPage() {
                       className="inline-block w-2.5 h-2.5 rounded-full"
                       style={{ backgroundColor: m.color }}
                     />
-                    {m.user?.display_name || m.user?.username || 'Unknown'}
+                    {getDisplayName(m.user?.display_name, m.user?.username)}
                     <span className="text-[10px] opacity-60">({m.role})</span>
                   </Badge>
                 ))}

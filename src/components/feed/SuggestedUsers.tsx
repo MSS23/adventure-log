@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 
 interface SuggestedUser {
   id: string
@@ -228,7 +229,7 @@ export function SuggestedUsers() {
                 <Avatar className="h-10 w-10 ring-2 ring-background group-hover:ring-primary/20 transition-all duration-200">
                   <AvatarImage src={getAvatarUrl(suggestedUser.avatar_url, suggestedUser.username)} />
                   <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                    {(suggestedUser.display_name || suggestedUser.username)[0]?.toUpperCase()}
+                    {getDisplayInitial(suggestedUser.display_name, suggestedUser.username)}
                   </AvatarFallback>
                 </Avatar>
               </Link>
@@ -239,7 +240,7 @@ export function SuggestedUsers() {
                   className="block hover:underline"
                 >
                   <p className="font-semibold text-foreground text-sm truncate">
-                    {suggestedUser.display_name || suggestedUser.username}
+                    {getDisplayName(suggestedUser.display_name, suggestedUser.username)}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
                     @{suggestedUser.username}

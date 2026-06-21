@@ -166,7 +166,7 @@ export default function PublicTripView({ trip, members, pins }: Props) {
               Map places with friends, live-log as you go, and turn every trip into a story worth sharing.
             </p>
             <Link
-              href="/sign-up"
+              href="/signup"
               className="inline-flex items-center justify-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold text-sm px-6 py-2.5 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Start free — no credit card

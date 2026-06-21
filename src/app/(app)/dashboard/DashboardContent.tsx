@@ -58,6 +58,10 @@ interface Props {
 
 const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
+// Ghost button styled for the dark hero (translucent white on the gradient).
+const HERO_GHOST_BTN =
+  'bg-white/[0.12] text-white border border-white/20 shadow-none hover:bg-white/[0.18] hover:text-white active:scale-[0.97] focus-visible:ring-offset-transparent'
+
 function flagEmoji(code?: string | null): string {
   if (!code || code.length !== 2) return ''
   return code
@@ -161,66 +165,10 @@ export default function DashboardContent({
               }}
             />
 
-            {/* Soft warm halo behind the globe for depth */}
-            <div
-              className="absolute right-[-50px] top-[-80px] w-[380px] h-[380px] rounded-full pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(circle at 42% 42%, rgba(242,161,121,0.34) 0%, rgba(199,91,58,0.16) 46%, transparent 72%)',
-                filter: 'blur(10px)',
-              }}
-            />
-
-            {/* Decorative globe — a little world with pins dropped across it */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.85, rotate: -8 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 1.1, ease: EDITORIAL_EASE, delay: 0.25 }}
-              className="absolute right-[-50px] top-[-44px] w-[300px] h-[300px] rounded-full pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(circle at 34% 30%, rgba(242,161,121,0.55) 0%, rgba(199,91,58,0.42) 42%, rgba(20,16,10,0.32) 82%)',
-                boxShadow:
-                  'inset -26px -36px 72px rgba(0,0,0,0.45), inset 16px 20px 52px rgba(242,161,121,0.22), 0 0 60px rgba(199,91,58,0.16)',
-                border: '1px solid rgba(247,242,231,0.10)',
-              }}
-            >
-              {/* concentric meridian rings on the sphere */}
-              <div
-                className="absolute inset-0 rounded-full pointer-events-none"
-                style={{
-                  background:
-                    'repeating-radial-gradient(circle at 50% 50%, transparent 0px, transparent 27px, rgba(247,242,231,0.09) 27px, rgba(247,242,231,0.09) 28px)',
-                }}
-              />
-              {[
-                { x: 42, y: 30, c: '#F2A179' },
-                { x: 70, y: 45, c: '#E8C77A' },
-                { x: 30, y: 60, c: '#F2A179' },
-                { x: 58, y: 70, c: '#FBE3CF' },
-                { x: 48, y: 48, c: '#ffffff' },
-              ].map((p, i) => (
-                <motion.span
-                  key={i}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 360,
-                    damping: 18,
-                    delay: 0.6 + i * 0.08,
-                  }}
-                  className="absolute w-2 h-2 rounded-full"
-                  style={{
-                    left: `${p.x}%`,
-                    top: `${p.y}%`,
-                    background: p.c,
-                    transform: 'translate(-50%,-50%)',
-                    boxShadow: `0 0 0 3px ${p.c}44, 0 0 18px ${p.c}`,
-                  }}
-                />
-              ))}
-            </motion.div>
+            {/* Decorative globe — a recognizable little world with dropped pins.
+                Replaces the old abstract blob: a graticule sphere reads clearly
+                as a globe and folds the glow/rings into one tidy layer. */}
+            <HeroGlobe />
 
             {/* Contrast scrim — anchors the headline & stats over any texture */}
             <div
@@ -257,11 +205,7 @@ export default function DashboardContent({
                     Spin your globe
                   </Link>
                 </Button>
-                <Button
-                  size="pill"
-                  asChild
-                  className="bg-white/[0.12] text-white border border-white/20 shadow-none hover:bg-white/[0.18] hover:text-white active:scale-[0.97] focus-visible:ring-offset-transparent"
-                >
+                <Button size="pill" asChild className={HERO_GHOST_BTN}>
                   <Link href="/wrapped">See Wrapped</Link>
                 </Button>
               </div>
@@ -385,6 +329,100 @@ export default function DashboardContent({
         </div>
       </div>
     </MotionConfig>
+  )
+}
+
+// A crisp, recognizable globe rendered as SVG — latitude/longitude graticule
+// over a warm sphere, with a few location pins dropped on the visible face.
+// One self-contained layer (glow + sphere + lines + pins) instead of the old
+// stack of overlapping gradients, so the hero reads as "a world" at a glance.
+function HeroGlobe() {
+  const pins = [
+    { x: 74, y: 66, c: '#F2A179', d: 0 },
+    { x: 122, y: 86, c: '#E8C77A', d: 0.1 },
+    { x: 92, y: 116, c: '#FBE3CF', d: 0.2 },
+    { x: 138, y: 58, c: '#ffffff', d: 0.3 },
+  ]
+
+  return (
+    <motion.div
+      aria-hidden
+      initial={{ opacity: 0, scale: 0.9, rotate: -6 }}
+      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+      transition={{ duration: 1, ease: EDITORIAL_EASE, delay: 0.2 }}
+      className="pointer-events-none absolute right-[-56px] top-[-58px] h-[320px] w-[320px] sm:right-[-36px] sm:h-[360px] sm:w-[360px]"
+    >
+      <svg viewBox="0 0 200 200" className="h-full w-full overflow-visible">
+        <defs>
+          <radialGradient id="al-globe-face" cx="36%" cy="30%" r="78%">
+            <stop offset="0%" stopColor="#F6B58C" />
+            <stop offset="40%" stopColor="#D06B43" />
+            <stop offset="78%" stopColor="#7A3320" />
+            <stop offset="100%" stopColor="#241008" />
+          </radialGradient>
+          <radialGradient id="al-globe-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(242,161,121,0.42)" />
+            <stop offset="55%" stopColor="rgba(199,91,58,0.14)" />
+            <stop offset="100%" stopColor="rgba(199,91,58,0)" />
+          </radialGradient>
+          <clipPath id="al-globe-clip">
+            <circle cx="100" cy="100" r="84" />
+          </clipPath>
+        </defs>
+
+        {/* atmospheric glow */}
+        <circle cx="100" cy="100" r="118" fill="url(#al-globe-glow)" />
+
+        {/* sphere body */}
+        <circle cx="100" cy="100" r="84" fill="url(#al-globe-face)" />
+
+        {/* graticule: meridians (longitude) as vertical ellipses, parallels
+            (latitude) as horizontal rings — the curved rings read as a real
+            3D sphere rather than a flat wireframe ball. */}
+        <g
+          clipPath="url(#al-globe-clip)"
+          fill="none"
+          stroke="#F7F2E7"
+          strokeOpacity="0.15"
+          strokeWidth="1"
+        >
+          <ellipse cx="100" cy="100" rx="84" ry="84" />
+          <ellipse cx="100" cy="100" rx="55" ry="84" />
+          <ellipse cx="100" cy="100" rx="27" ry="84" />
+          <line x1="100" y1="16" x2="100" y2="184" />
+          <ellipse cx="100" cy="100" rx="84" ry="14" strokeOpacity="0.24" />
+          <ellipse cx="100" cy="72" rx="79" ry="11" />
+          <ellipse cx="100" cy="128" rx="79" ry="11" />
+          <ellipse cx="100" cy="46" rx="64" ry="8" />
+          <ellipse cx="100" cy="154" rx="64" ry="8" />
+        </g>
+
+        {/* rim light */}
+        <circle
+          cx="100"
+          cy="100"
+          r="84"
+          fill="none"
+          stroke="#F7F2E7"
+          strokeOpacity="0.22"
+          strokeWidth="1.2"
+        />
+
+        {/* location pins dropped on the visible face */}
+        {pins.map((p, i) => (
+          <motion.g
+            key={i}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 340, damping: 18, delay: 0.6 + p.d }}
+            style={{ transformOrigin: `${p.x}px ${p.y}px` }}
+          >
+            <circle cx={p.x} cy={p.y} r="6.5" fill={p.c} opacity="0.22" />
+            <circle cx={p.x} cy={p.y} r="3" fill={p.c} />
+          </motion.g>
+        ))}
+      </svg>
+    </motion.div>
   )
 }
 

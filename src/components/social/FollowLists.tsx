@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Users, UserCheck, UserPlus } from 'lucide-react'
 import Link from 'next/link'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 
 export function FollowLists() {
   const { followers, following, stats } = useFollows()
@@ -18,7 +20,7 @@ export function FollowLists() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Social Connections
+          Social connections
         </CardTitle>
         <CardDescription>
           View your followers and people you follow
@@ -63,15 +65,14 @@ export function FollowLists() {
                   >
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={follow.follower?.avatar_url} />
+                        <AvatarImage src={getAvatarUrl(follow.follower?.avatar_url, follow.follower?.username)} />
                         <AvatarFallback>
-                          {follow.follower?.display_name?.[0] ||
-                           follow.follower?.username?.[0] || '?'}
+                          {getDisplayInitial(follow.follower?.display_name, follow.follower?.username)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="text-sm font-medium text-foreground">
-                          {follow.follower?.display_name || follow.follower?.username}
+                          {getDisplayName(follow.follower?.display_name, follow.follower?.username)}
                         </p>
                         {follow.follower?.display_name && (
                           <p className="text-xs text-muted-foreground">
@@ -85,7 +86,7 @@ export function FollowLists() {
                     </div>
 
                     <Link href={`/profile/${follow.follower?.username && follow.follower.username !== 'user' ? follow.follower.username : follow.follower?.id}`}>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="min-h-[44px]">
                         View Profile
                       </Button>
                     </Link>
@@ -115,15 +116,14 @@ export function FollowLists() {
                   >
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={follow.following?.avatar_url} />
+                        <AvatarImage src={getAvatarUrl(follow.following?.avatar_url, follow.following?.username)} />
                         <AvatarFallback>
-                          {follow.following?.display_name?.[0] ||
-                           follow.following?.username?.[0] || '?'}
+                          {getDisplayInitial(follow.following?.display_name, follow.following?.username)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="text-sm font-medium text-foreground">
-                          {follow.following?.display_name || follow.following?.username}
+                          {getDisplayName(follow.following?.display_name, follow.following?.username)}
                         </p>
                         {follow.following?.display_name && (
                           <p className="text-xs text-muted-foreground">

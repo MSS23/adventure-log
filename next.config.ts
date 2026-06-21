@@ -185,15 +185,18 @@ const nextConfig: NextConfig = {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
       const isDev = process.env.NODE_ENV !== 'production'
       const scriptSrc = isDev
-        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com"
-        : "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://va.vercel-scripts.com"
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live"
+        : "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://va.vercel-scripts.com https://vercel.live"
       const csp = [
         "default-src 'self'",
         scriptSrc,
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' data: https://fonts.gstatic.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://vercel.live",
+        "font-src 'self' data: https://fonts.gstatic.com https://vercel.live https://assets.vercel.com",
         "img-src 'self' data: blob: https:",
-        `connect-src 'self' ${supabaseUrl} https://*.supabase.co wss: https://api.openweathermap.org https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com https://nominatim.openstreetmap.org https://*.ingest.sentry.io https://*.sentry.io https://va.vercel-scripts.com`,
+        // vercel.live + *.pusher.com power the Vercel Toolbar/feedback widget; without
+        // them its script/websocket are blocked by CSP and spam the console on Vercel.
+        `connect-src 'self' ${supabaseUrl} https://*.supabase.co wss: https://api.openweathermap.org https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com https://nominatim.openstreetmap.org https://*.ingest.sentry.io https://*.sentry.io https://va.vercel-scripts.com https://vercel.live https://*.pusher.com wss://*.pusher.com`,
+        "frame-src 'self' https://vercel.live",
         "worker-src 'self' blob:",
         "child-src 'self' blob:",
         "object-src 'none'",

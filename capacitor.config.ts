@@ -4,11 +4,10 @@ import type { CapacitorConfig } from '@capacitor/cli';
 //   * iOS:     ios/App/App/Info.plist → CFBundleURLTypes
 //   * Android: android/app/src/main/AndroidManifest.xml → <intent-filter>
 //
-// The Capacitor-side OAuth bridge (custom URL scheme + system browser
-// handshake) was prototyped in src/lib/auth/clerk-capacitor.ts and removed
-// pending an active wire-up — see the Clerk + Capacitor section of the auth
-// audit for the exact native snippets and recreate from git history when
-// native OAuth is needed.
+// Deep-link scheme for a future native OAuth bridge (custom URL scheme +
+// system browser handshake). Auth today is Supabase email/password with no
+// social providers wired, so no native OAuth round-trip is active yet — keep
+// the scheme registered for when one is.
 const OAUTH_REDIRECT_SCHEME = 'com.adventurelog.app';
 
 // Hostnames the WebView is allowed to navigate to without leaving the app.
@@ -57,7 +56,7 @@ const config: CapacitorConfig = {
     },
     // The App plugin (when installed via `npm i @capacitor/app`) emits the
     // `appUrlOpen` event whenever the OS hands a deep link to our app — this
-    // is how the Clerk OAuth callback re-enters the app after the user signs
+    // is how an OAuth callback would re-enter the app after the user signs
     // in via the system browser. The custom URL scheme below must be
     // registered in Info.plist (iOS) and AndroidManifest.xml (Android).
     App: {

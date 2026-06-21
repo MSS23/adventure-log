@@ -11,6 +11,7 @@ import { Trophy, Medal, Award, TrendingUp } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 
 interface UserWithStats extends Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url'> {
   albums_count: number
@@ -267,17 +268,17 @@ export function Leaderboard({ className, limit = 10, metric = 'score' }: Leaderb
             >
               <AvatarImage
                 src={getAvatarUrl(leader.avatar_url, leader.username)}
-                alt={leader.display_name || leader.username}
+                alt={getDisplayName(leader.display_name, leader.username)}
               />
               <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                {(leader.display_name || leader.username || 'U')[0].toUpperCase()}
+                {getDisplayInitial(leader.display_name, leader.username)}
               </AvatarFallback>
             </Avatar>
 
             {/* User Info */}
             <div className="flex-1 min-w-0">
               <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-                {leader.display_name || leader.username}
+                {getDisplayName(leader.display_name, leader.username)}
               </h3>
               <p className="font-mono text-[11px] tracking-wide text-muted-foreground truncate">
                 @{leader.username}

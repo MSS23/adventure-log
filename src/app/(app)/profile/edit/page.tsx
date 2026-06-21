@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -28,6 +28,7 @@ export default function EditProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
   const [checkingUsername, setCheckingUsername] = useState(false)
+  const avatarObjectUrlRef = useRef<string | null>(null)
   const supabase = createClient()
 
   const {
@@ -38,6 +39,7 @@ export default function EditProfilePage() {
     watch
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
+    mode: 'onChange',
   })
 
   useEffect(() => {
@@ -54,45 +56,65 @@ export default function EditProfilePage() {
   const currentUsername = watch('username')
 
   useEffect(() => {
+    let cancelled = false
+    const name = currentUsername
+
     const checkUsername = async () => {
-      if (!currentUsername || currentUsername === profile?.username) {
-        setUsernameAvailable(null)
+      // Unchanged or empty → nothing to check.
+      if (!name || name === profile?.username) {
+        if (!cancelled) setUsernameAvailable(null)
         return
       }
 
-      const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/
-      if (!usernameRegex.test(currentUsername)) {
-        setUsernameAvailable(null)
+      // Only query once the field passes the same rules zod enforces on save,
+      // so a green "Available" can never contradict the submit-time validator.
+      // (Schema: letters/numbers/underscore only, 3–50 chars — no hyphens.)
+      const usernameRegex = /^[a-zA-Z0-9_]{3,50}$/
+      if (errors.username || !usernameRegex.test(name)) {
+        if (!cancelled) setUsernameAvailable(null)
         return
       }
 
-      setCheckingUsername(true)
+      if (!cancelled) setCheckingUsername(true)
       try {
         const { data, error } = await supabase
           .from('users')
           .select('id')
-          .eq('username', currentUsername)
+          .eq('username', name)
           .maybeSingle()
 
         if (error) throw error
-        setUsernameAvailable(!data)
+        if (!cancelled) setUsernameAvailable(!data)
       } catch (err) {
         log.error('Error checking username', { component: 'EditProfile' }, err instanceof Error ? err : new Error(String(err)))
-        setUsernameAvailable(null)
+        if (!cancelled) setUsernameAvailable(null)
       } finally {
-        setCheckingUsername(false)
+        if (!cancelled) setCheckingUsername(false)
       }
     }
 
     const timeoutId = setTimeout(checkUsername, 500)
-    return () => clearTimeout(timeoutId)
-  }, [currentUsername, profile?.username, supabase])
+    // Re-running the effect (or unmount) cancels the prior run, so only the
+    // latest keystroke's response is allowed to set state.
+    return () => { cancelled = true; clearTimeout(timeoutId) }
+  }, [currentUsername, profile?.username, errors.username, supabase])
+
+  // Revoke any blob URL we created when the component unmounts.
+  useEffect(() => {
+    return () => {
+      if (avatarObjectUrlRef.current) URL.revokeObjectURL(avatarObjectUrlRef.current)
+    }
+  }, [])
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      // Release the previous preview blob before creating a new one.
+      if (avatarObjectUrlRef.current) URL.revokeObjectURL(avatarObjectUrlRef.current)
+      const objectUrl = URL.createObjectURL(file)
+      avatarObjectUrlRef.current = objectUrl
       setAvatarFile(file)
-      setAvatarPreview(URL.createObjectURL(file))
+      setAvatarPreview(objectUrl)
     }
   }
 
@@ -163,7 +185,7 @@ export default function EditProfilePage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
+    <div className="max-w-2xl mx-auto px-4 pb-24 pt-2 sm:pt-6">
       {/* Header */}
       <div className="mb-6">
         <Link href="/profile" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-3 cursor-pointer transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded">
@@ -196,14 +218,16 @@ export default function EditProfilePage() {
               </Avatar>
               <Label
                 htmlFor="avatar"
+                aria-label="Change profile photo"
                 className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-primary text-primary-foreground shadow-sm cursor-pointer transition-all duration-200 hover:bg-primary/90 active:scale-95"
               >
-                <Camera className="h-3.5 w-3.5" />
+                <Camera className="h-3.5 w-3.5" aria-hidden="true" />
               </Label>
               <Input
                 id="avatar"
                 type="file"
                 accept="image/*"
+                aria-label="Change profile photo"
                 onChange={handleAvatarChange}
                 className="hidden"
               />
@@ -211,6 +235,12 @@ export default function EditProfilePage() {
             <div>
               <p className="text-sm font-semibold text-foreground">Profile photo</p>
               <p className="text-xs text-muted-foreground mt-0.5">Square image, at least 200&times;200px</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Looking for your cover photo?{' '}
+                <Link href="/settings" className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
+                  Change it in Settings
+                </Link>
+              </p>
             </div>
           </div>
         </div>
@@ -289,6 +319,9 @@ export default function EditProfilePage() {
                 placeholder="City, Country"
                 className={cn(errors.location ? 'border-destructive' : '')}
               />
+              <p className="text-xs text-muted-foreground">
+                Shown on your profile. Your home base for distance stats lives in Settings.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="website" className="text-foreground font-medium">

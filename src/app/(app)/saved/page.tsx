@@ -62,6 +62,28 @@ export default async function SavedPage() {
     return <SavedContent initialAlbums={[]} />
   }
 
+  // Fetch like counts for popularity in one query, tallied in memory.
+  // No denormalized count column exists, so we aggregate from the `likes` table
+  // (same source the Explore feed scores against). target_id stores album ids as text.
+  const popularityByAlbum = new Map<string, number>()
+  const { data: likeRows, error: likeCountError } = await supabase
+    .from('likes')
+    .select('target_id')
+    .eq('target_type', 'album')
+    .in('target_id', albumIds)
+
+  if (likeCountError) {
+    log.error('Error fetching saved album popularity', {
+      component: 'SavedPage',
+      action: 'server-fetch-like-counts',
+      userId,
+    }, likeCountError)
+  } else {
+    for (const row of likeRows || []) {
+      popularityByAlbum.set(row.target_id, (popularityByAlbum.get(row.target_id) || 0) + 1)
+    }
+  }
+
   // Map albums to SavedAlbum shape with savedAt timestamps
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const savedAlbums: SavedAlbum[] = (albums || []).map((album: any) => ({
@@ -75,6 +97,7 @@ export default async function SavedPage() {
     user_id: album.user_id,
     user: album.users,
     savedAt: favorites.find(f => f.target_id === album.id)?.created_at || '',
+    popularity: popularityByAlbum.get(album.id) || 0,
   }))
 
   return <SavedContent initialAlbums={savedAlbums} />

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { getDisplayName } from '@/lib/utils/display-name'
 import type { User } from '@/types/database'
 
 // Partial user type for cases where we only have minimal user data
@@ -32,10 +33,10 @@ export function UserLink({
 
   const displayText = children || (
     showDisplayName
-      ? user.display_name || user.username || 'Anonymous'
+      ? getDisplayName(user.display_name, user.username)
       : showUsername
         ? `@${user.username}`
-        : user.display_name || user.username || 'Anonymous'
+        : getDisplayName(user.display_name, user.username)
   )
 
   // Validate user has an ID

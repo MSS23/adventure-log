@@ -79,7 +79,7 @@ export function apiUrl(path: string): string {
 /**
  * Drop-in replacement for `fetch('/api/...', init)` that resolves the URL via
  * `apiUrl()` and, on Capacitor native, defaults `credentials: 'include'` so
- * the WebView ships the Clerk session cookie cross-origin to the deployed
+ * the WebView ships the Supabase session cookie cross-origin to the deployed
  * web API.
  *
  * The cross-origin cookie behaviour requires the deployed API to:
@@ -87,8 +87,8 @@ export function apiUrl(path: string): string {
  *   2. Echo back the WebView origin in `Access-Control-Allow-Origin` (cannot
  *      be `*` when credentials are included).
  *   3. Set its session cookie with `SameSite=None; Secure`.
- * On Clerk, this is the default for the production frontend API. If you see
- * 401s on mobile that work on web, this is the first thing to check.
+ * Configure these on the deployed web app. If you see 401s on mobile that work
+ * on web, the cross-origin cookie setup is the first thing to check.
  *
  * Callers can override `credentials` via `init` — we only set the default.
  */

@@ -1,12 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { Settings, Share2 } from 'lucide-react'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName } from '@/lib/utils/display-name'
+import { Settings, Share2, Check, Pencil } from 'lucide-react'
 import { AnimatedCounter } from '@/components/ui/animated-count'
 import { FollowButton } from '@/components/social/FollowButton'
 
@@ -24,9 +26,29 @@ export function ProfileHero({
   isOwnProfile = false,
   followStats
 }: ProfileHeroProps) {
-  const displayName = profile.display_name || profile.username || 'Anonymous User'
+  const displayName = getDisplayName(profile.display_name, profile.username)
   const username = profile.username || 'anonymous'
   const initials = displayName.charAt(0).toUpperCase()
+  const [copied, setCopied] = useState(false)
+
+  const handleShare = async () => {
+    const shareData = { title: `${displayName} on Adventure Log`, url: window.location.href }
+    if (typeof navigator !== 'undefined' && 'share' in navigator) {
+      try {
+        await navigator.share(shareData)
+        return
+      } catch {
+        // cancelled or unavailable — fall through to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard blocked — nothing more we can do
+    }
+  }
 
   return (
     <div className="relative">
@@ -44,7 +66,7 @@ export function ProfileHero({
           >
             <Avatar className="h-24 w-24 sm:h-28 sm:w-28 ring-4 ring-background">
               <AvatarImage
-                src={getPhotoUrl(profile.avatar_url, 'avatars') || ''}
+                src={getAvatarUrl(profile.avatar_url, profile.username)}
                 alt={displayName}
               />
               <AvatarFallback className="bg-accent font-heading text-3xl font-semibold text-accent-foreground">
@@ -80,29 +102,32 @@ export function ProfileHero({
               <div className="flex items-center gap-2 flex-shrink-0">
                 {isOwnProfile ? (
                   <>
-                    <Link href="/settings">
+                    <Link href="/profile/edit">
                       <Button
                         size="sm"
-                        className="rounded-full text-[12px] font-semibold"
+                        className="rounded-full text-[12px] font-semibold min-h-[44px]"
                       >
-                        <Settings className="h-3.5 w-3.5 mr-1.5" />
-                        Edit
+                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                        Edit profile
+                      </Button>
+                    </Link>
+                    <Link href="/settings" aria-label="Settings">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full h-11 w-11"
+                      >
+                        <Settings className="h-4 w-4" />
                       </Button>
                     </Link>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="rounded-full h-9 w-9"
-                      onClick={() => {
-                        if (navigator.share) {
-                          navigator.share({
-                            title: `${displayName} on Adventure Log`,
-                            url: window.location.href,
-                          })
-                        }
-                      }}
+                      className="rounded-full h-11 w-11"
+                      aria-label={copied ? 'Link copied' : 'Share profile'}
+                      onClick={handleShare}
                     >
-                      <Share2 className="h-4 w-4" />
+                      {copied ? <Check className="h-4 w-4 text-primary" /> : <Share2 className="h-4 w-4" />}
                     </Button>
                   </>
                 ) : (

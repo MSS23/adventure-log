@@ -14,6 +14,7 @@ import { log } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 
 interface CreatorsToFollowSectionProps {
   className?: string
@@ -220,7 +221,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                     className="object-cover"
                   />
                   <AvatarFallback className="bg-primary/10 text-primary text-xl sm:text-2xl font-bold">
-                    {(creator.display_name || creator.username || 'U')[0].toUpperCase()}
+                    {getDisplayInitial(creator.display_name, creator.username)}
                   </AvatarFallback>
                 </Avatar>
               </Link>
@@ -232,7 +233,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
                   className="block"
                 >
                   <h3 className="font-heading text-base font-semibold text-foreground hover:text-primary transition-colors line-clamp-1">
-                    {creator.display_name || creator.username}
+                    {getDisplayName(creator.display_name, creator.username)}
                   </h3>
                   <p className="font-mono text-[11px] tracking-wide text-muted-foreground mt-0.5">@{creator.username}</p>
                 </Link>

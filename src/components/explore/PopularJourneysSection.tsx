@@ -7,6 +7,8 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { Album } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -226,13 +228,13 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
                       className="flex items-center gap-2 group/user min-w-0 flex-1"
                     >
                       <Avatar className="h-8 w-8 ring-1 ring-border flex-shrink-0">
-                        <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
+                        <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={user.display_name || user.username} />
                         <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                          {(user.display_name || user.username || 'U')[0].toUpperCase()}
+                          {getDisplayInitial(user.display_name, user.username)}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm text-muted-foreground group-hover/user:text-foreground transition-colors duration-200 truncate">
-                        <span className="hidden sm:inline">by </span><span className="font-medium">{user.display_name || user.username}</span>
+                        <span className="hidden sm:inline">by </span><span className="font-medium">{getDisplayName(user.display_name, user.username)}</span>
                       </span>
                     </Link>
 

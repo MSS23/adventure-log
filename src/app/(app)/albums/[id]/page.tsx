@@ -32,6 +32,8 @@ import { useCollaborativeAlbum } from '@/lib/hooks/useCollaborativeAlbum'
 import { ReportDialog } from '@/components/social/ReportDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { YouWereHereBadge } from '@/components/albums/YouWereHereBadge'
 import { AlbumQualityNudges } from '@/components/albums/AlbumQualityNudges'
 
@@ -485,7 +487,7 @@ export default function AlbumDetailPage() {
                     </p>
                   </div>
                   <div className="flex gap-2 justify-center pt-2">
-                    <Link href={`/sign-in?redirect_url=${encodeURIComponent(`/albums/${album.id}`)}`}>
+                    <Link href={`/login?redirectTo=${encodeURIComponent(`/albums/${album.id}`)}`}>
                       <Button>Log In</Button>
                     </Link>
                     <Link href="/">
@@ -697,15 +699,15 @@ export default function AlbumDetailPage() {
                   <div className="flex -space-x-1.5">
                     {activeCollaborators.slice(0, 6).map((c) => (
                       <Avatar key={c.id} className="h-6 w-6 ring-2 ring-background">
-                        <AvatarImage src={getPhotoUrl(c.user?.avatar_url) || undefined} />
+                        <AvatarImage src={getAvatarUrl(c.user?.avatar_url, c.user?.username)} />
                         <AvatarFallback className="text-[8px] bg-primary/10 text-primary">
-                          {c.user?.display_name?.[0] || c.user?.username?.[0] || '?'}
+                          {getDisplayInitial(c.user?.display_name, c.user?.username)}
                         </AvatarFallback>
                       </Avatar>
                     ))}
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {activeCollaborators.map(c => c.user?.display_name || c.user?.username).filter(Boolean).join(', ')}
+                    {activeCollaborators.map(c => getDisplayName(c.user?.display_name, c.user?.username, '')).filter(Boolean).join(', ')}
                   </span>
                 </div>
               )}

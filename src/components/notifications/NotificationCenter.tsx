@@ -29,6 +29,8 @@ import { formatDistanceToNow } from 'date-fns'
 import { UserAvatarLink } from '@/components/social/UserLink'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 
 interface Notification {
   id: string
@@ -379,9 +381,9 @@ function NotificationContent({ notification }: { notification: Notification }) {
       {notification.sender ? (
         <UserAvatarLink user={notification.sender}>
           <Avatar className="h-10 w-10 flex-shrink-0">
-            <AvatarImage src={notification.sender.avatar_url} />
+            <AvatarImage src={getAvatarUrl(notification.sender.avatar_url, notification.sender.username)} />
             <AvatarFallback className="bg-accent text-accent-foreground font-semibold">
-              {notification.sender.display_name[0]?.toUpperCase()}
+              {getDisplayInitial(notification.sender.display_name, notification.sender.username)}
             </AvatarFallback>
           </Avatar>
         </UserAvatarLink>

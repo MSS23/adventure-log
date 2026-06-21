@@ -401,7 +401,7 @@ export function PublicProfileContent({
               Turn your trips into a living map, build your travel passport, and share
               your adventures — free, forever.
             </p>
-            <Link href="/sign-up">
+            <Link href="/signup">
               <Button variant="coral" className="cursor-pointer px-8">
                 Create your free profile
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -538,7 +538,7 @@ export function PublicProfileContent({
               Adventure Log
             </Link>
           </p>
-          <Link href="/sign-up">
+          <Link href="/signup">
             <Button className="cursor-pointer px-8">
               Start Your Adventure Log
               <ArrowRight className="h-4 w-4 ml-2" />

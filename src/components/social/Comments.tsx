@@ -15,6 +15,8 @@ import { MentionInput } from '@/components/mentions/MentionInput'
 import { useMentions } from '@/lib/hooks/useMentions'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import type { User } from '@/types/database'
 
 interface CommentsProps {
@@ -120,11 +122,9 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                     >
                       <UserAvatarLink user={commentUser}>
                         <Avatar className="h-10 w-10 ring-2 ring-background">
-                          <AvatarImage src={commentUser?.avatar_url} />
+                          <AvatarImage src={getAvatarUrl(commentUser?.avatar_url, commentUser?.username)} />
                           <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-                            {commentUser?.display_name?.[0] ||
-                             commentUser?.username?.[0] ||
-                             'U'}
+                            {getDisplayInitial(commentUser?.display_name, commentUser?.username)}
                           </AvatarFallback>
                         </Avatar>
                       </UserAvatarLink>
@@ -215,9 +215,9 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
               <form onSubmit={handleSubmit}>
                 <div className="flex gap-3">
                   <Avatar className="h-10 w-10 ring-2 ring-background">
-                    <AvatarImage src={profile?.avatar_url} />
+                    <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} />
                     <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-                      {profile?.display_name?.[0] || profile?.username?.[0] || 'Y'}
+                      {getDisplayInitial(profile?.display_name, profile?.username)}
                     </AvatarFallback>
                   </Avatar>
 
@@ -257,7 +257,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
           ) : (
             <div className="mt-4 rounded-xl bg-muted/50 p-4 text-center">
               <p className="text-sm text-muted-foreground">
-                <Link href="/sign-in" className="text-primary hover:underline font-semibold">
+                <Link href="/login" className="text-primary hover:underline font-semibold">
                   Sign in
                 </Link>{' '}
                 to join the conversation

@@ -105,12 +105,6 @@ const nextConfig: NextConfig = {
 
   // Bundle optimization
   webpack: (config, { isServer }) => {
-    // Note: Clerk's internal server-action files (server-actions.js and
-    // keyless-actions.js under @clerk/nextjs/dist/...) are stubbed at the
-    // filesystem level by scripts/mobile-build.mjs during MOBILE_BUILD,
-    // because Next.js's RSC compiler reads `'use server'` directives BEFORE
-    // webpack alias resolution kicks in. A webpack alias here is too late.
-
     // Optimize bundle size
     if (!isServer) {
       config.optimization = {

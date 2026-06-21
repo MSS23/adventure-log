@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { Album, User } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -215,7 +217,7 @@ export function SearchBar({
                         </p>
                         {user && (
                           <p className="text-xs text-muted-foreground truncate">
-                            by {user.display_name || user.username}
+                            by {getDisplayName(user.display_name, user.username)}
                           </p>
                         )}
                       </div>
@@ -237,14 +239,14 @@ export function SearchBar({
                       className="flex items-center gap-4 px-4 py-3 hover:bg-muted/60 transition-colors"
                     >
                       <Avatar className="h-12 w-12 flex-shrink-0">
-                        <AvatarImage src={user.avatar_url || undefined} alt={user.display_name || user.username} />
+                        <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={user.display_name || user.username} />
                         <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
-                          {(user.display_name || user.username || 'U')[0].toUpperCase()}
+                          {getDisplayInitial(user.display_name, user.username)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-foreground truncate">
-                          {user.display_name || user.username}
+                          {getDisplayName(user.display_name, user.username)}
                         </p>
                         <p className="text-sm text-muted-foreground truncate">
                           @{user.username}

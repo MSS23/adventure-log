@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Check, X, User } from 'lucide-react'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 
 export function FollowRequests() {
   const {
@@ -22,7 +24,7 @@ export function FollowRequests() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Follow Requests
+            Follow requests
           </CardTitle>
           <CardDescription>
             Manage who can follow you
@@ -62,15 +64,14 @@ export function FollowRequests() {
           >
             <div className="flex items-center gap-3">
               <Avatar>
-                <AvatarImage src={request.follower?.avatar_url} />
+                <AvatarImage src={getAvatarUrl(request.follower?.avatar_url, request.follower?.username)} />
                 <AvatarFallback>
-                  {request.follower?.display_name?.[0] ||
-                   request.follower?.username?.[0] || '?'}
+                  {getDisplayInitial(request.follower?.display_name, request.follower?.username)}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  {request.follower?.display_name || request.follower?.username}
+                  {getDisplayName(request.follower?.display_name, request.follower?.username)}
                 </p>
                 {request.follower?.display_name && (
                   <p className="text-xs text-muted-foreground">
@@ -85,15 +86,17 @@ export function FollowRequests() {
 
             <div className="flex gap-2">
               <Button
-                size="sm"
+                size="icon"
+                aria-label="Accept follow request"
                 onClick={() => acceptFollowRequest(request.follower_id)}
                 disabled={loading}
               >
                 <Check className="h-4 w-4" />
               </Button>
               <Button
-                size="sm"
+                size="icon"
                 variant="outline"
+                aria-label="Decline follow request"
                 onClick={() => rejectFollowRequest(request.follower_id)}
                 disabled={loading}
                 className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"

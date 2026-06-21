@@ -17,6 +17,8 @@ import {
   Send
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { log } from '@/lib/utils/logger'
 import { useToast } from '@/components/ui/toast-provider'
 
@@ -256,14 +258,14 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={collab.user?.avatar_url} />
+                        <AvatarImage src={getAvatarUrl(collab.user?.avatar_url, collab.user?.username)} />
                         <AvatarFallback>
-                          {collab.user?.display_name[0]?.toUpperCase()}
+                          {getDisplayInitial(collab.user?.display_name, collab.user?.username)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-stone-900 dark:text-stone-100 truncate">
-                          {collab.user?.display_name}
+                          {getDisplayName(collab.user?.display_name, collab.user?.username)}
                         </p>
                         <p className="text-sm text-stone-600 dark:text-stone-400 truncate">
                           @{collab.user?.username}

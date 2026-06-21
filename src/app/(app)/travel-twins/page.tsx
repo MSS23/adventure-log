@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { FollowButton } from '@/components/social/FollowButton'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
@@ -135,14 +137,14 @@ export default function TravelTwinsPage() {
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={twin.avatar_url || undefined} />
+                      <AvatarImage src={getAvatarUrl(twin.avatar_url, twin.username)} />
                       <AvatarFallback className="bg-accent text-accent-foreground">
-                        {(twin.display_name || twin.username)[0]?.toUpperCase()}
+                        {getDisplayInitial(twin.display_name, twin.username)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-sm text-foreground truncate">
-                        {twin.display_name || twin.username}
+                        {getDisplayName(twin.display_name, twin.username)}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {overlapPct}% match
@@ -163,9 +165,9 @@ export default function TravelTwinsPage() {
                   <Card className="p-5 mb-4 gap-0">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-14 w-14">
-                        <AvatarImage src={twin.avatar_url || undefined} />
+                        <AvatarImage src={getAvatarUrl(twin.avatar_url, twin.username)} />
                         <AvatarFallback className="bg-accent text-accent-foreground">
-                          {(twin.display_name || twin.username)[0]?.toUpperCase()}
+                          {getDisplayInitial(twin.display_name, twin.username)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
@@ -173,7 +175,7 @@ export default function TravelTwinsPage() {
                           href={`/u/${twin.username}`}
                           className="font-heading font-semibold text-lg text-foreground hover:text-accent transition-colors"
                         >
-                          {twin.display_name || twin.username}
+                          {getDisplayName(twin.display_name, twin.username)}
                         </Link>
                         <p className="text-sm text-muted-foreground">
                           You share a lot of ground — here&apos;s where your journeys overlap.

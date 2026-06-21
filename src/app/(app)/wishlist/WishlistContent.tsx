@@ -7,6 +7,8 @@ import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { WalkthroughTour, type TourStep } from '@/components/ui/walkthrough-tour'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -15,6 +17,7 @@ import {
   Plus,
   X,
   Check,
+  Pencil,
   Trash2,
   MapPin,
   Send,
@@ -73,6 +76,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
     loading,
     addItem,
     removeItem,
+    updateItem,
     suggestToPartner,
     travelPartners: hookPartners,
     loadPartnerWishlist,
@@ -89,6 +93,12 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
   const [notes, setNotes] = useState('')
   const [priority, setPriority] = useState<Priority>('medium')
   const [isAdding, setIsAdding] = useState(false)
+
+  // Edit state
+  const [editingItem, setEditingItem] = useState<WishlistItem | null>(null)
+  const [editNotes, setEditNotes] = useState('')
+  const [editPriority, setEditPriority] = useState<Priority>('medium')
+  const [isUpdating, setIsUpdating] = useState(false)
 
   // Travel partners state
   const [expandedPartner, setExpandedPartner] = useState<string | null>(null)
@@ -165,6 +175,35 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
 
     toast.success(`Let's log your trip to ${item.location_name}!`)
     window.location.href = `/albums/new?${params.toString()}`
+  }
+
+  const handleOpenEdit = (item: WishlistItem) => {
+    setEditingItem(item)
+    setEditNotes(item.notes || '')
+    setEditPriority((item.priority as Priority) || 'medium')
+  }
+
+  const handleCloseEdit = () => {
+    setEditingItem(null)
+    setEditNotes('')
+    setEditPriority('medium')
+  }
+
+  const handleUpdateItem = async () => {
+    if (!editingItem) return
+    setIsUpdating(true)
+    try {
+      await updateItem(editingItem.id, {
+        notes: editNotes.trim() || null,
+        priority: editPriority,
+      })
+      toast.success('Destination updated')
+      handleCloseEdit()
+    } catch {
+      toast.error('Failed to update destination')
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   const handleRemoveItem = async (itemId: string) => {
@@ -601,6 +640,16 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleOpenEdit(item)}
+                              className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 cursor-pointer"
+                              title="Edit"
+                              aria-label={`Edit ${item.location_name}`}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleRemoveItem(item.id)}
                               className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                               title="Remove"
@@ -657,15 +706,13 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                   )}
                 >
                   <Avatar className="h-12 w-12 ring-2 ring-border ring-offset-2 ring-offset-background">
-                    <AvatarImage src={partner.avatar_url || undefined} alt={partner.display_name || partner.username} />
+                    <AvatarImage src={getAvatarUrl(partner.avatar_url, partner.username)} alt={partner.display_name || partner.username} />
                     <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-                      {(partner.display_name || partner.username || '?')
-                        .charAt(0)
-                        .toUpperCase()}
+                      {getDisplayInitial(partner.display_name, partner.username)}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-xs font-medium text-muted-foreground max-w-[64px] truncate">
-                    {partner.display_name || partner.username}
+                    {getDisplayName(partner.display_name, partner.username)}
                   </span>
                 </button>
               ))}
@@ -868,6 +915,112 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
           </motion.div>
         )}
       </div>
+
+      {/* ── Edit Destination Modal ────────────────────────────── */}
+      <AnimatePresence>
+        {editingItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={handleCloseEdit}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Edit destination"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-hover)]"
+            >
+              <div className="space-y-4">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="al-eyebrow text-primary">Edit Destination</p>
+                    <h2 className="font-heading font-semibold text-foreground truncate flex items-center gap-2 mt-0.5">
+                      {editingItem.country_code && (
+                        <span className="text-lg leading-none">
+                          {countryCodeToFlag(editingItem.country_code)}
+                        </span>
+                      )}
+                      {editingItem.location_name}
+                    </h2>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCloseEdit}
+                    className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl shrink-0 cursor-pointer"
+                    aria-label="Close edit dialog"
+                    title="Close"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    Notes
+                  </label>
+                  <Textarea
+                    value={editNotes}
+                    onChange={(e) => setEditNotes(e.target.value)}
+                    placeholder="Why do you want to visit? Any must-see spots..."
+                    className="rounded-xl resize-none min-h-[80px]"
+                  />
+                </div>
+
+                {/* Priority */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Priority</label>
+                  <div className="flex gap-2">
+                    {(['low', 'medium', 'high'] as const).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        aria-pressed={editPriority === p}
+                        onClick={() => setEditPriority(p)}
+                        className={cn(
+                          'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border cursor-pointer active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                          editPriority === p
+                            ? 'bg-primary/10 text-primary border-primary/40'
+                            : 'bg-card text-muted-foreground border-border hover:border-primary/30'
+                        )}
+                      >
+                        <span className={cn('w-2 h-2 rounded-full', priorityConfig[p].dot)} />
+                        {priorityConfig[p].label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 justify-end pt-1">
+                  <Button variant="ghost" onClick={handleCloseEdit} disabled={isUpdating}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpdateItem} disabled={isUpdating} className="gap-2">
+                    {isUpdating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

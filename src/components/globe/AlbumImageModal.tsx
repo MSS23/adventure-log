@@ -219,7 +219,7 @@ export function AlbumImageModal({
       {/* Photo */}
       {photos.length > 0 && currentPhoto && (
         <div className="px-3 lg:px-5 pt-2 lg:pt-0">
-          <div className="relative aspect-[16/9] lg:aspect-[16/10] rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-lg group">
+          <div className="relative aspect-[16/9] lg:aspect-[16/10] max-h-[20vh] lg:max-h-none rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shadow-lg group">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPhotoIndex}
@@ -406,7 +406,7 @@ export function AlbumImageModal({
             // ~160px up from the viewport bottom) so the popup never covers it.
             // The offset clears the bottom nav (56px) + filmstrip (~96px) + gap,
             // plus the iOS home-indicator safe area.
-            className="fixed left-2 right-2 z-[100] bg-white dark:bg-[#111] rounded-2xl shadow-2xl border border-stone-200 dark:border-stone-800 max-h-[40vh] overflow-y-auto"
+            className="fixed left-2 right-2 z-[100] bg-white dark:bg-[#111] rounded-2xl shadow-2xl border border-stone-200 dark:border-stone-800 max-h-[34vh] overflow-y-auto"
             style={{ bottom: 'calc(172px + env(safe-area-inset-bottom, 0px))' }}
           >
             {/* Handle + close */}

@@ -159,13 +159,15 @@ export function PublicPassportContent({
   const [copied, setCopied] = useState(false)
   const worldPercent = (countryCodes.length / 195) * 100
   const searchParams = useSearchParams()
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, profile } = useAuth()
+  const viewerName = getDisplayName(profile?.display_name, profile?.username) || 'You'
 
   // A logged-in person viewing someone else's passport (e.g. via QR scan).
   const isOtherViewer = !!currentUser && currentUser.id !== user.id
 
   // Auto-connect state
   const [connectStatus, setConnectStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle')
+  const [showConnected, setShowConnected] = useState(false)
   const connectAttempted = useRef(false)
 
   // Auto-connect when arriving via QR scan (?connect=true)
@@ -185,6 +187,7 @@ export function PublicPassportContent({
       .then(data => {
         if (data.connected) {
           setConnectStatus('connected')
+          setShowConnected(true)
         } else {
           setConnectStatus('error')
         }
@@ -220,6 +223,70 @@ export function PublicPassportContent({
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Connection success — both travelers appear, confirm you've connected,
+          then tap through into the Travel Blend. Shown right after a scan
+          lands here with ?connect=true and the mutual follow succeeds. */}
+      <AnimatePresence>
+        {showConnected && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Connected"
+          >
+            <motion.div
+              className="w-full max-w-sm rounded-3xl border border-border bg-card p-7 text-center shadow-2xl"
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+            >
+              {/* Both accounts */}
+              <div className="flex items-center justify-center gap-3 mb-5">
+                <Avatar className="size-16 ring-2 ring-background shadow">
+                  <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} alt={viewerName} />
+                  <AvatarFallback className="bg-primary/15 text-primary font-semibold">
+                    {viewerName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-coral)] text-white shadow-md">
+                  <UserCheck className="size-4" />
+                </span>
+                <Avatar className="size-16 ring-2 ring-background shadow">
+                  <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={displayName} />
+                  <AvatarFallback className="bg-olive-200 text-olive-800 font-semibold">
+                    {displayName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              <p className="al-eyebrow mb-1">Connected</p>
+              <h2 className="al-display text-2xl mb-1.5">You&apos;re now connected</h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                You and <span className="font-semibold text-foreground">{displayName}</span> now follow each other.
+              </p>
+
+              <Link
+                href={`/blend/${user.username}`}
+                className="flex items-center justify-center gap-2 w-full rounded-full bg-[color:var(--color-coral)] text-white font-semibold px-5 py-3 shadow-lg transition-transform active:scale-[0.98]"
+              >
+                See your Travel Blend
+                <ArrowRight className="size-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowConnected(false)}
+                className="mt-3 w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+              >
+                View {displayName}&apos;s passport
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* ── Hero ── */}
       <motion.section
         className="relative overflow-hidden"

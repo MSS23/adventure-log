@@ -682,44 +682,31 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     }
   }, [isAutoRotating, userInteracting])
 
-  // Modal state management - Pause rendering when modal is open
+  // Modal state management - Pause rendering / interaction while a modal is open.
+  //
+  // IMPORTANT: we deliberately do NOT call `setAnimationLoop(null)` here. The
+  // render loop installed in `onGlobeReady` already early-returns while
+  // `modalOpenRef.current` is true, so rendering pauses automatically AND
+  // resumes the instant the modal closes. Calling `setAnimationLoop(null)`
+  // permanently kills Three.js's loop (nothing re-installs react-globe's render
+  // tick), which froze the globe after closing an album modal — it could no
+  // longer spin or zoom because frames were never drawn again.
   useEffect(() => {
     modalOpenRef.current = showAlbumModal
 
-    if (showAlbumModal) {
-      if (isAutoRotating) {
-        setIsAutoRotating(false)
-      }
-
-      if (rendererRef.current) {
-        rendererRef.current.setAnimationLoop(null)
-      }
-
-      if (globeRef.current) {
-        const controls = globeRef.current.controls() as { enabled?: boolean } | undefined
-        if (controls && 'enabled' in controls) {
-          controls.enabled = false
-        }
-      }
-    } else {
-      if (rendererRef.current && shouldRender()) {
-        if (globeRef.current) {
-          const controls = globeRef.current.controls() as { enabled?: boolean } | undefined
-          if (controls && 'enabled' in controls) {
-            controls.enabled = true
-          }
-        }
-
-        const globeMethods = globeRef.current as unknown as { scene?: () => unknown; renderer?: () => { setAnimationLoop: (cb: ((time: number) => void) | null) => void } | undefined }
-        if (globeMethods.renderer) {
-          const renderer = globeMethods.renderer()
-          if (renderer) {
-            log.info('Modal closed, resumed WebGL animation', { component: 'EnhancedGlobe' })
-          }
-        }
+    // Disable orbit controls while the modal is up so drags don't move the
+    // globe behind it; re-enable as soon as it closes.
+    if (globeRef.current) {
+      const controls = globeRef.current.controls() as { enabled?: boolean } | undefined
+      if (controls && 'enabled' in controls) {
+        controls.enabled = !showAlbumModal
       }
     }
-  }, [showAlbumModal, isAutoRotating, shouldRender, rendererRef])
+
+    if (showAlbumModal && isAutoRotating) {
+      setIsAutoRotating(false)
+    }
+  }, [showAlbumModal, isAutoRotating, setIsAutoRotating, globeRef, modalOpenRef])
 
   // Cleanup auto-rotate and camera animation on unmount
   useEffect(() => {

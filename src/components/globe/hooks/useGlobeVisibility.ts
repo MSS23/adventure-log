@@ -51,25 +51,18 @@ export function useGlobeVisibility(
         isVisible
       })
 
+      // NOTE: rendering pause/resume is driven by the `shouldRender()` guard
+      // inside the render loop (installed in onGlobeReady), which reads
+      // `isVisibleRef`. We must NOT call `setAnimationLoop(null)` here — doing
+      // so permanently kills the loop with nothing to restart it, freezing the
+      // globe. Toggling the ref is enough; the loop skips frames on its own.
       if (!isVisible) {
         if (isAutoRotating) {
           setIsAutoRotating(false)
         }
-
-        if (rendererRef.current) {
-          rendererRef.current.setAnimationLoop(null)
-          log.info('Stopped WebGL rendering (tab hidden)', { component: 'EnhancedGlobe' })
-        }
-      } else {
-        if (rendererRef.current && shouldRender()) {
-          const globeMethods = globeRef.current as unknown as GlobeInternals
-          if (globeMethods.renderer) {
-            const renderer = globeMethods.renderer()
-            if (renderer) {
-              log.info('Resumed WebGL rendering (tab visible)', { component: 'EnhancedGlobe' })
-            }
-          }
-        }
+        log.info('Paused WebGL rendering (tab hidden)', { component: 'EnhancedGlobe' })
+      } else if (shouldRender()) {
+        log.info('Resumed WebGL rendering (tab visible)', { component: 'EnhancedGlobe' })
       }
     }
 
@@ -102,19 +95,17 @@ export function useGlobeVisibility(
           intersectionRatio: entry.intersectionRatio
         })
 
+        // As with the tab-visibility handler: the render loop's `shouldRender()`
+        // guard (reading `isInViewportRef`) pauses/resumes frames on its own.
+        // Never call `setAnimationLoop(null)` — it kills the loop permanently
+        // and freezes the globe.
         if (!isInViewport) {
           if (isAutoRotating) {
             setIsAutoRotating(false)
           }
-
-          if (rendererRef.current) {
-            rendererRef.current.setAnimationLoop(null)
-            log.info('Stopped WebGL rendering (out of viewport)', { component: 'EnhancedGlobe' })
-          }
+          log.info('Paused WebGL rendering (out of viewport)', { component: 'EnhancedGlobe' })
         } else if (shouldRender()) {
-          if (rendererRef.current) {
-            log.info('Resumed WebGL rendering (in viewport)', { component: 'EnhancedGlobe' })
-          }
+          log.info('Resumed WebGL rendering (in viewport)', { component: 'EnhancedGlobe' })
         }
       })
     }

@@ -138,7 +138,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
   return (
     <article className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-resting)] transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-hover)]">
       {/* Byline — avatar, name, location chip, date */}
-      <header className="px-5 pt-4 pb-3 flex items-center gap-3">
+      <header className="px-4 sm:px-5 pt-4 pb-3 flex items-center gap-2.5 sm:gap-3">
         <UserAvatarLink user={user}>
           <OptimizedAvatar
             src={user.avatar_url}
@@ -149,10 +149,10 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
         </UserAvatarLink>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
             <UserLink
               user={user}
-              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              className="min-w-0 truncate text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
               {user.display_name || user.username}
             </UserLink>
@@ -167,17 +167,19 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
           </p>
         </div>
 
-        {/* Location chip — primary "view their globe" affordance */}
+        {/* Location chip — primary "view their globe" affordance. shrink-0 so it
+            keeps its shape, but the label truncates hard on small screens so it
+            never squeezes the name into a wrap. */}
         {album.location && (
           <Link
             href={userGlobeHref}
-            className="group inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors duration-200 hover:bg-primary/15 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors duration-200 hover:bg-primary/15 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             title={`Open ${user.display_name || user.username}'s globe`}
           >
-            <MapPin className="w-3 h-3" strokeWidth={2.2} aria-hidden />
-            <span className="truncate max-w-[140px]">{album.location}</span>
+            <MapPin className="w-3 h-3 shrink-0" strokeWidth={2.2} aria-hidden />
+            <span className="truncate max-w-[26vw] sm:max-w-[160px]">{album.location}</span>
             <GlobeIcon
-              className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity"
+              className="w-3 h-3 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity"
               strokeWidth={2.2}
               aria-hidden
             />

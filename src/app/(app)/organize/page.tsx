@@ -29,12 +29,24 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
+import { getFlagEmoji, extractCountryFromLocation } from '@/lib/utils/country';
+import { getCountryCodeFromName } from '@/lib/utils/country-search';
 import { log } from '@/lib/utils/logger';
 import { Toast } from '@capacitor/toast';
 import type { Photo, Album } from '@/types/database';
 
 type ViewMode = 'grid' | 'list';
 type FilterType = 'all' | 'no-album' | 'date' | 'location';
+
+// Photos store a free-text location_name but no country_code, so derive the
+// flag from the country portion of the location string ("City, Region, Country").
+function flagForLocation(locationName?: string | null): string | null {
+  if (!locationName) return null;
+  const countryName = extractCountryFromLocation(locationName);
+  if (!countryName) return null;
+  const code = getCountryCodeFromName(countryName);
+  return code ? getFlagEmoji(code) : null;
+}
 
 export default function OrganizePage() {
   const { user } = useAuth();
@@ -72,7 +84,15 @@ export default function OrganizePage() {
         query = query.is('album_id', null);
       }
 
-      query = query.order('taken_at', { ascending: false, nullsFirst: false });
+      // Respect the chosen sort. Previously every filter ordered by taken_at,
+      // so "By location" was a no-op; group by location_name when chosen.
+      if (filterType === 'location') {
+        query = query
+          .order('location_name', { ascending: true, nullsFirst: false })
+          .order('taken_at', { ascending: false, nullsFirst: false });
+      } else {
+        query = query.order('taken_at', { ascending: false, nullsFirst: false });
+      }
 
       const { data: photosData, error } = await query;
 
@@ -286,18 +306,19 @@ export default function OrganizePage() {
             </Select>
           </div>
 
-          {/* Selection toolbar */}
+          {/* Selection toolbar — stacks on mobile so the move/delete controls
+              never overflow or overlap; single row from sm up. */}
           {selectedPhotos.size > 0 && (
-            <div className="mt-4 flex items-center justify-between rounded-xl border border-primary/20 bg-primary/10 p-3">
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-foreground">
+            <div className="mt-4 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/10 p-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-4">
+                <span className="text-sm font-medium text-foreground whitespace-nowrap">
                   {selectedPhotos.size} selected
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={selectAll}
-                  className="cursor-pointer"
+                  className="cursor-pointer whitespace-nowrap"
                 >
                   {selectedPhotos.size === photos.length ? 'Deselect all' : 'Select all'}
                 </Button>
@@ -305,8 +326,8 @@ export default function OrganizePage() {
 
               <div className="flex items-center gap-2">
                 <Select onValueChange={handleMoveToAlbum}>
-                  <SelectTrigger className="w-[200px] cursor-pointer">
-                    <Move className="h-4 w-4 mr-2" />
+                  <SelectTrigger className="flex-1 min-w-0 sm:w-[200px] sm:flex-none cursor-pointer">
+                    <Move className="h-4 w-4 mr-2 shrink-0" />
                     <SelectValue placeholder="Move to album..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -322,17 +343,19 @@ export default function OrganizePage() {
                   variant="destructive"
                   size="sm"
                   onClick={handleDeleteSelected}
-                  className="cursor-pointer"
+                  className="cursor-pointer shrink-0"
+                  aria-label="Delete selected"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
+                  <Trash2 className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Delete</span>
                 </Button>
 
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedPhotos(new Set())}
-                  className="cursor-pointer"
+                  className="cursor-pointer shrink-0"
+                  aria-label="Clear selection"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -399,7 +422,9 @@ export default function OrganizePage() {
                 : 'space-y-2'
             }
           >
-            {filteredPhotos.map(photo => (
+            {filteredPhotos.map(photo => {
+              const locationFlag = flagForLocation(photo.location_name);
+              return (
               <div
                 key={photo.id}
                 className={`relative group cursor-pointer transition-all duration-200 ${
@@ -434,8 +459,11 @@ export default function OrganizePage() {
                       )}
                     </div>
                     {photo.location_name && (
-                      <div className="absolute bottom-2 left-2 rounded-md bg-black/70 px-2 py-1 text-xs text-white">
-                        {photo.location_name}
+                      <div className="absolute bottom-2 left-2 right-2 inline-flex w-fit max-w-[calc(100%-1rem)] items-center gap-1 rounded-md bg-black/70 px-2 py-1 text-xs text-white">
+                        {locationFlag && (
+                          <span className="shrink-0 leading-none" aria-hidden>{locationFlag}</span>
+                        )}
+                        <span className="truncate">{photo.location_name}</span>
                       </div>
                     )}
                   </>
@@ -455,8 +483,12 @@ export default function OrganizePage() {
                       </p>
                       {photo.location_name && (
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {photo.location_name}
+                          {locationFlag ? (
+                            <span className="shrink-0 leading-none" aria-hidden>{locationFlag}</span>
+                          ) : (
+                            <MapPin className="h-3 w-3 shrink-0" />
+                          )}
+                          <span className="truncate">{photo.location_name}</span>
                         </p>
                       )}
                       {photo.taken_at && (
@@ -476,7 +508,8 @@ export default function OrganizePage() {
                   </>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

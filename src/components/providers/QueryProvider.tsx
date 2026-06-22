@@ -17,8 +17,10 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             // Retry failed requests
             retry: 2,
             retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-            // Refetch on window focus for data freshness
-            refetchOnWindowFocus: true,
+            // Don't refetch on window focus — an installed PWA regains focus
+            // constantly (app switching), and staleTime/refetchOnReconnect
+            // already keep data fresh enough without re-running every query.
+            refetchOnWindowFocus: false,
             // Refetch on reconnect
             refetchOnReconnect: true,
             // Don't refetch on mount if data is fresh

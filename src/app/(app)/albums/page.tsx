@@ -1,6 +1,7 @@
 'use client'
 
-import { Suspense, useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -24,22 +25,102 @@ import { toast } from 'sonner'
 
 const photoCount = (album: Album) => (album.photos as unknown as { count: number }[] | undefined)?.[0]?.count ?? 0
 
+type SupabaseClient = ReturnType<typeof createClient>
+
+// Fetch all of a user's albums (with photo counts) and split them into
+// published albums (1+ photos) vs drafts (0 photos). Kept at module scope so
+// it can be the React Query `queryFn` body — the result for each user is
+// cached (5min staleTime + refetchOnMount:false from QueryProvider), so
+// revisiting the Albums page via the sidebar repaints from cache instantly
+// instead of re-running this query behind a skeleton.
+async function fetchAlbums(
+  supabase: SupabaseClient,
+  targetUserId: string,
+): Promise<{ albums: Album[]; drafts: Album[] }> {
+  // Fetch all albums with photo counts
+  const { data, error } = await supabase
+    .from('albums')
+    .select(`
+      *,
+      photos(count)
+    `)
+    .eq('user_id', targetUserId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    log.error('Error fetching albums', { userId: targetUserId }, error)
+    throw error
+  }
+
+  // Transform cover photo URLs to full Supabase storage URLs
+  const allAlbums = (data || []).map(album => ({
+    ...album,
+    cover_photo_url: getPhotoUrl(album.cover_photo_url)
+  }))
+
+  // Separate drafts (0 photos) from published albums (1+ photos)
+  const publishedAlbums = allAlbums.filter(album => photoCount(album) > 0)
+  const draftAlbums = allAlbums.filter(album => photoCount(album) === 0)
+
+  return { albums: publishedAlbums, drafts: draftAlbums }
+}
+
 function AlbumsPageContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const filterUserId = searchParams.get('user')
-  const [albums, setAlbums] = useState<Album[]>([])
-  const [drafts, setDrafts] = useState<Album[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'name-asc' | 'name-desc' | 'photo-count'>('date-desc')
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedAlbums, setSelectedAlbums] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const prefersReducedMotion = useReducedMotion()
+
+  const targetUserId = filterUserId || user?.id
+
+  // React Query owns the albums cache, so navigating away and back via the
+  // sidebar repaints from cache instantly instead of re-fetching behind a
+  // skeleton. Keyed by the target user id so a self view and an "other user"
+  // view cache apart. enabled until we know which user to load.
+  const {
+    data,
+    isPending,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['albums', targetUserId],
+    enabled: !!targetUserId,
+    queryFn: async () => {
+      try {
+        return await fetchAlbums(supabase, targetUserId!)
+      } catch (err) {
+        log.error('Failed to fetch albums', {
+          component: 'AlbumsPage',
+          action: 'fetchAlbums',
+          userId: user?.id
+        }, err instanceof Error ? err : new Error(String(err)))
+        throw err
+      }
+    },
+  })
+
+  const albums = useMemo(() => data?.albums ?? [], [data])
+  const drafts = useMemo(() => data?.drafts ?? [], [data])
+  // When there's no user to load for yet, the query is disabled (isPending stays
+  // true forever), so treat "no target user" as not-loading to match the old
+  // behavior where fetchAlbums short-circuited and cleared loading.
+  const loading = !!targetUserId && isPending
+  const error = queryError
+    ? (queryError instanceof Error ? queryError.message : 'Unable to load albums. Please try again.')
+    : null
+
+  // Invalidate the cached albums query so a refetch runs after a mutation
+  // (delete). Replaces the old manual `fetchAlbums()` re-invocation.
+  const reloadAlbums = () =>
+    queryClient.invalidateQueries({ queryKey: ['albums', targetUserId] })
 
   // Animation variants for grid
   const gridVariants = {
@@ -62,63 +143,6 @@ function AlbumsPageContent() {
       transition: { type: 'spring' as const, stiffness: 300, damping: 24 }
     }
   }
-
-  const fetchAlbums = useCallback(async () => {
-    const targetUserId = filterUserId || user?.id
-
-    if (!targetUserId) {
-      setLoading(false)
-      return
-    }
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      // Fetch all albums with photo counts
-      const { data, error } = await supabase
-        .from('albums')
-        .select(`
-          *,
-          photos(count)
-        `)
-        .eq('user_id', targetUserId)
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        log.error('Error fetching albums', { userId: targetUserId }, error)
-        throw error
-      }
-
-      // Transform cover photo URLs to full Supabase storage URLs
-      const allAlbums = (data || []).map(album => ({
-        ...album,
-        cover_photo_url: getPhotoUrl(album.cover_photo_url)
-      }))
-
-      // Separate drafts (0 photos) from published albums (1+ photos)
-      const publishedAlbums = allAlbums.filter(album => photoCount(album) > 0)
-      const draftAlbums = allAlbums.filter(album => photoCount(album) === 0)
-
-      setAlbums(publishedAlbums)
-      setDrafts(draftAlbums)
-    } catch (err) {
-      log.error('Failed to fetch albums', {
-        component: 'AlbumsPage',
-        action: 'fetchAlbums',
-        userId: user?.id
-      }, err instanceof Error ? err : new Error(String(err)))
-      setError(err instanceof Error ? err.message : 'Unable to load albums. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }, [user?.id, filterUserId, supabase])
-
-  useEffect(() => {
-    if (user) {
-      fetchAlbums()
-    }
-  }, [user, fetchAlbums])
 
   const filteredAlbums = albums.filter(album =>
     album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -200,7 +224,7 @@ function AlbumsPageContent() {
       if (error) throw error
 
       toast.success(`"${album.title}" deleted`)
-      await fetchAlbums()
+      await reloadAlbums()
       // Refresh server cache so deleted album disappears from globe, feed, explore, etc.
       router.refresh()
     } catch (err) {
@@ -230,7 +254,7 @@ function AlbumsPageContent() {
       if (error) throw error
 
       toast.success(`${selectedAlbums.size} album${selectedAlbums.size === 1 ? '' : 's'} deleted`)
-      await fetchAlbums()
+      await reloadAlbums()
       // Refresh server cache so deleted albums disappear from globe, feed, explore, etc.
       router.refresh()
 
@@ -299,7 +323,7 @@ function AlbumsPageContent() {
             <p className="mt-1 text-sm text-destructive">{error}</p>
             <Button
               variant="outline"
-              onClick={fetchAlbums}
+              onClick={() => refetch()}
               className="mt-4"
             >
               Try Again

@@ -70,6 +70,8 @@ export async function areFriends(
 
   try {
     // Check if user1 follows user2 AND user2 follows user1 (both accepted)
+    // .limit(1).maybeSingle(): "not following" is a normal zero-row result —
+    // .single() would 406 on it. limit(1) also tolerates legacy duplicate rows.
     const [follow1, follow2] = await Promise.all([
       supabase
         .from('follows')
@@ -77,7 +79,8 @@ export async function areFriends(
         .eq('follower_id', userId1)
         .eq('following_id', userId2)
         .eq('status', 'accepted')
-        .single(),
+        .limit(1)
+        .maybeSingle(),
 
       supabase
         .from('follows')
@@ -85,7 +88,8 @@ export async function areFriends(
         .eq('follower_id', userId2)
         .eq('following_id', userId1)
         .eq('status', 'accepted')
-        .single()
+        .limit(1)
+        .maybeSingle()
     ])
 
     // Both must exist for friendship
@@ -109,7 +113,8 @@ export async function isFollowing(followerId: string, followingId: string): Prom
       .eq('follower_id', followerId)
       .eq('following_id', followingId)
       .eq('status', 'accepted')
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     if (error && error.code !== 'PGRST116') {
       throw error

@@ -39,6 +39,16 @@ const TEST_ACCOUNTS = [
   { username: 'explorer_eight', display_name: 'Explorer Eight', email: 'tester8@adventurelog.test' },
   { username: 'explorer_nine',  display_name: 'Explorer Nine',  email: 'tester9@adventurelog.test' },
   { username: 'explorer_ten',   display_name: 'Explorer Ten',   email: 'tester10@adventurelog.test' },
+  { username: 'explorer_eleven',   display_name: 'Explorer Eleven',   email: 'tester11@adventurelog.test' },
+  { username: 'explorer_twelve',   display_name: 'Explorer Twelve',   email: 'tester12@adventurelog.test' },
+  { username: 'explorer_thirteen', display_name: 'Explorer Thirteen', email: 'tester13@adventurelog.test' },
+  { username: 'explorer_fourteen', display_name: 'Explorer Fourteen', email: 'tester14@adventurelog.test' },
+  { username: 'explorer_fifteen',  display_name: 'Explorer Fifteen',  email: 'tester15@adventurelog.test' },
+  { username: 'explorer_sixteen',  display_name: 'Explorer Sixteen',  email: 'tester16@adventurelog.test' },
+  { username: 'explorer_seventeen', display_name: 'Explorer Seventeen', email: 'tester17@adventurelog.test' },
+  { username: 'explorer_eighteen', display_name: 'Explorer Eighteen', email: 'tester18@adventurelog.test' },
+  { username: 'explorer_nineteen', display_name: 'Explorer Nineteen', email: 'tester19@adventurelog.test' },
+  { username: 'explorer_twenty',   display_name: 'Explorer Twenty',   email: 'tester20@adventurelog.test' },
 ]
 
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {

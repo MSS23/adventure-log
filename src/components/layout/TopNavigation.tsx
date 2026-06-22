@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { motion, MotionConfig } from 'framer-motion'
+import { ScanLine } from 'lucide-react'
+import { PassportScanner } from '@/components/passport/PassportScanner'
 import { UserNav } from './UserNav'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { NetworkStatusIndicator } from '@/components/pwa/NetworkStatusIndicator'
@@ -15,6 +17,7 @@ const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
 export function TopNavigation() {
   const [scrolled, setScrolled] = useState(false)
+  const [scanOpen, setScanOpen] = useState(false)
 
   useEffect(() => {
     // The app shell scrolls an inner region, not the window — observe that.
@@ -69,6 +72,17 @@ export function TopNavigation() {
 
           {/* Right: Actions */}
           <nav aria-label="User actions" className="flex items-center gap-1">
+            {/* Scan a passport — the quick in-person "we met, let's connect"
+                action lives here as an always-visible top-bar affordance. */}
+            <button
+              type="button"
+              onClick={() => setScanOpen(true)}
+              aria-label="Scan a passport to connect"
+              title="Scan a passport"
+              className="inline-flex items-center justify-center h-9 w-9 rounded-full text-[color:var(--color-ink)] hover:bg-[color:var(--color-line-warm)]/50 transition-colors active:scale-[0.96] outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            >
+              <ScanLine className="h-5 w-5" strokeWidth={1.9} />
+            </button>
             <ThemeToggle />
             <NetworkStatusIndicator />
             <FeedbackLauncher variant="icon" label="Send feedback" />
@@ -77,6 +91,8 @@ export function TopNavigation() {
           </nav>
         </div>
       </motion.header>
+
+      {scanOpen && <PassportScanner onClose={() => setScanOpen(false)} />}
     </MotionConfig>
   )
 }

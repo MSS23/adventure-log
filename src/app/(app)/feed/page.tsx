@@ -22,6 +22,21 @@ type FeedMode = 'following' | 'discover'
 
 const PAGE_SIZE = 10
 
+// A rotating eyebrow line above the feed heading — changes once per day so the
+// page feels alive without being noisy. Indexed by day so it's stable all day.
+const DISPATCHES = [
+  'Fresh dispatches from the trail',
+  'Postcards from everywhere',
+  'Notes from the road',
+  'Where the wanderers are today',
+  'The world, as your friends saw it',
+  'New miles, freshly logged',
+  'Dispatches from far-flung places',
+  'Today’s view from somewhere far',
+  'Stamps still drying',
+  'What the explorers found',
+]
+
 type SupabaseClient = ReturnType<typeof createClient>
 
 // Fetch a single page of the feed: resolve the visible author set, pull the
@@ -159,6 +174,12 @@ export default function FeedPage() {
   const { user } = useAuth()
   const [mode, setMode] = useState<FeedMode>('following')
 
+  // Pick today's dispatch line (rotates daily, stable within the day).
+  const dailyDispatch = useMemo(
+    () => DISPATCHES[Math.floor(Date.now() / 86_400_000) % DISPATCHES.length],
+    [],
+  )
+
   const supabase = useMemo(() => createClient(), [])
   const { users: suggestedUsers } = useSuggestedUsers(user?.id, 6)
 
@@ -206,55 +227,51 @@ export default function FeedPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 py-6 md:py-8">
-      {/* Editorial header — eyebrow + display heading */}
-      <header className="mb-8 space-y-1">
-        <p className="al-eyebrow">Fresh dispatches from the trail</p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="al-display text-3xl md:text-4xl">
-            <em className="italic font-normal">Field</em> Notes
-          </h1>
-
-          {/* Quiet toggle — underline, not pill */}
-          <nav
-            aria-label="Feed mode"
-            className="flex items-center gap-6 pb-1"
-            role="tablist"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'following'}
-              onClick={() => setMode('following')}
-              className={`relative pb-1.5 text-xs font-semibold tracking-wide uppercase transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                mode === 'following'
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Friends
-              {mode === 'following' && (
-                <span className="absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full bg-primary" />
-              )}
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'discover'}
-              onClick={() => setMode('discover')}
-              className={`relative pb-1.5 text-xs font-semibold tracking-wide uppercase transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                mode === 'discover'
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Discover
-              {mode === 'discover' && (
-                <span className="absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full bg-primary" />
-              )}
-            </button>
-          </nav>
-        </div>
+      {/* Editorial header — daily dispatch line + clean heading on its own row */}
+      <header className="mb-4 space-y-1">
+        <p className="al-eyebrow">{dailyDispatch}</p>
+        <h1 className="al-display text-3xl md:text-4xl">Travel Memories</h1>
       </header>
+
+      {/* Feed mode toggle — its own clear tab bar, not crammed by the title */}
+      <nav
+        aria-label="Feed mode"
+        role="tablist"
+        className="flex items-center gap-7 border-b border-border mb-6"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === 'following'}
+          onClick={() => setMode('following')}
+          className={`relative pb-2.5 text-[13px] font-semibold tracking-wide transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+            mode === 'following'
+              ? 'text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Friends
+          {mode === 'following' && (
+            <span className="absolute left-0 right-0 -bottom-px h-[2px] rounded-full bg-primary" />
+          )}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === 'discover'}
+          onClick={() => setMode('discover')}
+          className={`relative pb-2.5 text-[13px] font-semibold tracking-wide transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+            mode === 'discover'
+              ? 'text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Discover
+          {mode === 'discover' && (
+            <span className="absolute left-0 right-0 -bottom-px h-[2px] rounded-full bg-primary" />
+          )}
+        </button>
+      </nav>
 
       {/* Suggested travelers — compact, no Instagram rings */}
       {suggestedUsers.length > 0 && (

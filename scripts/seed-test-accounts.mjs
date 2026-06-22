@@ -59,6 +59,7 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 const argv = process.argv.slice(2)
 const APPLY = argv.includes('--apply')
 const CLEAR = argv.includes('--clear')
+const STRIP = argv.includes('--strip-avatars')
 const EMAIL_DOMAIN = 'test.adventurelog.app'
 const PASSWORD = 'Test123!@#'
 const countFlagIdx = argv.indexOf('--count')
@@ -127,7 +128,8 @@ function buildAccounts(n) {
       username: `testuser${num}`,
       display_name: `Test User ${num}`,
       bio: BIOS[i % BIOS.length],
-      avatar_url: AVATARS[i % AVATARS.length],
+      // No avatar — test accounts show their initials, not stock photos.
+      avatar_url: null,
       // Mix in some private accounts (every 6th) to exercise privacy flows.
       privacy_level: num % 6 === 0 ? 'private' : 'public',
       email: `testuser${num}@${EMAIL_DOMAIN}`,
@@ -241,13 +243,38 @@ async function clearAccounts(accounts) {
   console.log(`✅ Removed ${ids.length} test accounts (auth + profile + content).`)
 }
 
+// Clear avatar_url on existing test accounts so they fall back to initials
+// (removes the stock/fake profile photos without deleting the accounts).
+async function stripAvatars(accounts) {
+  const usernames = accounts.map((a) => a.username)
+  if (!APPLY) {
+    console.log(`Dry run — would clear avatars for up to ${usernames.length} test accounts. Re-run with --apply.`)
+    return
+  }
+  const { data, error } = await supabase
+    .from('users')
+    .update({ avatar_url: null })
+    .in('username', usernames)
+    .select('id')
+  if (error) {
+    console.error(`❌ strip failed: ${error.message}`)
+    return
+  }
+  console.log(`✅ Cleared avatars for ${data?.length ?? 0} test accounts.`)
+}
+
 async function main() {
   const accounts = buildAccounts(COUNT)
   console.log('\n🧪 Adventure Log — Test Account Seeder')
   console.log('='.repeat(48))
   console.log(`Project: ${SUPABASE_URL}`)
-  console.log(`Mode:    ${CLEAR ? 'CLEAR' : APPLY ? 'APPLY' : 'DRY RUN'}  |  Count: ${COUNT}`)
+  console.log(`Mode:    ${STRIP ? 'STRIP-AVATARS' : CLEAR ? 'CLEAR' : APPLY ? 'APPLY' : 'DRY RUN'}  |  Count: ${COUNT}`)
   console.log('='.repeat(48) + '\n')
+
+  if (STRIP) {
+    await stripAvatars(accounts)
+    return
+  }
 
   if (CLEAR) {
     await clearAccounts(accounts)

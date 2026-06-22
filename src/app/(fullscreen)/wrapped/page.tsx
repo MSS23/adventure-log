@@ -484,26 +484,26 @@ export default function WrappedPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40 z-10" />
 
             {/* Stats content */}
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 py-20 overflow-y-auto">
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 py-8 sm:py-10 overflow-y-auto">
               {/* Personality */}
               <motion.div
-                className="text-center mb-8"
+                className="text-center mb-5"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, type: 'spring' }}
               >
-                <Sparkles className="h-10 w-10 mx-auto mb-3 text-olive-400" />
-                <p className="al-eyebrow !text-olive-400 mb-2">
+                <Sparkles className="h-7 w-7 mx-auto mb-2 text-olive-400" />
+                <p className="al-eyebrow !text-olive-400 mb-1">
                   Your travel personality
                 </p>
-                <h2 className="al-display text-4xl md:text-6xl !text-white">
+                <h2 className="al-display text-3xl sm:text-4xl md:text-5xl !text-white">
                   {data.personality}
                 </h2>
               </motion.div>
 
               {/* Stat grid */}
               <motion.div
-                className="grid grid-cols-3 gap-3 sm:gap-4 max-w-lg w-full mb-8"
+                className="grid grid-cols-3 gap-2.5 sm:gap-3 max-w-md w-full mb-5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -543,40 +543,45 @@ export default function WrappedPage() {
               {/* Country flags */}
               {data.countryCodes.length > 0 && (
                 <motion.div
-                  className="flex flex-wrap justify-center gap-2 mb-8 max-w-md"
+                  className="flex flex-wrap items-center justify-center gap-1.5 mb-5 max-w-sm"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7 }}
                 >
-                  {data.countryCodes.map((code, i) => (
+                  {data.countryCodes.slice(0, 18).map((code, i) => (
                     <motion.span
                       key={code}
-                      className="text-3xl"
+                      className="text-2xl leading-none"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{
-                        delay: 0.8 + i * 0.08,
+                        delay: 0.8 + Math.min(i, 12) * 0.05,
                         type: 'spring',
                       }}
                     >
                       {countryCodeToFlag(code)}
                     </motion.span>
                   ))}
+                  {data.countryCodes.length > 18 && (
+                    <span className="text-white/70 text-sm font-medium">
+                      +{data.countryCodes.length - 18}
+                    </span>
+                  )}
                 </motion.div>
               )}
 
               {/* World explored — share of the planet's countries visited */}
               {data.countryCodes.length > 0 && (
                 <motion.div
-                  className="text-center mb-8"
+                  className="text-center mb-5"
                   initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.9, type: 'spring', stiffness: 200, damping: 18 }}
                 >
-                  <p className="al-stat-value text-5xl sm:text-6xl !text-white tabular-nums leading-none">
+                  <p className="al-stat-value text-4xl sm:text-5xl !text-white tabular-nums leading-none">
                     {data.countryPercentage}%
                   </p>
-                  <p className="al-eyebrow !text-olive-400 mt-2">
+                  <p className="al-eyebrow !text-olive-400 mt-1.5">
                     of the world explored
                   </p>
                 </motion.div>
@@ -585,7 +590,7 @@ export default function WrappedPage() {
               {/* Distance comparison */}
               {data.totalDistanceKm > 0 && (
                 <motion.p
-                  className="text-white/75 text-sm sm:text-base mb-8 text-center"
+                  className="text-white/75 text-xs sm:text-sm mb-2 text-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1 }}
@@ -733,10 +738,10 @@ function StatCard({
   icon: React.ReactNode
 }) {
   return (
-    <div className="bg-white/[0.07] backdrop-blur-md rounded-2xl p-4 sm:p-5 text-center border border-white/15 shadow-lg shadow-black/20">
-      <div className="text-olive-400 mb-2 flex justify-center">{icon}</div>
-      <p className="al-stat-value text-3xl sm:text-4xl !text-white tabular-nums">{value}</p>
-      <p className="al-eyebrow !text-white/65 mt-1.5">{label}</p>
+    <div className="bg-white/[0.07] backdrop-blur-md rounded-xl p-2.5 sm:p-3 text-center border border-white/15 shadow-lg shadow-black/20">
+      <div className="text-olive-400 mb-1 flex justify-center">{icon}</div>
+      <p className="al-stat-value text-2xl sm:text-3xl !text-white tabular-nums leading-none">{value}</p>
+      <p className="al-eyebrow !text-white/65 mt-1 text-[9px]">{label}</p>
     </div>
   )
 }

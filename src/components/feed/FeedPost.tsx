@@ -98,6 +98,10 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
   const { triggerLight, triggerDoubleTap } = useHaptics()
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showShareToast, setShowShareToast] = useState(false)
+  // Local, optimistic like count: the footer shows a server-provided count, so
+  // it must move the instant the user taps the heart (the LikeButton reports
+  // the toggle), not wait for a refetch.
+  const [likesCount, setLikesCount] = useState(album.likes_count)
 
   // Album dates read as seasons (e.g. "Summer 2025"), hemisphere-aware.
   const albumDate = album.date_start || album.created_at
@@ -230,7 +234,12 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
       {/* Action row — minimal, typographic */}
       <div className="px-5 py-2.5 flex items-center justify-between border-t border-border">
         <div className="flex items-center gap-1">
-          <LikeButton albumId={album.id} showCount={false} size="md" />
+          <LikeButton
+            albumId={album.id}
+            showCount={false}
+            size="md"
+            onToggle={(liked) => setLikesCount((c) => Math.max(0, c + (liked ? 1 : -1)))}
+          />
           <Link
             href={`/albums/${album.id}#comments`}
             aria-label="View comments"
@@ -272,11 +281,11 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
       </div>
 
       {/* Stats footer — tight typographic row */}
-      {(album.likes_count > 0 || album.comments_count > 0) && (
+      {(likesCount > 0 || album.comments_count > 0) && (
         <div className="px-5 pb-4 -mt-1 flex items-center gap-3 font-mono text-[11px] tracking-wide uppercase text-muted-foreground">
-          {album.likes_count > 0 && (
+          {likesCount > 0 && (
             <span>
-              {album.likes_count} {album.likes_count === 1 ? 'like' : 'likes'}
+              {likesCount} {likesCount === 1 ? 'like' : 'likes'}
             </span>
           )}
           {album.comments_count > 0 && (

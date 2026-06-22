@@ -17,6 +17,13 @@ interface LikeButtonProps {
   size?: 'sm' | 'md' | 'lg'
   className?: string
   showParticles?: boolean
+  /**
+   * Fired on tap with the *next* liked state. Lets a parent that renders its
+   * own like count (e.g. the feed footer, which shows a server-provided
+   * `likes_count`) keep that number in sync optimistically — the button itself
+   * only owns the heart when `showCount` is false.
+   */
+  onToggle?: (nextLiked: boolean) => void
 }
 
 export function LikeButton({
@@ -25,7 +32,8 @@ export function LikeButton({
   showCount = false,
   size: _size = 'md',
   className,
-  showParticles = true
+  showParticles = true,
+  onToggle,
 }: LikeButtonProps) {
   const { isLiked, likesCount, toggleLike } = useLikes(albumId, photoId, undefined, { fetchList: showCount, subscribe: showCount })
   const { triggerLight, triggerSuccess } = useHaptics()
@@ -36,8 +44,10 @@ export function LikeButton({
     e.preventDefault()
     e.stopPropagation()
 
+    const nextLiked = !isLiked
+
     // Trigger haptic feedback
-    if (!isLiked) {
+    if (nextLiked) {
       triggerSuccess()
       // Show particle burst on like
       if (showParticles && !prefersReducedMotion) {
@@ -47,6 +57,9 @@ export function LikeButton({
     } else {
       triggerLight()
     }
+
+    // Let a parent-owned count update optimistically, in lockstep with the heart.
+    onToggle?.(nextLiked)
 
     // Fire and forget - optimistic update makes it instant
     toggleLike()

@@ -77,7 +77,13 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
     return hardwareAcceleration === false ? 'low' : 'balanced'
   }, [performanceMode, hardwareAcceleration])
 
-  // Performance settings based on mode
+  // Performance settings based on mode.
+  //
+  // COMPLETENESS IS NON-NEGOTIABLE: every mode shows ALL pins and ALL
+  // connections (uniform high `maxPins` + `showArcs: true`). Performance mode
+  // only tunes *visual cost* — atmosphere, arc stroke, and curve resolution —
+  // never how much of the user's travel data is rendered. Slower load on a
+  // weak device is acceptable; a globe missing pins/arcs is not.
   const performanceConfig = useMemo((): PerformanceConfig => {
     switch (effectivePerformanceMode) {
       case 'high':
@@ -88,7 +94,7 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
           arcStroke: 1.8,
           showArcs: true,
           pinSize: 1.2,
-          maxPins: 1000,
+          maxPins: 12000,
           arcCurveResolution: 128,
           arcCircularResolution: 64,
           solidArcs: false
@@ -101,7 +107,7 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
           arcStroke: 1.5,
           showArcs: true,
           pinSize: 1.0,
-          maxPins: 500,
+          maxPins: 12000,
           arcCurveResolution: 64,
           arcCircularResolution: 32,
           solidArcs: false
@@ -112,9 +118,9 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
           atmosphereOpacity: 0,
           atmosphereAltitude: 0,
           arcStroke: 1.0,
-          showArcs: false,
+          showArcs: true,
           pinSize: 0.8,
-          maxPins: 200,
+          maxPins: 12000,
           arcCurveResolution: 32,
           arcCircularResolution: 16,
           solidArcs: false
@@ -127,7 +133,7 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
           arcStroke: 1.5,
           showArcs: true,
           pinSize: 1.0,
-          maxPins: 500,
+          maxPins: 12000,
           arcCurveResolution: 64,
           arcCircularResolution: 32,
           solidArcs: false

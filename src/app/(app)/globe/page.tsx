@@ -244,11 +244,11 @@ function GlobePageContent() {
 function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExplore: () => void }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-      <div className="pointer-events-auto bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.1] p-6 sm:p-8 max-w-sm mx-4 text-center shadow-2xl relative">
+      <div className="pointer-events-auto bg-card/90 backdrop-blur-xl rounded-2xl border border-border p-6 sm:p-8 max-w-sm mx-4 text-center shadow-2xl relative">
         <button
           type="button"
           onClick={onDismiss}
-          className="absolute top-3 right-3 p-2 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="absolute top-3 right-3 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="Dismiss"
         >
           <span className="text-lg">&times;</span>
@@ -256,8 +256,8 @@ function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExpl
         <div className="w-14 h-14 rounded-2xl bg-olive-900/40 flex items-center justify-center mx-auto mb-3">
           <Globe2 className="h-7 w-7 text-olive-400" />
         </div>
-        <h3 className="text-lg font-bold text-white mb-2">Your globe is empty</h3>
-        <p className="text-sm text-white/60 mb-5 leading-relaxed">
+        <h3 className="text-lg font-bold text-foreground mb-2">Your globe is empty</h3>
+        <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
           Create your first album to see it pinned here. Upload photos with GPS data and watch your travels come to life.
         </p>
         <div className="flex flex-col gap-2">
@@ -270,7 +270,7 @@ function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExpl
           <button
             type="button"
             onClick={onExplore}
-            className="text-xs text-white/50 hover:text-white/80 transition-colors duration-200 py-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-lg"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors duration-200 py-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-lg"
           >
             or explore other travelers&apos; globes
           </button>

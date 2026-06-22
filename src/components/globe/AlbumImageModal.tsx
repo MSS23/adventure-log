@@ -291,6 +291,156 @@ export function AlbumImageModal({
         )}
       </AnimatePresence>
 
+      {/* ── Mobile: compact bottom glance card ──
+          The desktop popup is gated to !isMobile, so on the PWA / phones a pin
+          or cluster tap would open nothing. This mirrors the desktop card's
+          data + handlers in a phone-sized layout. Positioned ABSOLUTE within
+          the globe container (not fixed) and offset above the thumbnail
+          filmstrip using bottom-[100px] — the same proven offset that
+          GlobeStatsOverlay uses to sit above the strip. z-[60] keeps it above
+          the strip (z-10/z-20) but below full-screen modals/lightbox. */}
+      <AnimatePresence>
+        {isMobile && isOpen && (
+          <motion.div
+            key={`m-${cluster?.id}`}
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 24, opacity: 0 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 280 }}
+            className="md:hidden absolute bottom-[100px] left-1/2 -translate-x-1/2 z-[60] w-[92%] max-w-[420px] rounded-2xl overflow-hidden"
+            style={{
+              background: 'var(--card)',
+              border: '1px solid var(--color-line-warm)',
+              boxShadow:
+                '0 1px 2px rgba(26,20,14,0.04), 0 14px 36px rgba(26,20,14,0.20)',
+            }}
+            role="dialog"
+            aria-label={`Album preview — ${isMultiCity ? `${cluster.cities.length} cities` : primaryCity.name}`}
+          >
+            <div className="flex items-center gap-2.5 p-2.5 pr-3">
+              {/* Cover thumbnail — tap straight to album (single-city) */}
+              <Link
+                href={isMultiCity ? '#' : `/albums/${primaryCity.id}`}
+                onClick={(e) => {
+                  if (isMultiCity) e.preventDefault()
+                }}
+                className="relative w-[60px] h-[60px] rounded-xl overflow-hidden flex-shrink-0"
+                style={{ background: 'var(--color-ivory-alt)' }}
+              >
+                {currentPhoto && getPhotoSrc(currentPhoto.file_path) ? (
+                  <Image
+                    src={getPhotoSrc(currentPhoto.file_path)}
+                    alt=""
+                    fill
+                    sizes="60px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <Camera
+                      className="h-5 w-5"
+                      style={{ color: 'var(--color-muted-warm)' }}
+                    />
+                  </div>
+                )}
+                <div
+                  className="absolute top-1 left-1 flex items-center justify-center w-4 h-4 rounded-full"
+                  style={{ background: 'var(--color-coral)' }}
+                >
+                  <MapPin className="h-2 w-2 text-white" strokeWidth={2.5} />
+                </div>
+              </Link>
+
+              {/* Title + inline meta */}
+              <div className="flex-1 min-w-0">
+                <h2
+                  className="font-heading text-[15px] font-semibold truncate leading-tight"
+                  style={{
+                    color: 'var(--color-ink)',
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {isMultiCity
+                    ? `${cluster.cities.length} places near ${primaryCity.name.split(',')[0]}`
+                    : primaryCity.name}
+                </h2>
+                <div
+                  className="flex items-center gap-2.5 mt-1 font-mono text-[10px] tracking-wide"
+                  style={{ color: 'var(--color-muted-warm)' }}
+                >
+                  <span className="inline-flex items-center gap-1">
+                    <Camera className="h-3 w-3" />
+                    {cluster.totalPhotos}
+                  </span>
+                  {!isMultiCity && formattedDate && (
+                    <span className="inline-flex items-center gap-1 truncate">
+                      <Calendar className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{formattedDate}</span>
+                    </span>
+                  )}
+                  {isMultiCity && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {cluster.totalAlbums} albums
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Primary action (single-city) */}
+              {!isMultiCity && (
+                <Link
+                  href={`/albums/${primaryCity.id}`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold flex-shrink-0 active:scale-[0.97] transition-transform"
+                  style={{
+                    background: 'var(--color-coral)',
+                    color: '#fff',
+                    boxShadow: '0 4px 14px rgba(226,85,58,0.3)',
+                  }}
+                >
+                  Open
+                  <ExternalLink className="h-3 w-3" />
+                </Link>
+              )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-lg flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-[0.97] transition-transform min-w-[40px] min-h-[40px] flex items-center justify-center"
+                style={{ color: 'var(--color-muted-warm)' }}
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Multi-city: a single horizontal row of city pills */}
+            {isMultiCity && (
+              <div
+                className="flex gap-1.5 px-2.5 pb-2.5 pt-2 overflow-x-auto scrollbar-hide"
+                style={{ borderTop: '1px solid var(--color-line-warm)' }}
+              >
+                {cluster.cities.slice(0, 6).map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/albums/${c.id}`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap transition-colors"
+                    style={{
+                      background: 'var(--color-ivory-alt)',
+                      color: 'var(--color-ink-soft)',
+                      border: '1px solid var(--color-line-warm)',
+                    }}
+                  >
+                    <MapPin className="h-2.5 w-2.5" />
+                    {c.name.split(',')[0]}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Enhanced Lightbox for full photo viewing */}
       <EnhancedLightbox
         photos={photos}

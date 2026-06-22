@@ -48,7 +48,7 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
   )
 
   return (
-    <div className="hidden md:flex flex-col w-[320px] flex-shrink-0 bg-black/80 backdrop-blur-xl border-l border-white/[0.08] animate-in slide-in-from-right-5 duration-300">
+    <div className="hidden md:flex flex-col w-[320px] flex-shrink-0 bg-card/95 backdrop-blur-xl border-l border-border animate-in slide-in-from-right-5 duration-300">
       {/* Cover image */}
       <div className="relative h-[200px] flex-shrink-0">
         {album.cover_photo_url ? (
@@ -64,6 +64,7 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
             <Camera className="h-10 w-10 text-olive-400/50" />
           </div>
         )}
+        {/* Cover scrim keeps the title legible over the photo regardless of theme */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
         <button
           type="button"
@@ -73,7 +74,7 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
         >
           <X className="h-4 w-4" />
         </button>
-        {/* Title overlay on cover */}
+        {/* Title overlay on cover — sits on the dark scrim, so white stays */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <h3 className="text-lg font-semibold text-white mb-1">{album.title}</h3>
           {album.location_name && (
@@ -90,7 +91,7 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Date */}
         {travelDate && (
-          <div className="flex items-center gap-2 text-sm text-white/80">
+          <div className="flex items-center gap-2 text-sm text-foreground">
             <Calendar className="h-4 w-4 flex-shrink-0" />
             <span>{travelDate}</span>
           </div>
@@ -98,12 +99,12 @@ export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelP
 
         {/* Description */}
         {album.description && (
-          <p className="text-sm text-white/70 leading-relaxed">{album.description}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{album.description}</p>
         )}
       </div>
 
       {/* View Album button pinned to bottom */}
-      <div className="p-4 flex-shrink-0 border-t border-white/[0.06]">
+      <div className="p-4 flex-shrink-0 border-t border-border">
         <Link
           href={`/albums/${album.id}`}
           className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-olive-600 hover:bg-olive-500 text-white text-sm font-medium transition-colors duration-200 cursor-pointer active:scale-[0.97]"
@@ -136,9 +137,9 @@ export function MobileFeaturedAlbum({ album, isOwnProfile, onClose }: MobileFeat
   // collapses on mobile while this card is shown, so there is no overlap.
   return (
     <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] z-20 animate-in fade-in slide-in-from-bottom-2 duration-200">
-      <div className="bg-black/70 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl px-3 py-2 flex items-center gap-2.5">
+      <div className="bg-card/90 backdrop-blur-xl rounded-xl border border-border shadow-2xl px-3 py-2 flex items-center gap-2.5">
         {/* Thumbnail */}
-        <div className="relative h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-stone-800">
+        <div className="relative h-10 w-10 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
           {album.cover_photo_url ? (
             <Image
               src={getPhotoUrl(album.cover_photo_url) || ''}
@@ -155,15 +156,15 @@ export function MobileFeaturedAlbum({ album, isOwnProfile, onClose }: MobileFeat
         </div>
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-xs font-semibold text-white truncate">{album.title}</h3>
+          <h3 className="text-xs font-semibold text-foreground truncate">{album.title}</h3>
           {album.location_name && (
-            <p className="text-[10px] text-white/80 flex items-center gap-1 truncate">
+            <p className="text-[10px] text-foreground flex items-center gap-1 truncate">
               {flag && <span className="text-xs">{flag}</span>}
               <span className="truncate">{album.location_name.split(',')[0]}</span>
             </p>
           )}
           {travelDate && (
-            <p className="text-[10px] text-white/75 flex items-center gap-1 truncate">
+            <p className="text-[10px] text-muted-foreground flex items-center gap-1 truncate">
               <Calendar className="h-2.5 w-2.5 flex-shrink-0" />
               <span className="truncate">{travelDate}</span>
             </p>
@@ -181,7 +182,7 @@ export function MobileFeaturedAlbum({ album, isOwnProfile, onClose }: MobileFeat
           type="button"
           aria-label="Dismiss featured album"
           onClick={onClose}
-          className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors duration-200 flex-shrink-0 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]"
+          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200 flex-shrink-0 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -288,17 +289,17 @@ export function GlobeAlbumFilmstrip({
         hideOnMobileWhenSelected ? "hidden md:block" : "block"
       )}
     >
-      <div className="relative bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-2.5 py-2 shadow-2xl">
+      <div className="relative bg-card/80 backdrop-blur-xl rounded-2xl border border-border px-2.5 py-2 shadow-2xl">
         {/* Count chip */}
         {albums.length > 24 && (
-          <span className="pointer-events-none absolute -top-2 right-3 z-20 px-1.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/70 tabular-nums">
+          <span className="pointer-events-none absolute -top-2 right-3 z-20 px-1.5 py-0.5 rounded-full bg-card/90 backdrop-blur-md border border-border text-[10px] font-medium text-muted-foreground tabular-nums">
             {selectedAlbumId ? `${albums.findIndex(a => a.id === selectedAlbumId) + 1} / ${albums.length}` : `${albums.length} albums`}
           </span>
         )}
 
         {/* Edge fade gradients */}
-        {canLeft && <div aria-hidden className="pointer-events-none absolute left-2.5 top-2 bottom-2 w-8 z-10 bg-gradient-to-r from-black/60 to-transparent rounded-l-xl" />}
-        {canRight && <div aria-hidden className="pointer-events-none absolute right-2.5 top-2 bottom-2 w-8 z-10 bg-gradient-to-l from-black/60 to-transparent rounded-r-xl" />}
+        {canLeft && <div aria-hidden className="pointer-events-none absolute left-2.5 top-2 bottom-2 w-8 z-10 bg-gradient-to-r from-card/80 to-transparent rounded-l-xl" />}
+        {canRight && <div aria-hidden className="pointer-events-none absolute right-2.5 top-2 bottom-2 w-8 z-10 bg-gradient-to-l from-card/80 to-transparent rounded-r-xl" />}
 
         {/* Scroll arrows (desktop only) */}
         {canLeft && (
@@ -306,7 +307,7 @@ export function GlobeAlbumFilmstrip({
             type="button"
             onClick={() => nudge(-1)}
             aria-label="Scroll albums left"
-            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/80 items-center justify-center transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
+            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-card/90 backdrop-blur-md border border-border text-muted-foreground hover:text-foreground hover:bg-card items-center justify-center transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -316,7 +317,7 @@ export function GlobeAlbumFilmstrip({
             type="button"
             onClick={() => nudge(1)}
             aria-label="Scroll albums right"
-            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:bg-black/80 items-center justify-center transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
+            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 hidden md:flex w-7 h-7 rounded-full bg-card/90 backdrop-blur-md border border-border text-muted-foreground hover:text-foreground hover:bg-card items-center justify-center transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
           >
             <ChevronRight className="h-4 w-4" />
           </button>

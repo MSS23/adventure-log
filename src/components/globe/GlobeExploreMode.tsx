@@ -32,22 +32,22 @@ export function GlobeExploreStrip({
   exploreStats,
 }: GlobeExploreModeProps) {
   return (
-    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] bg-black/50 backdrop-blur-xl rounded-2xl border border-white/[0.08] px-3 py-2.5 z-10 shadow-2xl">
+    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] bg-card/80 backdrop-blur-xl rounded-2xl border border-border px-3 py-2.5 z-10 shadow-2xl">
       {exploreLoading ? (
         <div className="flex items-center justify-center gap-2 py-3">
-          <Loader2 className="h-4 w-4 text-olive-400 animate-spin" />
-          <span className="text-xs text-white/50">Discovering travelers worldwide...</span>
+          <Loader2 className="h-4 w-4 text-olive-500 animate-spin" />
+          <span className="text-xs text-muted-foreground">Discovering travelers worldwide...</span>
         </div>
       ) : exploreAlbums.length === 0 ? (
         <div className="flex items-center justify-center gap-2 py-3">
-          <Compass className="h-4 w-4 text-white/30" />
-          <span className="text-xs text-white/50">No public albums found yet. Be the first to share!</span>
+          <Compass className="h-4 w-4 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">No public albums found yet. Be the first to share!</span>
         </div>
       ) : (
         <>
           <div className="flex items-center gap-1.5 mb-2 px-0.5">
-            <Compass className="h-3 w-3 text-olive-400" />
-            <span className="text-[10px] font-semibold text-white/75 uppercase tracking-wider">Community</span>
+            <Compass className="h-3 w-3 text-olive-500" />
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Community</span>
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             {exploreAlbums.map((album) => (
@@ -114,9 +114,9 @@ export function GlobeExploreStatsIndicator({
 }) {
   return (
     <div className="md:hidden absolute top-4 left-1/2 -translate-x-1/2 z-10">
-      <div className="bg-black/50 backdrop-blur-xl rounded-full px-4 py-1.5 border border-white/10 shadow-lg flex items-center gap-2">
-        <Users className="h-3 w-3 text-olive-400" />
-        <span className="text-[11px] font-medium text-white/80">
+      <div className="bg-card/85 backdrop-blur-xl rounded-full px-4 py-1.5 border border-border shadow-lg flex items-center gap-2">
+        <Users className="h-3 w-3 text-olive-500" />
+        <span className="text-[11px] font-medium text-foreground">
           {exploreStats.travelers} travelers, {exploreStats.albums} albums
         </span>
       </div>

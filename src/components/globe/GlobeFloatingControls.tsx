@@ -30,13 +30,13 @@ export function GlobeFloatingControls({
     <>
       {/* Floating Controls - Top Right Only */}
       <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
-        <div className="flex items-center gap-1.5 backdrop-blur-xl bg-stone-900/95 rounded-xl p-1.5 shadow-2xl border border-white/10">
+        <div className="flex items-center gap-1.5 backdrop-blur-xl bg-card/90 rounded-xl p-1.5 shadow-2xl border border-border">
           {/* Travel Routes Toggle */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowStaticConnections(!showStaticConnections)}
-            className={cn("h-9 w-9 p-0 text-white hover:bg-white/20 rounded-lg transition-all", showStaticConnections && 'bg-olive-500/30 text-olive-200')}
+            className={cn("h-9 w-9 p-0 text-foreground hover:bg-muted rounded-lg transition-all", showStaticConnections && 'bg-olive-500/30 text-olive-700')}
             title="Toggle travel routes"
           >
             <Route className="h-4 w-4" />
@@ -53,8 +53,8 @@ export function GlobeFloatingControls({
               permissionStatus === 'denied' && "opacity-50 cursor-not-allowed",
               showCurrentLocation
                 ? "bg-green-500 hover:bg-green-600 text-white"
-                : "text-white hover:bg-white/20",
-              (locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied') && "hover:bg-white/10"
+                : "text-foreground hover:bg-muted",
+              (locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied') && "hover:bg-muted"
             )}
             title={
               locationLoading

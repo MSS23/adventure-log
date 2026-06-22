@@ -163,7 +163,7 @@ export default function WrappedPage() {
   // Loading
   if (data.loading) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center">
+      <div className="dark fixed inset-0 bg-black flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 text-olive-400 animate-spin mx-auto mb-4" />
           <p className="text-white/60 text-sm">Loading your journey...</p>
@@ -175,7 +175,7 @@ export default function WrappedPage() {
   // No trips
   if (data.totalTrips === 0) {
     return (
-      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white p-8">
+      <div className="dark fixed inset-0 bg-black flex flex-col items-center justify-center text-white p-8">
         <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
           <Link href="/feed" aria-label="Back to home">
             <Button
@@ -222,7 +222,7 @@ export default function WrappedPage() {
   }
 
   return (
-    <div className="fixed inset-0 bg-black overflow-hidden">
+    <div className="dark fixed inset-0 bg-black overflow-hidden">
       {/* Home + close buttons */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
         <Link href="/feed" aria-label="Back to home">

@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
                   <div style={{ fontSize: '32px', fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
                     {displayName}
                   </div>
-                  <div style={{ fontSize: '15px', color: 'rgba(153,177,105,0.8)', lineHeight: 1.4 }}>
+                  <div style={{ fontSize: '15px', color: 'rgba(205,224,168,0.92)', lineHeight: 1.4 }}>
                     @{user.username} &middot; Travel Passport
                   </div>
                 </div>
@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
                   <div style={{ fontSize: '36px', fontWeight: 800, color: 'white', lineHeight: 1 }}>
                     {stat.value}
                   </div>
-                  <div style={{ fontSize: '13px', color: 'rgba(153,177,105,0.7)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <div style={{ fontSize: '13px', color: 'rgba(205,224,168,0.86)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {stat.label}
                   </div>
                 </div>
@@ -281,11 +281,11 @@ export async function GET(request: NextRequest) {
               >
                 &#127757;
               </div>
-              <span style={{ color: 'rgba(153,177,105,0.8)', fontSize: '14px', fontWeight: 600 }}>
+              <span style={{ color: 'rgba(205,224,168,0.92)', fontSize: '14px', fontWeight: 600 }}>
                 Adventure Log
               </span>
             </div>
-            <span style={{ color: 'rgba(153,177,105,0.4)', fontSize: '13px' }}>
+            <span style={{ color: 'rgba(205,224,168,0.62)', fontSize: '13px' }}>
               Your travel life, on a globe
             </span>
           </div>

@@ -19,17 +19,33 @@
 
 -- Safety net: the table/column the function writes to (normally from m22).
 -- IF NOT EXISTS means this never alters an existing table's column types.
+-- NOTE: the per-day uniqueness is enforced by the expression index below, not
+-- an inline UNIQUE constraint — Postgres rejects expressions like
+-- (viewed_at::date) inside a table-level UNIQUE (...) clause.
 CREATE TABLE IF NOT EXISTS public.album_views (
   id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   album_id   UUID NOT NULL REFERENCES public.albums(id) ON DELETE CASCADE,
   viewer_id  UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  viewed_at  TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE (album_id, viewer_id, (viewed_at::date))
+  viewed_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
 ALTER TABLE public.albums ADD COLUMN IF NOT EXISTS view_count INTEGER DEFAULT 0;
 
--- Guarantee the ON CONFLICT inference target exists (one view per viewer/day).
+-- If the per-day unique index never existed (m22's inline UNIQUE used the same
+-- invalid expression syntax), the table may hold duplicate (album, viewer, day)
+-- rows that would make the index build fail. Collapse them first, keeping one.
+-- NULL viewer_id rows (anonymous views) are left alone — the unique index treats
+-- NULLs as distinct, so they aren't duplicates.
+DELETE FROM public.album_views a
+USING public.album_views b
+WHERE a.viewer_id IS NOT NULL
+  AND a.album_id = b.album_id
+  AND a.viewer_id = b.viewer_id
+  AND a.viewed_at::date = b.viewed_at::date
+  AND a.ctid > b.ctid;
+
+-- One view per viewer per album per day. This expression-based unique index is
+-- also the arbiter for the function's ON CONFLICT clause.
 CREATE UNIQUE INDEX IF NOT EXISTS uq_album_views_per_viewer_per_day
   ON public.album_views (album_id, viewer_id, (viewed_at::date));
 

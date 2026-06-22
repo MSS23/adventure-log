@@ -5,12 +5,13 @@ import { useSavedPlaces, type SavedPlace, type ExtractResult, type AddPlaceParam
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
-import { Link2, Loader2, Sparkles, Trash2, ExternalLink, Check, MapPinned, Plus } from 'lucide-react'
+import { Link2, Loader2, Sparkles, Trash2, ExternalLink, Check, MapPinned, Plus, Luggage } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import { categoryConfig, platformLabel } from './savedPlacesConfig'
 import { ReviewPlacesModal } from './ReviewPlacesModal'
+import { AddToTripDialog } from './AddToTripDialog'
 
 const MANUAL_RESULT: ExtractResult = {
   platform: 'manual',
@@ -30,6 +31,7 @@ export function SavedPlacesSection() {
   const [extracting, setExtracting] = useState(false)
   const [reviewResult, setReviewResult] = useState<ExtractResult | null>(null)
   const [reviewOpen, setReviewOpen] = useState(false)
+  const [tripPlace, setTripPlace] = useState<SavedPlace | null>(null)
 
   const handlePaste = async () => {
     const url = linkUrl.trim()
@@ -189,6 +191,7 @@ export function SavedPlacesSection() {
                             place={place}
                             onRemove={handleRemove}
                             onToggleVisited={handleToggleVisited}
+                            onAddToTrip={setTripPlace}
                           />
                         ))}
                       </AnimatePresence>
@@ -207,6 +210,8 @@ export function SavedPlacesSection() {
         onClose={() => setReviewOpen(false)}
         onSave={handleSave}
       />
+
+      <AddToTripDialog place={tripPlace} open={tripPlace !== null} onClose={() => setTripPlace(null)} />
     </div>
   )
 }
@@ -215,10 +220,12 @@ function PlaceCard({
   place,
   onRemove,
   onToggleVisited,
+  onAddToTrip,
 }: {
   place: SavedPlace
   onRemove: (id: string) => void
   onToggleVisited: (place: SavedPlace) => void
+  onAddToTrip: (place: SavedPlace) => void
 }) {
   const cat = categoryConfig[place.category]
   const CatIcon = cat.icon
@@ -273,6 +280,15 @@ function PlaceCard({
           )}
 
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => onAddToTrip(place)}
+              aria-label="Add to a trip"
+              title="Add to a trip"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            >
+              <Luggage className="h-3.5 w-3.5" />
+            </button>
             <button
               type="button"
               onClick={() => onToggleVisited(place)}

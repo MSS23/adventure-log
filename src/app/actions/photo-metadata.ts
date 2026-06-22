@@ -3,6 +3,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { log } from '@/lib/utils/logger';
+import { sanitizeText } from '@/lib/utils/input-validation';
+
+const MAX_BATCH_PHOTOS = 100;
 
 export interface UpdatePhotoMetadataRequest {
   photoId: string;
@@ -51,7 +54,7 @@ export async function updatePhotoMetadata(request: UpdatePhotoMetadataRequest) {
     };
 
     if (request.taken_at !== undefined) updates.taken_at = request.taken_at;
-    if (request.location_name !== undefined) updates.location_name = request.location_name;
+    if (request.location_name !== undefined) updates.location_name = sanitizeText(request.location_name);
     if (request.location_lat !== undefined) {
       updates.location_lat = request.location_lat;
       updates.latitude = request.location_lat; // Alias
@@ -60,9 +63,9 @@ export async function updatePhotoMetadata(request: UpdatePhotoMetadataRequest) {
       updates.location_lng = request.location_lng;
       updates.longitude = request.location_lng; // Alias
     }
-    if (request.caption !== undefined) updates.caption = request.caption;
-    if (request.camera_make !== undefined) updates.camera_make = request.camera_make;
-    if (request.camera_model !== undefined) updates.camera_model = request.camera_model;
+    if (request.caption !== undefined) updates.caption = sanitizeText(request.caption);
+    if (request.camera_make !== undefined) updates.camera_make = sanitizeText(request.camera_make);
+    if (request.camera_model !== undefined) updates.camera_model = sanitizeText(request.camera_model);
     if (request.iso !== undefined) updates.iso = request.iso;
     if (request.aperture !== undefined) updates.aperture = request.aperture;
     if (request.shutter_speed !== undefined) updates.shutter_speed = request.shutter_speed;
@@ -80,7 +83,7 @@ export async function updatePhotoMetadata(request: UpdatePhotoMetadataRequest) {
         component: 'updatePhotoMetadata',
         photoId: request.photoId,
       }, updateError);
-      return { success: false, error: updateError.message };
+      return { success: false, error: 'Failed to update photo metadata' };
     }
 
     // Revalidate album page
@@ -119,6 +122,13 @@ export async function batchUpdatePhotoMetadata(
       return { success: false, error: 'Authentication required' };
     }
 
+    if (!Array.isArray(photoIds) || photoIds.length === 0) {
+      return { success: false, error: 'No photos specified' };
+    }
+    if (photoIds.length > MAX_BATCH_PHOTOS) {
+      return { success: false, error: `Too many photos in one request (max ${MAX_BATCH_PHOTOS})` };
+    }
+
     // Verify all photos belong to user
     const { data: photos, error: photosError } = await supabase
       .from('photos')
@@ -139,7 +149,7 @@ export async function batchUpdatePhotoMetadata(
       updated_at: new Date().toISOString(),
     };
 
-    if (updates.location_name !== undefined) updateData.location_name = updates.location_name;
+    if (updates.location_name !== undefined) updateData.location_name = sanitizeText(updates.location_name);
     if (updates.location_lat !== undefined) {
       updateData.location_lat = updates.location_lat;
       updateData.latitude = updates.location_lat;
@@ -148,8 +158,8 @@ export async function batchUpdatePhotoMetadata(
       updateData.location_lng = updates.location_lng;
       updateData.longitude = updates.location_lng;
     }
-    if (updates.camera_make !== undefined) updateData.camera_make = updates.camera_make;
-    if (updates.camera_model !== undefined) updateData.camera_model = updates.camera_model;
+    if (updates.camera_make !== undefined) updateData.camera_make = sanitizeText(updates.camera_make);
+    if (updates.camera_model !== undefined) updateData.camera_model = sanitizeText(updates.camera_model);
 
     // Update all photos
     const { error: updateError } = await supabase
@@ -162,7 +172,7 @@ export async function batchUpdatePhotoMetadata(
         component: 'batchUpdatePhotoMetadata',
         photoIds,
       }, updateError);
-      return { success: false, error: updateError.message };
+      return { success: false, error: 'Failed to update photos' };
     }
 
     // Revalidate album pages

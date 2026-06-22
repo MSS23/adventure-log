@@ -62,17 +62,25 @@ export async function POST(
     if (!inviteeId) {
       const q = body.query?.trim()
       if (!q) return NextResponse.json({ error: 'Provide a user id, username, or email' }, { status: 400 })
-      let { data: found } = await supabase
-        .from('users')
-        .select('id')
-        .or(`username.eq.${q},email.eq.${q}`)
-        .maybeSingle()
+      // Resolve by username OR email using parameterized .eq() lookups. We avoid a
+      // raw interpolated .or(`username.eq.${q},email.eq.${q}`) here because the
+      // user-controlled value would be spliced into the PostgREST filter grammar
+      // (filter injection + email enumeration), and the fallback runs on the
+      // RLS-bypassing admin client.
+      let found: { id: string } | null = null
+      const byUsername = await supabase.from('users').select('id').eq('username', q).maybeSingle()
+      found = byUsername.data
+      if (!found) {
+        const byEmail = await supabase.from('users').select('id').eq('email', q).maybeSingle()
+        found = byEmail.data
+      }
       if (!found && supabaseAdmin) {
-        ;({ data: found } = await supabaseAdmin
-          .from('users')
-          .select('id')
-          .or(`username.eq.${q},email.eq.${q}`)
-          .maybeSingle())
+        const adminByUsername = await supabaseAdmin.from('users').select('id').eq('username', q).maybeSingle()
+        found = adminByUsername.data
+        if (!found) {
+          const adminByEmail = await supabaseAdmin.from('users').select('id').eq('email', q).maybeSingle()
+          found = adminByEmail.data
+        }
       }
       if (!found) return NextResponse.json({ error: 'No user found with that username or email' }, { status: 404 })
       inviteeId = found.id

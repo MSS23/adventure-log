@@ -226,7 +226,7 @@ export async function getShareByToken(token: string) {
 
     return { success: true, data: share };
   } catch (error) {
-    log.error('Error fetching share by token', { component: 'getShareByToken', token }, error as Error);
+    log.error('Error fetching share by token', { component: 'getShareByToken' }, error as Error);
     return { success: false, error: 'Failed to fetch share' };
   }
 }

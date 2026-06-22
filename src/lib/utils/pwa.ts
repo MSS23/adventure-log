@@ -38,6 +38,7 @@ export class PWAManager {
   private static instance: PWAManager
   private installPrompt: PWAInstallPrompt | null = null
   private registration: ServiceWorkerRegistration | null = null
+  private initialized = false
   private callbacks: {
     onInstallable?: () => void
     onInstalled?: () => void
@@ -54,6 +55,14 @@ export class PWAManager {
   }
 
   async initialize() {
+    // Idempotent: this is the single PWA bootstrap, and it is intentionally
+    // invoked from more than one mount point (the root-level registration
+    // component for global/public-page coverage AND the in-app usePWA hook).
+    // Guarding here means exactly one service-worker registration and one set
+    // of event listeners regardless of how many callers fire.
+    if (this.initialized) return
+    this.initialized = true
+
     try {
       // Only initialize PWA features on web platform
       if (Platform.isWeb()) {
@@ -118,6 +127,13 @@ export class PWAManager {
           })
         }
       })
+
+      // Proactively poll for a new service worker every hour so long-lived
+      // tabs pick up deploys without a manual reload. (Previously handled by
+      // the now-removed service-worker.ts registration path.)
+      setInterval(() => {
+        registration.update()
+      }, 60 * 60 * 1000)
 
       // Listen for messages from service worker
       navigator.serviceWorker.addEventListener('message', this.handleServiceWorkerMessage.bind(this))

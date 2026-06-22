@@ -208,10 +208,10 @@ export default function FeedPage() {
     <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 py-6 md:py-8">
       {/* Editorial header — eyebrow + display heading */}
       <header className="mb-8 space-y-1">
-        <p className="al-eyebrow">The latest from your travelers</p>
+        <p className="al-eyebrow">Fresh dispatches from the trail</p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="al-display text-3xl md:text-4xl">
-            <em className="italic font-normal">Field</em> Feed
+            <em className="italic font-normal">Field</em> Notes
           </h1>
 
           {/* Quiet toggle — underline, not pill */}

@@ -68,10 +68,14 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string, o
         query = query.eq('target_type', 'story').eq('target_id', storyId)
       }
 
-      const { data, error } = await query.maybeSingle()
+      // Don't use .maybeSingle(): legacy duplicate like rows (same user+target)
+      // make it throw PGRST116 ("multiple rows"). We only care whether ≥1 row
+      // exists, so fetch one and check presence. A unique index now prevents
+      // new duplicates (see migration 58).
+      const { data, error } = await query.limit(1)
 
       if (error) throw error
-      setIsLiked(!!data)
+      setIsLiked((data?.length ?? 0) > 0)
     } catch (error) {
       log.error('Error checking if liked', {}, error)
     }

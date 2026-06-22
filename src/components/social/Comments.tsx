@@ -86,29 +86,29 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
       {/* Comments Section with Card */}
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
         {/* Comments Header */}
-        <div className="px-6 py-4 border-b border-border">
+        <div className="px-5 py-3.5 sm:px-6 border-b border-border">
           <h3 className="font-heading text-base md:text-lg font-semibold text-foreground flex items-center gap-2">
             <MessageCircle className="h-5 w-5 text-primary" />
             Comments
             {commentsCount > 0 && (
               <span className="text-sm font-normal text-muted-foreground">
-                ({commentsCount})
+                {commentsCount}
               </span>
             )}
           </h3>
         </div>
 
         {/* Comments List */}
-        <div className="px-6 py-4">
+        <div className="px-5 py-5 sm:px-6">
           {displayedComments.length > 0 ? (
-            <div className="space-y-5 mb-6">
+            <div className="space-y-4 mb-6">
               <AnimatePresence mode="popLayout">
                 {displayedComments.map((comment, index) => {
                   const commentUser = comment.users || comment.profiles || comment.user
                   return (
                     <motion.div
                       key={comment.id}
-                      className="flex gap-3 group"
+                      className="flex items-start gap-3 group"
                       initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
@@ -121,7 +121,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       layout={!prefersReducedMotion}
                     >
                       <UserAvatarLink user={commentUser}>
-                        <Avatar className="h-10 w-10 ring-2 ring-background">
+                        <Avatar className="h-9 w-9 ring-2 ring-background shrink-0">
                           <AvatarImage src={getAvatarUrl(commentUser?.avatar_url, commentUser?.username)} />
                           <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                             {getDisplayInitial(commentUser?.display_name, commentUser?.username)}
@@ -130,8 +130,8 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       </UserAvatarLink>
 
                       <div className="flex-1 min-w-0">
-                        <div className="bg-muted/50 rounded-xl px-4 py-3">
-                          <div className="flex items-start justify-between gap-2">
+                        <div className="bg-muted/50 rounded-2xl px-4 py-3 sm:px-5">
+                          <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 min-w-0">
                               <UserLink
                                 user={commentUser}
@@ -152,7 +152,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                                   variant="ghost"
                                   size="sm"
                                   aria-label="Delete comment"
-                                  className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive opacity-60 group-hover:opacity-100 transition-opacity"
+                                  className="-mr-1.5 h-7 w-7 p-0 text-muted-foreground hover:text-destructive opacity-60 group-hover:opacity-100 transition-opacity"
                                   onClick={() => handleDelete(comment.id)}
                                   disabled={loading}
                                 >
@@ -162,8 +162,8 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                             )}
                           </div>
                         </div>
-                        <div className="px-4 mt-1.5">
-                          <span className="text-xs text-muted-foreground font-medium">
+                        <div className="px-4 mt-1 sm:px-5">
+                          <span className="text-[11px] text-muted-foreground/70">
                             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                           </span>
                         </div>
@@ -195,12 +195,12 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
               )}
             </div>
           ) : (
-            <div className="py-8 text-center">
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div className="py-7 text-center">
+              <div className="mx-auto mb-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <MessageCircle className="h-5 w-5" />
               </div>
               <p className="text-sm font-medium text-foreground">No comments yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Be the first to comment!</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Be the first to comment!</p>
             </div>
           )}
 
@@ -213,17 +213,17 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
               transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 25 }}
             >
               <form onSubmit={handleSubmit}>
-                <div className="flex gap-3">
-                  <Avatar className="h-10 w-10 ring-2 ring-background">
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-9 w-9 ring-2 ring-background shrink-0">
                     <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} />
                     <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                       {getDisplayInitial(profile?.display_name, profile?.username)}
                     </AvatarFallback>
                   </Avatar>
 
-                  <div className="flex-1">
-                    <div className="flex gap-2">
-                      <div className="flex-1">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1 min-w-0">
                         <MentionInput
                           value={newComment}
                           onChange={(value, mentioned) => {
@@ -234,14 +234,14 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                           maxLength={500}
                           rows={1}
                           disabled={isSubmitting}
-                          className="px-4 py-2.5 bg-muted/50 border border-border rounded-full text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:bg-card transition-all"
+                          className="px-4 py-3 bg-muted/50 border border-border rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent focus:bg-card transition-all"
                         />
                       </div>
                       <Button
                         type="submit"
                         disabled={!newComment.trim() || isSubmitting}
                         size="sm"
-                        className="px-5 rounded-full font-semibold"
+                        className="h-11 px-5 rounded-2xl font-semibold shrink-0"
                       >
                         {isSubmitting ? (
                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

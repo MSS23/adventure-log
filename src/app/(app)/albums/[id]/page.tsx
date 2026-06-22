@@ -891,13 +891,10 @@ export default function AlbumDetailPage() {
           <div
             className="grid gap-1"
             style={{
-              // Size columns to the actual number of visible actions (3–6) so
-              // a non-owner viewing a geotagged album never overflows the row.
+              // Size columns to the actual number of visible actions. Like,
+              // Comment and Share always show; Save only shows for non-owners.
               gridTemplateColumns: `repeat(${
-                3 +
-                (!isOwner ? 1 : 0) +
-                (album.latitude && album.longitude ? 1 : 0) +
-                (!isOwner && user ? 1 : 0)
+                3 + (!isOwner ? 1 : 0)
               }, minmax(0, 1fr))`,
             }}
           >
@@ -938,28 +935,6 @@ export default function AlbumDetailPage() {
               >
                 <Bookmark className={cn("h-6 w-6", isSaved && "fill-current")} />
                 <span className="text-[10px] font-medium">Save</span>
-              </motion.button>
-            )}
-
-            {album.latitude && album.longitude && (
-              <motion.button
-                onClick={handleGlobeClick}
-                className="flex flex-col items-center gap-1 py-2 rounded-xl text-primary transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
-                whileTap={{ scale: 0.9 }}
-              >
-                <Globe className="h-6 w-6" />
-                <span className="text-[10px] font-medium">Globe</span>
-              </motion.button>
-            )}
-
-            {!isOwner && user && (
-              <motion.button
-                onClick={() => setReportOpen(true)}
-                className="flex flex-col items-center gap-1 py-2 rounded-xl text-muted-foreground transition-all duration-200 cursor-pointer min-w-[44px] min-h-[44px]"
-                whileTap={{ scale: 0.9 }}
-              >
-                <Flag className="h-5 w-5" />
-                <span className="text-[10px] font-medium">Report</span>
               </motion.button>
             )}
           </div>

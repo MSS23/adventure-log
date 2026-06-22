@@ -147,8 +147,8 @@ export default function ExplorePage() {
               transition={{ duration: 0.4, delay: 0.18 }}
             >
               <SectionHeader
-                eyebrow="Follow"
-                title="Creators for you"
+                eyebrow="Discover people"
+                title="Travelers for you"
                 href="/explore/creators"
               />
               <CreatorsToFollowSection limit={4} />

@@ -3,7 +3,8 @@
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { ArrowLeft, Users } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowLeft, Users, Camera } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/client'
@@ -11,6 +12,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { FollowButton } from '@/components/social/FollowButton'
 import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface Creator {
   id: string
@@ -21,6 +23,7 @@ interface Creator {
   privacy_level: string
   albumCount?: number
   followerCount?: number
+  covers?: string[]
 }
 
 export default function CreatorsPage() {
@@ -41,15 +44,19 @@ export default function CreatorsPage() {
 
       if (usersError) throw usersError
 
-      // Fetch album counts for each user
+      // Fetch album count + a few recent covers (for the preview strip) and
+      // follower count for each user. The albums query returns both the exact
+      // total count and up to 3 recent rows, so it's a single round-trip.
       const usersWithCounts = await Promise.all(
         (usersData || []).map(async (creator) => {
           const [albumsResult, followersResult] = await Promise.all([
             supabase
               .from('albums')
-              .select('id', { count: 'exact', head: true })
+              .select('id, cover_photo_url, cover_image_url', { count: 'exact' })
               .eq('user_id', creator.id)
-              .neq('status', 'draft'),
+              .neq('status', 'draft')
+              .order('created_at', { ascending: false })
+              .limit(3),
             supabase
               .from('follows')
               .select('id', { count: 'exact', head: true })
@@ -57,10 +64,15 @@ export default function CreatorsPage() {
               .eq('status', 'accepted')
           ])
 
+          const covers = (albumsResult.data || [])
+            .map((a) => getPhotoUrl(a.cover_photo_url || a.cover_image_url))
+            .filter((url): url is string => Boolean(url))
+
           return {
             ...creator,
             albumCount: albumsResult.count || 0,
-            followerCount: followersResult.count || 0
+            followerCount: followersResult.count || 0,
+            covers
           }
         })
       )
@@ -91,10 +103,13 @@ export default function CreatorsPage() {
             <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
             Back to Explore
           </Link>
-          <p className="al-eyebrow">Follow</p>
+          <p className="al-eyebrow">Discover people</p>
           <h1 className="al-display text-3xl md:text-4xl leading-[1.02]">
-            Creators to follow
+            Travelers to follow
           </h1>
+          <p className="text-sm text-muted-foreground max-w-xl pt-1">
+            Public adventurers sharing their journeys — find someone new to follow.
+          </p>
         </header>
 
         {/* Main Content */}
@@ -168,6 +183,40 @@ export default function CreatorsPage() {
                           <span>·</span>
                           <span>{creator.followerCount || 0} followers</span>
                         </div>
+                      </div>
+
+                      {/* Recent-photo preview strip — turns each card into a
+                          content-forward suggestion (Instagram "discover people"). */}
+                      <div className="grid w-full grid-cols-3 gap-1">
+                        {(creator.covers && creator.covers.length > 0
+                          ? creator.covers
+                          : []
+                        ).slice(0, 3).map((url, i) => (
+                          <Link
+                            key={i}
+                            href={`/profile/${creator.username}`}
+                            className="relative aspect-square overflow-hidden rounded-md bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            <Image
+                              src={url}
+                              alt=""
+                              fill
+                              sizes="80px"
+                              className="object-cover transition-transform duration-200 hover:scale-105"
+                            />
+                          </Link>
+                        ))}
+                        {/* Fill empty slots so the strip keeps its shape */}
+                        {Array.from({
+                          length: Math.max(0, 3 - (creator.covers?.length || 0)),
+                        }).map((_, i) => (
+                          <div
+                            key={`ph-${i}`}
+                            className="flex aspect-square items-center justify-center rounded-md bg-muted/60"
+                          >
+                            <Camera className="h-4 w-4 text-muted-foreground/40" />
+                          </div>
+                        ))}
                       </div>
 
                       <FollowButton

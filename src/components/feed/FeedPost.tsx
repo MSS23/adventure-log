@@ -9,6 +9,7 @@ import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { LikeButton } from '@/components/social/LikeButton'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { useHaptics } from '@/lib/hooks/useHaptics'
+import { formatTravelDate } from '@/lib/utils/travel-date'
 import { cn } from '@/lib/utils'
 
 export interface FeedAlbum {
@@ -98,11 +99,11 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [showShareToast, setShowShareToast] = useState(false)
 
+  // Album dates read as seasons (e.g. "Summer 2025"), hemisphere-aware.
   const albumDate = album.date_start || album.created_at
-  const dateFormatted = new Date(albumDate).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  const dateFormatted = formatTravelDate(albumDate, {
+    view: 'fuzzy',
+    latitude: album.latitude,
   })
 
   const hasGeo = !!(album.latitude && album.longitude)
@@ -152,15 +153,19 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
           <div className="flex items-center gap-1.5 min-w-0">
             <UserLink
               user={user}
-              className="min-w-0 truncate text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              className="min-w-0 truncate text-sm font-semibold leading-none text-foreground hover:text-primary transition-colors"
             >
               {user.display_name || user.username}
             </UserLink>
             {album.country_code && (
-              // Match the username's text-sm line-height exactly (no leading-none)
-              // so the flag's line-box is the same height and items-center lines
-              // the emoji up with the name instead of floating it higher.
-              <span className="shrink-0 text-sm" title={album.country || album.location} aria-hidden>
+              // leading-none collapses both line-boxes to their glyph height so
+              // items-center aligns the flag's optical centre with the name's
+              // cap-height; the tiny nudge corrects the emoji's high baseline.
+              <span
+                className="shrink-0 text-sm leading-none translate-y-[0.5px]"
+                title={album.country || album.location}
+                aria-hidden
+              >
                 {getFlag(album.country_code)}
               </span>
             )}

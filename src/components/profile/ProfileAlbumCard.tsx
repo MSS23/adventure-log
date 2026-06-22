@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Album } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { formatTravelDate } from '@/lib/utils/travel-date'
 import { Camera, MapPin, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -19,14 +20,12 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
   const hasLocation = album.location_name || album.location_city
   const location = album.location_city || album.location_name?.split(',')[0]
 
-  // Format date
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return null
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-  }
-
-  const date = formatDate(album.date_start)
+  // Album dates read as seasons (e.g. "Summer 2025"), hemisphere-aware via
+  // the album's latitude. Returns '' for missing/invalid dates.
+  const date = formatTravelDate(album.date_start, {
+    view: 'fuzzy',
+    latitude: album.latitude ?? undefined,
+  })
 
   return (
     <Link
@@ -97,20 +96,21 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
           )}
         </div>
 
-        {/* Scrim — keeps overlay text legible on any photo */}
+        {/* Scrim — taller, darker gradient so the title stays legible even on
+            bright or busy cover photos. */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
+          className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/55 to-transparent"
         />
 
         {/* Content overlay */}
         <div className="absolute inset-x-0 bottom-0 p-4 z-10">
-          <h3 className="font-heading font-semibold text-white text-base sm:text-lg leading-snug line-clamp-2 mb-1.5 [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
+          <h3 className="font-heading font-bold text-white text-base sm:text-lg leading-snug line-clamp-2 mb-1.5 [text-shadow:0_2px_6px_rgba(0,0,0,0.85)]">
             {album.title}
           </h3>
 
           {date && (
-            <div className="flex items-center gap-1.5 text-white text-xs font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+            <div className="flex items-center gap-1.5 text-white text-xs font-semibold [text-shadow:0_1px_4px_rgba(0,0,0,0.85)]">
               <Calendar className="h-3 w-3 shrink-0" />
               <span>{date}</span>
             </div>

@@ -148,8 +148,12 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
+  // App-like behaviour: disable browser pinch/double-tap zoom across the app so
+  // the UI never zooms accidentally on mobile / PWA. The 3D globe has its own
+  // in-canvas zoom (Three.js OrbitControls), which is unaffected by this — so
+  // effectively the globe remains the only zoomable surface.
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [

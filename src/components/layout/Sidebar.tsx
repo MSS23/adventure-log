@@ -23,7 +23,8 @@ import {
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
 import { createClient } from '@/lib/supabase/client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { log } from '@/lib/utils/logger'
 import { useUnreadCount } from '@/components/activity/UnreadCountProvider'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -64,30 +65,23 @@ export function Sidebar() {
   const { unreadCount } = useUnreadCount()
   const { user, profile, signOut } = useAuth()
 
-  const [countryCount, setCountryCount] = useState<number | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
 
-  useEffect(() => {
-    if (!user) return
-    let cancelled = false
-    ;(async () => {
-      try {
-        const { data, error } = await supabase
-          .from('albums')
-          .select('country_code')
-          .eq('user_id', user.id)
-          .not('country_code', 'is', null)
-        if (error || cancelled) return
-        const unique = new Set((data || []).map((row) => row.country_code))
-        if (!cancelled) setCountryCount(unique.size)
-      } catch (error) {
-        log.error('Country count fetch failed', { component: 'Sidebar' }, error as Error)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [user, supabase])
+  // Cached (5min staleTime from QueryProvider) so it isn't re-queried each time
+  // the sidebar mounts. Returns null until resolved to preserve the '...' state.
+  const { data: countryCount = null } = useQuery({
+    queryKey: ['sidebar-country-count', user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('albums')
+        .select('country_code')
+        .eq('user_id', user!.id)
+        .not('country_code', 'is', null)
+      if (error) throw error
+      return new Set((data || []).map((row) => row.country_code)).size
+    },
+  })
 
   const handleLogout = async () => {
     if (loggingOut) return

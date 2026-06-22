@@ -81,7 +81,14 @@ function validateEnvironmentVariable(
 
     case 'NEXT_PUBLIC_SUPABASE_ANON_KEY':
     case 'SUPABASE_SERVICE_ROLE_KEY':
-      if (value.length < 100) {
+      // Supabase keys come in two shapes:
+      //   - legacy JWTs (start with "eyJ", ~200+ chars)
+      //   - new-style keys ("sb_publishable_…" / "sb_secret_…", ~40+ chars)
+      if (value.startsWith('sb_publishable_') || value.startsWith('sb_secret_')) {
+        if (value.length < 30) {
+          warnings.push(`${name} seems too short, verify it's correct`)
+        }
+      } else if (value.length < 100) {
         warnings.push(`${name} seems too short, verify it's correct`)
       }
       break

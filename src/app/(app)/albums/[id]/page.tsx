@@ -23,6 +23,8 @@ import { RelatedAlbums } from '@/components/albums/RelatedAlbums'
 import { useLikes, useComments } from '@/lib/hooks/useSocial'
 import { useFavorites } from '@/lib/hooks/useFavorites'
 import { ShareButton } from '@/components/albums/ShareButton'
+import { isPWAInstalled } from '@/lib/utils/pwa'
+import { isNativePlatform } from '@/lib/api/client'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
@@ -55,6 +57,14 @@ export default function AlbumDetailPage() {
   const { getFollowStatus, follow, unfollow } = useFollows(album?.user_id)
   const [followLoading, setFollowLoading] = useState(false)
   const [followStatus, setFollowStatus] = useState<string>('not_following')
+
+  // Hide the fixed mobile floating action bar when running as an installed PWA
+  // / native app — there a fixed bottom bar overlaps page content while
+  // scrolling. The inline engagement bar still provides like/comment/share/fav.
+  const [isStandalone, setIsStandalone] = useState(false)
+  useEffect(() => {
+    setIsStandalone(isPWAInstalled() || isNativePlatform())
+  }, [])
 
   // Show share prompt when album was just created
   useEffect(() => {
@@ -890,7 +900,10 @@ export default function AlbumDetailPage() {
         )}
       </div>
 
-      {/* Mobile Floating Action Bar */}
+      {/* Mobile Floating Action Bar — hidden in the installed PWA / native app,
+          where a fixed bar overlaps page content on scroll (the inline action
+          bar above still provides like / comment / share / favourite). */}
+      {!isStandalone && (
       <div className="sm:hidden fixed left-4 right-4 z-40 fab-position">
         <motion.div
           className="bg-card/95 backdrop-blur-xl rounded-2xl shadow-lg border border-border px-4 py-2.5"
@@ -961,6 +974,7 @@ export default function AlbumDetailPage() {
           </div>
         </motion.div>
       </div>
+      )}
 
       {/* Report Dialog */}
       {album && !isOwner && (

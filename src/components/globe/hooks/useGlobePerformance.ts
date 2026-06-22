@@ -135,14 +135,9 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
     }
   }, [effectivePerformanceMode])
 
-  // Pick earth texture based on device capability + performance mode.
-  //
-  // Previously any viewport < 768px got the low-res texture, which made the
-  // globe look soft on phones — even though modern phones are high-DPR and
-  // render the 4K texture crisply. Now we only fall back to the light texture
-  // on genuinely low-density small screens (DPR < 2); high-DPR mobiles get the
-  // 4K texture and a noticeably sharper globe.
-  const globeImageUrl = useMemo(() => {
+  // The device-appropriate FINAL earth texture. High-DPR phones get the crisp
+  // 4K map; genuinely low-density/low-RAM/low-perf devices get the light one.
+  const targetImageUrl = useMemo(() => {
     if (effectivePerformanceMode === 'low') return '/earth-texture.jpg'
     if (typeof window === 'undefined') return '/earth-texture-4k.jpg'
 
@@ -157,6 +152,28 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
     const isSmallLowDensity = window.innerWidth < 768 && dpr < 2
     return isSmallLowDensity ? '/earth-texture.jpg' : '/earth-texture-4k.jpg'
   }, [effectivePerformanceMode])
+
+  // PROGRESSIVE LOAD: paint the lightweight 239KB texture immediately, then
+  // upgrade to the target (4K ≈ 1.4MB) once it has preloaded in the background.
+  // This is the main fix for slow globe load on mobile — time-to-first-globe is
+  // driven by the light texture, and the crisp texture swaps in seamlessly when
+  // ready (react-globe.gl just re-uploads the map, no scene re-init).
+  const LIGHT_TEXTURE = '/earth-texture.jpg'
+  const [hiResReady, setHiResReady] = useState(false)
+  useEffect(() => {
+    if (targetImageUrl === LIGHT_TEXTURE) {
+      setHiResReady(true)
+      return
+    }
+    setHiResReady(false)
+    let cancelled = false
+    const img = new window.Image()
+    img.onload = () => { if (!cancelled) setHiResReady(true) }
+    img.src = targetImageUrl
+    return () => { cancelled = true }
+  }, [targetImageUrl])
+
+  const globeImageUrl = hiResReady ? targetImageUrl : LIGHT_TEXTURE
 
   // Memoize renderer config
   const rendererConfig = useMemo(() => ({

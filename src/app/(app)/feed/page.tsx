@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { Loader2, Compass, Users } from 'lucide-react'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { createClient } from '@/lib/supabase/client'
@@ -21,168 +22,179 @@ type FeedMode = 'following' | 'discover'
 
 const PAGE_SIZE = 10
 
+type SupabaseClient = ReturnType<typeof createClient>
+
+// Fetch a single page of the feed: resolve the visible author set, pull the
+// albums (with up to 10 photos each), then attach per-album like/comment
+// counts. Kept at module scope so it can be the React Query `queryFn` body —
+// the result for each (mode, page) is cached, so revisiting the feed via the
+// sidebar repaints instantly instead of re-running this waterfall.
+async function fetchFeedPage(
+  supabase: SupabaseClient,
+  userId: string,
+  mode: FeedMode,
+  pageParam: number,
+): Promise<FeedAlbum[]> {
+  let userIds: string[] | null = null
+
+  if (mode === 'following') {
+    const { data: follows } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', userId)
+      .eq('status', 'accepted')
+
+    userIds = follows?.map((f) => f.following_id) || []
+
+    // Bootstrap: on a brand-new account with 0 follows, include the
+    // user's own posts so the Friends feed isn't empty. As soon as
+    // they follow anyone, switch to a pure social feed (their own
+    // posts live on Dashboard / Profile / Globe / Passport already).
+    if (userIds.length === 0) {
+      userIds.push(userId)
+    }
+  }
+
+  let query = supabase
+    .from('albums')
+    .select(
+      `
+      id, title, description, location_name, country_code,
+      latitude, longitude, created_at, date_start,
+      cover_photo_url, cover_image_url, cover_photo_x_offset,
+      cover_photo_y_offset, user_id,
+      user:users!albums_user_id_fkey(id, username, display_name, avatar_url),
+      photos(id, file_path, caption, taken_at)
+    `
+    )
+    .order('created_at', { ascending: true, referencedTable: 'photos' })
+    .limit(10, { referencedTable: 'photos' })
+    .order('created_at', { ascending: false })
+    .range(pageParam * PAGE_SIZE, pageParam * PAGE_SIZE + PAGE_SIZE - 1)
+
+  if (mode === 'following' && userIds && userIds.length > 0) {
+    // Never surface a followed user's PRIVATE albums. Show their public
+    // and friends-only posts; always show the current user's own posts
+    // (covers the brand-new-account bootstrap above).
+    query = query
+      .in('user_id', userIds)
+      .or(`visibility.in.(public,friends),user_id.eq.${userId}`)
+  } else if (mode === 'discover') {
+    query = query.eq('visibility', 'public').neq('user_id', userId)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+
+  const albumIds = (data || []).map((row) => row.id as string)
+
+  // Fetch like and comment counts for the page in parallel. The
+  // likes/comments tables are polymorphic (target_type + target_id) so
+  // there is no album foreign-key embed available; we group counts here
+  // instead. Both queries fire concurrently and are safe to fail
+  // independently — a count outage shouldn't blank the feed.
+  const [likesResult, commentsResult] = albumIds.length
+    ? await Promise.all([
+        supabase
+          .from('likes')
+          .select('target_id')
+          .eq('target_type', 'album')
+          .in('target_id', albumIds),
+        supabase
+          .from('comments')
+          .select('target_id')
+          .eq('target_type', 'album')
+          .in('target_id', albumIds),
+      ])
+    : [{ data: [] as Array<{ target_id: string }> }, { data: [] as Array<{ target_id: string }> }]
+
+  const likesByAlbum = new Map<string, number>()
+  for (const row of (likesResult.data ?? []) as Array<{ target_id: string }>) {
+    likesByAlbum.set(row.target_id, (likesByAlbum.get(row.target_id) ?? 0) + 1)
+  }
+  const commentsByAlbum = new Map<string, number>()
+  for (const row of (commentsResult.data ?? []) as Array<{ target_id: string }>) {
+    commentsByAlbum.set(row.target_id, (commentsByAlbum.get(row.target_id) ?? 0) + 1)
+  }
+
+  return (data || []).map((row: Record<string, unknown>) => {
+    const u = Array.isArray(row.user) ? row.user[0] : row.user
+    const rawPhotos =
+      (row.photos as Array<{ id: string; file_path: string; caption?: string; taken_at?: string }>) || []
+    const coverSource = (row.cover_photo_url as string) || (row.cover_image_url as string) || ''
+    const albumId = row.id as string
+    return {
+      id: albumId,
+      title: (row.title as string) || 'Untitled',
+      description: row.description as string | undefined,
+      location: row.location_name as string | undefined,
+      country_code: row.country_code as string | undefined,
+      latitude: row.latitude as number | undefined,
+      longitude: row.longitude as number | undefined,
+      created_at: row.created_at as string,
+      date_start: row.date_start as string | undefined,
+      cover_image_url: (getPhotoUrl(coverSource) as string) || undefined,
+      cover_photo_x_offset: row.cover_photo_x_offset as number | undefined,
+      cover_photo_y_offset: row.cover_photo_y_offset as number | undefined,
+      likes_count: likesByAlbum.get(albumId) ?? 0,
+      comments_count: commentsByAlbum.get(albumId) ?? 0,
+      user_id: row.user_id as string,
+      user: {
+        id: (u as { id?: string })?.id || (row.user_id as string),
+        username: (u as { username?: string })?.username || 'unknown',
+        display_name: (u as { display_name?: string })?.display_name || 'Explorer',
+        avatar_url: (u as { avatar_url?: string })?.avatar_url,
+      },
+      photos: rawPhotos.map((p) => ({
+        id: p.id,
+        file_path: p.file_path,
+        caption: p.caption,
+        taken_at: p.taken_at,
+      })),
+    }
+  })
+}
+
 export default function FeedPage() {
   const { user } = useAuth()
   const [mode, setMode] = useState<FeedMode>('following')
-  const [albums, setAlbums] = useState<FeedAlbum[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(0)
-  const [loadError, setLoadError] = useState(false)
 
   const supabase = useMemo(() => createClient(), [])
   const { users: suggestedUsers } = useSuggestedUsers(user?.id, 6)
 
-  const loadFeed = useCallback(async (nextPage: number, replace: boolean) => {
-    if (!user) return
-
-    try {
-      if (nextPage === 0) setLoading(true)
-      else setLoadingMore(true)
-      setLoadError(false)
-
-      let userIds: string[] | null = null
-
-      if (mode === 'following') {
-        const { data: follows } = await supabase
-          .from('follows')
-          .select('following_id')
-          .eq('follower_id', user.id)
-          .eq('status', 'accepted')
-
-        userIds = follows?.map((f) => f.following_id) || []
-
-        // Bootstrap: on a brand-new account with 0 follows, include the
-        // user's own posts so the Friends feed isn't empty. As soon as
-        // they follow anyone, switch to a pure social feed (their own
-        // posts live on Dashboard / Profile / Globe / Passport already).
-        if (userIds.length === 0) {
-          userIds.push(user.id)
-        }
+  // React Query owns the feed cache (5min staleTime + refetchOnMount:false from
+  // QueryProvider), so navigating away and back via the sidebar repaints from
+  // cache instantly instead of re-running the follows -> albums -> counts
+  // waterfall behind a skeleton. Keyed by mode so the two tabs cache apart.
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['feed', mode, user?.id],
+    enabled: !!user,
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      try {
+        return await fetchFeedPage(supabase, user!.id, mode, pageParam)
+      } catch (error) {
+        log.error('Feed load failed', { component: 'Feed', action: 'load', userId: user!.id }, error as Error)
+        throw error
       }
+    },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === PAGE_SIZE ? allPages.length : undefined,
+  })
 
-      let query = supabase
-        .from('albums')
-        .select(
-          `
-          id, title, description, location_name, country_code,
-          latitude, longitude, created_at, date_start,
-          cover_photo_url, cover_image_url, cover_photo_x_offset,
-          cover_photo_y_offset, user_id,
-          user:users!albums_user_id_fkey(id, username, display_name, avatar_url),
-          photos(id, file_path, caption, taken_at)
-        `
-        )
-        .order('created_at', { ascending: true, referencedTable: 'photos' })
-        .limit(10, { referencedTable: 'photos' })
-        .order('created_at', { ascending: false })
-        .range(nextPage * PAGE_SIZE, nextPage * PAGE_SIZE + PAGE_SIZE - 1)
-
-      if (mode === 'following' && userIds && userIds.length > 0) {
-        // Never surface a followed user's PRIVATE albums. Show their public
-        // and friends-only posts; always show the current user's own posts
-        // (covers the brand-new-account bootstrap above).
-        query = query
-          .in('user_id', userIds)
-          .or(`visibility.in.(public,friends),user_id.eq.${user.id}`)
-      } else if (mode === 'discover') {
-        query = query.eq('visibility', 'public').neq('user_id', user.id)
-      }
-
-      const { data, error } = await query
-      if (error) throw error
-
-      const albumIds = (data || []).map((row) => row.id as string)
-
-      // Fetch like and comment counts for the page in parallel. The
-      // likes/comments tables are polymorphic (target_type + target_id) so
-      // there is no album foreign-key embed available; we group counts here
-      // instead. Both queries fire concurrently and are safe to fail
-      // independently — a count outage shouldn't blank the feed.
-      const [likesResult, commentsResult] = albumIds.length
-        ? await Promise.all([
-            supabase
-              .from('likes')
-              .select('target_id')
-              .eq('target_type', 'album')
-              .in('target_id', albumIds),
-            supabase
-              .from('comments')
-              .select('target_id')
-              .eq('target_type', 'album')
-              .in('target_id', albumIds),
-          ])
-        : [{ data: [] as Array<{ target_id: string }> }, { data: [] as Array<{ target_id: string }> }]
-
-      const likesByAlbum = new Map<string, number>()
-      for (const row of (likesResult.data ?? []) as Array<{ target_id: string }>) {
-        likesByAlbum.set(row.target_id, (likesByAlbum.get(row.target_id) ?? 0) + 1)
-      }
-      const commentsByAlbum = new Map<string, number>()
-      for (const row of (commentsResult.data ?? []) as Array<{ target_id: string }>) {
-        commentsByAlbum.set(row.target_id, (commentsByAlbum.get(row.target_id) ?? 0) + 1)
-      }
-
-      const mapped: FeedAlbum[] = (data || []).map((row: Record<string, unknown>) => {
-        const u = Array.isArray(row.user) ? row.user[0] : row.user
-        const rawPhotos =
-          (row.photos as Array<{ id: string; file_path: string; caption?: string; taken_at?: string }>) || []
-        const coverSource = (row.cover_photo_url as string) || (row.cover_image_url as string) || ''
-        const albumId = row.id as string
-        return {
-          id: albumId,
-          title: (row.title as string) || 'Untitled',
-          description: row.description as string | undefined,
-          location: row.location_name as string | undefined,
-          country_code: row.country_code as string | undefined,
-          latitude: row.latitude as number | undefined,
-          longitude: row.longitude as number | undefined,
-          created_at: row.created_at as string,
-          date_start: row.date_start as string | undefined,
-          cover_image_url: (getPhotoUrl(coverSource) as string) || undefined,
-          cover_photo_x_offset: row.cover_photo_x_offset as number | undefined,
-          cover_photo_y_offset: row.cover_photo_y_offset as number | undefined,
-          likes_count: likesByAlbum.get(albumId) ?? 0,
-          comments_count: commentsByAlbum.get(albumId) ?? 0,
-          user_id: row.user_id as string,
-          user: {
-            id: (u as { id?: string })?.id || (row.user_id as string),
-            username: (u as { username?: string })?.username || 'unknown',
-            display_name: (u as { display_name?: string })?.display_name || 'Explorer',
-            avatar_url: (u as { avatar_url?: string })?.avatar_url,
-          },
-          photos: rawPhotos.map((p) => ({
-            id: p.id,
-            file_path: p.file_path,
-            caption: p.caption,
-            taken_at: p.taken_at,
-          })),
-        }
-      })
-
-      setAlbums((prev) => (replace ? mapped : [...prev, ...mapped]))
-      setHasMore(mapped.length === PAGE_SIZE)
-      setPage(nextPage)
-    } catch (error) {
-      log.error('Feed load failed', { component: 'Feed', action: 'load', userId: user.id }, error as Error)
-      // Only surface a full-page error when the initial load fails; a failed
-      // "load more" leaves the already-shown posts intact.
-      if (replace) setLoadError(true)
-    } finally {
-      setLoading(false)
-      setLoadingMore(false)
-    }
-  }, [supabase, user, mode])
-
-  useEffect(() => {
-    if (user) {
-      setAlbums([])
-      setPage(0)
-      setHasMore(true)
-      loadFeed(0, true)
-    }
-  }, [user, mode, loadFeed])
+  const albums = useMemo<FeedAlbum[]>(() => data?.pages.flat() ?? [], [data])
+  const loading = isLoading
+  const loadError = isError
+  const hasMore = !!hasNextPage
+  const loadingMore = isFetchingNextPage
 
   if (!user) {
     return (
@@ -311,7 +323,7 @@ export default function FeedPage() {
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
             Something went wrong reaching the server. Check your connection and try again.
           </p>
-          <Button size="pill" className="mt-5" onClick={() => loadFeed(0, true)}>
+          <Button size="pill" className="mt-5" onClick={() => refetch()}>
             Try again
           </Button>
         </div>
@@ -335,7 +347,7 @@ export default function FeedPage() {
               <Button
                 variant="outline"
                 size="pill"
-                onClick={() => loadFeed(page + 1, false)}
+                onClick={() => fetchNextPage()}
                 disabled={loadingMore}
                 className="px-6"
               >

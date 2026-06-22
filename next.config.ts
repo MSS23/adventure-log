@@ -95,7 +95,12 @@ const nextConfig: NextConfig = {
         }
       ],
       formats: ['image/webp', 'image/avif'],
-      minimumCacheTTL: 60,
+      // Photo storage paths are content-addressed (timestamp + random key) and
+      // never mutate in place, so a given image URL's bytes are immutable. Cache
+      // the optimized derivative for a year instead of expiring every 60s, which
+      // was forcing repeated cold re-optimization of the full-res source on
+      // ordinary feed revisits/scroll-back.
+      minimumCacheTTL: 31536000,
       deviceSizes: [640, 750, 828, 1080, 1200],
       imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
       dangerouslyAllowSVG: true,

@@ -43,6 +43,12 @@ export function PhotoCarousel({
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
   const [showHeartAnimation, setShowHeartAnimation] = useState(false)
+  // Track which photos have finished decoding so they can fade up from the
+  // muted backdrop instead of snapping in from nothing (perceived-lag polish).
+  const [loadedIds, setLoadedIds] = useState<Record<string, boolean>>({})
+  const markLoaded = useCallback((id: string) => {
+    setLoadedIds((prev) => (prev[id] ? prev : { ...prev, [id]: true }))
+  }, [])
   const { user } = useAuth()
 
   // Use the same like hook as LikeButton for state sync
@@ -125,14 +131,18 @@ export function PhotoCarousel({
               src={photoUrl}
               alt={photo.caption || albumTitle}
               fill
-              className="object-cover select-none"
+              className={cn(
+                'object-cover select-none transition-opacity duration-500 ease-out',
+                loadedIds[photo.id] ? 'opacity-100' : 'opacity-0',
+              )}
               style={{
                 objectPosition: `${coverPhotoOffset?.x ?? 50}% ${coverPhotoOffset?.y ?? 50}%`
               }}
               sizes="(max-width: 480px) 100vw, (max-width: 768px) 90vw, 650px"
               loading={priority ? 'eager' : 'lazy'}
               priority={priority}
-              quality={90}
+              quality={75}
+              onLoad={() => markLoaded(photo.id)}
             />
             <HeartAnimation
               show={showHeartAnimation}
@@ -173,7 +183,10 @@ export function PhotoCarousel({
                     src={photoUrl}
                     alt={photo.caption || `${albumTitle} - Photo ${index + 1}`}
                     fill
-                    className="object-cover select-none"
+                    className={cn(
+                      'object-cover select-none transition-opacity duration-500 ease-out',
+                      loadedIds[photo.id] ? 'opacity-100' : 'opacity-0',
+                    )}
                     style={{
                       objectPosition: index === 0 && coverPhotoOffset
                         ? `${coverPhotoOffset.x ?? 50}% ${coverPhotoOffset.y ?? 50}%`
@@ -181,8 +194,9 @@ export function PhotoCarousel({
                     }}
                     sizes="(max-width: 480px) 100vw, (max-width: 768px) 90vw, 650px"
                     loading={index === 0 && priority ? 'eager' : 'lazy'}
-                    quality={90}
+                    quality={75}
                     priority={index === 0 && priority}
+                    onLoad={() => markLoaded(photo.id)}
                   />
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center">

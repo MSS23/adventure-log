@@ -47,6 +47,10 @@ interface CollectionGroup {
   key: string
   label: string
   flag?: string
+  /** Uppercase ISO country code, when this group is a country. Used as a
+   *  readable, neutral-toned fallback chip on platforms (e.g. Windows) that
+   *  render the regional-indicator flag emoji as bare letters. */
+  code?: string
   albums: SavedAlbum[]
 }
 
@@ -278,10 +282,11 @@ export default function SavedContent() {
       let key: string
       let label: string
       let flag: string | undefined
+      let code: string | undefined
 
       if (groupBy === 'location') {
         const countryName = getCountryLabel(album)
-        const code = album.country_code?.toUpperCase()
+        code = album.country_code?.toUpperCase()
         key = code || countryName.toLowerCase()
         label = countryName
         flag = code ? getFlagEmoji(code) : undefined
@@ -292,7 +297,7 @@ export default function SavedContent() {
       }
 
       if (!groups.has(key)) {
-        groups.set(key, { key, label, flag, albums: [] })
+        groups.set(key, { key, label, flag, code, albums: [] })
       }
       groups.get(key)!.albums.push(album)
     }
@@ -454,7 +459,9 @@ export default function SavedContent() {
                       {countryOptions.map((c) => (
                         <SelectItem key={c.key} value={c.key}>
                           <span className="flex items-center gap-2">
-                            {c.flag && <span>{c.flag}</span>}
+                            {c.flag && (
+                              <span className="text-foreground" role="img" aria-label={c.label}>{c.flag}</span>
+                            )}
                             {c.label}
                           </span>
                         </SelectItem>
@@ -549,7 +556,19 @@ export default function SavedContent() {
                         >
                           <div className="flex items-center gap-3">
                             {group.flag ? (
-                              <span className="text-2xl">{group.flag}</span>
+                              // Neutral chip so that platforms which can't render the
+                              // regional-indicator flag emoji (notably Windows, where
+                              // 🇯🇵 degrades to bare "JP" letters) show those letters in
+                              // readable text-foreground on a muted background — never
+                              // the low-contrast green/primary token they had before.
+                              <span
+                                className="flex h-8 min-w-8 items-center justify-center rounded-full bg-muted px-1.5 text-xl leading-none text-foreground"
+                                role="img"
+                                aria-label={group.label}
+                                title={group.label}
+                              >
+                                {group.flag}
+                              </span>
                             ) : groupBy === 'username' ? (
                               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
                                 <User className="h-4 w-4" />
@@ -618,12 +637,20 @@ export default function SavedContent() {
 
 function getCountryLabel(album: SavedAlbum): string {
   if (album.country_code) {
-    return getCountryName(album.country_code) || album.country_code
+    // Prefer the full, human-readable country name. We deliberately do NOT
+    // fall back to the bare 2-letter code here — a raw "JP"/"US" as a label
+    // reads as an unreadable token in the group header. If the code can't be
+    // resolved to a name, fall through to the location-derived label instead,
+    // and the flag emoji (rendered alongside) still carries the country.
+    const name = getCountryName(album.country_code)
+    if (name) return name
   }
   if (album.location_name) {
     return extractCountryFromLocation(album.location_name)
   }
-  return 'Unknown Location'
+  // Last resort: show the code in a neutral, readable tone (the caller renders
+  // group.label inside a text-foreground heading, never a green/primary token).
+  return album.country_code ? album.country_code.toUpperCase() : 'Unknown Location'
 }
 
 function getFlagEmoji(code: string): string {

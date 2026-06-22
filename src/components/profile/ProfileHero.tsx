@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { User } from '@/types/database'
@@ -8,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName } from '@/lib/utils/display-name'
-import { Settings, Share2, Check, Pencil } from 'lucide-react'
+import { Settings, Pencil } from 'lucide-react'
 import { AnimatedCounter } from '@/components/ui/animated-count'
 import { FollowButton } from '@/components/social/FollowButton'
 
@@ -29,26 +28,6 @@ export function ProfileHero({
   const displayName = getDisplayName(profile.display_name, profile.username)
   const username = profile.username || 'anonymous'
   const initials = displayName.charAt(0).toUpperCase()
-  const [copied, setCopied] = useState(false)
-
-  const handleShare = async () => {
-    const shareData = { title: `${displayName} on Adventure Log`, url: window.location.href }
-    if (typeof navigator !== 'undefined' && 'share' in navigator) {
-      try {
-        await navigator.share(shareData)
-        return
-      } catch {
-        // cancelled or unavailable — fall through to clipboard
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(window.location.href)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // clipboard blocked — nothing more we can do
-    }
-  }
 
   return (
     <div className="relative px-4 sm:px-6">
@@ -120,15 +99,6 @@ export function ProfileHero({
                         <Settings className="h-4 w-4" />
                       </Button>
                     </Link>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-full h-11 w-11"
-                      aria-label={copied ? 'Link copied' : 'Share profile'}
-                      onClick={handleShare}
-                    >
-                      {copied ? <Check className="h-4 w-4 text-primary" /> : <Share2 className="h-4 w-4" />}
-                    </Button>
                   </>
                 ) : (
                   <FollowButton userId={profile.id} size="sm" showText />

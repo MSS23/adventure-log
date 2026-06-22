@@ -147,7 +147,7 @@ export default function ProfileContent({
             href="/passport"
             icon={<Book className="h-5 w-5" />}
             label="Passport"
-            hint="Stamps & countries"
+            hint="Share & connect"
           />
           <FeatureTile
             href="/wrapped"

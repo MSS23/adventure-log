@@ -38,16 +38,19 @@ interface NavItem {
 
 const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
-const mainNavItems: NavItem[] = [
+// "Browse" — outward-facing discovery: other people's adventures and places.
+const browseNavItems: NavItem[] = [
   { name: 'Feed', href: '/feed', icon: Home },
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Explore', href: '/explore', icon: Compass },
-  { name: 'Globe', href: '/globe', icon: Globe },
-  { name: 'Albums', href: '/albums', icon: BookOpen },
-  { name: 'Trips', href: '/trips', icon: MapIcon },
 ]
 
-const libraryNavItems: NavItem[] = [
+// "Yours" — everything about the signed-in traveler: their overview, maps,
+// albums, trips, and personal collections.
+const yoursNavItems: NavItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Your Globe', href: '/globe', icon: Globe },
+  { name: 'Your Albums', href: '/albums', icon: BookOpen },
+  { name: 'Your Trips', href: '/trips', icon: MapIcon },
   { name: 'Saved', href: '/saved', icon: Bookmark },
   { name: 'Wishlist', href: '/wishlist', icon: Star },
   { name: 'Countries', href: '/countries', icon: MapPin },
@@ -246,8 +249,8 @@ export function Sidebar() {
             </Link>
           </motion.div>
 
-          {/* Main navigation */}
-          <nav aria-label="Main navigation" className="px-3 space-y-0.5">
+          {/* Browse — outward-facing discovery (other travelers / places) */}
+          <nav aria-label="Browse navigation" className="px-3 space-y-0.5">
             <motion.p
               className="al-eyebrow px-3 pb-1.5 text-[color:var(--color-muted-warm)]"
               initial={{ opacity: 0, x: -8 }}
@@ -256,11 +259,11 @@ export function Sidebar() {
             >
               Browse
             </motion.p>
-            {mainNavItems.map((item, i) => renderNavItem(item, i))}
+            {browseNavItems.map((item, i) => renderNavItem(item, i))}
           </nav>
 
-          {/* Library navigation — personal collections */}
-          <nav aria-label="Library navigation" className="px-3 space-y-0.5 mt-5">
+          {/* Yours — the signed-in traveler's own content & collections */}
+          <nav aria-label="Your navigation" className="px-3 space-y-0.5 mt-5">
             <motion.p
               className="al-eyebrow px-3 pb-1.5 text-[color:var(--color-muted-warm)]"
               initial={{ opacity: 0, x: -8 }}
@@ -268,13 +271,13 @@ export function Sidebar() {
               transition={{
                 duration: 0.4,
                 ease: EDITORIAL_EASE,
-                delay: 0.05 + mainNavItems.length * 0.04,
+                delay: 0.05 + browseNavItems.length * 0.04,
               }}
             >
-              Library
+              Yours
             </motion.p>
-            {libraryNavItems.map((item, i) =>
-              renderNavItem(item, mainNavItems.length + i),
+            {yoursNavItems.map((item, i) =>
+              renderNavItem(item, browseNavItems.length + i),
             )}
           </nav>
 
@@ -284,7 +287,7 @@ export function Sidebar() {
           {/* Bottom navigation */}
           <nav aria-label="Secondary navigation" className="px-3 space-y-0.5 pb-3">
             {bottomNavItems.map((item, i) =>
-              renderNavItem(item, mainNavItems.length + libraryNavItems.length + i),
+              renderNavItem(item, browseNavItems.length + yoursNavItems.length + i),
             )}
 
             {/* Send feedback — opens the feedback dialog inline (not a route) */}
@@ -298,7 +301,7 @@ export function Sidebar() {
                 ease: EDITORIAL_EASE,
                 delay:
                   0.05 +
-                  (mainNavItems.length + libraryNavItems.length + bottomNavItems.length) * 0.04,
+                  (browseNavItems.length + yoursNavItems.length + bottomNavItems.length) * 0.04,
               }}
               className="w-full flex items-center gap-3 px-3 py-[9px] rounded-xl transition-colors duration-200 text-[color:var(--color-ink-soft)] hover:bg-white/60 dark:hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]/60"
             >

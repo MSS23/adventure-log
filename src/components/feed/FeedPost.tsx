@@ -157,7 +157,10 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
               {user.display_name || user.username}
             </UserLink>
             {album.country_code && (
-              <span className="inline-flex shrink-0 items-center text-sm leading-none" title={album.country || album.location} aria-hidden>
+              // Match the username's text-sm line-height exactly (no leading-none)
+              // so the flag's line-box is the same height and items-center lines
+              // the emoji up with the name instead of floating it higher.
+              <span className="shrink-0 text-sm" title={album.country || album.location} aria-hidden>
                 {getFlag(album.country_code)}
               </span>
             )}

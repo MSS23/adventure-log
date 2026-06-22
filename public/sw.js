@@ -6,7 +6,7 @@
 // Bump this version on any deploy that must invalidate stale caches for
 // returning visitors. The activate handler deletes every cache whose name
 // doesn't match the current set, so changing the suffix purges old content.
-const CACHE_VERSION = 'v33'
+const CACHE_VERSION = 'v34'
 const CACHE_NAME = `adventure-log-${CACHE_VERSION}`
 const STATIC_CACHE = `adventure-log-static-${CACHE_VERSION}`
 const DYNAMIC_CACHE = `adventure-log-dynamic-${CACHE_VERSION}`
@@ -440,73 +440,5 @@ async function removeOfflineData(type, id) {
     return false
   }
 }
-
-// Handle push notifications
-self.addEventListener('push', (event) => {
-  swLog('Service Worker: Push notification received')
-
-  let notificationData = {
-    title: 'Adventure Log',
-    body: 'You have a new notification',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
-    tag: 'adventure-log-notification'
-  }
-
-  if (event.data) {
-    try {
-      notificationData = { ...notificationData, ...event.data.json() }
-    } catch (error) {
-      swLog('Service Worker: Failed to parse push data')
-    }
-  }
-
-  event.waitUntil(
-    self.registration.showNotification(notificationData.title, {
-      body: notificationData.body,
-      icon: notificationData.icon,
-      badge: notificationData.badge,
-      tag: notificationData.tag,
-      requireInteraction: false,
-      actions: [
-        {
-          action: 'view',
-          title: 'View'
-        },
-        {
-          action: 'dismiss',
-          title: 'Dismiss'
-        }
-      ]
-    })
-  )
-})
-
-// Handle notification clicks
-self.addEventListener('notificationclick', (event) => {
-  swLog('Service Worker: Notification clicked')
-
-  event.notification.close()
-
-  if (event.action === 'view') {
-    event.waitUntil(
-      clients.openWindow('/dashboard')
-    )
-  } else if (event.action === 'dismiss') {
-    // Just close the notification
-    return
-  } else {
-    // Default action - open the app
-    event.waitUntil(
-      clients.matchAll({ type: 'window' }).then(clientList => {
-        if (clientList.length > 0) {
-          return clientList[0].focus()
-        } else {
-          return clients.openWindow('/dashboard')
-        }
-      })
-    )
-  }
-})
 
 swLog('Service Worker: Loaded and ready')

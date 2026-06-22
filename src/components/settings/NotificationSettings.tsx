@@ -4,27 +4,16 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import {
   Heart,
   MessageCircle,
   UserPlus,
   Bell,
-  Smartphone,
-  Loader2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useToast } from '@/components/ui/toast-provider'
 import { log } from '@/lib/utils/logger'
-import {
-  isPushSupported,
-  isPushConfigured,
-  isPushSubscribed,
-  subscribeToPush,
-  unsubscribeFromPush,
-  getPushPermission,
-} from '@/lib/services/push-notifications'
 
 interface NotificationPreferences {
   likes_enabled: boolean
@@ -46,9 +35,6 @@ export function NotificationSettings() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [pushEnabled, setPushEnabled] = useState(false)
-  const [pushLoading, setPushLoading] = useState(false)
-  const [pushAvailable, setPushAvailable] = useState(false)
   const { user } = useAuth()
   const { success, error: showError } = useToast()
   const supabase = createClient()
@@ -56,48 +42,9 @@ export function NotificationSettings() {
   useEffect(() => {
     if (user) {
       fetchPreferences()
-      // Check push notification status
-      const checkPush = async () => {
-        const supported = isPushSupported() && isPushConfigured()
-        setPushAvailable(supported)
-        if (supported) {
-          const subscribed = await isPushSubscribed()
-          setPushEnabled(subscribed)
-        }
-      }
-      checkPush()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
-
-  const handlePushToggle = async (enabled: boolean) => {
-    if (!user) return
-    setPushLoading(true)
-    try {
-      if (enabled) {
-        const subscribed = await subscribeToPush(user.id)
-        setPushEnabled(subscribed)
-        if (!subscribed) {
-          const perm = getPushPermission()
-          if (perm === 'denied') {
-            showError('Blocked', 'Push notifications are blocked by your browser. Enable them in your browser settings.')
-          } else {
-            showError('Failed', 'Could not enable push notifications.')
-          }
-        } else {
-          success('Enabled!', 'You will receive push notifications for new activity.')
-        }
-      } else {
-        await unsubscribeFromPush(user.id)
-        setPushEnabled(false)
-        success('Disabled', 'Push notifications turned off.')
-      }
-    } catch {
-      showError('Error', 'Failed to update push notification settings.')
-    } finally {
-      setPushLoading(false)
-    }
-  }
 
   const fetchPreferences = async () => {
     try {
@@ -217,30 +164,6 @@ export function NotificationSettings() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Push Notifications */}
-        {pushAvailable && (
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 p-4">
-            <div className="flex items-center gap-3 flex-1">
-              <Smartphone className="h-5 w-5 text-primary" />
-              <div className="flex-1">
-                <Label htmlFor="push-toggle" className="font-medium cursor-pointer text-foreground">Push Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Get notified on this device even when the app is closed
-                </p>
-              </div>
-            </div>
-            {pushLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            ) : (
-              <Switch
-                id="push-toggle"
-                checked={pushEnabled}
-                onCheckedChange={handlePushToggle}
-              />
-            )}
-          </div>
-        )}
-
         {/* Notification Types */}
         <div className="space-y-1">
           {notificationTypes.map((type) => {

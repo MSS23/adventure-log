@@ -72,7 +72,6 @@ const PUBLIC_API_PATHS = [
   '/api/manifest',
   '/api/maintenance/cleanup',
   '/api/email/notify',
-  '/api/push/send',
   '/api/admin/apply-migrations',
   '/api/errors',
   '/api/monitoring/web-vitals',

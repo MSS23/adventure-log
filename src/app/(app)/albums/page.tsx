@@ -755,7 +755,7 @@ function AlbumsPageContent() {
                             </div>
                           </div>
 
-                          {/* Quick delete button (mobile) - subtle, bottom-right */}
+                          {/* Quick delete button (mobile) — top-right, balances the photo-count badge and stays clear of the title gradient */}
                           {!isViewingOtherUser && (
                             <button
                               type="button"
@@ -764,7 +764,7 @@ function AlbumsPageContent() {
                                 e.stopPropagation()
                                 setQuickDeleteAlbum(album)
                               }}
-                              className="md:hidden absolute bottom-1.5 right-1.5 bg-black/55 active:bg-destructive backdrop-blur-sm text-white/90 active:text-white rounded-full p-1 transition-all duration-200 cursor-pointer z-10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                              className="md:hidden absolute top-2 right-2 bg-black/45 active:bg-destructive backdrop-blur-sm text-white/85 active:text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer z-10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                               aria-label={`Delete ${album.title}`}
                             >
                               <Trash2 className="h-3 w-3" />

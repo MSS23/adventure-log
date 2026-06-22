@@ -86,7 +86,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
       {/* Comments Section with Card */}
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
         {/* Comments Header */}
-        <div className="px-5 py-3.5 sm:px-6 border-b border-border">
+        <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-border">
           <h3 className="font-heading text-base md:text-lg font-semibold text-foreground flex items-center gap-2">
             <MessageCircle className="h-5 w-5 text-primary" />
             Comments
@@ -99,16 +99,16 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
         </div>
 
         {/* Comments List */}
-        <div className="px-5 py-5 sm:px-6">
+        <div className="px-4 py-4 sm:px-6 sm:py-5">
           {displayedComments.length > 0 ? (
-            <div className="space-y-4 mb-6">
+            <div className="space-y-3 sm:space-y-4 mb-5 sm:mb-6">
               <AnimatePresence mode="popLayout">
                 {displayedComments.map((comment, index) => {
                   const commentUser = comment.users || comment.profiles || comment.user
                   return (
                     <motion.div
                       key={comment.id}
-                      className="flex items-start gap-3 group"
+                      className="flex items-start gap-2.5 sm:gap-3 group"
                       initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
@@ -121,7 +121,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       layout={!prefersReducedMotion}
                     >
                       <UserAvatarLink user={commentUser}>
-                        <Avatar className="h-9 w-9 ring-2 ring-background shrink-0">
+                        <Avatar className="h-8 w-8 sm:h-9 sm:w-9 ring-2 ring-background shrink-0">
                           <AvatarImage src={getAvatarUrl(commentUser?.avatar_url, commentUser?.username)} />
                           <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                             {getDisplayInitial(commentUser?.display_name, commentUser?.username)}
@@ -130,7 +130,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       </UserAvatarLink>
 
                       <div className="flex-1 min-w-0">
-                        <div className="bg-muted/50 rounded-2xl px-4 py-3 sm:px-5">
+                        <div className="bg-muted/50 rounded-2xl px-3.5 py-2.5 sm:px-5 sm:py-3">
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 min-w-0">
                               <UserLink
@@ -162,7 +162,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                             )}
                           </div>
                         </div>
-                        <div className="px-4 mt-1 sm:px-5">
+                        <div className="px-3.5 mt-1 sm:px-5">
                           <span className="text-[11px] text-muted-foreground/70">
                             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                           </span>
@@ -214,7 +214,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
             >
               <form onSubmit={handleSubmit}>
                 <div className="flex items-end gap-2.5 sm:gap-3">
-                  <Avatar className="h-9 w-9 ring-2 ring-background shrink-0">
+                  <Avatar className="h-8 w-8 sm:h-9 sm:w-9 ring-2 ring-background shrink-0">
                     <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} />
                     <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                       {getDisplayInitial(profile?.display_name, profile?.username)}

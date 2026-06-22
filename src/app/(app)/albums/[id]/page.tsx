@@ -578,13 +578,13 @@ export default function AlbumDetailPage() {
 
             {/* ── Album Header ── */}
             <motion.div
-              className="mb-5"
+              className="mb-4 sm:mb-5"
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
             >
               {/* User row */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="flex items-center gap-3 min-w-0">
                   {albumUser && (
                     <Link href={`/profile/${albumUser.username}`} className="shrink-0 cursor-pointer">
@@ -640,7 +640,7 @@ export default function AlbumDetailPage() {
               </div>
 
               {/* Title + metadata */}
-              <h1 className="al-display text-3xl md:text-4xl leading-tight mb-2">
+              <h1 className="al-display text-2xl sm:text-3xl md:text-4xl leading-tight mb-2">
                 {album.title}
               </h1>
 
@@ -654,7 +654,7 @@ export default function AlbumDetailPage() {
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground">
                 {album.location_name && (
                   <span className="inline-flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 text-primary" />

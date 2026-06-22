@@ -123,8 +123,8 @@ export default function ProfileContent({
       {/* Profile Hero — compact cover + avatar + bio + follow counts */}
       <ProfileHero profile={profile} isOwnProfile={true} followStats={followStats} />
 
-      {/* Single section stack — consistent 32px rhythm, one horizontal inset */}
-      <div className="mt-8 mx-4 md:mx-0 space-y-8">
+      {/* Single section stack — consistent 32px rhythm, inherits app-shell padding */}
+      <div className="mt-8 px-4 sm:px-6 space-y-8">
         {/* Travel snapshot — 3 calm stat tiles */}
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-2xl border border-border bg-card p-5 text-center shadow-[var(--shadow-resting)]">

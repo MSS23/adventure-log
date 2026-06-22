@@ -51,11 +51,11 @@ export function ProfileHero({
   }
 
   return (
-    <div className="relative">
-      {/* Calm cover band — single quiet accent surface */}
-      <div className="h-32 sm:h-40 mx-4 md:mx-0 rounded-2xl bg-primary/10 dark:bg-primary/15" />
+    <div className="relative px-4 sm:px-6">
+      {/* Calm cover band — single quiet accent surface, same inset as info below */}
+      <div className="h-32 sm:h-40 rounded-2xl bg-primary/10 dark:bg-primary/15" />
 
-      <div className="relative z-10 px-5 sm:px-8 pb-7 -mt-12 sm:-mt-14">
+      <div className="relative z-10 pb-7 -mt-12 sm:-mt-14">
         <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
           {/* Avatar — overlaps the cover band */}
           <motion.div
@@ -81,9 +81,9 @@ export function ProfileHero({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="flex items-start justify-between gap-3"
+              className="flex flex-wrap items-start justify-between gap-x-3 gap-y-3"
             >
-              <div>
+              <div className="min-w-0">
                 <h1 className="al-display text-2xl sm:text-3xl">
                   {displayName}
                 </h1>
@@ -98,8 +98,8 @@ export function ProfileHero({
                 </p>
               </div>
 
-              {/* Action Buttons — top-right of info block */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Action Buttons — top-right of info block, wrap tidily on narrow screens */}
+              <div className="flex flex-wrap items-center justify-end gap-2">
                 {isOwnProfile ? (
                   <>
                     <Link href="/profile/edit">

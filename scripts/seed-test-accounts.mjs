@@ -110,22 +110,27 @@ const AVATARS = [
   'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=200&fit=crop&q=80',
 ]
 
-/** Build the deterministic, reproducible list of test accounts. */
+/**
+ * Build the deterministic list of test accounts. Logins are simple and
+ * memorable so testers can sign in easily:
+ *   username: testuser1 … testuserN
+ *   email:    testuser1@test.adventurelog.app … (this is the login)
+ *   password: Test123!@#  (shared, see PASSWORD)
+ * A friendly display name + bio + avatar are still attached so the app has
+ * varied content to test against.
+ */
 function buildAccounts(n) {
   const accounts = []
   for (let i = 0; i < n; i++) {
-    const first = FIRST[i % FIRST.length]
-    const last = LAST[(i * 7) % LAST.length]
-    const num = String(i + 1).padStart(2, '0')
-    const username = `${first}_${last}_${num}`.toLowerCase()
+    const num = i + 1
     accounts.push({
-      username,
-      display_name: `${first} ${last}`,
+      username: `testuser${num}`,
+      display_name: `Test User ${num}`,
       bio: BIOS[i % BIOS.length],
       avatar_url: AVATARS[i % AVATARS.length],
       // Mix in some private accounts (every 6th) to exercise privacy flows.
-      privacy_level: (i + 1) % 6 === 0 ? 'private' : 'public',
-      email: `${first}_${last}_${num}`.toLowerCase() + '@' + EMAIL_DOMAIN,
+      privacy_level: num % 6 === 0 ? 'private' : 'public',
+      email: `testuser${num}@${EMAIL_DOMAIN}`,
     })
   }
   return accounts
@@ -221,10 +226,13 @@ async function clearAccounts(accounts) {
 
   // Remove dependent content first (FK-safe order), then the profile rows,
   // then the auth users so nothing is orphaned.
-  for (const table of ['likes', 'comments', 'follows', 'stories', 'photos', 'albums']) {
+  for (const table of ['likes', 'comments', 'stories', 'photos', 'albums']) {
     const { error } = await supabase.from(table).delete().in('user_id', ids)
     if (error) console.error(`⚠️  ${table}: ${error.message}`)
   }
+  // follows is keyed by follower_id/following_id (no user_id column).
+  await supabase.from('follows').delete().in('follower_id', ids)
+  await supabase.from('follows').delete().in('following_id', ids)
   await supabase.from('users').delete().in('id', ids)
   for (const id of ids) {
     const { error } = await supabase.auth.admin.deleteUser(id)

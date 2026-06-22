@@ -460,8 +460,8 @@ function HeroGlobe() {
           </radialGradient>
           <radialGradient id="al-globe-glow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="rgba(242,161,121,0.42)" />
-            <stop offset="55%" stopColor="rgba(199,91,58,0.14)" />
-            <stop offset="100%" stopColor="rgba(199,91,58,0)" />
+            <stop offset="55%" stopColor="rgba(16,185,129,0.14)" />
+            <stop offset="100%" stopColor="rgba(16,185,129,0)" />
           </radialGradient>
           <clipPath id="al-globe-clip">
             <circle cx="100" cy="100" r="84" />

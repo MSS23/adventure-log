@@ -20,9 +20,9 @@ const buttonVariants = cva(
         // Primary — forest/olive, the standard action color
         default:
           "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md",
-        // Coral — the rare hero CTA moment (terracotta accent, pill shape)
+        // Accent CTA — the rare hero CTA moment (emerald accent, pill shape)
         coral:
-          "bg-accent text-accent-foreground rounded-full hover:-translate-y-px shadow-[0_6px_18px_rgba(199,91,58,0.28)] hover:shadow-[0_8px_22px_rgba(199,91,58,0.36)]",
+          "bg-accent text-accent-foreground rounded-full hover:-translate-y-px shadow-[0_6px_18px_rgba(16,185,129,0.28)] hover:shadow-[0_8px_22px_rgba(16,185,129,0.36)]",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 shadow-sm focus-visible:ring-destructive/40",
         outline:

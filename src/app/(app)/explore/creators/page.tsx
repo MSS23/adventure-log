@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Users, Camera } from 'lucide-react'
+import { ArrowLeft, Users, Camera, Lock } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createClient } from '@/lib/supabase/client'
@@ -33,30 +33,39 @@ export default function CreatorsPage() {
   const { data: creators = [], isLoading: loading, error } = useQuery<Creator[]>({
     queryKey: ['explore-creators', user?.id ?? ''],
     queryFn: async () => {
-      // Fetch users with their album counts
+      // Include public AND private accounts so people can discover and follow
+      // either — but private accounts never expose their photos here (handled
+      // per-creator below + on the card).
       const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('id, username, display_name, avatar_url, bio, privacy_level')
-        .eq('privacy_level', 'public')
         .neq('id', user?.id || '')
         .order('created_at', { ascending: false })
         .limit(24)
 
       if (usersError) throw usersError
 
-      // Fetch album count + a few recent covers (for the preview strip) and
-      // follower count for each user. The albums query returns both the exact
-      // total count and up to 3 recent rows, so it's a single round-trip.
+      // For each user: album count + follower count (both just numbers, safe to
+      // show for anyone). Recent cover photos are fetched ONLY for public
+      // accounts — a private account's images must not appear until you follow.
       const usersWithCounts = await Promise.all(
         (usersData || []).map(async (creator) => {
+          const isPublic = creator.privacy_level === 'public'
           const [albumsResult, followersResult] = await Promise.all([
-            supabase
-              .from('albums')
-              .select('id, cover_photo_url, cover_image_url', { count: 'exact' })
-              .eq('user_id', creator.id)
-              .neq('status', 'draft')
-              .order('created_at', { ascending: false })
-              .limit(3),
+            isPublic
+              ? supabase
+                  .from('albums')
+                  .select('id, cover_photo_url, cover_image_url', { count: 'exact' })
+                  .eq('user_id', creator.id)
+                  .neq('status', 'draft')
+                  .order('created_at', { ascending: false })
+                  .limit(3)
+              : // Private: count only — never request cover URLs.
+                supabase
+                  .from('albums')
+                  .select('id', { count: 'exact', head: true })
+                  .eq('user_id', creator.id)
+                  .neq('status', 'draft'),
             supabase
               .from('follows')
               .select('id', { count: 'exact', head: true })
@@ -64,9 +73,15 @@ export default function CreatorsPage() {
               .eq('status', 'accepted')
           ])
 
-          const covers = (albumsResult.data || [])
-            .map((a) => getPhotoUrl(a.cover_photo_url || a.cover_image_url))
-            .filter((url): url is string => Boolean(url))
+          const coverRows = (albumsResult.data || []) as Array<{
+            cover_photo_url?: string | null
+            cover_image_url?: string | null
+          }>
+          const covers = isPublic
+            ? coverRows
+                .map((a) => getPhotoUrl(a.cover_photo_url || a.cover_image_url))
+                .filter((url): url is string => Boolean(url))
+            : []
 
           return {
             ...creator,
@@ -185,39 +200,45 @@ export default function CreatorsPage() {
                         </div>
                       </div>
 
-                      {/* Recent-photo preview strip — turns each card into a
-                          content-forward suggestion (Instagram "discover people"). */}
-                      <div className="grid w-full grid-cols-3 gap-1">
-                        {(creator.covers && creator.covers.length > 0
-                          ? creator.covers
-                          : []
-                        ).slice(0, 3).map((url, i) => (
-                          <Link
-                            key={i}
-                            href={`/profile/${creator.username}`}
-                            className="relative aspect-square overflow-hidden rounded-md bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          >
-                            <Image
-                              src={url}
-                              alt=""
-                              fill
-                              sizes="80px"
-                              className="object-cover transition-transform duration-200 hover:scale-105"
-                            />
-                          </Link>
-                        ))}
-                        {/* Fill empty slots so the strip keeps its shape */}
-                        {Array.from({
-                          length: Math.max(0, 3 - (creator.covers?.length || 0)),
-                        }).map((_, i) => (
-                          <div
-                            key={`ph-${i}`}
-                            className="flex aspect-square items-center justify-center rounded-md bg-muted/60"
-                          >
-                            <Camera className="h-4 w-4 text-muted-foreground/40" />
-                          </div>
-                        ))}
-                      </div>
+                      {/* Public accounts get a recent-photo preview strip
+                          (Instagram "discover people"). Private accounts never
+                          expose photos here — just the album/follower counts
+                          above, plus a lock note. */}
+                      {creator.privacy_level === 'public' ? (
+                        <div className="grid w-full grid-cols-3 gap-1">
+                          {(creator.covers || []).slice(0, 3).map((url, i) => (
+                            <Link
+                              key={i}
+                              href={`/profile/${creator.username}`}
+                              className="relative aspect-square overflow-hidden rounded-md bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <Image
+                                src={url}
+                                alt=""
+                                fill
+                                sizes="80px"
+                                className="object-cover transition-transform duration-200 hover:scale-105"
+                              />
+                            </Link>
+                          ))}
+                          {/* Fill empty slots so the strip keeps its shape */}
+                          {Array.from({
+                            length: Math.max(0, 3 - (creator.covers?.length || 0)),
+                          }).map((_, i) => (
+                            <div
+                              key={`ph-${i}`}
+                              className="flex aspect-square items-center justify-center rounded-md bg-muted/60"
+                            >
+                              <Camera className="h-4 w-4 text-muted-foreground/40" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex w-full items-center justify-center gap-1.5 rounded-md bg-muted/50 py-2.5 text-[11px] font-medium text-muted-foreground">
+                          <Lock className="h-3 w-3" />
+                          Private — follow to see photos
+                        </div>
+                      )}
 
                       <FollowButton
                         userId={creator.id}

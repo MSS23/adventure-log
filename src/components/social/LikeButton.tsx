@@ -117,7 +117,7 @@ export function LikeButton({
         {/* Particle burst effect */}
         <ParticleBurst
           isActive={showBurst}
-          colors={['#C75B3A', '#F38162', '#D4A54A', '#F2A179']}
+          colors={['#10B981', '#34D399', '#6EE7B7', '#A7F3D0']}
           particleCount={8}
           spread={35}
           size="sm"

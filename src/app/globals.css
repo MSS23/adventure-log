@@ -42,158 +42,161 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  /* Field Notebook palette — warm cream + forest green (logo-derived) */
-  --color-olive-50:  #F7F2E7;  /* warm cream bg */
-  --color-olive-100: #EFE9D9;  /* ivory-alt (card-in-card) */
-  --color-olive-200: #E5DDC8;  /* warm line */
-  --color-olive-300: #C9C0A6;  /* deeper warm line */
-  --color-olive-400: #99B169;  /* logo bright olive */
-  --color-olive-500: #7A9248;  /* logo mid olive */
-  --color-olive-600: #5A6F2B;  /* logo deep olive */
-  --color-olive-700: #4A5D23;  /* forest primary (logo gradient mid) */
-  --color-olive-800: #3B4A1C;  /* forest hover (logo gradient bottom) */
-  --color-olive-900: #3D3A2C;  /* ink-soft */
-  --color-olive-950: #1F1C12;  /* ink (warm black) */
+  /* Slate + Emerald palette — cool neutral base, emerald brand accent.
+     (Var names kept as `olive-*` for compatibility with 250+ existing
+     references; values remapped to the new sleek/modern scheme.) */
+  --color-olive-50:  #F1F5F9;  /* cool light bg */
+  --color-olive-100: #E2E8F0;  /* surface alt (card-in-card) */
+  --color-olive-200: #CBD5E1;  /* cool line */
+  --color-olive-300: #94A3B8;  /* deeper cool line / muted */
+  --color-olive-400: #34D399;  /* bright emerald (mint accent) */
+  --color-olive-500: #10B981;  /* emerald */
+  --color-olive-600: #059669;  /* emerald deep (primary actions) */
+  --color-olive-700: #047857;  /* emerald darker */
+  --color-olive-800: #065F46;  /* emerald hover */
+  --color-olive-900: #1E293B;  /* slate ink-soft */
+  --color-olive-950: #0C1014;  /* slate ink (near-black) */
 }
 
 :root {
   --radius: 0.875rem;
-  /* Field Notebook — warm cream base, forest-green primary, coral + brass accents (logo-derived) */
-  --background: #FBF7EE;
-  --foreground: #1F1C12;
+  /* Slate + Emerald — cool off-white base, emerald primary + mint accent */
+  --background: #F7F9FB;
+  --foreground: #0C1014;
   --card: #FFFFFF;
-  --card-foreground: #1F1C12;
+  --card-foreground: #0C1014;
   --popover: #FFFFFF;
-  --popover-foreground: #1F1C12;
-  --primary: #4A5D23;
-  --primary-foreground: #F7F2E7;
-  --secondary: #F2ECDC;
-  --secondary-foreground: #1F1C12;
-  --muted: #F2ECDC;
-  --muted-foreground: #5A5448;
-  --accent: #C9512E;
+  --popover-foreground: #0C1014;
+  --primary: #059669;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EEF2F6;
+  --secondary-foreground: #0C1014;
+  --muted: #EEF2F6;
+  --muted-foreground: #5B6770;
+  --accent: #10B981;
   --accent-foreground: #FFFFFF;
-  --destructive: #A2322B;
-  --border: #E7DEC9;
-  --input: #F2ECDC;
-  --ring: #4A5D23;
-  --chart-1: #4A5D23;
-  --chart-2: #D4A54A;
-  --chart-3: #C75B3A;
-  --chart-4: #A2322B;
-  --chart-5: #1F1C12;
-  --sidebar: #F7F2E7;
-  --sidebar-foreground: #1F1C12;
-  --sidebar-primary: #4A5D23;
-  --sidebar-primary-foreground: #F7F2E7;
+  --destructive: #DC2626;
+  --border: #E2E8F0;
+  --input: #EEF2F6;
+  --ring: #059669;
+  --chart-1: #059669;
+  --chart-2: #10B981;
+  --chart-3: #34D399;
+  --chart-4: #0EA5E9;
+  --chart-5: #0C1014;
+  --sidebar: #F2F5F8;
+  --sidebar-foreground: #0C1014;
+  --sidebar-primary: #059669;
+  --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #FFFFFF;
-  --sidebar-accent-foreground: #1F1C12;
-  --sidebar-border: #E5DDC8;
-  --sidebar-ring: #4A5D23;
+  --sidebar-accent-foreground: #0C1014;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #059669;
 
   /* Editorial palette extensions */
-  --color-ivory: #F7F2E7;
-  --color-ivory-alt: #EFE9D9;
-  --color-ink: #1F1C12;
-  --color-ink-soft: #3D3A2C;
-  --color-muted-warm: #5A5448;
-  --color-line-warm: #E5DDC8;
+  --color-ivory: #F7F9FB;
+  --color-ivory-alt: #EEF2F6;
+  --color-ink: #0C1014;
+  --color-ink-soft: #2A333B;
+  --color-muted-warm: #5B6770;
+  --color-line-warm: #E2E8F0;
 
-  /* Forest — primary brand (logo gradient) */
-  --color-forest: #4A5D23;
-  --color-forest-deep: #3B4A1C;
-  --color-forest-soft: #7A9248;
-  --color-forest-bright: #99B169;
-  --color-forest-tint: #E0E5C9;
+  /* Forest → Emerald — primary brand */
+  --color-forest: #059669;
+  --color-forest-deep: #047857;
+  --color-forest-soft: #34D399;
+  --color-forest-bright: #6EE7B7;
+  --color-forest-tint: #D1FAE5;
 
-  /* Coral — secondary accent (location pin) */
-  --color-coral: #C9512E;
-  --color-coral-soft: #F2A179;
-  --color-coral-tint: #F8DDD0;
+  /* Coral → Mint — secondary accent (location pin / likes) */
+  --color-coral: #10B981;
+  --color-coral-soft: #6EE7B7;
+  --color-coral-tint: #D1FAE5;
 
   /* Gold — tertiary accent (compass / camera flash) */
-  --color-gold: #E0A93C;
-  --color-gold-soft: #E8C77A;
-  --color-gold-tint: #F5E8C4;
+  --color-gold: #D4A24A;
+  --color-gold-soft: #E2C281;
+  --color-gold-tint: #F3E6C7;
 
-  --color-sky: #2F6FB0;
-  --color-sky-tint: #DDE8F5;
-  --color-stamp: #A2322B;
+  --color-sky: #0EA5E9;
+  --color-sky-tint: #DBEFFB;
+  --color-stamp: #DC2626;
 
   /* Elevation ramp — "Soft UI Evolution": resting → hover → overlay.
-     One consistent scale for every card/sheet/popover so depth never drifts. */
-  --shadow-resting: 0 1px 2px rgba(26, 20, 14, 0.04), 0 4px 16px rgba(26, 20, 14, 0.06);
-  --shadow-hover: 0 2px 4px rgba(26, 20, 14, 0.05), 0 12px 28px rgba(26, 20, 14, 0.10);
-  --shadow-overlay: 0 16px 48px rgba(26, 20, 14, 0.18);
+     One consistent scale for every card/sheet/popover so depth never drifts.
+     Cool slate-toned shadows to match the new neutral base. */
+  --shadow-resting: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 2px 4px rgba(15, 23, 42, 0.05), 0 12px 28px rgba(15, 23, 42, 0.10);
+  --shadow-overlay: 0 16px 48px rgba(15, 23, 42, 0.18);
 }
 
 .dark {
-  /* Field Notebook (dark) — deep umber base with bright forest + coral accents */
-  --background: #14110A;
-  --foreground: #F2EBD7;
-  --card: #1B170E;
-  --card-foreground: #F2EBD7;
-  --popover: #1B170E;
-  --popover-foreground: #F2EBD7;
-  --primary: #99B169;
-  --primary-foreground: #14110A;
-  --secondary: #221D13;
-  --secondary-foreground: #F2EBD7;
-  --muted: #221D13;
-  --muted-foreground: #B0A791;
-  --accent: #F38162;
-  --accent-foreground: #14110A;
-  --destructive: #D44F48;
-  --border: rgba(255, 235, 200, 0.09);
-  --input: rgba(255, 235, 200, 0.08);
-  --ring: #99B169;
-  --chart-1: #99B169;
-  --chart-2: #E0B961;
-  --chart-3: #F38162;
-  --chart-4: #D44F48;
-  --chart-5: #F2EBD7;
-  --sidebar: #14110A;
-  --sidebar-foreground: #F2EBD7;
-  --sidebar-primary: #99B169;
-  --sidebar-primary-foreground: #14110A;
-  --sidebar-accent: #221D13;
-  --sidebar-accent-foreground: #F2EBD7;
-  --sidebar-border: rgba(255, 235, 200, 0.09);
-  --sidebar-ring: #99B169;
+  /* Slate + Emerald (dark) — near-black slate base, emerald + mint accents */
+  --background: #0C1014;
+  --foreground: #E8EDF1;
+  --card: #151B22;
+  --card-foreground: #E8EDF1;
+  --popover: #151B22;
+  --popover-foreground: #E8EDF1;
+  --primary: #10B981;
+  --primary-foreground: #022C22;
+  --secondary: #1B232B;
+  --secondary-foreground: #E8EDF1;
+  --muted: #1B232B;
+  --muted-foreground: #9AA7B2;
+  --accent: #34D399;
+  --accent-foreground: #022C22;
+  --destructive: #F87171;
+  --border: rgba(226, 232, 240, 0.10);
+  --input: rgba(226, 232, 240, 0.08);
+  --ring: #10B981;
+  --chart-1: #10B981;
+  --chart-2: #34D399;
+  --chart-3: #6EE7B7;
+  --chart-4: #38BDF8;
+  --chart-5: #E8EDF1;
+  --sidebar: #0C1014;
+  --sidebar-foreground: #E8EDF1;
+  --sidebar-primary: #10B981;
+  --sidebar-primary-foreground: #022C22;
+  --sidebar-accent: #1B232B;
+  --sidebar-accent-foreground: #E8EDF1;
+  --sidebar-border: rgba(226, 232, 240, 0.10);
+  --sidebar-ring: #10B981;
 
   /* Editorial palette extensions (dark) */
-  --color-ivory: #14110A;
-  --color-ivory-alt: #221D13;
-  --color-ink: #F2EBD7;
-  --color-ink-soft: #D9D2C0;
-  --color-muted-warm: #B0A791;
-  --color-line-warm: rgba(255, 235, 200, 0.09);
+  --color-ivory: #0C1014;
+  --color-ivory-alt: #1B232B;
+  --color-ink: #E8EDF1;
+  --color-ink-soft: #C2CCD4;
+  --color-muted-warm: #9AA7B2;
+  --color-line-warm: rgba(226, 232, 240, 0.10);
 
-  /* Forest — primary brand (lighter on dark) */
-  --color-forest: #99B169;
-  --color-forest-deep: #7A9248;
-  --color-forest-soft: #B8CC8A;
-  --color-forest-bright: #C8DD9E;
-  --color-forest-tint: rgba(122, 146, 72, 0.18);
+  /* Forest → Emerald — primary brand (brighter on dark) */
+  --color-forest: #10B981;
+  --color-forest-deep: #059669;
+  --color-forest-soft: #34D399;
+  --color-forest-bright: #6EE7B7;
+  --color-forest-tint: rgba(16, 185, 129, 0.18);
 
-  /* Coral — secondary accent */
-  --color-coral: #F38162;
-  --color-coral-soft: #F2A179;
-  --color-coral-tint: rgba(243, 129, 98, 0.18);
+  /* Coral → Mint — secondary accent */
+  --color-coral: #34D399;
+  --color-coral-soft: #6EE7B7;
+  --color-coral-tint: rgba(52, 211, 153, 0.18);
 
   /* Gold — tertiary accent */
   --color-gold: #E0B961;
   --color-gold-soft: #EBCC83;
   --color-gold-tint: rgba(224, 185, 97, 0.18);
 
-  --color-sky: #7AA3D4;
-  --color-sky-tint: rgba(122, 163, 212, 0.14);
-  --color-stamp: #D44F48;
+  --color-sky: #38BDF8;
+  --color-sky-tint: rgba(56, 189, 248, 0.14);
+  --color-stamp: #F87171;
 
-  /* Elevation ramp (dark) — deeper cast + faint top inner-highlight so cards
-     still read as raised against the near-black umber background. */
-  --shadow-resting: 0 1px 2px rgba(0, 0, 0, 0.40), 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 235, 200, 0.04);
-  --shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.45), 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 235, 200, 0.05);
+  /* Elevation ramp (dark) — deeper cast + faint cool top inner-highlight so
+     cards still read as raised against the near-black slate background. */
+  --shadow-resting: 0 1px 2px rgba(0, 0, 0, 0.40), 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(232, 237, 241, 0.04);
+  --shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.45), 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(232, 237, 241, 0.05);
   --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.65);
 }
 
@@ -218,13 +221,13 @@
 
   /* Text selection */
   ::selection {
-    background-color: rgba(74, 93, 35, 0.20);
-    color: #1F1C12;
+    background-color: rgba(16, 185, 129, 0.18);
+    color: #0C1014;
   }
 
   .dark ::selection {
-    background-color: rgba(153, 177, 105, 0.28);
-    color: #F2EBD7;
+    background-color: rgba(52, 211, 153, 0.26);
+    color: #E8EDF1;
   }
 
   /* Editorial heading hierarchy */
@@ -276,9 +279,9 @@
   select:-webkit-autofill,
   select:-webkit-autofill:hover,
   select:-webkit-autofill:focus {
-    -webkit-text-fill-color: #1F1C12 !important;
-    -webkit-box-shadow: 0 0 0px 1000px #F7F2E7 inset !important;
-    box-shadow: 0 0 0px 1000px #F7F2E7 inset !important;
+    -webkit-text-fill-color: #0C1014 !important;
+    -webkit-box-shadow: 0 0 0px 1000px #F7F9FB inset !important;
+    box-shadow: 0 0 0px 1000px #F7F9FB inset !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 
@@ -624,12 +627,12 @@
 
   /* Focus visibility — forest ring */
   :focus-visible {
-    outline: 2px solid #4A5D23;
+    outline: 2px solid #059669;
     outline-offset: 2px;
   }
 
   .dark :focus-visible {
-    outline-color: #99B169;
+    outline-color: #10B981;
   }
 
   /* Skip to content link for keyboard nav */
@@ -637,7 +640,7 @@
     position: absolute;
     top: -40px;
     left: 0;
-    background: #1F1C12;
+    background: #0C1014;
     color: white;
     padding: 8px 16px;
     z-index: 100;
@@ -873,13 +876,13 @@
   background: var(--color-forest);
   color: #fff;
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(74, 93, 35, 0.33);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.33);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .al-btn-coral:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(74, 93, 35, 0.42);
-  background: var(--color-forest-deep, #3B4A1C);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.38);
+  background: var(--color-forest-deep, #047857);
 }
 
 /* Coral CTA — secondary accent for moments where forest doesn't fit */
@@ -887,12 +890,12 @@
   background: var(--color-coral);
   color: #fff;
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(199, 91, 58, 0.33);
+  box-shadow: 0 6px 18px rgba(52, 211, 153, 0.33);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .al-btn-accent:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(199, 91, 58, 0.42);
+  box-shadow: 0 8px 24px rgba(52, 211, 153, 0.42);
 }
 
 /* Pill badge with tint */

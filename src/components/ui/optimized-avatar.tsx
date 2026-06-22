@@ -37,14 +37,14 @@ export function OptimizedAvatar({
   const sizeConfig = sizeMap[size]
   const avatarUrl = src ? getPhotoUrl(src, 'avatars') : null
 
-  // Consistent warm brand tint based on the fallback text — calm, on-palette
+  // Consistent emerald/slate brand tint based on the fallback text — calm, on-palette
   const getGradientClass = (text: string) => {
     // Static brand hexes (not theme vars) so white initials stay legible in both themes
     const gradients = [
-      'from-[#4A5D23] to-[#7A9248]',
-      'from-[#C75B3A] to-[#E2553A]',
-      'from-[#9C7A2E] to-[#C2983E]',
-      'from-[#3B4A1C] to-[#5A6F2B]',
+      'from-[#059669] to-[#34D399]',
+      'from-[#0D9488] to-[#2DD4BF]',
+      'from-[#1E293B] to-[#475569]',
+      'from-[#047857] to-[#10B981]',
     ]
     const index = text.charCodeAt(0) % gradients.length
     return gradients[index]

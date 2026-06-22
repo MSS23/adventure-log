@@ -141,13 +141,13 @@ export default function HomePage() {
   // Force dark context so heading colors resolve correctly
   return (
     <div className="dark">
-      <div className="min-h-screen bg-[#060a03] text-stone-100 overflow-x-hidden selection:bg-olive-500/30 selection:text-white">
+      <div className="min-h-screen bg-[#0A0E14] text-stone-100 overflow-x-hidden selection:bg-olive-500/30 selection:text-white">
 
         {/* ── Header ── */}
         <header className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           scrolled
-            ? "bg-[#060a03]/90 backdrop-blur-2xl border-b border-white/[0.05] shadow-2xl shadow-black/20"
+            ? "bg-[#0A0E14]/90 backdrop-blur-2xl border-b border-white/[0.05] shadow-2xl shadow-black/20"
             : "bg-transparent"
         )}>
           <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
@@ -159,17 +159,17 @@ export default function HomePage() {
             </Link>
             <nav className="flex items-center gap-1 sm:gap-2">
               <Link href="/discover" className="hidden sm:inline-flex">
-                <Button variant="ghost" className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
+                <Button variant="ghost" className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
                   Discover
                 </Button>
               </Link>
               <Link href="/login">
-                <Button variant="ghost" className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
+                <Button variant="ghost" className="cursor-pointer text-stone-400 hover:text-white hover:bg-white/[0.06] font-medium text-sm h-9 px-4 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
                   Sign In
                 </Button>
               </Link>
               <Link href="/signup">
-                <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 text-white font-medium px-5 rounded-xl text-sm h-9 shadow-lg shadow-olive-900/30 transition-all duration-200 hover:shadow-olive-800/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
+                <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 text-white font-medium px-5 rounded-xl text-sm h-9 shadow-lg shadow-olive-900/30 transition-all duration-200 hover:shadow-olive-800/40 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
                   Get Started
                 </Button>
               </Link>
@@ -184,18 +184,18 @@ export default function HomePage() {
             {/* Radial vignette */}
             <div className="absolute inset-0 z-10 pointer-events-none"
               style={{
-                background: 'radial-gradient(ellipse at 50% 50%, transparent 30%, #060a03 75%)',
+                background: 'radial-gradient(ellipse at 50% 50%, transparent 30%, #0A0E14 75%)',
               }}
             />
             {/* Top/bottom fade */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#060a03] via-transparent to-[#060a03] z-10 pointer-events-none opacity-60" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E14] via-transparent to-[#0A0E14] z-10 pointer-events-none opacity-60" />
             {mounted && (
               <GlobeGL
                 ref={globeRef}
                 globeImageUrl="/earth-dark.jpg"
                 bumpImageUrl="/earth-topology.png"
                 backgroundImageUrl={undefined}
-                backgroundColor="rgba(6, 10, 3, 1)"
+                backgroundColor="rgba(10, 14, 20, 1)"
                 showAtmosphere={true}
                 atmosphereColor="#A2322B"
                 atmosphereAltitude={0.18}
@@ -240,13 +240,13 @@ export default function HomePage() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
               <Link href="/signup">
-                <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-8 h-13 text-base rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
+                <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-8 h-13 text-base rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
                   Start Your Globe
                   <ArrowRight className="h-5 w-5 ml-1.5" />
                 </Button>
               </Link>
               <Link href="/login">
-                <Button size="lg" variant="outline" className="cursor-pointer h-13 px-8 text-base rounded-2xl border-white/10 !text-stone-300 hover:!text-white hover:bg-white/[0.06] hover:border-white/20 w-full sm:w-auto transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
+                <Button size="lg" variant="outline" className="cursor-pointer h-13 px-8 text-base rounded-2xl border-white/10 !text-stone-300 hover:!text-white hover:bg-white/[0.06] hover:border-white/20 w-full sm:w-auto transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
                   Sign In
                 </Button>
               </Link>
@@ -276,14 +276,14 @@ export default function HomePage() {
             type="button"
             onClick={() => document.getElementById('stats')?.scrollIntoView({ behavior: 'smooth' })}
             aria-label="Scroll to learn more"
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 p-2.5 rounded-full opacity-40 hover:opacity-80 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03] active:scale-[0.97]"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 p-2.5 rounded-full opacity-40 hover:opacity-80 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14] active:scale-[0.97]"
           >
             <ChevronDown className="h-5 w-5 text-stone-400 animate-bounce" />
           </button>
         </section>
 
         {/* ── Stats Bar ── */}
-        <section id="stats" className="relative z-10 py-8 border-y border-white/[0.04] bg-[#060a03]/90 backdrop-blur-2xl scroll-mt-16">
+        <section id="stats" className="relative z-10 py-8 border-y border-white/[0.04] bg-[#0A0E14]/90 backdrop-blur-2xl scroll-mt-16">
           <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
               { value: '195', label: 'Countries' },
@@ -386,7 +386,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <Link href="/signup">
-                  <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white rounded-xl gap-2 shadow-lg shadow-olive-900/30 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
+                  <Button className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white rounded-xl gap-2 shadow-lg shadow-olive-900/30 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
                     Create Your Passport
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -444,7 +444,7 @@ export default function HomePage() {
               Free forever. No ads. Your travel story deserves better than a flat map.
             </p>
             <Link href="/signup">
-              <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-10 h-14 text-lg rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a03]">
+              <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-10 h-14 text-lg rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
                 Get Started — It&apos;s Free
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>

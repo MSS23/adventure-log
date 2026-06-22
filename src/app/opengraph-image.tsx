@@ -16,7 +16,7 @@ export default async function Image() {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          background: 'linear-gradient(145deg, #1a2e0a 0%, #2d4a14 40%, #0f1f05 100%)',
+          background: 'linear-gradient(145deg, #0C1014 0%, #134E4A 45%, #0C1014 100%)',
           fontFamily: 'sans-serif',
           position: 'relative',
           overflow: 'hidden',
@@ -31,7 +31,7 @@ export default async function Image() {
             right: 0,
             bottom: 0,
             display: 'flex',
-            background: 'radial-gradient(circle at 30% 40%, rgba(153,177,105,0.15) 0%, transparent 60%), radial-gradient(circle at 70% 60%, rgba(74,93,35,0.2) 0%, transparent 50%)',
+            background: 'radial-gradient(circle at 30% 40%, rgba(52,211,153,0.15) 0%, transparent 60%), radial-gradient(circle at 70% 60%, rgba(16,185,129,0.2) 0%, transparent 50%)',
           }}
         />
 
@@ -60,7 +60,7 @@ export default async function Image() {
           style={{
             fontSize: '28px',
             fontWeight: 500,
-            color: '#F2A179',
+            color: '#34D399',
             textAlign: 'center',
             marginBottom: '32px',
             display: 'flex',

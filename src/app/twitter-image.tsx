@@ -16,7 +16,7 @@ export default async function Image() {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          background: 'linear-gradient(145deg, #1a2e0a 0%, #2d4a14 40%, #0f1f05 100%)',
+          background: 'linear-gradient(145deg, #0C1014 0%, #134E4A 45%, #0C1014 100%)',
           fontFamily: 'sans-serif',
         }}
       >
@@ -24,7 +24,7 @@ export default async function Image() {
         <div style={{ fontSize: '56px', fontWeight: 800, color: 'white', display: 'flex' }}>
           Adventure Log
         </div>
-        <div style={{ fontSize: '24px', color: '#F2A179', marginTop: '8px', display: 'flex' }}>
+        <div style={{ fontSize: '24px', color: '#34D399', marginTop: '8px', display: 'flex' }}>
           Your travel life, on a globe
         </div>
       </div>

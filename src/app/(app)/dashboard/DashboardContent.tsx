@@ -245,7 +245,7 @@ export default function DashboardContent() {
               className="absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(135% 130% at 84% 6%, #6E8A33 0%, #4A5D23 32%, #2A3517 62%, #141A0C 100%)',
+                  'radial-gradient(135% 130% at 84% 6%, #10B981 0%, #059669 32%, #134E4A 62%, #0C1014 100%)',
               }}
             />
 
@@ -292,7 +292,7 @@ export default function DashboardContent() {
               >
                 Your world,
                 <br />
-                <em className="italic font-normal" style={{ color: '#F2A179' }}>
+                <em className="italic font-normal" style={{ color: '#6EE7B7' }}>
                   written in pins.
                 </em>
               </h2>
@@ -436,7 +436,7 @@ export default function DashboardContent() {
 // stack of overlapping gradients, so the hero reads as "a world" at a glance.
 function HeroGlobe() {
   const pins = [
-    { x: 74, y: 66, c: '#F2A179', d: 0 },
+    { x: 74, y: 66, c: '#6EE7B7', d: 0 },
     { x: 122, y: 86, c: '#E8C77A', d: 0.1 },
     { x: 92, y: 116, c: '#FBE3CF', d: 0.2 },
     { x: 138, y: 58, c: '#ffffff', d: 0.3 },

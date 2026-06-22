@@ -140,7 +140,7 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'application-name': 'Adventure Log',
-    'msapplication-TileColor': '#4A5D23',
+    'msapplication-TileColor': '#059669',
     'msapplication-config': '/browserconfig.xml',
   },
 };
@@ -157,8 +157,8 @@ export const viewport = {
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F7F2E7' },
-    { media: '(prefers-color-scheme: dark)', color: '#14110A' }
+    { media: '(prefers-color-scheme: light)', color: '#F7F9FB' },
+    { media: '(prefers-color-scheme: dark)', color: '#0C1014' }
   ]
 };
 

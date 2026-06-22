@@ -11,12 +11,13 @@ import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 import {
   Globe, MapPin, Camera, Route, Share2, Loader2, Compass, Plane,
-  Copy, Check,
+  Copy, Check, ScanLine,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import QRCode from 'qrcode'
 import { StreakBadge } from '@/components/profile/StreakBadge'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PassportScanner } from '@/components/passport/PassportScanner'
 
 // ---------------------------------------------------------------------------
 // Country-to-continent mapping
@@ -465,6 +466,7 @@ export default function TravelPassportPage() {
   const { user, profile } = useAuth()
   const { data, loading } = useTravelPassport()
   const [copied, setCopied] = useState(false)
+  const [scannerOpen, setScannerOpen] = useState(false)
 
   const shareUrl = useMemo(() => {
     if (typeof window === 'undefined') return ''
@@ -961,9 +963,24 @@ export default function TravelPassportPage() {
                 </Button>
               )}
             </div>
+
+            {/* ── Reciprocal action: scan someone else's passport ── */}
+            <div className="w-full mt-7 pt-6 border-t border-border flex flex-col items-center">
+              <p className="text-sm text-muted-foreground mb-3 max-w-xs">
+                Met a fellow traveler? Scan their passport to connect.
+              </p>
+              <Button
+                onClick={() => setScannerOpen(true)}
+                className="gap-2 cursor-pointer w-full sm:w-auto"
+              >
+                <ScanLine className="size-4" /> Scan a passport
+              </Button>
+            </div>
           </div>
         </div>
       </motion.div>
+
+      {scannerOpen && <PassportScanner onClose={() => setScannerOpen(false)} />}
     </div>
   )
 }

@@ -35,6 +35,7 @@ import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { YouWereHereBadge } from '@/components/albums/YouWereHereBadge'
 import { AlbumQualityNudges } from '@/components/albums/AlbumQualityNudges'
+import { FavoriteAlbumToggle } from '@/components/albums/FavoriteAlbumToggle'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -813,11 +814,20 @@ export default function AlbumDetailPage() {
 
                 {/* Owner actions */}
                 {isOwner && (
-                  <Link href={`/albums/${album.id}/edit`} className="cursor-pointer">
-                    <Button variant="ghost" size="sm" className="text-xs cursor-pointer">
-                      Edit
-                    </Button>
-                  </Link>
+                  <>
+                    <FavoriteAlbumToggle
+                      albumId={album.id}
+                      initialFavorite={album.is_favorite}
+                      onChange={(next) =>
+                        setAlbum((prev) => (prev ? { ...prev, is_favorite: next } : prev))
+                      }
+                    />
+                    <Link href={`/albums/${album.id}/edit`} className="cursor-pointer">
+                      <Button variant="ghost" size="sm" className="text-xs cursor-pointer">
+                        Edit
+                      </Button>
+                    </Link>
+                  </>
                 )}
               </div>
             </motion.div>
@@ -892,10 +902,9 @@ export default function AlbumDetailPage() {
             className="grid gap-1"
             style={{
               // Size columns to the actual number of visible actions. Like,
-              // Comment and Share always show; Save only shows for non-owners.
-              gridTemplateColumns: `repeat(${
-                3 + (!isOwner ? 1 : 0)
-              }, minmax(0, 1fr))`,
+              // Comment and Share always show; the 4th slot is Save for
+              // non-owners and the Favourite toggle for the owner.
+              gridTemplateColumns: `repeat(4, minmax(0, 1fr))`,
             }}
           >
             <motion.button
@@ -924,7 +933,7 @@ export default function AlbumDetailPage() {
               <span className="text-[10px] font-medium">Share</span>
             </div>
 
-            {!isOwner && (
+            {!isOwner ? (
               <motion.button
                 onClick={handleSaveClick}
                 className={cn(
@@ -936,6 +945,18 @@ export default function AlbumDetailPage() {
                 <Bookmark className={cn("h-6 w-6", isSaved && "fill-current")} />
                 <span className="text-[10px] font-medium">Save</span>
               </motion.button>
+            ) : (
+              <div className="flex flex-col items-center gap-1 py-2 rounded-xl min-w-[44px] min-h-[44px]">
+                <FavoriteAlbumToggle
+                  albumId={album.id}
+                  initialFavorite={album.is_favorite}
+                  onChange={(next) =>
+                    setAlbum((prev) => (prev ? { ...prev, is_favorite: next } : prev))
+                  }
+                  className="!p-0"
+                />
+                <span className="text-[10px] font-medium text-muted-foreground">Favourite</span>
+              </div>
             )}
           </div>
         </motion.div>

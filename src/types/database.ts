@@ -62,6 +62,9 @@ export interface Album {
   license_type?: 'all-rights-reserved' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc-by-nc-sa' | 'cc-by-nc-nd' | 'cc0' | 'public-domain';
   license_url?: string;
   view_count?: number;
+  // Owner-only "favourite album" flag (migration 60). Optional for back-compat:
+  // treat a missing value as `false` (e.g. before the migration is applied).
+  is_favorite?: boolean;
   created_at: string;
   updated_at: string;
   // Relations

@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2, CheckSquare, Square, ArrowUpDown, Images } from 'lucide-react'
+import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2, CheckSquare, Square, ArrowUpDown, Images, Star } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
@@ -747,6 +747,16 @@ function AlbumsPageContent() {
                               <span>{photoCount(album)}</span>
                             </div>
                           </div>
+
+                          {/* Favourite badge (owner's favourited albums only;
+                              `is_favorite` is undefined pre-migration => hidden) */}
+                          {!isViewingOtherUser && album.is_favorite && (
+                            <div className="absolute top-2 right-2">
+                              <div className="bg-black/55 backdrop-blur-sm rounded-full p-1 sm:p-1.5 drop-shadow-sm" title="Favourite">
+                                <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400 fill-current" />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Link>

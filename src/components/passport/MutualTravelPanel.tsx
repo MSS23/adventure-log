@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Plane, MapPin, Sparkles, Compass } from 'lucide-react'
+import { Plane, MapPin, Sparkles, Compass, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -209,6 +210,26 @@ export function MutualTravelPanel({
             <Compass className="size-3.5 text-[color:var(--color-coral)]" />
             Be the first to follow in {ownerName}&apos;s footsteps — their countries are below.
           </p>
+        )}
+
+        {/* CTA → full Travel Blend (compatibility %, combined/shared/unique
+            countries, favourite trips). Routes to /blend/<ownerUsername>. */}
+        {!loading && (
+          <motion.div
+            className="mt-5 flex justify-center"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+          >
+            <Link
+              href={`/blend/${ownerUsername}`}
+              className="group inline-flex items-center gap-2 rounded-full bg-[color:var(--color-coral)] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            >
+              <Sparkles className="size-4" />
+              See your Travel Blend
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </motion.div>
         )}
       </div>
     </motion.div>

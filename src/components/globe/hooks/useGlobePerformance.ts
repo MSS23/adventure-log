@@ -135,11 +135,19 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
     }
   }, [effectivePerformanceMode])
 
-  // Pick earth texture based on screen size and performance mode
+  // Pick earth texture based on device capability + performance mode.
+  //
+  // Previously any viewport < 768px got the low-res texture, which made the
+  // globe look soft on phones — even though modern phones are high-DPR and
+  // render the 4K texture crisply. Now we only fall back to the light texture
+  // on genuinely low-density small screens (DPR < 2); high-DPR mobiles get the
+  // 4K texture and a noticeably sharper globe.
   const globeImageUrl = useMemo(() => {
     if (effectivePerformanceMode === 'low') return '/earth-texture.jpg'
-    if (typeof window !== 'undefined' && window.innerWidth < 768) return '/earth-texture.jpg'
-    return '/earth-texture-4k.jpg'
+    if (typeof window === 'undefined') return '/earth-texture-4k.jpg'
+    const dpr = window.devicePixelRatio || 1
+    const isSmallLowDensity = window.innerWidth < 768 && dpr < 2
+    return isSmallLowDensity ? '/earth-texture.jpg' : '/earth-texture-4k.jpg'
   }, [effectivePerformanceMode])
 
   // Memoize renderer config

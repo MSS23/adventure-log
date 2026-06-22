@@ -119,10 +119,17 @@ const nextConfig: NextConfig = {
           cacheGroups: {
             default: false,
             vendors: false,
-            // Globe visualization (largest - Three.js + react-globe)
+            // Globe visualization (largest - Three.js + react-globe).
+            // NOTE: the package matcher must cover every `three*` package, not
+            // just bare `three/`. react-globe.gl pulls in three-globe,
+            // three-render-objects, three-conic-polygon-geometry,
+            // three-geojson-geometry and three-slippy-map-globe — without the
+            // `three[-\w.]*` form those ~480KB leak into the shared `vendor`
+            // chunk and load on every route, even though the globe component is
+            // dynamically imported and only renders on globe pages.
             globe: {
               name: 'globe',
-              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three)[\\/]/,
+              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three[-\w.]*|h3-js)[\\/]/,
               chunks: 'all',
               priority: 40,
               enforce: true
@@ -149,6 +156,34 @@ const nextConfig: NextConfig = {
               test: /[\\/]node_modules[\\/](mapbox-gl|react-map-gl)[\\/]/,
               chunks: 'all',
               priority: 35,
+              enforce: true
+            },
+            // Leaflet - only rendered by TripMap (trips/[id] + public trip view),
+            // both of which dynamically import it. Splitting it out of `vendor`
+            // keeps ~145KB off every other route's First Load.
+            leaflet: {
+              name: 'leaflet',
+              test: /[\\/]node_modules[\\/](leaflet|react-leaflet|@react-leaflet)[\\/]/,
+              chunks: 'all',
+              priority: 36,
+              enforce: true
+            },
+            // Photo upload/EXIF libs - used only on upload & bulk-import flows
+            // (exifr is dynamically imported; react-dropzone lives on upload
+            // pages). ~130KB that doesn't belong in the shared vendor chunk.
+            photoTools: {
+              name: 'photo-tools',
+              test: /[\\/]node_modules[\\/](exifr|react-dropzone|file-selector)[\\/]/,
+              chunks: 'all',
+              priority: 34,
+              enforce: true
+            },
+            // Drag-and-drop - only the photo grid editor (organize/edit) uses it.
+            dndKit: {
+              name: 'dnd-kit',
+              test: /[\\/]node_modules[\\/]@dnd-kit[\\/]/,
+              chunks: 'all',
+              priority: 34,
               enforce: true
             },
             // Core vendor (Supabase, React Query, etc.)

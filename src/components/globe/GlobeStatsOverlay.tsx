@@ -1,6 +1,6 @@
 'use client'
 
-import { MapPin, Camera, Globe2, Route, BarChart3 } from 'lucide-react'
+import { MapPin, Camera, Globe2, Route, BarChart3, X } from 'lucide-react'
 
 interface GlobeStatsOverlayProps {
   stats: { totalAlbums: number; totalCountries: number; totalPhotos: number }
@@ -61,9 +61,11 @@ export function GlobeStatsOverlay({
               <button
                 type="button"
                 onClick={() => setShowStatsOverlay(false)}
-                className="text-muted-foreground hover:text-foreground text-xs cursor-pointer transition-colors duration-200 py-1 px-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
+                aria-label="Hide travel stats"
+                title="Hide stats"
+                className="inline-flex items-center justify-center h-7 w-7 -mr-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500"
               >
-                close
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
             <div className="space-y-1.5">

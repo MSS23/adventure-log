@@ -9,6 +9,8 @@ export interface WrappedData {
   totalTrips: number
   totalPhotos: number
   countryCodes: string[]
+  /** Share of the world's ~195 countries visited, 0–100 (rounded). */
+  countryPercentage: number
   cities: string[]
   topAlbums: { id: string; title: string; location_name?: string; cover_photo_url?: string; like_count: number }[]
   firstTrip: { title: string; location_name?: string; date_start?: string } | null
@@ -70,6 +72,7 @@ const EMPTY_DATA: WrappedData = {
   totalTrips: 0,
   totalPhotos: 0,
   countryCodes: [],
+  countryPercentage: 0,
   cities: [],
   topAlbums: [],
   firstTrip: null,
@@ -150,6 +153,8 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
 
         const totalPhotos = albumList.reduce((sum, a) => sum + (a.photos?.length || 0), 0)
         const countryCodes = [...new Set(albumList.filter(a => a.country_code).map(a => a.country_code as string))]
+        // 195 = standard world-country count used by travel apps (UN members + observers)
+        const countryPercentage = Math.min(100, Math.round((countryCodes.length / 195) * 100))
         const cities = [...new Set(albumList.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
 
         const months = albumList
@@ -216,6 +221,7 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
           totalTrips: albumList.length,
           totalPhotos,
           countryCodes,
+          countryPercentage,
           cities,
           topAlbums,
           firstTrip,

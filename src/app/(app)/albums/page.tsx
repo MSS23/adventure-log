@@ -737,39 +737,8 @@ function AlbumsPageContent() {
                               <div className="bg-black/55 backdrop-blur-sm rounded-full p-1.5">
                                 {getVisibilityIcon(album.visibility || album.privacy)}
                               </div>
-                              {!isViewingOtherUser && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation()
-                                    setQuickDeleteAlbum(album)
-                                  }}
-                                  className="bg-destructive/80 hover:bg-destructive backdrop-blur-sm text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
-                                  title="Delete album"
-                                  aria-label={`Delete ${album.title}`}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              )}
                             </div>
                           </div>
-
-                          {/* Quick delete button (mobile) — top-right, balances the photo-count badge and stays clear of the title gradient */}
-                          {!isViewingOtherUser && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                setQuickDeleteAlbum(album)
-                              }}
-                              className="md:hidden absolute top-2 right-2 bg-black/45 active:bg-destructive backdrop-blur-sm text-white/85 active:text-white rounded-full p-1.5 transition-all duration-200 cursor-pointer z-10 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                              aria-label={`Delete ${album.title}`}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
-                          )}
 
                           {/* Photo count indicator (always visible) */}
                           <div className="absolute top-2 left-2">

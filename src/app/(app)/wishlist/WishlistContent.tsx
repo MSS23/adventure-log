@@ -262,12 +262,13 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
         </div>
 
         {/* ── View Switcher (Bucket List | Saved Places) ────────── */}
-        <div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 p-1">
+        <div role="group" aria-label="Wishlist view" className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 p-1">
           <button
             type="button"
+            aria-pressed={view === 'bucket'}
             onClick={() => setView('bucket')}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer',
+              'inline-flex items-center justify-center gap-1.5 rounded-full px-4 h-9 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
               view === 'bucket' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -276,9 +277,10 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
           </button>
           <button
             type="button"
+            aria-pressed={view === 'places'}
             onClick={() => setView('places')}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer',
+              'inline-flex items-center justify-center gap-1.5 rounded-full px-4 h-9 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
               view === 'places' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}
           >

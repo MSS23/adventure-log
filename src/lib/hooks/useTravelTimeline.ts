@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { areFriends, type VisibilityLevel } from '@/lib/utils/privacy'
+import { formatLocationLabel } from '@/lib/utils/country'
 
 interface TravelLocation {
   id: string
@@ -310,9 +311,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         const photoCount = photoCounts.get(item.id) || 0
         totalPhotos += photoCount
 
-        const locationName = [item.location_name, item.country_code]
-          .filter(Boolean)
-          .join(', ') || 'Unknown Location'
+        const locationName = formatLocationLabel(item.location_name, item.country_code)
 
         // Get cover photo URL - use cover_photo_url or first photo
         let coverPhotoUrl: string | undefined = undefined

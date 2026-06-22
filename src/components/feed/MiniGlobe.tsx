@@ -138,7 +138,12 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
   ]
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-xl border border-border bg-[var(--color-ivory-alt)] shadow-[var(--shadow-resting)]',
+        className,
+      )}
+    >
       <GlobeGL
         ref={globeRef}
         globeImageUrl="/earth-texture.jpg"
@@ -412,12 +417,10 @@ export function MiniGlobe({ latitude, longitude, location, className = '' }: Min
       />
 
       {location && (
-        <div className="absolute bottom-2 left-2 right-2 z-10 pointer-events-none">
-          <div className="bg-white/95 dark:bg-[#1B170E]/95 backdrop-blur-sm rounded-md px-2 py-1.5 shadow-sm border border-stone-200 dark:border-white/[0.10]">
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3 text-red-500 flex-shrink-0" />
-              <p className="text-xs font-medium text-stone-900 dark:text-stone-100 truncate">{location}</p>
-            </div>
+        <div className="absolute inset-x-2 bottom-2 z-10 pointer-events-none">
+          <div className="flex items-center gap-1.5 rounded-lg border border-border/80 bg-card/90 px-2.5 py-1.5 shadow-sm backdrop-blur-md">
+            <MapPin className="h-3 w-3 shrink-0 text-[var(--color-coral)]" strokeWidth={2.2} />
+            <p className="truncate text-xs font-medium text-foreground">{location}</p>
           </div>
         </div>
       )}

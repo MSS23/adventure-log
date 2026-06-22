@@ -84,20 +84,20 @@ export function GlobePageHeader({
 
             {/* Mode Toggle: My Globe / Explore */}
             {isOwnProfile && (
-              <div className="flex bg-stone-100 dark:bg-stone-800 rounded-lg p-0.5 flex-shrink-0">
+              <div role="group" aria-label="Globe mode" className="flex bg-stone-100 dark:bg-white/[0.06] rounded-lg p-0.5 flex-shrink-0">
                 <button
                   type="button"
                   aria-label="My Globe"
                   aria-pressed={!exploreMode}
                   onClick={() => setExploreMode(false)}
                   className={cn(
-                    "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1 min-h-[32px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]",
+                    "inline-flex items-center justify-center gap-1.5 px-3 h-8 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]",
                     !exploreMode
-                      ? "bg-white dark:bg-stone-700 shadow-sm text-olive-700 dark:text-olive-400"
-                      : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
+                      ? "bg-white dark:bg-white/[0.12] shadow-sm text-olive-700 dark:text-olive-300"
+                      : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
                   )}
                 >
-                  <Globe2 className="h-3.5 w-3.5" />
+                  <Globe2 className="h-4 w-4" />
                   <span className="hidden lg:inline">My Globe</span>
                 </button>
                 <button
@@ -106,13 +106,13 @@ export function GlobePageHeader({
                   aria-pressed={exploreMode}
                   onClick={() => setExploreMode(true)}
                   className={cn(
-                    "px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1 min-h-[32px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]",
+                    "inline-flex items-center justify-center gap-1.5 px-3 h-8 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]",
                     exploreMode
-                      ? "bg-white dark:bg-stone-700 shadow-sm text-olive-700 dark:text-olive-400"
-                      : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300"
+                      ? "bg-white dark:bg-white/[0.12] shadow-sm text-olive-700 dark:text-olive-300"
+                      : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
                   )}
                 >
-                  <Compass className="h-3.5 w-3.5" />
+                  <Compass className="h-4 w-4" />
                   <span className="hidden lg:inline">Explore</span>
                 </button>
               </div>
@@ -158,10 +158,10 @@ export function GlobePageHeader({
             {availableYears.length > 0 && !exploreMode && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" aria-label="Filter by year" className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[32px]">
+                  <button type="button" aria-label="Filter albums by year" className="hidden lg:inline-flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-white/[0.06] hover:bg-stone-200 dark:hover:bg-white/[0.1] text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]">
                     <Calendar className="h-3.5 w-3.5" />
-                    <span>{selectedYear ? selectedYear : 'All'}</span>
-                    <ChevronDown className="h-3 w-3" />
+                    <span>{selectedYear ? selectedYear : 'All years'}</span>
+                    <ChevronDown className="h-3 w-3 opacity-70" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="min-w-[140px]">
@@ -224,9 +224,9 @@ export function GlobePageHeader({
                 onClick={() => router.push('/globe')}
                 variant="outline"
                 size="sm"
-                className="gap-1 h-7 px-2 text-xs"
+                className="gap-1.5 h-9"
               >
-                <Globe2 className="h-3 w-3" />
+                <Globe2 className="h-4 w-4" />
                 <span className="hidden lg:inline">My Globe</span>
               </Button>
             )}
@@ -240,25 +240,26 @@ export function GlobePageHeader({
                   setWishlistPrompt(null)
                 }}
                 className={cn(
-                  "relative flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]",
+                  "relative inline-flex items-center justify-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97]",
                   showWishlist
-                    ? "bg-amber-100 text-amber-700 ring-1 ring-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
-                    : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
+                    ? "bg-amber-100 text-amber-800 ring-1 ring-amber-400 dark:bg-amber-500/20 dark:text-amber-300 dark:ring-amber-400/40"
+                    : "bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.1]"
                 )}
-                title={showWishlist ? 'Hide Wishlist' : 'Show Wishlist'}
+                title={showWishlist ? 'Hide wishlist pins on globe' : 'Show wishlist pins on globe'}
                 aria-label={showWishlist ? 'Hide wishlist' : 'Show wishlist'}
               >
                 {showWishlist ? (
-                  <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                  <Star className="h-4 w-4 fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400" />
                 ) : (
-                  <StarOff className="h-3.5 w-3.5" />
+                  <StarOff className="h-4 w-4" />
                 )}
+                <span className="hidden sm:inline">Wishlist</span>
                 {wishlistItemsCount > 0 && (
                   <span className={cn(
-                    "absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[10px] font-bold px-1",
+                    "ml-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold px-1 tabular-nums",
                     showWishlist
-                      ? "bg-amber-500 text-white"
-                      : "bg-stone-400 text-white"
+                      ? "bg-amber-500 text-white dark:bg-amber-400 dark:text-stone-900"
+                      : "bg-stone-300 text-stone-700 dark:bg-white/[0.12] dark:text-stone-200"
                   )}>
                     {wishlistItemsCount}
                   </span>
@@ -266,11 +267,15 @@ export function GlobePageHeader({
               </button>
             )}
 
-
             {isOwnProfile && !exploreMode && (
-              <Link href="/albums/new">
-                <Button size="sm" className="gap-1 h-7 px-2 bg-olive-500 hover:bg-olive-600 text-white text-xs">
-                  <Plus className="h-3 w-3" />
+              <Link href="/albums/new" aria-label="Create new album">
+                <Button
+                  size="sm"
+                  className="gap-1.5 h-9 bg-olive-600 hover:bg-olive-700 text-white"
+                  title="Create new album"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">New album</span>
                 </Button>
               </Link>
             )}

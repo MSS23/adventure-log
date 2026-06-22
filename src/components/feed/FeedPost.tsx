@@ -10,6 +10,7 @@ import { LikeButton } from '@/components/social/LikeButton'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { formatTravelDate } from '@/lib/utils/travel-date'
+import { formatLocationLabel, getFlagEmoji } from '@/lib/utils/country'
 import { cn } from '@/lib/utils'
 
 export interface FeedAlbum {
@@ -110,6 +111,11 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
     latitude: album.latitude,
   })
 
+  // Clean, de-duplicated location label ("New York, USA, US" -> "New York, USA").
+  const locationLabel = album.location
+    ? formatLocationLabel(album.location, album.country_code)
+    : ''
+
   const hasGeo = !!(album.latitude && album.longitude)
   // Location chip routes to that user's globe view (filtered globe page).
   const userGlobeHref = hasGeo
@@ -142,9 +148,11 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
 
   return (
     <article className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-resting)] transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-hover)]">
-      {/* Byline — avatar, name, location chip, date */}
-      <header className="px-4 sm:px-5 pt-4 pb-3 flex items-center gap-2.5 sm:gap-3">
-        <UserAvatarLink user={user}>
+      {/* Byline — avatar, name + flag, then a secondary location · date meta line.
+          Tightened to a single balanced row: identity on the left, the globe
+          affordance pinned right. */}
+      <header className="flex items-center gap-3 px-4 sm:px-5 pt-3.5 pb-3">
+        <UserAvatarLink user={user} className="shrink-0">
           <OptimizedAvatar
             src={user.avatar_url}
             alt={user.display_name}
@@ -153,50 +161,57 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
           />
         </UserAvatarLink>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
+        <div className="min-w-0 flex-1">
+          {/* Line 1 — display name + country flag, on one baseline */}
+          <div className="flex items-center gap-1.5">
             <UserLink
               user={user}
-              className="min-w-0 truncate text-sm font-semibold leading-none text-foreground hover:text-primary transition-colors"
+              className="min-w-0 truncate text-[15px] font-semibold leading-tight text-foreground hover:text-primary transition-colors"
             >
               {user.display_name || user.username}
             </UserLink>
             {album.country_code && (
-              // leading-none collapses both line-boxes to their glyph height so
-              // items-center aligns the flag's optical centre with the name's
-              // cap-height; the tiny nudge corrects the emoji's high baseline.
+              // leading-none collapses the line-box to glyph height so the flag's
+              // optical centre lines up with the name's cap-height; the nudge
+              // corrects the emoji's naturally-high baseline.
               <span
-                className="shrink-0 text-sm leading-none translate-y-[0.5px]"
-                title={album.country || album.location}
+                className="shrink-0 text-[13px] leading-none translate-y-[0.5px]"
+                title={album.country || locationLabel}
                 aria-hidden
               >
-                {getFlag(album.country_code)}
+                {getFlagEmoji(album.country_code)}
               </span>
             )}
           </div>
-          <p className="font-mono text-[11px] tracking-wide uppercase text-muted-foreground mt-0.5">
-            {dateFormatted}
-          </p>
+
+          {/* Line 2 — location · date, as quiet secondary meta */}
+          <div className="mt-1 flex items-center gap-1.5 text-xs leading-none text-muted-foreground">
+            {locationLabel && (
+              <>
+                <span className="inline-flex min-w-0 items-center gap-1">
+                  <MapPin className="h-3 w-3 shrink-0 opacity-70" strokeWidth={2} aria-hidden />
+                  <span className="truncate font-medium text-foreground/80">{locationLabel}</span>
+                </span>
+                <span className="text-muted-foreground/50" aria-hidden>·</span>
+              </>
+            )}
+            <span className="shrink-0 font-mono uppercase tracking-wide text-[11px]">
+              {dateFormatted}
+            </span>
+          </div>
         </div>
 
-        {/* Location chip — primary "view their globe" affordance. shrink-0 so it
-            keeps its shape, but the label truncates hard on small screens so it
-            never squeezes the name into a wrap. */}
-        {album.location && (
-          <Link
-            href={userGlobeHref}
-            className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary transition-colors duration-200 hover:bg-primary/15 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            title={`Open ${user.display_name || user.username}'s globe`}
-          >
-            <MapPin className="w-3 h-3 shrink-0" strokeWidth={2.2} aria-hidden />
-            <span className="truncate max-w-[26vw] sm:max-w-[160px]">{album.location}</span>
-            <GlobeIcon
-              className="w-3 h-3 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity"
-              strokeWidth={2.2}
-              aria-hidden
-            />
-          </Link>
-        )}
+        {/* Globe affordance — compact, icon-led pill that opens this user's globe.
+            shrink-0 keeps its shape; the location text now lives in the meta line
+            so the pill stays small and never crowds the name. */}
+        <Link
+          href={userGlobeHref}
+          className="group inline-flex shrink-0 items-center justify-center h-8 w-8 rounded-full border border-border/70 bg-muted/40 text-muted-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-primary/10 hover:text-primary cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          title={`Open ${user.display_name || user.username}'s globe`}
+          aria-label={`Open ${user.display_name || user.username}'s globe`}
+        >
+          <GlobeIcon className="h-4 w-4" strokeWidth={1.9} aria-hidden />
+        </Link>
       </header>
 
       {/* Photo — full-bleed, no decorative bg */}

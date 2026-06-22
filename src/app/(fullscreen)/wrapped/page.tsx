@@ -565,6 +565,23 @@ export default function WrappedPage() {
                 </motion.div>
               )}
 
+              {/* World explored — share of the planet's countries visited */}
+              {data.countryCodes.length > 0 && (
+                <motion.div
+                  className="text-center mb-8"
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.9, type: 'spring', stiffness: 200, damping: 18 }}
+                >
+                  <p className="al-stat-value text-5xl sm:text-6xl !text-white tabular-nums leading-none">
+                    {data.countryPercentage}%
+                  </p>
+                  <p className="al-eyebrow !text-olive-400 mt-2">
+                    of the world explored
+                  </p>
+                </motion.div>
+              )}
+
               {/* Distance comparison */}
               {data.totalDistanceKm > 0 && (
                 <motion.p

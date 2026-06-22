@@ -279,34 +279,38 @@ function PlaceCard({
             <span className="text-[11px] text-muted-foreground">{platformLabel[place.source_platform]}</span>
           )}
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <button
               type="button"
               onClick={() => onAddToTrip(place)}
               aria-label="Add to a trip"
               title="Add to a trip"
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.95]"
             >
-              <Luggage className="h-3.5 w-3.5" />
+              <Luggage className="h-4 w-4" />
             </button>
             <button
               type="button"
+              aria-pressed={visited}
               onClick={() => onToggleVisited(place)}
               aria-label={visited ? 'Mark as not visited' : 'Mark as visited'}
-              title={visited ? 'Visited' : 'Mark visited'}
-              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                visited ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground hover:text-foreground'
+              title={visited ? 'Visited — tap to undo' : 'Mark visited'}
+              className={`inline-flex items-center justify-center h-9 w-9 rounded-lg transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.95] ${
+                visited
+                  ? 'text-emerald-700 bg-emerald-500/15 dark:text-emerald-400 dark:bg-emerald-500/20'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
-              <Check className="h-3.5 w-3.5" />
+              <Check className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={() => onRemove(place.id)}
               aria-label="Remove place"
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+              title="Remove place"
+              className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.95]"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         </div>

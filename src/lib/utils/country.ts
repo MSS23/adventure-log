@@ -50,6 +50,59 @@ export function extractCountryFromLocation(locationName: string): string {
 }
 
 /**
+ * Just the city/primary segment of a location string ("New York, USA" -> "New York").
+ */
+export function getCityName(locationName?: string | null): string {
+  return (locationName || '').split(',')[0]?.trim() || ''
+}
+
+/**
+ * Produce a clean, de-duplicated location label for display.
+ *
+ * Fixes the "New York, USA, US" class of bug where a stored `location_name`
+ * (which often already ends in a country) gets a raw 2-letter `country_code`
+ * appended. Rules:
+ *   - drop a bare 2-letter token that just repeats the country code
+ *     (the flag / code is shown separately; "Tuscany, IT" -> "Tuscany"),
+ *   - case-insensitively de-duplicate repeated segments ("USA, USA" -> "USA"),
+ *   - never append the country code; fall back to the country *name* only when
+ *     there is no usable location string at all.
+ *
+ * @param locationName - stored album location string (may be null)
+ * @param countryCode  - ISO 3166-1 alpha-2 code (may be null)
+ */
+export function formatLocationLabel(
+  locationName?: string | null,
+  countryCode?: string | null,
+): string {
+  const code = (countryCode || '').toUpperCase()
+
+  const raw = (locationName || '')
+    .split(',')
+    .map(p => p.trim())
+    .filter(Boolean)
+
+  // Drop a trailing/standalone bare country-code token (e.g. "US", "IT").
+  const withoutBareCode = raw.filter(
+    p => !(p.length === 2 && p.toUpperCase() === code),
+  )
+
+  // Case-insensitive de-dupe, preserving first-seen order.
+  const seen = new Set<string>()
+  const parts = withoutBareCode.filter(p => {
+    const key = p.toLowerCase()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  if (parts.length > 0) return parts.join(', ')
+
+  const name = code.length === 2 ? getCountryName(code) : ''
+  return name && name !== 'Unknown' ? name : 'Unknown Location'
+}
+
+/**
  * Get all countries as an array of { code, name } objects
  * @returns Array of country objects sorted by name
  */

@@ -49,9 +49,12 @@ test.describe('API Health', () => {
 test.describe('Landing Page', () => {
   test('renders hero section with globe', async ({ page }) => {
     await page.goto('/')
-    // Hero headline
-    await expect(page.locator('text=Every Trip')).toBeVisible({ timeout: 10000 })
-    await expect(page.locator('text=One Globe')).toBeVisible()
+    // Hero headline — scope to the <h1>. Descriptive copy elsewhere on the page
+    // also contains "Every Trip"/"One Globe", so a loose text= locator matches
+    // multiple elements and trips Playwright strict mode.
+    const hero = page.getByRole('heading', { level: 1 })
+    await expect(hero).toContainText('Every Trip', { timeout: 10000 })
+    await expect(hero).toContainText('One Globe')
     // CTA buttons
     await expect(page.locator('text=Get Started').first()).toBeVisible()
     await expect(page.locator('text=Sign In').first()).toBeVisible()
@@ -60,9 +63,12 @@ test.describe('Landing Page', () => {
   test('features section loads', async ({ page }) => {
     await page.goto('/')
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2))
-    await expect(page.locator('text=Interactive 3D Globe')).toBeVisible({ timeout: 5000 })
-    await expect(page.locator('text=Flyover Videos')).toBeVisible()
-    await expect(page.locator('text=Travel Passport')).toBeVisible()
+    // Target the feature-card <h3> titles by role+name. The same phrases also
+    // appear in hero/body copy and eyebrows, so a substring text= locator would
+    // resolve to multiple elements.
+    await expect(page.getByRole('heading', { name: 'Interactive 3D Globe' })).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('heading', { name: 'Flyover Videos' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Travel Passport' })).toBeVisible()
   })
 
   test('navigation links work', async ({ page }) => {
@@ -412,7 +418,8 @@ test.describe('Mobile Layout', () => {
 
   test('landing page renders on mobile', async ({ page }) => {
     await page.goto('/')
-    await expect(page.locator('text=Every Trip')).toBeVisible({ timeout: 10000 })
+    // Scope to the <h1> — loose text= matches descriptive copy too (strict mode).
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Every Trip', { timeout: 10000 })
     await expect(page.locator('text=Get Started').first()).toBeVisible()
   })
 

@@ -8,11 +8,24 @@
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Loader2, MailCheck } from 'lucide-react'
+import { Loader2, MailCheck, Eye, EyeOff, Globe, Lock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+
+type AccountVisibility = 'public' | 'private'
+
+const VISIBILITY_OPTIONS: {
+  value: AccountVisibility
+  label: string
+  desc: string
+  icon: typeof Globe
+}[] = [
+  { value: 'public', label: 'Public', desc: 'Anyone can find & follow you', icon: Globe },
+  { value: 'private', label: 'Private', desc: 'Only people you approve', icon: Lock },
+]
 
 function SignupForm() {
   const router = useRouter()
@@ -20,6 +33,8 @@ function SignupForm() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [visibility, setVisibility] = useState<AccountVisibility>('public')
   const [ageConfirmed, setAgeConfirmed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -41,6 +56,15 @@ function SignupForm() {
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          // The chosen account visibility is the user's own preference (the same
+          // value they can later edit in Settings), not an authorization grant,
+          // so carrying it in client-writable user_metadata is fine. The
+          // create_profile_on_signup trigger reads `privacy_level` when it
+          // provisions the public.users row (migration 54), validating it and
+          // falling back to 'public'.
+          data: { privacy_level: visibility },
+        },
       })
 
       if (authError) {
@@ -51,6 +75,22 @@ function SignupForm() {
       // If a session was returned, email confirmation is disabled and the user
       // is signed in immediately — send them straight into the app.
       if (data.session) {
+        // Best-effort: apply the chosen visibility directly too, so it takes
+        // effect even where the migration-54 trigger isn't deployed yet. The
+        // trigger/Settings remain the source of truth; failures here are
+        // non-fatal (provisioning race or RLS) since the metadata still carries
+        // the choice.
+        if (visibility !== 'public') {
+          try {
+            await supabase
+              .from('users')
+              .update({ privacy_level: visibility })
+              .eq('id', data.session.user.id)
+          } catch {
+            // ignore — trigger metadata covers this case
+          }
+        }
+
         const redirectTo = searchParams.get('redirectTo')
         const target =
           redirectTo && redirectTo.startsWith('/') ? redirectTo : '/dashboard'
@@ -132,17 +172,68 @@ function SignupForm() {
             >
               Password
             </label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-xl"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" strokeWidth={1.8} />
+                ) : (
+                  <Eye className="h-4 w-4" strokeWidth={1.8} />
+                )}
+              </button>
+            </div>
           </div>
+
+          <fieldset className="space-y-1.5">
+            <legend className="block text-sm font-medium text-foreground">
+              Account visibility
+            </legend>
+            <div className="grid grid-cols-2 gap-2">
+              {VISIBILITY_OPTIONS.map((opt) => {
+                const Icon = opt.icon
+                const selected = visibility === opt.value
+                return (
+                  <button
+                    type="button"
+                    key={opt.value}
+                    onClick={() => setVisibility(opt.value)}
+                    aria-pressed={selected}
+                    className={cn(
+                      'flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      selected
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:bg-muted/50',
+                    )}
+                  >
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                      <Icon className="h-4 w-4" strokeWidth={1.8} />
+                      {opt.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{opt.desc}</span>
+                  </button>
+                )
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              You can change this anytime in Settings.
+            </p>
+          </fieldset>
 
           <div className="flex items-start gap-2.5">
             <input

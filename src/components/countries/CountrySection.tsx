@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Album } from '@/types/database'
 import { AlbumGrid } from '@/components/albums/AlbumGrid'
 import { getFlagEmoji } from '@/lib/utils/country'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { ChevronDown, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +29,12 @@ export function CountrySection({
     new Set(albums.map(a => a.location_name).filter(Boolean))
   ).length
 
+  // Representative cover for the country — first album that has one. Paired with
+  // the flag badge so the header shows "this place" not just a flag in a box.
+  const coverAlbum = albums.find(a => a.cover_photo_url)
+  const coverUrl = coverAlbum?.cover_photo_url ? getPhotoUrl(coverAlbum.cover_photo_url) : null
+  const flag = getFlagEmoji(countryCode)
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-resting)] transition-[box-shadow,border-color] duration-200 hover:border-primary/30 hover:shadow-[var(--shadow-hover)]">
       {/* Header */}
@@ -42,13 +50,33 @@ export function CountrySection({
         aria-expanded={isExpanded}
         aria-controls={`country-albums-${countryCode}`}
       >
-        {/* Flag */}
-        <div className="relative">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted/60">
-            <span className="text-2xl">
-              {getFlagEmoji(countryCode)}
-            </span>
+        {/* Album cover paired with the country flag */}
+        <div className="relative shrink-0">
+          <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-muted/60">
+            {coverUrl ? (
+              <Image
+                src={coverUrl}
+                alt=""
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-2xl" aria-hidden>
+                {flag}
+              </span>
+            )}
           </div>
+          {/* Flag badge — only when a cover is shown, so the flag is always
+              visible (either as the badge here or as the box fallback above). */}
+          {coverUrl && (
+            <span
+              className="absolute -bottom-1 -left-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-card px-0.5 text-[13px] leading-none shadow-sm ring-1 ring-border"
+              aria-hidden
+            >
+              {flag}
+            </span>
+          )}
           {albums.length > 5 && (
             <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary">
               <span className="text-[10px] font-bold text-primary-foreground">{albums.length}</span>

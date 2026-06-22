@@ -9,6 +9,7 @@ import { CountrySection } from '@/components/countries/CountrySection'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
+import { getCountryCodeFromName } from '@/lib/utils/country-search'
 import { Search, Globe, Plus } from 'lucide-react'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -51,11 +52,15 @@ export default function CountriesContent() {
     const grouped = albums.reduce((acc, album) => {
       let countryCode = album.country_code
 
-      // If no country code, try to extract from location_name
+      // If no country code, try to extract from location_name and convert the
+      // country *name* to a real ISO code so the flag emoji resolves (otherwise
+      // grouping by the raw name yields a blank/white flag in the header).
       if (!countryCode && album.location_name) {
         const extractedCountry = extractCountryFromLocation(album.location_name)
-        // Store the extracted country as a pseudo-code for grouping
-        countryCode = extractedCountry || 'UNKNOWN'
+        countryCode =
+          (extractedCountry && getCountryCodeFromName(extractedCountry)) ||
+          extractedCountry ||
+          'UNKNOWN'
       }
 
       if (!countryCode) {

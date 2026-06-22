@@ -76,9 +76,9 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-1 px-2.5 py-1 rounded-full
-                         bg-black/55 text-white text-xs font-medium"
+                         bg-black/60 backdrop-blur-sm text-white text-xs font-medium"
             >
-              <MapPin className="h-3 w-3" />
+              <MapPin className="h-3 w-3 shrink-0" />
               <span className="truncate max-w-[100px]">{location}</span>
             </motion.div>
           )}
@@ -89,9 +89,9 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-1 px-2.5 py-1 rounded-full
-                         bg-black/55 text-white text-xs font-medium"
+                         bg-black/60 backdrop-blur-sm text-white text-xs font-medium"
             >
-              <Camera className="h-3 w-3" />
+              <Camera className="h-3 w-3 shrink-0" />
               <span>{album.photos.length}</span>
             </motion.div>
           )}
@@ -100,18 +100,18 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
         {/* Scrim — keeps overlay text legible on any photo */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent"
+          className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
         />
 
         {/* Content overlay */}
         <div className="absolute inset-x-0 bottom-0 p-4 z-10">
-          <h3 className="font-heading font-semibold text-white text-base sm:text-lg line-clamp-2 mb-1 drop-shadow-sm">
+          <h3 className="font-heading font-semibold text-white text-base sm:text-lg leading-snug line-clamp-2 mb-1.5 [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
             {album.title}
           </h3>
 
           {date && (
-            <div className="flex items-center gap-1.5 text-white/90 text-xs">
-              <Calendar className="h-3 w-3" />
+            <div className="flex items-center gap-1.5 text-white text-xs font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+              <Calendar className="h-3 w-3 shrink-0" />
               <span>{date}</span>
             </div>
           )}

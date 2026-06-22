@@ -30,6 +30,7 @@
     "mobile:init": "npx cap add android && npx cap add ios"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@capacitor/android": "^7.4.4",
     "@capacitor/camera": "^7.0.2",
     "@capacitor/cli": "^7.4.4",

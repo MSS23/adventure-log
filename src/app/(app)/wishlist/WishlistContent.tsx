@@ -15,7 +15,10 @@ import {
   Filter,
   ListChecks,
   HelpCircle,
+  MapPinned,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { SavedPlacesSection } from './_components/SavedPlacesSection'
 import { AnimatePresence } from 'framer-motion'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -51,6 +54,7 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
   const [showAddForm, setShowAddForm] = useState(false)
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all')
   const [editingItem, setEditingItem] = useState<WishlistItem | null>(null)
+  const [view, setView] = useState<'bucket' | 'places'>('bucket')
 
   const filteredItems = useMemo(() => {
     switch (activeFilter) {
@@ -232,81 +236,116 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
                   <HelpCircle className="h-5 w-5" />
                 </Button>
 
-                <Button
-                  data-tour-step="add-destination-btn"
-                  variant={showAddForm ? 'secondary' : 'coral'}
-                  onClick={() => setShowAddForm(!showAddForm)}
-                  className="gap-2 shrink-0 rounded-full"
-                >
-                  {showAddForm ? (
-                    <>
-                      <X className="h-4 w-4" />
-                      Cancel
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4" />
-                      Add Destination
-                    </>
-                  )}
-                </Button>
+                {view === 'bucket' && (
+                  <Button
+                    data-tour-step="add-destination-btn"
+                    variant={showAddForm ? 'secondary' : 'coral'}
+                    onClick={() => setShowAddForm(!showAddForm)}
+                    className="gap-2 shrink-0 rounded-full"
+                  >
+                    {showAddForm ? (
+                      <>
+                        <X className="h-4 w-4" />
+                        Cancel
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4" />
+                        Add Destination
+                      </>
+                    )}
+                  </Button>
+                )}
               </>
             }
           />
         </div>
 
-        {/* ── Add Destination Form ──────────────────────────────── */}
-        <AddDestinationForm open={showAddForm} onSubmit={handleAddDestination} />
-
-        {/* ── Filter Tabs ───────────────────────────────────────── */}
-        <FilterTabs active={activeFilter} counts={counts} onChange={setActiveFilter} />
-
-        {/* ── Wishlist Grid ─────────────────────────────────────── */}
-        <div data-tour-step="wishlist-grid">
-          {filteredItems.length === 0 ? (
-            <EnhancedEmptyState
-              icon={<MapPin className="h-12 w-12" />}
-              title={
-                activeFilter === 'completed'
-                  ? 'No Completed Destinations Yet'
-                  : activeFilter === 'high'
-                    ? 'No High Priority Destinations'
-                    : 'Your Wishlist is Empty'
-              }
-              description={
-                activeFilter === 'all' ? 'Add destinations you dream of visiting.' : undefined
-              }
-              action={
-                activeFilter === 'all'
-                  ? { label: 'Add Destination', onClick: () => setShowAddForm(true) }
-                  : undefined
-              }
-            />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
-              <AnimatePresence mode="popLayout">
-                {filteredItems.map((item, index) => (
-                  <WishlistCard
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    onMarkCompleted={handleMarkCompleted}
-                    onEdit={setEditingItem}
-                    onRemove={handleRemoveItem}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
+        {/* ── View Switcher (Bucket List | Saved Places) ────────── */}
+        <div className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 p-1">
+          <button
+            type="button"
+            onClick={() => setView('bucket')}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer',
+              view === 'bucket' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <Star className="h-4 w-4" />
+            Bucket List
+          </button>
+          <button
+            type="button"
+            onClick={() => setView('places')}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer',
+              view === 'places' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <MapPinned className="h-4 w-4" />
+            Saved Places
+          </button>
         </div>
 
-        {/* ── Travel Partners Section ───────────────────────────── */}
-        <TravelPartnersSection
-          partners={travelPartners}
-          partnerWishlists={partnerWishlists}
-          loadPartnerWishlist={loadPartnerWishlist}
-          suggestToPartner={suggestToPartner}
-        />
+        {view === 'places' ? (
+          /* ── Saved Places (links → grouped by location) ──────── */
+          <SavedPlacesSection />
+        ) : (
+          <>
+            {/* ── Add Destination Form ──────────────────────────────── */}
+            <AddDestinationForm open={showAddForm} onSubmit={handleAddDestination} />
+
+            {/* ── Filter Tabs ───────────────────────────────────────── */}
+            <FilterTabs active={activeFilter} counts={counts} onChange={setActiveFilter} />
+
+            {/* ── Wishlist Grid ─────────────────────────────────────── */}
+            <div data-tour-step="wishlist-grid">
+              {filteredItems.length === 0 ? (
+                <EnhancedEmptyState
+                  icon={<MapPin className="h-12 w-12" />}
+                  title={
+                    activeFilter === 'completed'
+                      ? 'No Completed Destinations Yet'
+                      : activeFilter === 'high'
+                        ? 'No High Priority Destinations'
+                        : 'Your Wishlist is Empty'
+                  }
+                  description={
+                    activeFilter === 'all' ? 'Add destinations you dream of visiting.' : undefined
+                  }
+                  action={
+                    activeFilter === 'all'
+                      ? { label: 'Add Destination', onClick: () => setShowAddForm(true) }
+                      : undefined
+                  }
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
+                  <AnimatePresence mode="popLayout">
+                    {filteredItems.map((item, index) => (
+                      <WishlistCard
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        onMarkCompleted={handleMarkCompleted}
+                        onEdit={setEditingItem}
+                        onRemove={handleRemoveItem}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+
+            {/* ── Travel Partners Section ───────────────────────────── */}
+            <TravelPartnersSection
+              partners={travelPartners}
+              partnerWishlists={partnerWishlists}
+              loadPartnerWishlist={loadPartnerWishlist}
+              suggestToPartner={suggestToPartner}
+            />
+          </>
+        )}
       </div>
 
       {/* ── Edit Destination Modal ────────────────────────────── */}

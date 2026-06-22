@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Album } from '@/types/database'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/auth/AuthProvider'
 import { CountrySection } from '@/components/countries/CountrySection'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,14 +12,39 @@ import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
 import { Search, Globe, Plus } from 'lucide-react'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { log } from '@/lib/utils/logger'
 import Link from 'next/link'
+import CountriesLoading from './loading'
 
-interface CountriesContentProps {
-  albums: Album[]
-}
-
-export default function CountriesContent({ albums }: CountriesContentProps) {
+export default function CountriesContent() {
+  const { user } = useAuth()
+  const userId = user?.id
   const [searchQuery, setSearchQuery] = useState('')
+
+  const { data: albums = [], isPending } = useQuery<Album[]>({
+    queryKey: ['countries-albums', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('albums')
+        .select('*')
+        .eq('user_id', user!.id)
+        .neq('status', 'draft')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        log.error('Error fetching albums for countries view', {
+          component: 'CountriesContent',
+          action: 'client-fetch',
+          userId,
+        }, error)
+        throw error
+      }
+
+      return data || []
+    },
+  })
 
   // Group albums by country
   const albumsByCountry = useMemo(() => {
@@ -62,6 +90,12 @@ export default function CountriesContent({ albums }: CountriesContentProps) {
       return countryName.toLowerCase().includes(query)
     })
   }, [albumsByCountry, searchQuery])
+
+  // Show the skeleton while the query is loading (also covers the brief window
+  // before the auth user id is available, since the query is gated on userId).
+  if (isPending) {
+    return <CountriesLoading />
+  }
 
   return (
     <div className="space-y-8">

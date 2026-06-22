@@ -1,6 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
+import { log } from '@/lib/utils/logger'
 import { useFavorites } from '@/lib/hooks/useFavorites'
 import { Bookmark, Compass, MapPin, Camera, Heart, User, Users, Globe, ChevronDown, ChevronRight, LayoutGrid, FolderOpen, Filter, TrendingUp, X } from 'lucide-react'
 import { NoSavedEmptyState } from '@/components/ui/enhanced-empty-state'
@@ -15,6 +19,7 @@ import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
 import { PageHeader } from '@/components/layout/PageHeader'
+import SavedLoading from './loading'
 
 export interface SavedAlbum {
   id: string
@@ -45,18 +50,132 @@ interface CollectionGroup {
   albums: SavedAlbum[]
 }
 
-interface SavedContentProps {
-  initialAlbums: SavedAlbum[]
+// Fetches the saved-albums waterfall client-side (favorites -> albums ->
+// popularity) and maps to SavedAlbum[]. Mirrors the previous server fetch
+// exactly so behavior is unchanged; React Query (5min staleTime +
+// refetchOnMount:false from QueryProvider) now owns the cache, so revisiting
+// via the sidebar repaints from cache instead of doing an RSC round-trip.
+async function fetchSavedAlbums(
+  supabase: ReturnType<typeof createClient>,
+  userId: string
+): Promise<SavedAlbum[]> {
+  // Fetch user's favorited albums
+  const { data: favorites, error: favError } = await supabase
+    .from('likes')
+    .select('target_id, created_at')
+    .eq('user_id', userId)
+    .eq('target_type', 'album')
+    .order('created_at', { ascending: false })
+
+  if (favError) {
+    log.error('Error fetching favorites', {
+      component: 'SavedContent',
+      action: 'client-fetch-favorites',
+      userId,
+    }, favError)
+    throw favError
+  }
+
+  if (!favorites || favorites.length === 0) {
+    return []
+  }
+
+  // Fetch album details for each favorite
+  const albumIds = favorites.map(f => f.target_id)
+  const { data: albums, error: albumError } = await supabase
+    .from('albums')
+    .select(`
+      id,
+      title,
+      cover_photo_url,
+      location_name,
+      country_code,
+      latitude,
+      longitude,
+      user_id,
+      users:user_id (
+        username,
+        display_name,
+        avatar_url
+      )
+    `)
+    .in('id', albumIds)
+
+  if (albumError) {
+    log.error('Error fetching saved album details', {
+      component: 'SavedContent',
+      action: 'client-fetch-albums',
+      userId,
+    }, albumError)
+    throw albumError
+  }
+
+  // Fetch like counts for popularity in one query, tallied in memory.
+  // No denormalized count column exists, so we aggregate from the `likes` table
+  // (same source the Explore feed scores against). target_id stores album ids as text.
+  const popularityByAlbum = new Map<string, number>()
+  const { data: likeRows, error: likeCountError } = await supabase
+    .from('likes')
+    .select('target_id')
+    .eq('target_type', 'album')
+    .in('target_id', albumIds)
+
+  if (likeCountError) {
+    log.error('Error fetching saved album popularity', {
+      component: 'SavedContent',
+      action: 'client-fetch-like-counts',
+      userId,
+    }, likeCountError)
+  } else {
+    for (const row of likeRows || []) {
+      popularityByAlbum.set(row.target_id, (popularityByAlbum.get(row.target_id) || 0) + 1)
+    }
+  }
+
+  // Map albums to SavedAlbum shape with savedAt timestamps
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (albums || []).map((album: any) => ({
+    id: album.id,
+    title: album.title,
+    cover_photo_url: album.cover_photo_url,
+    location_name: album.location_name,
+    country_code: album.country_code,
+    latitude: album.latitude,
+    longitude: album.longitude,
+    user_id: album.user_id,
+    user: album.users,
+    savedAt: favorites.find(f => f.target_id === album.id)?.created_at || '',
+    popularity: popularityByAlbum.get(album.id) || 0,
+  }))
 }
 
-export default function SavedContent({ initialAlbums }: SavedContentProps) {
+export default function SavedContent() {
   const router = useRouter()
   const prefersReducedMotion = useReducedMotion()
+  const { user } = useAuth()
+  const userId = user?.id
+  const supabase = useMemo(() => createClient(), [])
   const { removeFavorite } = useFavorites({
     targetType: 'album',
     autoFetch: false
   })
-  const [savedAlbums, setSavedAlbums] = useState<SavedAlbum[]>(initialAlbums)
+
+  // React Query owns the saved-albums cache (5min staleTime +
+  // refetchOnMount:false from QueryProvider), so navigating away and back
+  // repaints from cache instead of re-running the favorites -> albums ->
+  // popularity waterfall behind a skeleton.
+  const { data: queryAlbums, isPending } = useQuery({
+    queryKey: ['saved-albums', userId],
+    enabled: !!userId,
+    queryFn: () => fetchSavedAlbums(supabase, userId!),
+  })
+
+  // Local mirror so the remove-from-saved interaction can optimistically drop a
+  // card without waiting on a refetch (preserves the original behavior).
+  const [savedAlbums, setSavedAlbums] = useState<SavedAlbum[]>([])
+  useEffect(() => {
+    if (queryAlbums) setSavedAlbums(queryAlbums)
+  }, [queryAlbums])
   const [sortMode, setSortMode] = useState<SortMode>('recent')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [groupBy, setGroupBy] = useState<GroupBy>('location')
@@ -184,6 +303,12 @@ export default function SavedContent({ initialAlbums }: SavedContentProps) {
       return a.label.localeCompare(b.label)
     })
   }, [filteredAlbums, groupBy])
+
+  // Show the same skeleton the route-level loading.tsx used while the initial
+  // query is in flight (or before the user id is known).
+  if (isPending || !userId) {
+    return <SavedLoading />
+  }
 
   return (
     <div className="mx-auto w-full max-w-6xl">

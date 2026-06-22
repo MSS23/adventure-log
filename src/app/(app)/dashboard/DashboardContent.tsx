@@ -4,8 +4,10 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
 import { motion, MotionConfig } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/auth/AuthProvider'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
 import {
@@ -26,6 +28,7 @@ import { MotionList, MotionItem, MotionReveal } from '@/components/animations/Mo
 import { Button } from '@/components/ui/button'
 import { MotionCard } from '@/components/ui/card'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
+import DashboardLoading from './loading'
 import type { User } from '@/types/database'
 
 interface RecentAlbum {
@@ -49,11 +52,10 @@ interface DashboardStats {
   cities: number
 }
 
-interface Props {
-  profile: User
-  userId: string
-  initialStats: DashboardStats
-  initialRecentAlbums: RecentAlbum[]
+interface DashboardData {
+  profile: User | null
+  stats: DashboardStats
+  recentAlbums: RecentAlbum[]
 }
 
 const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
@@ -71,14 +73,90 @@ function flagEmoji(code?: string | null): string {
     .join('')
 }
 
-export default function DashboardContent({
-  profile,
-  initialStats,
-  initialRecentAlbums,
-}: Props) {
+export default function DashboardContent() {
   const supabase = useMemo(() => createClient(), [])
-  const [stats] = useState(initialStats)
-  const [recentAlbums, setRecentAlbums] = useState<RecentAlbum[]>(initialRecentAlbums)
+  const { user } = useAuth()
+  const userId = user?.id
+
+  const { data, isPending } = useQuery<DashboardData>({
+    queryKey: ['dashboard', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      // Fetch profile
+      const { data: profile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId!)
+        .single()
+
+      // Fetch stats and recent albums in parallel
+      const [albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
+        supabase
+          .from('albums')
+          .select('id, country_code, location_name, latitude, longitude, status')
+          .eq('user_id', userId!),
+        supabase
+          .from('photos')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId!),
+        supabase
+          .from('albums')
+          .select('id, title, cover_photo_url, cover_photo_x_offset, cover_photo_y_offset, location_name, country_code, date_start, created_at, status')
+          .eq('user_id', userId!)
+          .order('date_start', { ascending: false, nullsFirst: false })
+          .limit(6),
+      ])
+
+      const albums = (albumsResult.data || []).filter((a) => a.status !== 'draft')
+      const albumsWithLocation = albums.filter((a) => a.latitude && a.longitude)
+
+      const uniqueCountries = new Set(
+        albumsWithLocation
+          .filter((a) => a.country_code || a.location_name)
+          .map((a) => {
+            if (a.country_code) return a.country_code
+            if (a.location_name) {
+              const parts = a.location_name.split(',').map((p: string) => p.trim())
+              return parts[parts.length - 1] || ''
+            }
+            return ''
+          })
+          .filter((country) => country.length > 0),
+      )
+
+      const uniqueCities = new Set(
+        albumsWithLocation
+          .filter((a) => a.location_name)
+          .map((a) => {
+            const parts = a.location_name.split(',').map((p: string) => p.trim())
+            return parts[0] || a.location_name
+          }),
+      )
+
+      const stats: DashboardStats = {
+        albums: albums.length,
+        photos: photosResult.count || 0,
+        countries: uniqueCountries.size,
+        cities: uniqueCities.size,
+      }
+
+      const recentAlbums = ((recentAlbumsResult.data || []) as RecentAlbum[]).filter(
+        (a) => a.status !== 'draft',
+      )
+
+      return { profile: profile ?? null, stats, recentAlbums }
+    },
+  })
+
+  const profile = data?.profile ?? null
+  const stats = data?.stats
+  const initialRecentAlbums = useMemo(() => data?.recentAlbums ?? [], [data?.recentAlbums])
+  const [recentAlbums, setRecentAlbums] = useState<RecentAlbum[]>([])
+
+  // Keep local enrichable copy in sync with the fetched recent albums.
+  useEffect(() => {
+    setRecentAlbums(initialRecentAlbums)
+  }, [initialRecentAlbums])
 
   useEffect(() => {
     let cancelled = false
@@ -106,6 +184,26 @@ export default function DashboardContent({
       cancelled = true
     }
   }, [supabase, initialRecentAlbums])
+
+  // Loading: no user yet, or the dashboard query is still resolving.
+  if (!userId || isPending || !stats) {
+    return <DashboardLoading />
+  }
+
+  // Profile not found → guide the user to complete setup.
+  if (!profile) {
+    return (
+      <div className="mx-auto w-full max-w-2xl px-4 py-12">
+        <div className="rounded-2xl border border-border bg-card p-8 text-center">
+          <p className="font-heading text-base md:text-lg font-semibold text-foreground">Profile not found</p>
+          <p className="mt-1 text-sm text-muted-foreground">Please complete your profile setup</p>
+          <Link href="/setup" className="mt-5 inline-block cursor-pointer">
+            <Button className="cursor-pointer">Complete Profile Setup</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   const firstName =
     (profile.display_name || profile.username || 'Explorer').split(' ')[0] || 'Explorer'

@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { Globe, Users } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
+import { WORLD_DOTS } from './world-map-dots'
 
 // Softer, more professional color palette
 const FRIEND_COLORS = [
@@ -218,47 +219,12 @@ export function FriendsMapSection() {
         {/* Map area */}
         <div className="relative bg-muted/40">
           <svg viewBox="0 0 800 400" className="w-full" style={{ height: 'clamp(180px, 28vw, 260px)' }}>
-            <defs>
-              {/* Subtle grid pattern */}
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.3" className="text-foreground/[0.06]" />
-              </pattern>
-              {/* Glow filter for pins */}
-              <filter id="pinGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-            </defs>
-
-            {/* Background grid */}
-            <rect width="800" height="400" fill="url(#grid)" />
-
-            {/* Continents — filled shapes with soft stroke */}
-            <g className="text-foreground/20" fill="currentColor" stroke="currentColor" strokeWidth="0.5" strokeLinejoin="round">
-              {/* North America */}
-              <path d="M95,55 L115,38 L148,30 L175,28 L205,35 L225,50 L238,68 L240,88 L232,108 L220,128 L208,145 L195,158 L178,168 L165,178 L155,182 L148,188 L142,196 L138,178 L125,162 L112,138 L100,115 L92,92 L90,72Z" opacity="0.4" />
-              {/* Greenland */}
-              <path d="M252,25 L270,18 L290,22 L298,35 L292,52 L278,58 L262,50 L254,38Z" opacity="0.35" />
-              {/* South America */}
-              <path d="M170,218 L182,208 L200,205 L218,210 L232,218 L242,235 L248,260 L250,285 L244,312 L232,335 L218,352 L202,362 L190,358 L182,342 L175,318 L168,290 L165,262 L168,238Z" opacity="0.4" />
-              {/* Europe */}
-              <path d="M358,48 L372,38 L390,35 L408,40 L425,52 L435,65 L430,82 L422,95 L412,102 L398,108 L385,105 L375,98 L365,88 L355,72 L355,58Z" opacity="0.4" />
-              {/* UK */}
-              <path d="M348,52 L355,45 L362,50 L360,62 L352,65 L347,58Z" opacity="0.35" />
-              {/* Africa */}
-              <path d="M368,125 L385,118 L405,122 L425,132 L438,152 L445,178 L448,208 L445,238 L438,262 L425,282 L412,298 L395,305 L380,300 L368,285 L360,258 L355,228 L352,198 L355,168 L360,145Z" opacity="0.4" />
-              {/* Asia */}
-              <path d="M435,38 L470,28 L510,22 L555,25 L600,32 L640,42 L665,55 L678,72 L675,92 L665,110 L648,125 L628,132 L600,135 L568,130 L538,122 L512,118 L488,112 L465,102 L450,88 L440,72 L435,55Z" opacity="0.4" />
-              {/* India */}
-              <path d="M528,135 L545,142 L552,162 L548,185 L538,202 L525,198 L518,178 L520,155Z" opacity="0.4" />
-              {/* SE Asia */}
-              <path d="M588,148 L608,142 L628,152 L635,172 L625,188 L610,182 L598,168Z" opacity="0.35" />
-              {/* Japan */}
-              <path d="M672,72 L680,62 L688,72 L686,88 L678,92 L672,82Z" opacity="0.35" />
-              {/* Australia */}
-              <path d="M618,268 L655,258 L695,262 L718,278 L720,302 L708,322 L685,332 L658,335 L638,325 L625,308 L618,288Z" opacity="0.4" />
-              {/* NZ */}
-              <path d="M738,318 L745,308 L750,318 L748,332 L742,335 L738,325Z" opacity="0.3" />
+            {/* Dotted world map — real land sampled on the same equirectangular
+                projection as the pins, so dots and pins line up exactly. */}
+            <g className="text-foreground/25" fill="currentColor">
+              {Array.from({ length: WORLD_DOTS.length / 2 }, (_, i) => (
+                <circle key={i} cx={WORLD_DOTS[i * 2]} cy={WORLD_DOTS[i * 2 + 1]} r={1.6} />
+              ))}
             </g>
 
             {/* Connection lines between same-friend pins */}

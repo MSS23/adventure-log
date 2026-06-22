@@ -30,7 +30,6 @@ export default function NewAlbumPage() {
     quickForm,
     setSelectedCoverIndex,
     setAlbumLocation,
-    setError,
     setPositionEditorOpen,
     setCoverPosition,
     setSelectedYear,

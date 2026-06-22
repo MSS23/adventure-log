@@ -6,13 +6,11 @@ import { Globe2, Plus, Camera } from 'lucide-react'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import type { Profile } from '@/types/database'
 
 // Extracted hook and sub-components
 import { useGlobePageData, formatDistance } from './useGlobePageData'
-import type { EnhancedGlobeRef } from './useGlobePageData'
 import { GlobePageHeader } from '@/components/globe/GlobePageHeader'
 import { GlobeStatsOverlay } from '@/components/globe/GlobeStatsOverlay'
 import { GlobeExploreStrip, GlobeExploreStatsIndicator } from '@/components/globe/GlobeExploreMode'

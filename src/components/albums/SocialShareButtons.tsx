@@ -8,8 +8,6 @@ import { cn } from '@/lib/utils'
 interface SocialShareButtonsProps {
   albumId: string
   albumTitle: string
-  albumCoverUrl?: string
-  locationName?: string
   className?: string
 }
 
@@ -24,8 +22,6 @@ interface ShareOption {
 export function SocialShareButtons({
   albumId,
   albumTitle,
-  albumCoverUrl,
-  locationName,
   className,
 }: SocialShareButtonsProps) {
   const [copied, setCopied] = useState(false)

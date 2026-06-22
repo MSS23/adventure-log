@@ -13,7 +13,7 @@ jest.mock('framer-motion', () => ({
   motion: {
     button: ({
       children,
-      whileTap,
+      whileTap: _whileTap,
       ...props
     }: React.PropsWithChildren<Record<string, unknown>>) => (
       <button {...props}>{children}</button>

@@ -138,3 +138,12 @@ screen/
 # Python bytecode (ui-ux-pro-max skill)
 __pycache__/
 *.pyc
+
+# Stray working-tree files dropped at repo root (never ship these)
+/WhatsApp Image*.jpeg
+/WhatsApp Image*.jpg
+# Ad-hoc combined migration bundles staged for manual prod application.
+# Canonical, tracked migrations live in supabase/migrations/ — these root
+# bundles are operational scratch and must not be committed.
+/prod-migrations-*.sql
+/trip-planner-combined-migrations.sql

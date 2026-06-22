@@ -130,10 +130,6 @@ const countryNames: Record<string, string> = {
   PF: 'French Polynesia',
 }
 
-function getFlag(code: string): string {
-  return code.toUpperCase().split('').map(c => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65)).join('')
-}
-
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180

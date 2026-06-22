@@ -170,10 +170,6 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     if (!user?.id) return null
 
     try {
-      // Fetch albums for the year with location and photo data
-      // const yearStart = new Date(year, 0, 1).toISOString()
-      // const yearEnd = new Date(year, 11, 31, 23, 59, 59).toISOString()
-
       // Fetch all albums for the user with location data (exclude drafts)
       const { data: allAlbums, error: timelineError } = await supabase
         .from('albums')

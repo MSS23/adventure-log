@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Zap, ChevronRight, MapPin } from 'lucide-react'
+import { Zap, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
 import { YearSeasonSelector, type Season } from '@/components/albums/YearSeasonSelector'

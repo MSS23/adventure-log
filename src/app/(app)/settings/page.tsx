@@ -92,9 +92,22 @@ export default function SettingsPage() {
 
       if (error) throw error
 
+      // Going public auto-accepts everyone who had a pending request — a public
+      // account approves all followers automatically (Instagram behaviour).
+      if (validatedLevel === 'public' && user?.id) {
+        const { error: acceptError } = await supabase
+          .from('follows')
+          .update({ status: 'accepted' })
+          .eq('following_id', user.id)
+          .eq('status', 'pending')
+        if (acceptError) {
+          log.error('Failed to auto-accept pending follows on going public', { component: 'Settings' }, acceptError)
+        }
+      }
+
       setPrivacyLevel(validatedLevel)
       await refreshProfile()
-      setSuccess('Privacy updated')
+      setSuccess(validatedLevel === 'public' ? 'Privacy updated — pending requests accepted' : 'Privacy updated')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
       log.error('Error updating privacy', { component: 'Settings' }, err)

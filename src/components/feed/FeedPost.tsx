@@ -157,7 +157,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
               {user.display_name || user.username}
             </UserLink>
             {album.country_code && (
-              <span className="text-[13px] leading-none" title={album.country || album.location} aria-hidden>
+              <span className="inline-flex shrink-0 items-center text-sm leading-none" title={album.country || album.location} aria-hidden>
                 {getFlag(album.country_code)}
               </span>
             )}

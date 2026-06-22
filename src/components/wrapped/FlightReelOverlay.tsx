@@ -70,7 +70,7 @@ export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightR
   if (!active) return null
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-24 z-30 flex justify-center px-4 sm:bottom-32">
+    <div className="pointer-events-none absolute inset-x-0 bottom-16 z-30 flex justify-center px-4 sm:bottom-32">
       <AnimatePresence mode="wait">
         <motion.div
           key={active.albumId ?? `${active.lat},${active.lng}`}
@@ -78,11 +78,13 @@ export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightR
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -16, scale: 0.96 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          className="pointer-events-auto w-full max-w-md"
+          className="pointer-events-auto w-full max-w-[14rem] sm:max-w-md"
         >
+          {/* Compact on mobile (max-w-[14rem]) so the card stays in the lower
+              third and doesn't cover the globe pins; full filmic size from sm up. */}
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/55 shadow-lg backdrop-blur-xl">
             {/* Cover image (or fallback gradient). 16:10 keeps it filmic. */}
-            <div className="relative aspect-[16/10] bg-gradient-to-br from-olive-700/40 via-black to-coral-700/30">
+            <div className="relative aspect-[16/9] sm:aspect-[16/10] bg-gradient-to-br from-olive-700/40 via-black to-coral-700/30">
               {active.coverUrl ? (
                 <Image
                   src={active.coverUrl}

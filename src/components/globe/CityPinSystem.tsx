@@ -96,14 +96,19 @@ export function CityPinSystem({
   const clusters: CityCluster[] = []
   const processedCities = new Set<string>()
 
-  cities.forEach(city => {
+  // Dedupe by id first. The timeline can surface the same album/location more
+  // than once; without this, a single album appears as several duplicate
+  // pills/photos in one popup (the "multiple popups for one album" bug).
+  const uniqueCities = Array.from(new Map(cities.map(c => [c.id, c])).values())
+
+  uniqueCities.forEach(city => {
     if (processedCities.has(city.id)) return
     // Skip cities with missing/NaN coordinates before any distance math —
     // these would produce NaN clusters or phantom pins at (0,0).
     if (!Number.isFinite(city.latitude) || !Number.isFinite(city.longitude)) return
 
     // Find nearby cities (within the current zoom-aware radius)
-    const nearbyCities = cities.filter(c => {
+    const nearbyCities = uniqueCities.filter(c => {
       if (processedCities.has(c.id)) return false
       if (!Number.isFinite(c.latitude) || !Number.isFinite(c.longitude)) return false
       const distance = Math.sqrt(

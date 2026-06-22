@@ -6,7 +6,7 @@ import { useComments } from '@/lib/hooks/useSocial'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { MessageCircle, Trash2 } from 'lucide-react'
+import { MessageCircle, Trash2, Send } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
 import { UserLink, UserAvatarLink } from './UserLink'
@@ -213,7 +213,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
               transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 25 }}
             >
               <form onSubmit={handleSubmit}>
-                <div className="flex items-start gap-3">
+                <div className="flex items-end gap-2.5 sm:gap-3">
                   <Avatar className="h-9 w-9 ring-2 ring-background shrink-0">
                     <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} />
                     <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
@@ -222,35 +222,35 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                   </Avatar>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-end gap-2">
-                      <div className="flex-1 min-w-0">
-                        <MentionInput
-                          value={newComment}
-                          onChange={(value, mentioned) => {
-                            setNewComment(value)
-                            if (mentioned) setMentionedUsers(mentioned)
-                          }}
-                          placeholder="Write a comment... (use @ to mention users)"
-                          maxLength={500}
-                          rows={1}
-                          disabled={isSubmitting}
-                          className="px-4 py-3 bg-muted/50 border border-border rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent focus:bg-card transition-all"
-                        />
-                      </div>
-                      <Button
-                        type="submit"
-                        disabled={!newComment.trim() || isSubmitting}
-                        size="sm"
-                        className="h-11 px-5 rounded-2xl font-semibold shrink-0"
-                      >
-                        {isSubmitting ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        ) : (
-                          'Post'
-                        )}
-                      </Button>
-                    </div>
+                    <MentionInput
+                      value={newComment}
+                      onChange={(value, mentioned) => {
+                        setNewComment(value)
+                        if (mentioned) setMentionedUsers(mentioned)
+                      }}
+                      placeholder="Add a comment…"
+                      maxLength={500}
+                      rows={1}
+                      disabled={isSubmitting}
+                      className="px-4 py-3 bg-muted/50 border border-border rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent focus:bg-card transition-all"
+                    />
                   </div>
+
+                  {/* Modern circular send button — springs to primary once there's
+                      text to post, fades back when empty (Instagram-style). */}
+                  <motion.button
+                    type="submit"
+                    disabled={!newComment.trim() || isSubmitting}
+                    aria-label="Post comment"
+                    className="mb-[26px] grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-all disabled:scale-90 disabled:bg-muted disabled:text-muted-foreground/60 disabled:shadow-none"
+                    whileTap={prefersReducedMotion || !newComment.trim() ? {} : { scale: 0.88 }}
+                  >
+                    {isSubmitting ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </motion.button>
                 </div>
               </form>
             </motion.div>

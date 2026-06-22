@@ -145,7 +145,15 @@ export function useGlobePerformance(): UseGlobePerformanceReturn {
   const globeImageUrl = useMemo(() => {
     if (effectivePerformanceMode === 'low') return '/earth-texture.jpg'
     if (typeof window === 'undefined') return '/earth-texture-4k.jpg'
+
     const dpr = window.devicePixelRatio || 1
+    // navigator.deviceMemory (GB, Chrome/Android only). Low-RAM phones evict the
+    // WebGL context under memory pressure when holding the 4K texture — those
+    // get the lighter texture to avoid "context lost". Unknown → assume capable.
+    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory
+    const isMemoryConstrained = typeof deviceMemory === 'number' && deviceMemory < 4
+    if (isMemoryConstrained) return '/earth-texture.jpg'
+
     const isSmallLowDensity = window.innerWidth < 768 && dpr < 2
     return isSmallLowDensity ? '/earth-texture.jpg' : '/earth-texture-4k.jpg'
   }, [effectivePerformanceMode])

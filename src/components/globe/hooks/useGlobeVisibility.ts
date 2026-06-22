@@ -142,7 +142,7 @@ export function useGlobeVisibility(
 
         // Special handling for flex-1 containers that may not have computed height yet
         if (hideHeader && height === 0) {
-          log.warn('Flex container has zero height, starting retry sequence', {
+          log.info('Flex container has zero height, starting retry sequence', {
             component: 'EnhancedGlobe',
             action: 'update-dimensions',
             hideHeader
@@ -175,7 +175,7 @@ export function useGlobeVisibility(
             } else {
               const parentRect = container.parentElement?.getBoundingClientRect()
               if (parentRect && parentRect.width > 0 && parentRect.height > 0) {
-                log.warn('Using parent dimensions after failed retries', {
+                log.info('Using parent dimensions after failed retries', {
                   component: 'EnhancedGlobe',
                   action: 'update-dimensions',
                   parentWidth: parentRect.width,
@@ -185,7 +185,7 @@ export function useGlobeVisibility(
               } else {
                 const fallbackWidth = typeof window !== 'undefined' ? window.innerWidth : 1200
                 const fallbackHeight = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
-                log.warn('Using window dimensions as fallback after all retries failed', {
+                log.info('Using window dimensions as fallback after all retries failed', {
                   component: 'EnhancedGlobe',
                   action: 'update-dimensions',
                   fallbackWidth,
@@ -217,7 +217,7 @@ export function useGlobeVisibility(
             width = typeof window !== 'undefined' ? window.innerWidth : 1200
             height = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
 
-            log.warn('Globe container has zero dimensions, using window fallback', {
+            log.info('Globe container has zero dimensions, using window fallback', {
               component: 'EnhancedGlobe',
               action: 'update-dimensions',
               fallbackWidth: width,
@@ -230,7 +230,10 @@ export function useGlobeVisibility(
         width = typeof window !== 'undefined' ? window.innerWidth : 1200
         height = typeof window !== 'undefined' ? window.innerHeight - 100 : 800
 
-        log.warn('Globe container ref not available, using window fallback', {
+        // Benign: the ref is briefly null on the first frame / fast nav. The
+        // window fallback is a perfectly valid size, so log at info (not warn)
+        // to avoid flooding Sentry with a non-issue.
+        log.info('Globe container ref not available, using window fallback', {
           component: 'EnhancedGlobe',
           action: 'update-dimensions',
           fallbackWidth: width,
@@ -373,8 +376,11 @@ export function useGlobeVisibility(
     if (!canvas) return
 
     const handleContextLost = (event: Event) => {
+      // preventDefault() lets the browser restore the context (handled below).
+      // This is an expected, recoverable event on memory-constrained mobile
+      // GPUs — log at info so it doesn't flood Sentry as an error.
       event.preventDefault()
-      log.error('WebGL context lost', {
+      log.info('WebGL context lost — awaiting automatic restore', {
         component: 'EnhancedGlobe',
         action: 'webgl-context-lost'
       })

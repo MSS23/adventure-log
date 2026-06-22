@@ -18,6 +18,7 @@ import { apiFetch } from '@/lib/api/client'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import QRCode from 'qrcode'
+import { MutualTravelPanel } from './MutualTravelPanel'
 
 function countryCodeToFlag(code: string): string {
   return code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
@@ -160,6 +161,9 @@ export function PublicPassportContent({
   const searchParams = useSearchParams()
   const { user: currentUser } = useAuth()
 
+  // A logged-in person viewing someone else's passport (e.g. via QR scan).
+  const isOtherViewer = !!currentUser && currentUser.id !== user.id
+
   // Auto-connect state
   const [connectStatus, setConnectStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle')
   const connectAttempted = useRef(false)
@@ -257,6 +261,18 @@ export function PublicPassportContent({
       </motion.section>
 
       <div className="max-w-3xl mx-auto px-6">
+        {/* ── Mutual travel — "where your paths cross" (logged-in viewers) ── */}
+        {isOtherViewer && (
+          <MutualTravelPanel
+            ownerId={user.id}
+            ownerName={displayName}
+            ownerAvatarUrl={user.avatar_url}
+            ownerUsername={user.username}
+            ownerCountryCodes={countryCodes}
+            ownerCities={cities}
+          />
+        )}
+
         {/* ── Connection Banner ── */}
         <AnimatePresence>
           {connectStatus === 'connected' && (
@@ -264,7 +280,7 @@ export function PublicPassportContent({
               initial={{ opacity: 0, y: -10, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-4 -mt-3 relative z-20"
+              className="mb-4 relative z-20"
             >
               <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 flex items-center gap-3">
                 <div className="size-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
@@ -281,7 +297,7 @@ export function PublicPassportContent({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="mb-4 -mt-3 relative z-20"
+              className="mb-4 relative z-20"
             >
               <div className="rounded-xl border border-border bg-card px-4 py-3 flex items-center gap-3">
                 <div className="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
@@ -293,7 +309,12 @@ export function PublicPassportContent({
 
         {/* ── Stats Bar ── */}
         <motion.div
-          className="-mt-6 relative z-10 rounded-2xl border border-border bg-card p-5 mb-8"
+          className={cn(
+            "relative z-10 rounded-2xl border border-border bg-card p-5 mb-8",
+            // The mutual-travel panel above already overlaps the hero wave for
+            // logged-in viewers; only pull the stats card up when it's absent.
+            !isOtherViewer && "-mt-6"
+          )}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}

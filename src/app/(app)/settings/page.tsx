@@ -35,6 +35,7 @@ import {
   ChevronRight,
   MessageSquarePlus,
   MessageCircle,
+  Palette,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -43,6 +44,7 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { FollowRequests } from '@/components/social/FollowRequests'
 import { FollowLists } from '@/components/social/FollowLists'
 import { FeedbackLauncher } from '@/components/feedback/FeedbackLauncher'
+import { ThemeToggleWithLabel } from '@/components/ui/ThemeToggle'
 import { cn } from '@/lib/utils'
 
 const DISCORD_INVITE_URL = process.env.NEXT_PUBLIC_DISCORD_INVITE_URL
@@ -321,8 +323,20 @@ export default function SettingsPage() {
 
       <div className="space-y-5">
 
+        {/* ── APPEARANCE ──────────────────────────────────────── */}
+        <SectionHeader title="Appearance" />
+
+        {/* Theme */}
+        <Card>
+          <CardHead icon={Palette} title="Theme" subtitle="Choose how Adventure Log looks for you" />
+          <div className="p-5 flex flex-wrap items-center gap-3">
+            <ThemeToggleWithLabel />
+            <p className="text-xs text-muted-foreground">Your choice is saved across devices.</p>
+          </div>
+        </Card>
+
         {/* ── ACCOUNT ─────────────────────────────────────────── */}
-        <SectionHeader title="Account" />
+        <SectionHeader title="Account" className="pt-3" />
 
         {/* Edit profile — identity fields live on the dedicated page */}
         <Link

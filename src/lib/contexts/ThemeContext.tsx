@@ -232,7 +232,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, [supabaseSynced, syncToSupabase])
 
   const toggleTheme = useCallback(() => {
-    const order: ThemeMode[] = ['light', 'dark', 'system']
+    const order: ThemeMode[] = ['light', 'dark']
     const currentIndex = order.indexOf(theme)
     const nextTheme = order[(currentIndex + 1) % order.length]
     setTheme(nextTheme)

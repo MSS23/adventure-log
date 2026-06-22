@@ -59,7 +59,7 @@
 :root {
   --radius: 0.875rem;
   /* Field Notebook — warm cream base, forest-green primary, coral + brass accents (logo-derived) */
-  --background: #F7F2E7;
+  --background: #FBF7EE;
   --foreground: #1F1C12;
   --card: #FFFFFF;
   --card-foreground: #1F1C12;
@@ -67,15 +67,15 @@
   --popover-foreground: #1F1C12;
   --primary: #4A5D23;
   --primary-foreground: #F7F2E7;
-  --secondary: #EFE9D9;
+  --secondary: #F2ECDC;
   --secondary-foreground: #1F1C12;
-  --muted: #EFE9D9;
+  --muted: #F2ECDC;
   --muted-foreground: #5A5448;
-  --accent: #C75B3A;
+  --accent: #C9512E;
   --accent-foreground: #FFFFFF;
   --destructive: #A2322B;
-  --border: #E5DDC8;
-  --input: #EFE9D9;
+  --border: #E7DEC9;
+  --input: #F2ECDC;
   --ring: #4A5D23;
   --chart-1: #4A5D23;
   --chart-2: #D4A54A;
@@ -107,16 +107,16 @@
   --color-forest-tint: #E0E5C9;
 
   /* Coral — secondary accent (location pin) */
-  --color-coral: #C75B3A;
+  --color-coral: #C9512E;
   --color-coral-soft: #F2A179;
   --color-coral-tint: #F8DDD0;
 
   /* Gold — tertiary accent (compass / camera flash) */
-  --color-gold: #D4A54A;
+  --color-gold: #E0A93C;
   --color-gold-soft: #E8C77A;
   --color-gold-tint: #F5E8C4;
 
-  --color-sky: #3F6BA3;
+  --color-sky: #2F6FB0;
   --color-sky-tint: #DDE8F5;
   --color-stamp: #A2322B;
 

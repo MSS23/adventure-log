@@ -17,6 +17,7 @@ import { MissingLocationBanner } from '@/components/notifications/MissingLocatio
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getCityName } from '@/lib/utils/country'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { NoAlbumsEmptyState } from '@/components/ui/enhanced-empty-state'
@@ -718,15 +719,17 @@ function AlbumsPageContent() {
                             </div>
                           )}
 
-                          {/* Mobile: Bottom gradient with title always visible */}
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent p-2 pt-8 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 md:from-black/75">
-                            <h3 className="text-white font-heading font-semibold text-xs sm:text-sm truncate drop-shadow-sm">
+                          {/* Mobile: bottom scrim with title — kept legible and
+                              tight (single lines, strong scrim + text shadow,
+                              city-only location). On desktop it fades in on hover. */}
+                          <div className="absolute inset-x-0 bottom-0 px-2.5 pb-2 pt-9 bg-gradient-to-t from-black/85 via-black/50 to-transparent md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+                            <h3 className="text-white font-heading font-semibold text-[13px] leading-tight line-clamp-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                               {album.title}
                             </h3>
-                            {album.location_name && (
-                              <div className="flex items-center gap-1 text-white/90 text-[10px] sm:text-xs mt-0.5 drop-shadow-sm">
+                            {getCityName(album.location_name) && (
+                              <div className="flex items-center gap-1 text-white/85 text-[11px] leading-tight mt-0.5 [text-shadow:0_1px_2px_rgba(0,0,0,0.65)]">
                                 <MapPin className="h-2.5 w-2.5 flex-shrink-0" />
-                                <span className="truncate">{album.location_name}</span>
+                                <span className="truncate">{getCityName(album.location_name)}</span>
                               </div>
                             )}
                           </div>

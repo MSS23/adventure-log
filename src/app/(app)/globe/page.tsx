@@ -131,6 +131,7 @@ function GlobePageContent() {
               initialLat={lat ? parseFloat(lat) : undefined}
               initialLng={lng ? parseFloat(lng) : undefined}
               filterUserId={userId || undefined}
+              isOwnProfile={isOwnProfile}
               onGlobeBackgroundClick={handleGlobeBackgroundClick}
               wishlistPins={wishlistGlobePins}
               onWishlistPinClick={handleWishlistPinClick}

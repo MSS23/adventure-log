@@ -46,6 +46,11 @@ interface EnhancedGlobeProps {
   onGlobeBackgroundClick?: (coords: { lat: number; lng: number; screenX: number; screenY: number }) => void
   wishlistPins?: WishlistPin[]
   onWishlistPinClick?: (wishlistId: string) => void
+  /** Whether the signed-in viewer owns this globe. The "current location"
+   *  (device GPS) pin + toggle are only ever available on your OWN globe, so a
+   *  current location is never shown to anyone else. Defaults to false so any
+   *  other/public/embedded surface omits it. */
+  isOwnProfile?: boolean
 }
 
 export interface EnhancedGlobeRef {
@@ -56,7 +61,7 @@ export interface EnhancedGlobeRef {
 }
 
 export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
-  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp, onGlobeBackgroundClick, wishlistPins, onWishlistPinClick }, ref) {
+  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp, onGlobeBackgroundClick, wishlistPins, onWishlistPinClick, isOwnProfile = false }, ref) {
 
   const state = useGlobeState({
     filterUserId,
@@ -171,7 +176,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       accuracy?: number;
     }>
 
-    if (currentLocation && showCurrentLocation) {
+    if (currentLocation && showCurrentLocation && isOwnProfile) {
       pins.push({
         lat: currentLocation.latitude,
         lng: currentLocation.longitude,
@@ -221,7 +226,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     const city = cityPins.find(pin => pin.id === albumId)
 
     if (city && globeReady) {
-      handleCityClick(city)
+      // Filmstrip/imperative navigation: fly + select WITHOUT opening the
+      // "Open" modal — the page shows the "View" card for the selection, so
+      // opening the modal here would duplicate the card on mobile.
+      handleCityClick(city, false)
     } else if (globeReady) {
       setIsAutoRotating(false)
       if (globeRef.current) {
@@ -295,6 +303,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           permissionStatus={permissionStatus}
           onLocationToggle={handleLocationToggle}
           onClearLocation={() => clearLocation()}
+          showLocationControl={isOwnProfile}
         />
 
       {/* Error Message */}

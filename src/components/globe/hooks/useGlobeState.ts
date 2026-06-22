@@ -797,7 +797,11 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     }
   }, [locations, animateCameraToPosition])
 
-  function handleCityClick(city: CityPin) {
+  // `openModal` distinguishes a direct globe-pin tap (opens the AlbumImageModal
+  // "Open" card) from filmstrip-driven navigation (the page already shows the
+  // MobileFeaturedAlbum "View" card for the selected album — opening the modal
+  // too would stack two cards). Filmstrip nav passes openModal=false.
+  function handleCityClick(city: CityPin, openModal: boolean = true) {
     setActiveCityId(city.id)
     setIsAutoRotating(false)
 
@@ -808,18 +812,20 @@ export function useGlobeState(options: UseGlobeStateOptions) {
       setCurrentAlbumIndex(albumIndex)
     }
 
-    const singleCityCluster: CityCluster = {
-      id: `single-${city.id}-${Date.now()}`,
-      latitude: city.latitude,
-      longitude: city.longitude,
-      cities: [city],
-      totalAlbums: city.albumCount,
-      totalPhotos: city.photoCount,
-      radius: 1
-    }
+    if (openModal) {
+      const singleCityCluster: CityCluster = {
+        id: `single-${city.id}-${Date.now()}`,
+        latitude: city.latitude,
+        longitude: city.longitude,
+        cities: [city],
+        totalAlbums: city.albumCount,
+        totalPhotos: city.photoCount,
+        radius: 1
+      }
 
-    setSelectedCluster(singleCityCluster)
-    setShowAlbumModal(true)
+      setSelectedCluster(singleCityCluster)
+      setShowAlbumModal(true)
+    }
 
     if (globeRef.current) {
       animateCameraToPosition({

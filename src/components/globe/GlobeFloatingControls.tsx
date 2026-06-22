@@ -14,6 +14,9 @@ interface GlobeFloatingControlsProps {
   permissionStatus: string | null
   onLocationToggle: () => void
   onClearLocation: () => void
+  /** Only show the "my location" control on the viewer's own globe — a current
+   *  location must never be exposed on another person's globe. */
+  showLocationControl?: boolean
 }
 
 export function GlobeFloatingControls({
@@ -24,7 +27,8 @@ export function GlobeFloatingControls({
   locationError,
   permissionStatus,
   onLocationToggle,
-  onClearLocation
+  onClearLocation,
+  showLocationControl = true
 }: GlobeFloatingControlsProps) {
   return (
     <>
@@ -42,7 +46,8 @@ export function GlobeFloatingControls({
             <Route className="h-4 w-4" />
           </Button>
 
-          {/* Location Permission Button */}
+          {/* Location Permission Button — own globe only */}
+          {showLocationControl && (
           <Button
             variant="ghost"
             size="sm"
@@ -76,6 +81,7 @@ export function GlobeFloatingControls({
               <Navigation className="h-4 w-4" />
             )}
           </Button>
+          )}
         </div>
       </div>
 

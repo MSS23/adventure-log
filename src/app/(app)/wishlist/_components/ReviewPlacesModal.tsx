@@ -144,9 +144,12 @@ export function ReviewPlacesModal({ result, open, onClose, onSave }: ReviewPlace
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{headerCopy.title}</DialogTitle>
-          {headerCopy.desc && (
-            <DialogDescription className="line-clamp-2">{headerCopy.desc}</DialogDescription>
-          )}
+          {/* Always render a description so Radix has an aria-describedby target.
+              When there's no caption (e.g. Google Maps / manual), keep it for
+              screen readers only. */}
+          <DialogDescription className={headerCopy.desc ? 'line-clamp-2' : 'sr-only'}>
+            {headerCopy.desc || 'Review the detected place and confirm before saving it to your board.'}
+          </DialogDescription>
         </DialogHeader>
 
         {/* TikTok thumbnail */}

@@ -460,8 +460,6 @@ export async function GET(request: NextRequest) {
 | `usePWA` | PWA features detection |
 | `useInstallPrompt` | App installation prompt |
 | `useOnlineStatus` | Network status |
-| `useNotifications` | Browser notifications |
-| `useWebShare` | Native share API |
 | `useOfflineData` | Offline storage |
 | `usePWAUpdate` | Service worker updates |
 

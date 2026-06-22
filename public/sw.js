@@ -6,7 +6,7 @@
 // Bump this version on any deploy that must invalidate stale caches for
 // returning visitors. The activate handler deletes every cache whose name
 // doesn't match the current set, so changing the suffix purges old content.
-const CACHE_VERSION = 'v32'
+const CACHE_VERSION = 'v33'
 const CACHE_NAME = `adventure-log-${CACHE_VERSION}`
 const STATIC_CACHE = `adventure-log-static-${CACHE_VERSION}`
 const DYNAMIC_CACHE = `adventure-log-dynamic-${CACHE_VERSION}`

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { ArrowLeft, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -24,61 +25,59 @@ interface Creator {
 
 export default function CreatorsPage() {
   const { user } = useAuth()
-  const [creators, setCreators] = useState<Creator[]>([])
-  const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
+  const { data: creators = [], isLoading: loading, error } = useQuery<Creator[]>({
+    queryKey: ['explore-creators', user?.id ?? ''],
+    queryFn: async () => {
+      // Fetch users with their album counts
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('id, username, display_name, avatar_url, bio, privacy_level')
+        .eq('privacy_level', 'public')
+        .neq('id', user?.id || '')
+        .order('created_at', { ascending: false })
+        .limit(24)
+
+      if (usersError) throw usersError
+
+      // Fetch album counts for each user
+      const usersWithCounts = await Promise.all(
+        (usersData || []).map(async (creator) => {
+          const [albumsResult, followersResult] = await Promise.all([
+            supabase
+              .from('albums')
+              .select('id', { count: 'exact', head: true })
+              .eq('user_id', creator.id)
+              .neq('status', 'draft'),
+            supabase
+              .from('follows')
+              .select('id', { count: 'exact', head: true })
+              .eq('following_id', creator.id)
+              .eq('status', 'accepted')
+          ])
+
+          return {
+            ...creator,
+            albumCount: albumsResult.count || 0,
+            followerCount: followersResult.count || 0
+          }
+        })
+      )
+
+      // Sort by album count
+      usersWithCounts.sort((a, b) => (b.albumCount || 0) - (a.albumCount || 0))
+
+      return usersWithCounts
+    },
+  })
+
+  // Preserve original error logging (query throws on failure → creators stays [])
   useEffect(() => {
-    const fetchCreators = async () => {
-      try {
-        // Fetch users with their album counts
-        const { data: usersData, error: usersError } = await supabase
-          .from('users')
-          .select('id, username, display_name, avatar_url, bio, privacy_level')
-          .eq('privacy_level', 'public')
-          .neq('id', user?.id || '')
-          .order('created_at', { ascending: false })
-          .limit(24)
-
-        if (usersError) throw usersError
-
-        // Fetch album counts for each user
-        const usersWithCounts = await Promise.all(
-          (usersData || []).map(async (creator) => {
-            const [albumsResult, followersResult] = await Promise.all([
-              supabase
-                .from('albums')
-                .select('id', { count: 'exact', head: true })
-                .eq('user_id', creator.id)
-                .neq('status', 'draft'),
-              supabase
-                .from('follows')
-                .select('id', { count: 'exact', head: true })
-                .eq('following_id', creator.id)
-                .eq('status', 'accepted')
-            ])
-
-            return {
-              ...creator,
-              albumCount: albumsResult.count || 0,
-              followerCount: followersResult.count || 0
-            }
-          })
-        )
-
-        // Sort by album count
-        usersWithCounts.sort((a, b) => (b.albumCount || 0) - (a.albumCount || 0))
-
-        setCreators(usersWithCounts)
-      } catch (error) {
-        log.error('Error fetching creators', { component: 'CreatorsPage', action: 'fetch-creators' }, error as Error)
-      } finally {
-        setLoading(false)
-      }
+    if (error) {
+      log.error('Error fetching creators', { component: 'CreatorsPage', action: 'fetch-creators' }, error as Error)
     }
-
-    fetchCreators()
-  }, [user?.id, supabase])
+  }, [error])
 
   return (
     <div className="min-h-screen bg-background">

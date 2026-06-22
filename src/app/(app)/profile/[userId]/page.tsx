@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -21,22 +22,237 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
 import Link from 'next/link'
 
+// View-model returned by the profile query. The sentinel `redirectToOwn`
+// signals that the viewer is looking at their own profile.
+type ProfileViewModel = {
+  redirectToOwn?: boolean
+  profile: User
+  isPrivate: boolean
+  followStatus: 'not_following' | 'following' | 'pending' | 'blocked'
+  albums: Album[]
+  followStats: { followersCount: number; followingCount: number }
+}
+
 export default function UserProfilePage() {
   const params = useParams()
   const router = useRouter()
   const { user: currentUser, authLoading } = useAuth()
-  const [profile, setProfile] = useState<User | null>(null)
-  const [albums, setAlbums] = useState<Album[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isPrivate, setIsPrivate] = useState(false)
+  const queryClient = useQueryClient()
   const supabase = useMemo(() => createClient(), [])
   const { getFollowStatus, followUser, unfollowUser } = useFollows()
-  const [followStatus, setFollowStatus] = useState<'not_following' | 'following' | 'pending' | 'blocked'>('not_following')
   const [followLoading, setFollowLoading] = useState(false)
-  const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 })
 
   const userIdOrUsername = Array.isArray(params.userId) ? params.userId[0] : params.userId
+  const viewerId = currentUser?.id ?? null
+
+  // Helper: count followers/following for a profile (shared by query + toggle)
+  const fetchFollowStats = useMemo(
+    () => async (profileId: string) => {
+      const [followersResult, followingResult] = await Promise.all([
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('following_id', profileId)
+          .eq('status', 'accepted'),
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('follower_id', profileId)
+          .eq('status', 'accepted')
+      ])
+      return {
+        followersCount: followersResult.count || 0,
+        followingCount: followingResult.count || 0
+      }
+    },
+    [supabase]
+  )
+
+  const {
+    data: viewModel,
+    isLoading: queryLoading,
+    error: queryError
+  } = useQuery<ProfileViewModel>({
+    // Include the viewer so a follow-status change re-resolves privacy gating.
+    queryKey: ['profile', userIdOrUsername, viewerId],
+    // Wait for auth to settle so privacy decisions use a known viewer.
+    enabled: !!userIdOrUsername && !authLoading,
+    queryFn: async () => {
+      // Validate userIdOrUsername exists
+      if (!userIdOrUsername) {
+        throw new Error('Invalid user identifier')
+      }
+
+      // Check if it's a UUID or username
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdOrUsername)
+
+      // Check if it's a generated username pattern (user_XXXXXXXX)
+      const generatedUsernameMatch = userIdOrUsername.match(/^user_([0-9a-f]{8})$/i)
+
+      // Fetch user profile by UUID or username
+      let userData: User | null = null
+      let userError: { code?: string; message?: string } | null = null
+
+      if (isUUID) {
+        // Direct UUID lookup
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userIdOrUsername)
+          .single()
+        userData = data
+        userError = error
+      } else if (generatedUsernameMatch) {
+        // Generated username pattern
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .ilike('username', userIdOrUsername)
+          .maybeSingle()
+        userData = data
+        userError = error
+      } else {
+        // Regular username lookup (case-insensitive)
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .ilike('username', userIdOrUsername)
+          .maybeSingle()
+        userData = data
+        userError = error
+      }
+
+      if (userError) {
+        if (userError.code === 'PGRST116') {
+          throw new Error('User not found')
+        }
+        throw new Error(userError.message || 'Failed to fetch user')
+      }
+
+      if (!userData) {
+        throw new Error('User not found')
+      }
+
+      // Redirect to own profile if viewing own page (only if logged in)
+      if (currentUser && currentUser.id === userData.id) {
+        return {
+          redirectToOwn: true,
+          profile: userData,
+          isPrivate: false,
+          followStatus: 'not_following',
+          albums: [],
+          followStats: { followersCount: 0, followingCount: 0 }
+        }
+      }
+
+      // Check privacy level and follow status
+      const privacyLevel = userData.privacy_level || (userData.is_private ? 'private' : 'public')
+
+      let resolvedFollowStatus: 'not_following' | 'following' | 'pending' | 'blocked' = 'not_following'
+
+      // Only check follow status if logged in
+      if (currentUser) {
+        try {
+          const status = await getFollowStatus(userData.id)
+          resolvedFollowStatus = status
+
+          // Check if content should be hidden based on privacy level
+          if (privacyLevel === 'private' && status !== 'following') {
+            return {
+              profile: userData,
+              isPrivate: true,
+              followStatus: status,
+              albums: [],
+              followStats: await fetchFollowStats(userData.id)
+            }
+          }
+
+          if (privacyLevel === 'friends' && status !== 'following') {
+            return {
+              profile: userData,
+              isPrivate: true,
+              followStatus: status,
+              albums: [],
+              followStats: await fetchFollowStats(userData.id)
+            }
+          }
+        } catch (err) {
+          log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
+          // Assume not following on error for non-public accounts
+          if (privacyLevel !== 'public') {
+            return {
+              profile: userData,
+              isPrivate: true,
+              followStatus: 'not_following',
+              albums: [],
+              followStats: await fetchFollowStats(userData.id)
+            }
+          }
+        }
+      } else {
+        // Not logged in - show private message for non-public accounts
+        if (privacyLevel !== 'public') {
+          return {
+            profile: userData,
+            isPrivate: true,
+            followStatus: 'not_following',
+            albums: [],
+            followStats: await fetchFollowStats(userData.id)
+          }
+        }
+      }
+
+      // Fetch user's albums
+      const { data: albumsData, error: albumsError } = await supabase
+        .from('albums')
+        .select('*')
+        .eq('user_id', userData.id)
+        .order('created_at', { ascending: false })
+
+      if (albumsError) {
+        log.error('Error fetching albums', {
+          component: 'ProfilePage',
+          userId: userData.id
+        }, albumsError)
+        throw albumsError
+      }
+
+      return {
+        profile: userData,
+        isPrivate: false,
+        followStatus: resolvedFollowStatus,
+        albums: albumsData || [],
+        followStats: await fetchFollowStats(userData.id)
+      }
+    }
+  })
+
+  // Perform the own-profile redirect once the query resolves to that sentinel.
+  useEffect(() => {
+    if (viewModel?.redirectToOwn) {
+      router.push('/profile')
+    }
+  }, [viewModel?.redirectToOwn, router])
+
+  const profile = viewModel && !viewModel.redirectToOwn ? viewModel.profile : null
+  const isPrivate = viewModel?.isPrivate ?? false
+  const albums = useMemo(() => viewModel?.albums ?? [], [viewModel?.albums])
+
+  // Local follow status/stats, seeded from the query and updated by the toggle.
+  const [followStatusOverride, setFollowStatusOverride] = useState<'not_following' | 'following' | 'pending' | 'blocked' | null>(null)
+  const [followStatsOverride, setFollowStatsOverride] = useState<{ followersCount: number; followingCount: number } | null>(null)
+
+  // Reset overrides whenever a fresh view-model arrives.
+  useEffect(() => {
+    setFollowStatusOverride(null)
+    setFollowStatsOverride(null)
+  }, [viewModel])
+
+  const followStatus = followStatusOverride ?? viewModel?.followStatus ?? 'not_following'
+  const followStats = followStatsOverride ?? viewModel?.followStats ?? { followersCount: 0, followingCount: 0 }
+
+  const loading = (queryLoading && !!userIdOrUsername && !authLoading) || authLoading || !!viewModel?.redirectToOwn
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load profile') : null
 
   // Calculate unique countries from albums
   const countriesCount = useMemo(() => {
@@ -49,200 +265,10 @@ export default function UserProfilePage() {
   }, [albums])
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        // Validate userIdOrUsername exists
-        if (!userIdOrUsername) {
-          setError('Invalid user identifier')
-          setLoading(false)
-          return
-        }
-
-        // Check if it's a UUID or username
-        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdOrUsername)
-
-        // Check if it's a generated username pattern (user_XXXXXXXX)
-        const generatedUsernameMatch = userIdOrUsername.match(/^user_([0-9a-f]{8})$/i)
-
-        // Fetch user profile by UUID or username
-        let userData: User | null = null
-        let userError: { code?: string; message?: string } | null = null
-
-        if (isUUID) {
-          // Direct UUID lookup
-          const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', userIdOrUsername)
-            .single()
-          userData = data
-          userError = error
-        } else if (generatedUsernameMatch) {
-          // Generated username pattern
-          const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .ilike('username', userIdOrUsername)
-            .maybeSingle()
-          userData = data
-          userError = error
-        } else {
-          // Regular username lookup (case-insensitive)
-          const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .ilike('username', userIdOrUsername)
-            .maybeSingle()
-          userData = data
-          userError = error
-        }
-
-        if (userError) {
-          if (userError.code === 'PGRST116') {
-            throw new Error('User not found')
-          }
-          throw new Error(userError.message || 'Failed to fetch user')
-        }
-
-        if (!userData) {
-          throw new Error('User not found')
-        }
-
-        setProfile(userData)
-
-        // Redirect to own profile if viewing own page (only if logged in)
-        if (currentUser && currentUser.id === userData.id) {
-          router.push('/profile')
-          return
-        }
-
-        // Check privacy level and follow status
-        const privacyLevel = userData.privacy_level || (userData.is_private ? 'private' : 'public')
-
-        // Only check follow status if logged in
-        if (currentUser) {
-          try {
-            const status = await getFollowStatus(userData.id)
-            setFollowStatus(status)
-
-            // Check if content should be hidden based on privacy level
-            if (privacyLevel === 'private' && status !== 'following') {
-              setIsPrivate(true)
-              setLoading(false)
-              return
-            }
-
-            if (privacyLevel === 'friends' && status !== 'following') {
-              setIsPrivate(true)
-              setLoading(false)
-              return
-            }
-          } catch (err) {
-            log.error('Error checking follow status', { component: 'ProfilePage', userId: userData.id }, err instanceof Error ? err : new Error(String(err)))
-            // Assume not following on error for non-public accounts
-            if (privacyLevel !== 'public') {
-              setFollowStatus('not_following')
-              setIsPrivate(true)
-              setLoading(false)
-              return
-            }
-          }
-        } else {
-          // Not logged in - show private message for non-public accounts
-          if (privacyLevel !== 'public') {
-            setIsPrivate(true)
-            setLoading(false)
-            return
-          }
-        }
-
-        // Fetch user's albums
-        const { data: albumsData, error: albumsError } = await supabase
-          .from('albums')
-          .select('*')
-          .eq('user_id', userData.id)
-          .order('created_at', { ascending: false })
-
-        if (albumsError) {
-          log.error('Error fetching albums', {
-            component: 'ProfilePage',
-            userId: userData.id
-          }, albumsError)
-          throw albumsError
-        }
-
-        setAlbums(albumsData || [])
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load profile')
-        log.error('Error fetching user profile', { component: 'ProfilePage', userId: userIdOrUsername }, err instanceof Error ? err : new Error(String(err)))
-      } finally {
-        setLoading(false)
-      }
+    if (queryError) {
+      log.error('Error fetching user profile', { component: 'ProfilePage', userId: userIdOrUsername }, queryError instanceof Error ? queryError : new Error(String(queryError)))
     }
-
-    // Run once auth state is determined (either logged in OR confirmed logged out)
-    if (userIdOrUsername && !authLoading) {
-      fetchUserProfile()
-    }
-
-    // Refresh when page becomes visible
-    const handleVisibilityChange = () => {
-      if (!document.hidden && userIdOrUsername && !authLoading) {
-        fetchUserProfile()
-      }
-    }
-
-    const handleFocus = () => {
-      if (userIdOrUsername && !authLoading) {
-        fetchUserProfile()
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [userIdOrUsername, authLoading, currentUser, supabase, getFollowStatus, router])
-
-  // Fetch follow stats for the profile being viewed
-  useEffect(() => {
-    const fetchFollowStats = async () => {
-      if (!profile?.id) return
-
-      try {
-        const [followersResult, followingResult] = await Promise.all([
-          // Count followers
-          supabase
-            .from('follows')
-            .select('id', { count: 'exact' })
-            .eq('following_id', profile.id)
-            .eq('status', 'accepted'),
-
-          // Count following
-          supabase
-            .from('follows')
-            .select('id', { count: 'exact' })
-            .eq('follower_id', profile.id)
-            .eq('status', 'accepted')
-        ])
-
-        setFollowStats({
-          followersCount: followersResult.count || 0,
-          followingCount: followingResult.count || 0
-        })
-      } catch (err) {
-        log.error('Error fetching follow stats', { component: 'ProfilePage', userId: profile.id }, err instanceof Error ? err : new Error(String(err)))
-      }
-    }
-
-    fetchFollowStats()
-  }, [profile?.id, supabase])
+  }, [queryError, userIdOrUsername])
 
   const handleFollowToggle = async () => {
     if (!profile) return
@@ -252,34 +278,22 @@ export default function UserProfilePage() {
 
       if (followStatus === 'following') {
         await unfollowUser(profile.id)
-        setFollowStatus('not_following')
+        setFollowStatusOverride('not_following')
       } else {
         await followUser(profile.id)
 
         // Determine new status based on privacy level
         const privacyLevel = profile.privacy_level || (profile.is_private ? 'private' : 'public')
         const newStatus = privacyLevel === 'public' ? 'following' : 'pending'
-        setFollowStatus(newStatus)
+        setFollowStatusOverride(newStatus)
       }
 
       // Refresh follow stats after follow/unfollow
-      const [followersResult, followingResult] = await Promise.all([
-        supabase
-          .from('follows')
-          .select('id', { count: 'exact' })
-          .eq('following_id', profile.id)
-          .eq('status', 'accepted'),
-        supabase
-          .from('follows')
-          .select('id', { count: 'exact' })
-          .eq('follower_id', profile.id)
-          .eq('status', 'accepted')
-      ])
+      setFollowStatsOverride(await fetchFollowStats(profile.id))
 
-      setFollowStats({
-        followersCount: followersResult.count || 0,
-        followingCount: followingResult.count || 0
-      })
+      // Invalidate so the privacy gating re-resolves (e.g. a now-accepted
+      // follower should see albums on the next fetch).
+      queryClient.invalidateQueries({ queryKey: ['profile', userIdOrUsername] })
     } catch (err) {
       log.error('Error toggling follow', { component: 'ProfilePage', userId: profile.id }, err instanceof Error ? err : new Error(String(err)))
     } finally {

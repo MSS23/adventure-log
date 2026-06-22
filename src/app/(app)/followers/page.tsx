@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Button } from '@/components/ui/button'
@@ -11,6 +13,7 @@ import { FollowButton } from '@/components/social/FollowButton'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import type { Follower } from '@/types/database'
 
 // Animated counter component
 function AnimatedCounter({ value, duration = 0.8 }: { value: number; duration?: number }) {
@@ -40,23 +43,84 @@ function AnimatedCounter({ value, duration = 0.8 }: { value: number; duration?: 
   return <span>{count.toLocaleString()}</span>
 }
 
+interface FollowersData {
+  followers: Follower[]
+  pendingRequests: Follower[]
+  followersCount: number
+  pendingRequestsCount: number
+}
+
 export default function FollowersPage() {
   const { user } = useAuth()
-  const { followers, pendingRequests, loading, stats, refreshFollowLists, acceptFollowRequest, rejectFollowRequest } = useFollows()
+  const queryClient = useQueryClient()
+  const supabase = useMemo(() => createClient(), [])
+  // useFollows still owns the accept/reject mutations. The lists themselves are
+  // read through React Query below so revisits repaint from cache.
+  const { acceptFollowRequest, rejectFollowRequest } = useFollows()
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const prefersReducedMotion = useReducedMotion()
 
-  useEffect(() => {
-    if (user) {
-      refreshFollowLists()
-    }
-  }, [user, refreshFollowLists])
+  const queryKey = ['followers', user?.id]
+
+  const { data, isLoading, isError } = useQuery<FollowersData>({
+    queryKey,
+    enabled: !!user,
+    queryFn: async () => {
+      // Mirrors useFollows.refreshFollowLists (followers + pending) and
+      // refreshStats (counts) for the signed-in user.
+      const [followersResult, pendingResult, followersCountResult, pendingCountResult] = await Promise.all([
+        supabase
+          .from('follows')
+          .select(`
+            *,
+            follower:users!follows_follower_id_fkey(*)
+          `)
+          .eq('following_id', user!.id)
+          .eq('status', 'accepted'),
+        supabase
+          .from('follows')
+          .select(`
+            *,
+            follower:users!follows_follower_id_fkey(*)
+          `)
+          .eq('following_id', user!.id)
+          .eq('status', 'pending'),
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('following_id', user!.id)
+          .eq('status', 'accepted'),
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('following_id', user!.id)
+          .eq('status', 'pending'),
+      ])
+
+      if (followersResult.error) throw followersResult.error
+      if (pendingResult.error) throw pendingResult.error
+
+      return {
+        followers: (followersResult.data || []) as Follower[],
+        pendingRequests: (pendingResult.data || []) as Follower[],
+        followersCount: followersCountResult.count || 0,
+        pendingRequestsCount: pendingCountResult.count || 0,
+      }
+    },
+  })
+
+  const followers = data?.followers ?? []
+  const pendingRequests = data?.pendingRequests ?? []
+  const followersCount = data?.followersCount ?? 0
+  const pendingRequestsCount = data?.pendingRequestsCount ?? 0
+  // Preserve original loading behavior: full-screen spinner while fetching.
+  const loading = (isLoading || (!data && !isError)) && !!user
 
   const handleAccept = async (followerUserId: string) => {
     setActionLoading(followerUserId)
     try {
       await acceptFollowRequest(followerUserId)
-      await refreshFollowLists()
+      await queryClient.invalidateQueries({ queryKey })
     } finally {
       setActionLoading(null)
     }
@@ -66,7 +130,7 @@ export default function FollowersPage() {
     setActionLoading(followerUserId)
     try {
       await rejectFollowRequest(followerUserId)
-      await refreshFollowLists()
+      await queryClient.invalidateQueries({ queryKey })
     } finally {
       setActionLoading(null)
     }
@@ -156,13 +220,13 @@ export default function FollowersPage() {
                 Followers
               </p>
               <p className="al-stat-value text-3xl md:text-4xl mt-1">
-                <AnimatedCounter value={stats.followersCount} />
+                <AnimatedCounter value={followersCount} />
               </p>
             </div>
           </motion.div>
           <motion.div variants={itemVariants}>
             <div className="relative rounded-2xl border border-border bg-card p-4 sm:p-5">
-              {stats.pendingRequestsCount > 0 && (
+              {pendingRequestsCount > 0 && (
                 <span
                   className="absolute top-3 right-3 inline-flex h-2.5 w-2.5 rounded-full bg-accent"
                   aria-hidden
@@ -173,7 +237,7 @@ export default function FollowersPage() {
                 Pending Requests
               </p>
               <p className="al-stat-value text-3xl md:text-4xl mt-1">
-                <AnimatedCounter value={stats.pendingRequestsCount} />
+                <AnimatedCounter value={pendingRequestsCount} />
               </p>
             </div>
           </motion.div>

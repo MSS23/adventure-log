@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { Button } from '@/components/ui/button'
@@ -11,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import type { Follower } from '@/types/database'
 
 // Animated counter component
 function AnimatedCounter({ value, duration = 0.8 }: { value: number; duration?: number }) {
@@ -40,24 +43,66 @@ function AnimatedCounter({ value, duration = 0.8 }: { value: number; duration?: 
   return <span>{count.toLocaleString()}</span>
 }
 
+interface FollowingData {
+  following: Follower[]
+  followingCount: number
+}
+
 export default function FollowingPage() {
   const { user } = useAuth()
   const router = useRouter()
-  const { following, loading, stats, refreshFollowLists, unfollowUser } = useFollows()
+  const queryClient = useQueryClient()
+  const supabase = useMemo(() => createClient(), [])
+  // useFollows still owns the unfollow mutation (and its own internal state /
+  // realtime subscription). We only borrow unfollowUser here; the list itself
+  // is read through React Query below so revisits repaint from cache.
+  const { unfollowUser } = useFollows()
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const prefersReducedMotion = useReducedMotion()
 
-  useEffect(() => {
-    if (user) {
-      refreshFollowLists()
-    }
-  }, [user, refreshFollowLists])
+  const queryKey = ['following', user?.id]
+
+  const { data, isLoading, isError } = useQuery<FollowingData>({
+    queryKey,
+    enabled: !!user,
+    queryFn: async () => {
+      // Mirrors useFollows.refreshFollowLists (following list) +
+      // refreshStats (following count) for the signed-in user.
+      const [followingResult, countResult] = await Promise.all([
+        supabase
+          .from('follows')
+          .select(`
+            *,
+            following:users!follows_following_id_fkey(*)
+          `)
+          .eq('follower_id', user!.id)
+          .eq('status', 'accepted'),
+        supabase
+          .from('follows')
+          .select('id', { count: 'exact' })
+          .eq('follower_id', user!.id)
+          .eq('status', 'accepted'),
+      ])
+
+      if (followingResult.error) throw followingResult.error
+
+      return {
+        following: (followingResult.data || []) as Follower[],
+        followingCount: countResult.count || 0,
+      }
+    },
+  })
+
+  const following = data?.following ?? []
+  const followingCount = data?.followingCount ?? 0
+  // Preserve original loading behavior: full-screen spinner while fetching.
+  const loading = (isLoading || (!data && !isError)) && !!user
 
   const handleUnfollow = async (userId: string) => {
     setActionLoading(userId)
     try {
       await unfollowUser(userId)
-      await refreshFollowLists()
+      await queryClient.invalidateQueries({ queryKey })
     } finally {
       setActionLoading(null)
     }
@@ -145,7 +190,7 @@ export default function FollowingPage() {
               Following
             </p>
             <p className="al-stat-value text-3xl md:text-4xl mt-1">
-              <AnimatedCounter value={stats.followingCount} />
+              <AnimatedCounter value={followingCount} />
             </p>
           </div>
         </motion.div>

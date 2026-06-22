@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -91,15 +92,7 @@ export function useGlobePageData() {
   const lng = searchParams.get('lng')
   const userId = searchParams.get('user')
 
-  const [albums, setAlbums] = useState<AlbumPreview[]>([])
-  const [, setLoading] = useState(true)
   const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(urlAlbumId)
-  const [stats, setStats] = useState({ totalAlbums: 0, totalCountries: 0, totalPhotos: 0 })
-  const [isOwnProfile, setIsOwnProfile] = useState(false)
-  const [isPrivateAccount, setIsPrivateAccount] = useState(false)
-  const [profileUser, setProfileUser] = useState<{ id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string } | null>(null)
-  const [friends, setFriends] = useState<Array<{ id: string; username: string; display_name: string; avatar_url?: string; last_active?: string }>>([])
-  const [, setLoadingFriends] = useState(false)
 
   // Year filter state for controlling EnhancedGlobe
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
@@ -112,9 +105,6 @@ export function useGlobePageData() {
 
   // Explore mode state
   const [exploreMode, setExploreMode] = useState(false)
-  const [exploreAlbums, setExploreAlbums] = useState<ExploreAlbum[]>([])
-  const [exploreLoading, setExploreLoading] = useState(false)
-  const [exploreStats, setExploreStats] = useState({ travelers: 0, albums: 0 })
 
   // Wishlist layer state
   const { items: wishlistItems, addItem: addWishlistItem } = useWishlist()
@@ -132,125 +122,151 @@ export function useGlobePageData() {
   const targetUserId = userId || user?.id
   const { followStatus, following } = useFollows(targetUserId || '')
 
+  // Default/empty shapes preserved from the original useState initializers so
+  // the public return shape is identical while the query is pending. Stable
+  // references avoid re-running downstream memos/effects on every render.
+  const EMPTY_STATS = useMemo(() => ({ totalAlbums: 0, totalCountries: 0, totalPhotos: 0 }), [])
+  const EMPTY_ALBUMS = useMemo<AlbumPreview[]>(() => [], [])
+
+  // Fetch albums with location data (profile gating, albums, stats) via React
+  // Query so revisits to the globe page hit the cache instead of re-running
+  // the whole waterfall.
+  const albumsQuery = useQuery({
+    queryKey: ['globe-data', 'albums', targetUserId ?? null, user?.id ?? null],
+    enabled: !!targetUserId,
+    queryFn: async () => {
+      // targetUserId is guaranteed by `enabled`, but narrow for TS.
+      if (!targetUserId) {
+        return {
+          albums: [] as AlbumPreview[],
+          stats: { totalAlbums: 0, totalCountries: 0, totalPhotos: 0 },
+          isOwnProfile: false,
+          isPrivateAccount: false,
+          profileUser: null as
+            | { id: string; username: string; display_name: string; avatar_url?: string; privacy_level?: string }
+            | null,
+        }
+      }
+
+      const isOwn = targetUserId === user?.id
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id, username, display_name, avatar_url, privacy_level')
+        .eq('id', targetUserId)
+        .single()
+
+      // Restricted (private/friends) accounts only reveal their globe to the
+      // owner or to an ACCEPTED follower. A non-follower gets the locked
+      // screen; an accepted follower falls through and RLS
+      // (albums_follower_read) returns the account's non-private albums.
+      const isRestricted =
+        userData?.privacy_level === 'private' || userData?.privacy_level === 'friends'
+
+      if (isRestricted && !isOwn) {
+        let isAcceptedFollower = false
+        if (user?.id) {
+          const { data: followRow } = await supabase
+            .from('follows')
+            .select('status')
+            .eq('follower_id', user.id)
+            .eq('following_id', targetUserId)
+            .eq('status', 'accepted')
+            .maybeSingle()
+          isAcceptedFollower = !!followRow
+        }
+
+        if (!isAcceptedFollower) {
+          return {
+            albums: [] as AlbumPreview[],
+            stats: { totalAlbums: 0, totalCountries: 0, totalPhotos: 0 },
+            isOwnProfile: isOwn,
+            isPrivateAccount: true,
+            profileUser: userData ?? null,
+          }
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('albums')
+        .select(`
+          id,
+          title,
+          cover_photo_url,
+          location_name,
+          latitude,
+          longitude,
+          created_at,
+          country_code,
+          date_start,
+          start_date,
+          description,
+          photos(id)
+        `)
+        .eq('user_id', targetUserId)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .neq('status', 'draft')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      const albumsData = (data || []).filter(a => a.photos && a.photos.length > 0)
+
+      const uniqueCountries = new Set(
+        albumsData
+          .map(a => a.country_code)
+          .filter(Boolean)
+      )
+
+      const { count: photoCount } = await supabase
+        .from('photos')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', targetUserId)
+
+      return {
+        albums: albumsData as AlbumPreview[],
+        stats: {
+          totalAlbums: albumsData.length,
+          totalCountries: uniqueCountries.size,
+          totalPhotos: photoCount || 0,
+        },
+        isOwnProfile: isOwn,
+        isPrivateAccount: false,
+        profileUser: userData ?? null,
+      }
+    },
+  })
+
+  useEffect(() => {
+    if (albumsQuery.error) {
+      log.error('Error fetching albums for globe',
+        { component: 'GlobePage', userId: userId || user?.id },
+        albumsQuery.error instanceof Error ? albumsQuery.error : new Error(String(albumsQuery.error))
+      )
+    }
+  }, [albumsQuery.error, userId, user?.id])
+
+  const albums = albumsQuery.data?.albums ?? EMPTY_ALBUMS
+  const stats = albumsQuery.data?.stats ?? EMPTY_STATS
+  const isOwnProfile = albumsQuery.data?.isOwnProfile ?? false
+  const isPrivateAccount = albumsQuery.data?.isPrivateAccount ?? false
+  const profileUser = albumsQuery.data?.profileUser ?? null
+
   // Calculate total distance from album coordinates
   const totalDistance = useMemo(() => calculateTotalDistance(albums), [albums])
 
-  // Fetch albums with location data
+  // Preserve the original visibility/focus refetch behavior — when the tab
+  // becomes visible or the window regains focus, re-run the albums query.
   useEffect(() => {
-    const fetchAlbums = async () => {
-      try {
-        setLoading(true)
-        setIsPrivateAccount(false)
-        setProfileUser(null)
-
-        const targetUserId = userId || user?.id
-
-        if (!targetUserId) {
-          setLoading(false)
-          return
-        }
-
-        const isOwn = targetUserId === user?.id
-        setIsOwnProfile(isOwn)
-
-        const { data: userData } = await supabase
-          .from('users')
-          .select('id, username, display_name, avatar_url, privacy_level')
-          .eq('id', targetUserId)
-          .single()
-
-        setProfileUser(userData)
-
-        // Restricted (private/friends) accounts only reveal their globe to the
-        // owner or to an ACCEPTED follower. A non-follower gets the locked
-        // screen; an accepted follower falls through and RLS
-        // (albums_follower_read) returns the account's non-private albums.
-        const isRestricted =
-          userData?.privacy_level === 'private' || userData?.privacy_level === 'friends'
-
-        if (isRestricted && !isOwn) {
-          let isAcceptedFollower = false
-          if (user?.id) {
-            const { data: followRow } = await supabase
-              .from('follows')
-              .select('status')
-              .eq('follower_id', user.id)
-              .eq('following_id', targetUserId)
-              .eq('status', 'accepted')
-              .maybeSingle()
-            isAcceptedFollower = !!followRow
-          }
-
-          if (!isAcceptedFollower) {
-            setIsPrivateAccount(true)
-            setLoading(false)
-            return
-          }
-        }
-
-        const { data, error } = await supabase
-          .from('albums')
-          .select(`
-            id,
-            title,
-            cover_photo_url,
-            location_name,
-            latitude,
-            longitude,
-            created_at,
-            country_code,
-            date_start,
-            start_date,
-            description,
-            photos(id)
-          `)
-          .eq('user_id', targetUserId)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-          .neq('status', 'draft')
-          .order('created_at', { ascending: false })
-
-        if (error) throw error
-
-        const albumsData = (data || []).filter(a => a.photos && a.photos.length > 0)
-        setAlbums(albumsData)
-
-        const uniqueCountries = new Set(
-          albumsData
-            .map(a => a.country_code)
-            .filter(Boolean)
-        )
-
-        const { count: photoCount } = await supabase
-          .from('photos')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', targetUserId)
-
-        setStats({
-          totalAlbums: albumsData.length,
-          totalCountries: uniqueCountries.size,
-          totalPhotos: photoCount || 0
-        })
-      } catch (err) {
-        log.error('Error fetching albums for globe',
-          { component: 'GlobePage', userId: userId || user?.id },
-          err instanceof Error ? err : new Error(String(err))
-        )
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchAlbums()
-
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        fetchAlbums()
+        albumsQuery.refetch()
       }
     }
 
     const handleFocus = () => {
-      fetchAlbums()
+      albumsQuery.refetch()
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -260,7 +276,7 @@ export function useGlobePageData() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [userId, user?.id, supabase])
+  }, [albumsQuery])
 
   const handleAlbumClick = useCallback((albumId: string) => {
     const album = albums.find(a => a.id === albumId)
@@ -389,125 +405,134 @@ export function useGlobePageData() {
     }
   }, [userId, user?.id])
 
-  // Fetch friends list with their latest activity (people user follows)
-  useEffect(() => {
-    const fetchFriends = async () => {
-      if (!user?.id) return
+  // Fetch friends list with their latest activity (people user follows).
+  // Keyed on the followed-user ids so the cache invalidates when the follow
+  // graph changes; gated until we have an auth user.
+  const friendIds = useMemo(
+    () => following.filter(f => f.following).map(f => f.following!.id),
+    [following]
+  )
 
-      try {
-        setLoadingFriends(true)
+  const friendsQuery = useQuery({
+    queryKey: ['globe-data', 'friends', user?.id ?? null, friendIds],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      if (friendIds.length === 0) {
+        return [] as Array<{ id: string; username: string; display_name: string; avatar_url?: string; last_active?: string }>
+      }
 
-        const friendIds = following
-          .filter(f => f.following)
-          .map(f => f.following!.id)
+      const { data: recentAlbums, error: albumsError } = await supabase
+        .from('albums')
+        .select('user_id, updated_at')
+        .in('user_id', friendIds)
+        .order('updated_at', { ascending: false })
 
-        if (friendIds.length === 0) {
-          setFriends([])
-          return
+      if (albumsError) throw albumsError
+
+      const activityMap: { [key: string]: string } = {}
+      recentAlbums?.forEach((album) => {
+        if (!activityMap[album.user_id]) {
+          activityMap[album.user_id] = album.updated_at
         }
+      })
 
-        const { data: recentAlbums, error: albumsError } = await supabase
-          .from('albums')
-          .select('user_id, updated_at')
-          .in('user_id', friendIds)
-          .order('updated_at', { ascending: false })
-
-        if (albumsError) throw albumsError
-
-        const activityMap: { [key: string]: string } = {}
-        recentAlbums?.forEach((album) => {
-          if (!activityMap[album.user_id]) {
-            activityMap[album.user_id] = album.updated_at
-          }
+      const friendsList = following
+        .filter(f => f.following)
+        .map(f => ({
+          id: f.following!.id,
+          username: f.following!.username || '',
+          display_name: f.following!.display_name || f.following!.username || '',
+          avatar_url: f.following!.avatar_url,
+          last_active: activityMap[f.following!.id] || '1970-01-01'
+        }))
+        .sort((a, b) => {
+          return new Date(b.last_active!).getTime() - new Date(a.last_active!).getTime()
         })
+        .slice(0, 5)
 
-        const friendsList = following
-          .filter(f => f.following)
-          .map(f => ({
-            id: f.following!.id,
-            username: f.following!.username || '',
-            display_name: f.following!.display_name || f.following!.username || '',
-            avatar_url: f.following!.avatar_url,
-            last_active: activityMap[f.following!.id] || '1970-01-01'
-          }))
-          .sort((a, b) => {
-            return new Date(b.last_active!).getTime() - new Date(a.last_active!).getTime()
-          })
-          .slice(0, 5)
+      return friendsList
+    },
+  })
 
-        setFriends(friendsList)
-      } catch (err) {
-        log.error('Error fetching friends', {
-          component: 'GlobePage',
-          userId: user.id
-        }, err instanceof Error ? err : new Error(String(err)))
-      } finally {
-        setLoadingFriends(false)
-      }
-    }
-
-    fetchFriends()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, supabase])
-
-  // Fetch explore albums when explore mode is activated
   useEffect(() => {
-    if (!exploreMode) return
-
-    const fetchExploreAlbums = async () => {
-      try {
-        setExploreLoading(true)
-        const { data, error } = await supabase
-          .from('albums')
-          .select(`
-            id, title, cover_photo_url, location_name, latitude, longitude, created_at, user_id,
-            users!albums_user_id_fkey(username, display_name, avatar_url)
-          `)
-          .eq('visibility', 'public')
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-          .neq('status', 'draft')
-          .neq('user_id', user?.id || '')
-          .order('created_at', { ascending: false })
-          .limit(100)
-
-        if (error) throw error
-
-        const mapped: ExploreAlbum[] = (data || []).map((item: Record<string, unknown>) => {
-          const usersData = item.users as Record<string, unknown> | null
-          return {
-            id: item.id as string,
-            title: item.title as string,
-            cover_photo_url: item.cover_photo_url as string | undefined,
-            location_name: item.location_name as string | undefined,
-            latitude: item.latitude as number | undefined,
-            longitude: item.longitude as number | undefined,
-            created_at: item.created_at as string,
-            user_id: item.user_id as string,
-            owner: usersData ? {
-              username: usersData.username as string,
-              display_name: usersData.display_name as string,
-              avatar_url: usersData.avatar_url as string | undefined,
-            } : undefined,
-          }
-        })
-
-        setExploreAlbums(mapped)
-
-        const uniqueUsers = new Set(mapped.map(a => a.user_id))
-        setExploreStats({ travelers: uniqueUsers.size, albums: mapped.length })
-      } catch (err) {
-        log.error('Error fetching explore albums', {
-          component: 'GlobePage',
-          action: 'fetch-explore',
-        }, err instanceof Error ? err : new Error(String(err)))
-      } finally {
-        setExploreLoading(false)
-      }
+    if (friendsQuery.error) {
+      log.error('Error fetching friends', {
+        component: 'GlobePage',
+        userId: user?.id
+      }, friendsQuery.error instanceof Error ? friendsQuery.error : new Error(String(friendsQuery.error)))
     }
+  }, [friendsQuery.error, user?.id])
 
-    fetchExploreAlbums()
-  }, [exploreMode, user?.id, supabase])
+  const EMPTY_FRIENDS = useMemo<Array<{ id: string; username: string; display_name: string; avatar_url?: string; last_active?: string }>>(() => [], [])
+  const friends = friendsQuery.data ?? EMPTY_FRIENDS
+
+  // Fetch explore albums when explore mode is activated. Gated on exploreMode
+  // via `enabled` so the query only runs (and caches) once the user opens
+  // explore mode.
+  const exploreQuery = useQuery({
+    queryKey: ['globe-data', 'explore', user?.id ?? null],
+    enabled: exploreMode,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('albums')
+        .select(`
+          id, title, cover_photo_url, location_name, latitude, longitude, created_at, user_id,
+          users!albums_user_id_fkey(username, display_name, avatar_url)
+        `)
+        .eq('visibility', 'public')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .neq('status', 'draft')
+        .neq('user_id', user?.id || '')
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (error) throw error
+
+      const mapped: ExploreAlbum[] = (data || []).map((item: Record<string, unknown>) => {
+        const usersData = item.users as Record<string, unknown> | null
+        return {
+          id: item.id as string,
+          title: item.title as string,
+          cover_photo_url: item.cover_photo_url as string | undefined,
+          location_name: item.location_name as string | undefined,
+          latitude: item.latitude as number | undefined,
+          longitude: item.longitude as number | undefined,
+          created_at: item.created_at as string,
+          user_id: item.user_id as string,
+          owner: usersData ? {
+            username: usersData.username as string,
+            display_name: usersData.display_name as string,
+            avatar_url: usersData.avatar_url as string | undefined,
+          } : undefined,
+        }
+      })
+
+      const uniqueUsers = new Set(mapped.map(a => a.user_id))
+
+      return {
+        exploreAlbums: mapped,
+        exploreStats: { travelers: uniqueUsers.size, albums: mapped.length },
+      }
+    },
+  })
+
+  useEffect(() => {
+    if (exploreQuery.error) {
+      log.error('Error fetching explore albums', {
+        component: 'GlobePage',
+        action: 'fetch-explore',
+      }, exploreQuery.error instanceof Error ? exploreQuery.error : new Error(String(exploreQuery.error)))
+    }
+  }, [exploreQuery.error])
+
+  const EMPTY_EXPLORE_ALBUMS = useMemo<ExploreAlbum[]>(() => [], [])
+  const EMPTY_EXPLORE_STATS = useMemo(() => ({ travelers: 0, albums: 0 }), [])
+  const exploreAlbums = exploreQuery.data?.exploreAlbums ?? EMPTY_EXPLORE_ALBUMS
+  const exploreStats = exploreQuery.data?.exploreStats ?? EMPTY_EXPLORE_STATS
+  // Preserve original semantics: exploreLoading was only ever true while a
+  // fetch was in flight after explore mode was activated.
+  const exploreLoading = exploreMode && exploreQuery.isFetching
 
   const handleViewFriendGlobe = (friendId: string) => {
     router.push(`/globe?user=${friendId}`)

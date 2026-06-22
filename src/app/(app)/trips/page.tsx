@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Plus, Map as MapIcon, Loader2, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -23,12 +24,21 @@ interface TripListItem extends Trip {
   my_role: 'owner' | 'editor' | 'viewer'
 }
 
+// Sentinel error thrown by the query when the trips/trip_pins tables haven't
+// been provisioned yet (503 + NOT_PROVISIONED). The component checks for this
+// to distinguish the friendly "launching soon" state from a real, retryable
+// failure. A transient 500 must NOT masquerade as "coming soon".
+class TripsNotProvisionedError extends Error {
+  readonly notProvisioned = true
+  constructor() {
+    super('Trip planner tables are not provisioned')
+    this.name = 'TripsNotProvisionedError'
+  }
+}
+
 export default function TripsPage() {
   const { user } = useAuth()
-  const [trips, setTrips] = useState<TripListItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [unavailable, setUnavailable] = useState(false)
-  const [loadError, setLoadError] = useState(false)
+  const queryClient = useQueryClient()
   const [creating, setCreating] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -40,37 +50,46 @@ export default function TripsPage() {
   // Today in the user's local timezone as YYYY-MM-DD — used to block past dates.
   const todayStr = new Date().toLocaleDateString('en-CA')
 
-  const load = async () => {
-    try {
-      setLoading(true)
-      setLoadError(false)
+  const {
+    data: trips = [],
+    isPending,
+    isError,
+    error: queryError,
+    refetch,
+  } = useQuery<TripListItem[]>({
+    queryKey: ['trips', user?.id],
+    enabled: !!user,
+    // The old single-shot fetch surfaced its error/unavailable state
+    // immediately — don't let the global retry:2 delay "launching soon" or the
+    // error fallback.
+    retry: false,
+    queryFn: async () => {
       const res = await apiFetch('/api/trips')
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
-        setTrips(data.trips || [])
-        setUnavailable(false)
-      } else if (res.status === 503 && data.code === 'NOT_PROVISIONED') {
-        // The trips/trip_pins tables haven't been applied to this Supabase
-        // project yet. Show a friendly "launching soon" state. This is the
-        // ONLY case that should hide the feature — gated on the explicit code
-        // so a transient 500 no longer masquerades as "coming soon".
-        setUnavailable(true)
-      } else {
-        // Any other failure is a real, recoverable error — surface it with a
-        // retry rather than a fake empty/coming-soon state.
-        setLoadError(true)
+        return (data.trips || []) as TripListItem[]
       }
-    } catch (error) {
-      log.error('Failed to load trips list', { component: 'TripsPage', action: 'load' }, error as Error)
-      setLoadError(true)
-    } finally {
-      setLoading(false)
-    }
-  }
+      if (res.status === 503 && data.code === 'NOT_PROVISIONED') {
+        // The trips/trip_pins tables haven't been applied to this Supabase
+        // project yet. Surface as a sentinel so the component can show a
+        // friendly "launching soon" state rather than a retryable error.
+        throw new TripsNotProvisionedError()
+      }
+      // Any other failure is a real, recoverable error — surface it with a
+      // retry rather than a fake empty/coming-soon state.
+      const err = new Error(data.error || 'Failed to load trips')
+      log.error('Failed to load trips list', { component: 'TripsPage', action: 'load' }, err)
+      throw err
+    },
+  })
 
-  useEffect(() => {
-    if (user) load()
-  }, [user])
+  // Loading only matters once auth is resolved; while waiting for the user the
+  // page renders its own spinner below.
+  const loading = !!user && isPending
+  const unavailable = isError && queryError instanceof TripsNotProvisionedError
+  const loadError = isError && !unavailable
+
+  const load = () => refetch()
 
   const handleCreate = async () => {
     if (!title.trim()) return
@@ -109,9 +128,10 @@ export default function TripsPage() {
           setCreateError('You need to log in again to create a trip.')
         } else if (res.status === 503 && data.code === 'NOT_PROVISIONED') {
           // Same migration-missing case as in load(); also dev-facing
-          // CLI guidance must NEVER reach end users.
-          setUnavailable(true)
+          // CLI guidance must NEVER reach end users. Refetch so the list query
+          // re-throws the sentinel and the page flips to "launching soon".
           setDialogOpen(false)
+          await refetch()
           if (process.env.NODE_ENV === 'development') {
             // Loud guidance for the developer on localhost
             log.warn(
@@ -129,7 +149,7 @@ export default function TripsPage() {
       setDescription('')
       setStartDate('')
       setEndDate('')
-      await load()
+      await queryClient.invalidateQueries({ queryKey: ['trips', user?.id] })
       if (data.trip?.id) window.location.href = `/trips/${data.trip.id}`
     } catch (error) {
       log.error('Failed to create trip', { component: 'TripsPage', action: 'create' }, error as Error)

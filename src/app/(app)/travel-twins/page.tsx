@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Loader2, Users, MapPin, Lock } from 'lucide-react'
@@ -39,44 +40,56 @@ interface Recommendation {
 
 export default function TravelTwinsPage() {
   const { user } = useAuth()
-  const [twins, setTwins] = useState<Twin[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedTwinId, setSelectedTwinId] = useState<string | null>(null)
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
-  const [loadingRecs, setLoadingRecs] = useState(false)
+  // null = no explicit user choice yet; we fall back to the first twin below so
+  // the default-select-first behavior is preserved without an effect.
+  const [manualTwinId, setManualTwinId] = useState<string | null>(null)
 
-  useEffect(() => {
-    (async () => {
+  const { data: twins = [], isPending } = useQuery<Twin[]>({
+    queryKey: ['travel-twins', user?.id],
+    enabled: !!user,
+    // The original fetch had no retry and fell through to the empty state on
+    // failure; preserve that immediate behavior.
+    retry: false,
+    queryFn: async () => {
       try {
         const res = await apiFetch('/api/travel-twins')
         const data = await res.json()
-        if (res.ok) {
-          setTwins(data.twins || [])
-          if (data.twins?.[0]) setSelectedTwinId(data.twins[0].user_id)
-        }
+        if (res.ok) return (data.twins || []) as Twin[]
+        return []
       } catch (error) {
         log.error('Load twins failed', { component: 'TravelTwinsPage' }, error as Error)
-      } finally {
-        setLoading(false)
+        throw error
       }
-    })()
-  }, [])
+    },
+  })
 
-  useEffect(() => {
-    if (!selectedTwinId) return
-    ;(async () => {
+  // Effective selection: the user's explicit pick if it still exists in the
+  // list, otherwise the first twin (matches the old "select first on load").
+  const selectedTwinId =
+    (manualTwinId && twins.some((t) => t.user_id === manualTwinId) ? manualTwinId : null) ??
+    twins[0]?.user_id ??
+    null
+  const setSelectedTwinId = setManualTwinId
+
+  // Loading the twins list only matters once auth is resolved.
+  const loading = !!user && isPending
+
+  const { data: recommendations = [], isFetching: loadingRecs } = useQuery<Recommendation[]>({
+    queryKey: ['travel-twins-recommendations', selectedTwinId],
+    enabled: !!selectedTwinId,
+    retry: false,
+    queryFn: async () => {
       try {
-        setLoadingRecs(true)
         const res = await apiFetch(`/api/travel-twins/${selectedTwinId}/recommendations`)
         const data = await res.json()
-        if (res.ok) setRecommendations(data.recommendations || [])
+        if (res.ok) return (data.recommendations || []) as Recommendation[]
+        return []
       } catch (error) {
         log.error('Load recommendations failed', { component: 'TravelTwinsPage' }, error as Error)
-      } finally {
-        setLoadingRecs(false)
+        throw error
       }
-    })()
-  }, [selectedTwinId])
+    },
+  })
 
   if (!user) {
     return (

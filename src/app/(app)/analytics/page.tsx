@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -278,138 +279,141 @@ export default function AnalyticsPage() {
   const router = useRouter()
   const { user, authLoading, profileLoading } = useAuth()
   const supabase = createClient()
-  const [stats, setStats] = useState<TravelStats | null>(null)
-  const [loading, setLoading] = useState(true)
   const [heatmapYear, setHeatmapYear] = useState(new Date().getFullYear())
   const prefersReducedMotion = useReducedMotion()
   const isAuthLoading = authLoading || profileLoading
 
-  useEffect(() => {
-    if (!user) return
+  const { data: stats = null, isLoading: queryLoading, error } = useQuery<TravelStats>({
+    queryKey: ['analytics', user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const userId = user!.id
 
-    const fetchAnalytics = async () => {
-      try {
-        setLoading(true)
+      const { data: albums, error: albumsError } = await supabase
+        .from('albums')
+        .select('id, title, location_name, country_code, latitude, longitude, date_start, date_end, created_at, photos(id, taken_at, created_at)')
+        .eq('user_id', userId)
+        .order('date_start', { ascending: true })
 
-        const { data: albums, error: albumsError } = await supabase
-          .from('albums')
-          .select('id, title, location_name, country_code, latitude, longitude, date_start, date_end, created_at, photos(id, taken_at, created_at)')
-          .eq('user_id', user.id)
-          .order('date_start', { ascending: true })
+      if (albumsError) throw albumsError
 
-        if (albumsError) throw albumsError
+      const { data: photos } = await supabase
+        .from('photos')
+        .select('id, taken_at, created_at, album_id')
+        .eq('user_id', userId)
 
-        const { data: photos } = await supabase
-          .from('photos')
-          .select('id, taken_at, created_at, album_id')
-          .eq('user_id', user.id)
+      const [likesResult, commentsResult, followersResult, followingResult] = await Promise.all([
+        supabase.from('likes').select('id').eq('target_type', 'album').in('target_id', (albums || []).map(a => a.id)),
+        supabase.from('comments').select('id').eq('target_type', 'album').in('target_id', (albums || []).map(a => a.id)),
+        supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', userId).eq('status', 'accepted'),
+        supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', userId).eq('status', 'accepted'),
+      ])
 
-        const [likesResult, commentsResult, followersResult, followingResult] = await Promise.all([
-          supabase.from('likes').select('id').eq('target_type', 'album').in('target_id', (albums || []).map(a => a.id)),
-          supabase.from('comments').select('id').eq('target_type', 'album').in('target_id', (albums || []).map(a => a.id)),
-          supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', user.id).eq('status', 'accepted'),
-          supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', user.id).eq('status', 'accepted'),
-        ])
+      const totalAlbums = albums?.length || 0
+      const totalPhotos = photos?.length || 0
+      const countries = new Set(albums?.filter(a => a.country_code).map(a => a.country_code) || [])
+      const cities = new Set(albums?.filter(a => a.location_name).map(a => a.location_name) || [])
 
-        const totalAlbums = albums?.length || 0
-        const totalPhotos = photos?.length || 0
-        const countries = new Set(albums?.filter(a => a.country_code).map(a => a.country_code) || [])
-        const cities = new Set(albums?.filter(a => a.location_name).map(a => a.location_name) || [])
+      let totalDistance = 0
+      const sorted = [...(albums || [])].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
+      for (let i = 1; i < sorted.length; i++) {
+        const prev = sorted[i - 1], curr = sorted[i]
+        if (prev.latitude && prev.longitude && curr.latitude && curr.longitude) {
+          totalDistance += haversineDistance(prev.latitude, prev.longitude, curr.latitude, curr.longitude)
+        }
+      }
 
-        let totalDistance = 0
-        const sorted = [...(albums || [])].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
-        for (let i = 1; i < sorted.length; i++) {
-          const prev = sorted[i - 1], curr = sorted[i]
-          if (prev.latitude && prev.longitude && curr.latitude && curr.longitude) {
-            totalDistance += haversineDistance(prev.latitude, prev.longitude, curr.latitude, curr.longitude)
+      let totalTripDays = 0, tripsWithDuration = 0
+      albums?.forEach(album => {
+        if (album.date_start && album.date_end) {
+          const days = Math.ceil((new Date(album.date_end).getTime() - new Date(album.date_start).getTime()) / (1000 * 60 * 60 * 24))
+          if (days > 0 && days < 365) { totalTripDays += days; tripsWithDuration++ }
+        }
+      })
+
+      // Photos by year — use album trip date, not photo upload/taken date
+      const photosByYearMap: Record<string, number> = {}
+      const currentYear = new Date().getFullYear()
+      for (let y = 2020; y <= currentYear; y++) photosByYearMap[y.toString()] = 0
+      // Build album date lookup: album_id → date_start
+      const albumDateMap: Record<string, string | null> = {}
+      albums?.forEach(a => { albumDateMap[a.id] = a.date_start || a.created_at })
+      photos?.forEach(p => {
+        const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
+        if (date) {
+          const y = new Date(date).getFullYear().toString()
+          if (y in photosByYearMap) photosByYearMap[y] = (photosByYearMap[y] || 0) + 1
+        }
+      })
+
+      // Top destinations
+      const countryCount: Record<string, number> = {}
+      albums?.forEach(a => { if (a.country_code) countryCount[a.country_code] = (countryCount[a.country_code] || 0) + 1 })
+      const topDestinations = Object.entries(countryCount)
+        .map(([country_code, count]) => ({ country_code, country_name: getCountryName(country_code), count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 6)
+
+      // Heatmap data
+      const heatmapData: Record<string, number> = {}
+      albums?.forEach(album => {
+        if (album.date_start) {
+          const start = new Date(album.date_start)
+          const end = album.date_end ? new Date(album.date_end) : start
+          for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const key = d.toISOString().split('T')[0]
+            heatmapData[key] = (heatmapData[key] || 0) + 1
           }
         }
+      })
+      photos?.forEach(p => {
+        const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
+        if (date) { const key = new Date(date).toISOString().split('T')[0]; heatmapData[key] = (heatmapData[key] || 0) + 1 }
+      })
 
-        let totalTripDays = 0, tripsWithDuration = 0
-        albums?.forEach(album => {
-          if (album.date_start && album.date_end) {
-            const days = Math.ceil((new Date(album.date_end).getTime() - new Date(album.date_start).getTime()) / (1000 * 60 * 60 * 24))
-            if (days > 0 && days < 365) { totalTripDays += days; tripsWithDuration++ }
-          }
-        })
+      // Photos by month
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const monthCount: Record<string, number> = {}
+      monthNames.forEach(m => (monthCount[m] = 0))
+      photos?.forEach(p => {
+        const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
+        if (date) { const m = monthNames[new Date(date).getMonth()]; monthCount[m] = (monthCount[m] || 0) + 1 }
+      })
 
-        // Photos by year — use album trip date, not photo upload/taken date
-        const photosByYearMap: Record<string, number> = {}
-        const currentYear = new Date().getFullYear()
-        for (let y = 2020; y <= currentYear; y++) photosByYearMap[y.toString()] = 0
-        // Build album date lookup: album_id → date_start
-        const albumDateMap: Record<string, string | null> = {}
-        albums?.forEach(a => { albumDateMap[a.id] = a.date_start || a.created_at })
-        photos?.forEach(p => {
-          const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
-          if (date) {
-            const y = new Date(date).getFullYear().toString()
-            if (y in photosByYearMap) photosByYearMap[y] = (photosByYearMap[y] || 0) + 1
-          }
-        })
-
-        // Top destinations
-        const countryCount: Record<string, number> = {}
-        albums?.forEach(a => { if (a.country_code) countryCount[a.country_code] = (countryCount[a.country_code] || 0) + 1 })
-        const topDestinations = Object.entries(countryCount)
-          .map(([country_code, count]) => ({ country_code, country_name: getCountryName(country_code), count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 6)
-
-        // Heatmap data
-        const heatmapData: Record<string, number> = {}
-        albums?.forEach(album => {
-          if (album.date_start) {
-            const start = new Date(album.date_start)
-            const end = album.date_end ? new Date(album.date_end) : start
-            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-              const key = d.toISOString().split('T')[0]
-              heatmapData[key] = (heatmapData[key] || 0) + 1
-            }
-          }
-        })
-        photos?.forEach(p => {
-          const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
-          if (date) { const key = new Date(date).toISOString().split('T')[0]; heatmapData[key] = (heatmapData[key] || 0) + 1 }
-        })
-
-        // Photos by month
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        const monthCount: Record<string, number> = {}
-        monthNames.forEach(m => (monthCount[m] = 0))
-        photos?.forEach(p => {
-          const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
-          if (date) { const m = monthNames[new Date(date).getMonth()]; monthCount[m] = (monthCount[m] || 0) + 1 }
-        })
-
-        setStats({
-          totalAlbums,
-          totalPhotos,
-          totalCountries: countries.size,
-          totalCities: cities.size,
-          totalDistance: Math.round(totalDistance),
-          avgTripDuration: tripsWithDuration > 0 ? Math.round(totalTripDays / tripsWithDuration) : 0,
-          photosByYear: Object.entries(photosByYearMap).map(([year, count]) => ({ year, count })).sort((a, b) => a.year.localeCompare(b.year)),
-          topDestinations,
-          averagePhotosPerAlbum: totalAlbums > 0 ? Math.round(totalPhotos / totalAlbums) : 0,
-          heatmapData,
-          photosByMonth: monthNames.map(month => ({ month, count: monthCount[month] })),
-          followerCount: followersResult.count || 0,
-          followingCount: followingResult.count || 0,
-          totalLikes: likesResult.data?.length || 0,
-          totalComments: commentsResult.data?.length || 0,
-        })
-
-        log.info('Analytics loaded', { component: 'AnalyticsPage', userId: user.id, totalAlbums })
-      } catch (error) {
-        log.error('Failed to load analytics', { component: 'AnalyticsPage', userId: user?.id, error })
-      } finally {
-        setLoading(false)
+      const result: TravelStats = {
+        totalAlbums,
+        totalPhotos,
+        totalCountries: countries.size,
+        totalCities: cities.size,
+        totalDistance: Math.round(totalDistance),
+        avgTripDuration: tripsWithDuration > 0 ? Math.round(totalTripDays / tripsWithDuration) : 0,
+        photosByYear: Object.entries(photosByYearMap).map(([year, count]) => ({ year, count })).sort((a, b) => a.year.localeCompare(b.year)),
+        topDestinations,
+        averagePhotosPerAlbum: totalAlbums > 0 ? Math.round(totalPhotos / totalAlbums) : 0,
+        heatmapData,
+        photosByMonth: monthNames.map(month => ({ month, count: monthCount[month] })),
+        followerCount: followersResult.count || 0,
+        followingCount: followingResult.count || 0,
+        totalLikes: likesResult.data?.length || 0,
+        totalComments: commentsResult.data?.length || 0,
       }
-    }
 
-    fetchAnalytics()
-  }, [user, supabase])
+      log.info('Analytics loaded', { component: 'AnalyticsPage', userId, totalAlbums })
+      return result
+    },
+  })
+
+  // Preserve original loading semantics: loading until the query resolves
+  // (the prior implementation started with loading=true and only flipped it
+  // off after the fetch completed when a user was present).
+  const loading = !!user && queryLoading
+
+  // Preserve original error logging (query throws on failure → stats stays null)
+  useEffect(() => {
+    if (error) {
+      log.error('Failed to load analytics', { component: 'AnalyticsPage', userId: user?.id, error })
+    }
+  }, [error, user?.id])
 
   // --- Auth / Loading / Error states ---
   if (!isAuthLoading && !user) {

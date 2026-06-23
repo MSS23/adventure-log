@@ -709,11 +709,20 @@ function AlbumCard({
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Country flag badge */}
+          {/* Country flag badge — wrapped in a translucent chip so that
+              platforms which can't render the regional-indicator flag emoji
+              (notably Windows, where 🇯🇵 degrades to bare "JP" letters) show
+              those letters in legible white on a dark backdrop instead of
+              unreadable dark glyphs over the photo. */}
           {album.country_code && (
-            <div className="absolute top-2 left-2 text-lg drop-shadow-md">
+            <span
+              className="absolute top-2 left-2 z-10 flex h-7 min-w-7 items-center justify-center rounded-full bg-black/55 px-1.5 text-base leading-none text-white shadow-sm ring-1 ring-white/15 backdrop-blur-md"
+              role="img"
+              aria-label={getCountryName(album.country_code) || album.country_code.toUpperCase()}
+              title={getCountryName(album.country_code) || album.country_code.toUpperCase()}
+            >
               {getFlagEmoji(album.country_code.toUpperCase())}
-            </div>
+            </span>
           )}
 
           {/* Popularity badge (total likes) */}
@@ -752,7 +761,9 @@ function AlbumCard({
         </div>
       </Link>
 
-      {/* Remove from Saved Button */}
+      {/* Remove-from-saved toggle — a clean translucent chip that mirrors the
+          flag badge in the opposite corner. Filled = saved; the heart shifts to
+          a soft red on hover to signal it will be removed. */}
       <div className="absolute top-2 right-2 z-10">
         <motion.button
           type="button"
@@ -762,9 +773,9 @@ function AlbumCard({
             onRemove(album.id)
           }}
           className={cn(
-            "p-2 rounded-full cursor-pointer",
-            "bg-background/90 backdrop-blur-sm shadow-[var(--shadow-overlay)]",
-            "hover:bg-accent/10 hover:scale-110 active:scale-[0.97]",
+            "group/heart grid h-8 w-8 place-items-center rounded-full cursor-pointer",
+            "bg-black/45 text-white shadow-sm ring-1 ring-white/15 backdrop-blur-md",
+            "hover:bg-black/65 hover:scale-105 active:scale-[0.95]",
             "transition-all duration-200 ease-out",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           )}
@@ -772,7 +783,7 @@ function AlbumCard({
           title="Remove from saved"
           aria-label="Remove from saved"
         >
-          <Heart className="h-4 w-4 text-accent fill-[currentColor]" />
+          <Heart className="h-4 w-4 fill-current transition-colors duration-200 group-hover/heart:text-red-400" />
         </motion.button>
       </div>
     </motion.div>

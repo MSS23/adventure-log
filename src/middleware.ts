@@ -1,9 +1,20 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { rateLimit as redisRateLimit } from '@/lib/utils/rate-limit-redis'
 
 // ============================================
 // Rate Limiting Configuration
 // ============================================
+//
+// THE BOTTLENECK: the in-memory Map below lives in a single serverless
+// instance's memory. On Vercel each concurrent instance has its own Map, so a
+// client spread across N instances effectively gets N× the limit — the limit
+// isn't enforced globally. When Upstash Redis is configured we use a
+// distributed counter shared across all instances; otherwise we fall back to
+// this in-memory limiter (fine for local dev / single-instance).
+const REDIS_RATE_LIMIT_ENABLED =
+  !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN
+
 interface RateLimitRecord {
   count: number
   timestamp: number
@@ -251,7 +262,24 @@ export async function middleware(request: NextRequest) {
       rateConfig = RATE_LIMITS.upload
     }
 
-    const { allowed, remaining } = checkRateLimit(ip, pathname, rateConfig.limit, rateConfig.windowMs)
+    // Same key shape for both backends: IP + first path segments.
+    const rlKey = `${ip}:${pathname.split('/').slice(0, 3).join('/')}`
+
+    let allowed: boolean
+    let remaining: number
+    if (REDIS_RATE_LIMIT_ENABLED) {
+      // Distributed counter shared across all serverless instances.
+      const result = await redisRateLimit(
+        rlKey,
+        rateConfig.limit,
+        Math.ceil(rateConfig.windowMs / 1000),
+      )
+      allowed = result.success
+      remaining = result.remaining
+    } else {
+      // Per-instance fallback (local dev / single instance).
+      ;({ allowed, remaining } = checkRateLimit(ip, pathname, rateConfig.limit, rateConfig.windowMs))
+    }
 
     if (!allowed) {
       return NextResponse.json(

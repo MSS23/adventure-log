@@ -46,9 +46,12 @@ export function FavoriteButton({
   const isDisabled = disabled
 
   const handleClick = async () => {
-    if (isDisabled || isAnimating) return
+    if (isDisabled) return
 
+    // Fire the pulse animation; it's purely visual and never gates the action.
+    // The underlying toggle is optimistic, so the heart flips instantly.
     setIsAnimating(true)
+    setTimeout(() => setIsAnimating(false), 400)
 
     try {
       const newFavoriteState = await toggleFavorite(targetId, targetType, metadata)
@@ -75,9 +78,6 @@ export function FavoriteButton({
           position: 'bottom-center'
         }
       )
-    } finally {
-      // Delay to allow animation to complete
-      setTimeout(() => setIsAnimating(false), 300)
     }
   }
 
@@ -102,7 +102,7 @@ export function FavoriteButton({
         variant={variant}
         size={size}
         onClick={handleClick}
-        disabled={isDisabled || loading || isAnimating}
+        disabled={isDisabled || loading}
         className={cn(
           'relative overflow-hidden transition-colors',
           favorited && variant === 'ghost' && 'text-accent hover:text-accent hover:bg-accent/10',

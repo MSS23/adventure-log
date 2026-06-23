@@ -113,6 +113,18 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
       return
     }
 
+    // Optimistic insert: show the favorite immediately with a temporary id,
+    // then swap in the real row (or roll back on error).
+    const optimistic: Favorite = {
+      id: `temp-${itemType}-${itemId}`,
+      user_id: user.id,
+      target_id: itemId,
+      target_type: itemType,
+      created_at: new Date().toISOString(),
+      metadata: metadata || {}
+    }
+    setFavorites(prev => [optimistic, ...prev])
+
     try {
       const { data, error: insertError } = await supabase
         .from('favorites')
@@ -129,8 +141,8 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
         throw insertError
       }
 
-      // Update local state
-      setFavorites(prev => [data, ...prev])
+      // Replace the optimistic row with the persisted one.
+      setFavorites(prev => prev.map(fav => (fav.id === optimistic.id ? data : fav)))
 
       log.info('Added favorite successfully', {
         component: 'useFavorites',
@@ -142,6 +154,8 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
       return data
 
     } catch (err) {
+      // Roll back the optimistic row.
+      setFavorites(prev => prev.filter(fav => fav.id !== optimistic.id))
       const errorMessage = err instanceof Error ? err.message : 'Failed to add favorite'
       setError(errorMessage)
       log.error('Failed to add favorite', { error: err })
@@ -158,6 +172,14 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
       throw new Error('Must be logged in to remove favorites')
     }
 
+    // Optimistic removal: snapshot the rows we drop so we can restore them on error.
+    const removed = favorites.filter(
+      fav => fav.target_id === itemId && fav.target_type === itemType
+    )
+    setFavorites(prev =>
+      prev.filter(fav => !(fav.target_id === itemId && fav.target_type === itemType))
+    )
+
     try {
       const { error: deleteError } = await supabase
         .from('favorites')
@@ -170,13 +192,6 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
         throw deleteError
       }
 
-      // Update local state
-      setFavorites(prev =>
-        prev.filter(fav =>
-          !(fav.target_id === itemId && fav.target_type === itemType)
-        )
-      )
-
       log.info('Removed favorite successfully', {
         component: 'useFavorites',
         action: 'removeFavorite',
@@ -185,12 +200,16 @@ export function useFavorites(options: UseFavoritesOptions = {}) {
       })
 
     } catch (err) {
+      // Roll back: restore the removed rows.
+      if (removed.length > 0) {
+        setFavorites(prev => [...removed, ...prev])
+      }
       const errorMessage = err instanceof Error ? err.message : 'Failed to remove favorite'
       setError(errorMessage)
       log.error('Failed to remove favorite', { error: err })
       throw err
     }
-  }, [user, supabase])
+  }, [user, favorites, supabase])
 
   // Toggle favorite status
   const toggleFavorite = useCallback(async (

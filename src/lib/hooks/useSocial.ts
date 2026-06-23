@@ -324,8 +324,40 @@ export function useComments(albumId?: string, photoId?: string) {
           })
 
           if (payload.eventType === 'INSERT') {
-            // Fetch the full comment with user data
-            fetchComments()
+            const inserted = payload.new as { id: string }
+            // Fetch ONLY the new comment (with joined user data) and append it,
+            // instead of refetching the entire list. Dedupe so our own
+            // optimistic insert isn't duplicated.
+            void (async () => {
+              const { data } = await supabase
+                .from('comments')
+                .select(`
+                  id,
+                  content,
+                  user_id,
+                  target_type,
+                  target_id,
+                  created_at,
+                  updated_at,
+                  users!comments_user_id_fkey(
+                    id,
+                    username,
+                    display_name,
+                    avatar_url
+                  )
+                `)
+                .eq('id', inserted.id)
+                .single()
+
+              if (!data) return
+              const newComment = {
+                ...data,
+                users: Array.isArray(data.users) ? data.users[0] : data.users
+              } as Comment
+              setComments(prev =>
+                prev.some(c => c.id === newComment.id) ? prev : [...prev, newComment]
+              )
+            })()
           } else if (payload.eventType === 'DELETE') {
             const deletedComment = payload.old as { id: string }
             setComments(prev => prev.filter(comment => comment.id !== deletedComment.id))
@@ -337,7 +369,7 @@ export function useComments(albumId?: string, photoId?: string) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [albumId, photoId, fetchComments])
+  }, [albumId, photoId])
 
   const addComment = async (text: string): Promise<Comment | null> => {
     if (!user || !text.trim() || loading) return null
@@ -394,10 +426,16 @@ export function useComments(albumId?: string, photoId?: string) {
   }
 
   const deleteComment = async (commentId: string) => {
-    if (!user || loading) return
+    if (!user) return
 
-    setLoading(true)
     const supabase = createClient()
+
+    // Optimistic removal: drop it from the list immediately (no global loading
+    // flag, so deleting one comment doesn't block deleting another), and
+    // restore it if the server rejects the delete.
+    const removed = comments.find(c => c.id === commentId)
+    setComments(prev => prev.filter(c => c.id !== commentId))
+
     try {
       const { error } = await supabase
         .from('comments')
@@ -406,13 +444,16 @@ export function useComments(albumId?: string, photoId?: string) {
         .eq('user_id', user.id) // Only allow users to delete their own comments
 
       if (error) throw error
-
-      // Refresh comments
-      await fetchComments()
     } catch (error) {
+      // Roll back: re-insert the comment in chronological order.
+      if (removed) {
+        setComments(prev =>
+          [...prev, removed].sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          )
+        )
+      }
       log.error('Error deleting comment', {}, error)
-    } finally {
-      setLoading(false)
     }
   }
 

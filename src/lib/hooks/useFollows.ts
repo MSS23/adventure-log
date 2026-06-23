@@ -189,11 +189,19 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
   const follow = useCallback(async (userId: string) => {
     if (!user?.id || userId === user.id) return
 
-    try {
-      setLoading(true)
-      setError(null)
+    // Snapshot for rollback if the server rejects the optimistic change.
+    const previousStatus = followStatus
+    const previousStats = stats
 
-      // Get target user's privacy level to determine status
+    // Optimistic update: assume a public account (the common case) so the
+    // button flips to "Following" instantly. We self-correct to "pending"
+    // below if the target turns out to be private.
+    setFollowStatus('following')
+    setStats(s => ({ ...s, followingCount: s.followingCount + 1 }))
+    setError(null)
+
+    try {
+      // Get target user's privacy level to determine final status
       const { data: targetUser } = await supabase
         .from('users')
         .select('privacy_level')
@@ -218,10 +226,15 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
 
       if (error) throw error
 
-      // Update follow status
-      setFollowStatus(status === 'accepted' ? 'following' : 'pending')
+      // Correct the optimistic assumption for private accounts: the request
+      // is pending (not an accepted follow), so it shouldn't count yet.
+      if (status === 'pending') {
+        setFollowStatus('pending')
+        setStats(s => ({ ...s, followingCount: Math.max(0, s.followingCount - 1) }))
+      }
 
-      await refreshStats()
+      // Reconcile real counts in the background (non-blocking).
+      void refreshStats()
 
       log.info('Follow request processed', {
         component: 'useFollows',
@@ -230,24 +243,35 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
         result: status
       })
     } catch (err) {
+      // Roll back the optimistic update.
+      setFollowStatus(previousStatus)
+      setStats(previousStats)
       log.error('Error following user', {
         component: 'useFollows',
         action: 'follow',
         targetUserId: userId
       }, err instanceof Error ? err : new Error(String(err)))
       setError(err instanceof Error ? err.message : 'Failed to follow user')
-    } finally {
-      setLoading(false)
     }
-  }, [user?.id, supabase, refreshStats])
+  }, [user?.id, followStatus, stats, supabase, refreshStats])
 
   const unfollow = useCallback(async (userId: string) => {
     if (!user?.id) return
 
-    try {
-      setLoading(true)
-      setError(null)
+    // Snapshot for rollback.
+    const previousStatus = followStatus
+    const previousStats = stats
 
+    // Optimistic update: flip to "not following" instantly. Only an accepted
+    // follow contributes to followingCount, so only decrement in that case.
+    const wasAccepted = previousStatus === 'following'
+    setFollowStatus('not_following')
+    if (wasAccepted) {
+      setStats(s => ({ ...s, followingCount: Math.max(0, s.followingCount - 1) }))
+    }
+    setError(null)
+
+    try {
       const { error } = await supabase
         .from('follows')
         .delete()
@@ -256,8 +280,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
 
       if (error) throw error
 
-      setFollowStatus('not_following')
-      await refreshStats()
+      void refreshStats()
 
       log.info('User unfollowed', {
         component: 'useFollows',
@@ -265,16 +288,17 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
         targetUserId: userId
       })
     } catch (err) {
+      // Roll back.
+      setFollowStatus(previousStatus)
+      setStats(previousStats)
       log.error('Error unfollowing user', {
         component: 'useFollows',
         action: 'unfollow',
         targetUserId: userId
       }, err instanceof Error ? err : new Error(String(err)))
       setError(err instanceof Error ? err.message : 'Failed to unfollow user')
-    } finally {
-      setLoading(false)
     }
-  }, [user?.id, supabase, refreshStats])
+  }, [user?.id, followStatus, stats, supabase, refreshStats])
 
   const acceptFollowRequest = useCallback(async (followerUserId: string) => {
     if (!user?.id) return

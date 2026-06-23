@@ -90,79 +90,81 @@ export async function syncOfflineData(): Promise<SyncStatus> {
       position: 'bottom'
     })
 
+    type QueueItem = (typeof queue)[number]
+
+    // Group items by table + action so we can write in BULK (a single request
+    // per group) instead of one row at a time.
+    const groups = {
+      albums: { create: [] as QueueItem[], update: [] as QueueItem[], delete: [] as QueueItem[] },
+      photos: { create: [] as QueueItem[], update: [] as QueueItem[], delete: [] as QueueItem[] }
+    }
     for (const item of queue) {
-      try {
-        switch (item.type) {
-          case 'album':
-            if (item.action === 'create') {
-              const { error } = await supabase
-                .from('albums')
-                .insert(item.data)
-
-              if (error) throw error
-            } else if (item.action === 'update') {
-              const { error } = await supabase
-                .from('albums')
-                .update(item.data)
-                .eq('id', item.data.id)
-
-              if (error) throw error
-            } else if (item.action === 'delete') {
-              const { error } = await supabase
-                .from('albums')
-                .delete()
-                .eq('id', item.data.id)
-
-              if (error) throw error
-            }
-            break
-
-          case 'photo':
-            if (item.action === 'create') {
-              const { error } = await supabase
-                .from('photos')
-                .insert(item.data)
-
-              if (error) throw error
-            } else if (item.action === 'update') {
-              const { error } = await supabase
-                .from('photos')
-                .update(item.data)
-                .eq('id', item.data.id)
-
-              if (error) throw error
-            } else if (item.action === 'delete') {
-              const { error } = await supabase
-                .from('photos')
-                .delete()
-                .eq('id', item.data.id)
-
-              if (error) throw error
-            }
-            break
-        }
-
-        // Remove from queue after successful sync
-        await removeFromSyncQueue(item.id)
-        syncStatus.syncedItems++
-        syncStatus.syncProgress = (syncStatus.syncedItems / syncStatus.totalItems) * 100
-
-        log.debug('Item synced', {
-          component: 'offline-sync',
-          itemId: item.id,
-          progress: syncStatus.syncProgress
-        })
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        syncStatus.errors.push(errorMessage)
-
-        log.error('Failed to sync item', {
-          component: 'offline-sync',
-          itemId: item.id,
-          error: errorMessage
-        })
+      const table = item.type === 'album' ? 'albums' : item.type === 'photo' ? 'photos' : null
+      if (table && (item.action === 'create' || item.action === 'update' || item.action === 'delete')) {
+        groups[table][item.action].push(item)
       }
     }
+
+    const markSynced = async (items: QueueItem[]) => {
+      await Promise.all(items.map(it => removeFromSyncQueue(it.id)))
+      syncStatus.syncedItems += items.length
+      syncStatus.syncProgress = (syncStatus.syncedItems / syncStatus.totalItems) * 100
+    }
+    const markFailed = (items: QueueItem[], error: unknown) => {
+      const msg = error instanceof Error ? error.message : 'Unknown error'
+      items.forEach(() => syncStatus.errors.push(msg))
+      log.error('Failed to sync batch', {
+        component: 'offline-sync',
+        table: items[0]?.type,
+        count: items.length,
+        error: msg
+      })
+    }
+
+    // Bulk insert, with a per-row fallback so a single bad row doesn't fail the
+    // whole batch (preserves the old per-item resilience).
+    const bulkCreate = async (table: 'albums' | 'photos', items: QueueItem[]) => {
+      if (items.length === 0) return
+      const { error } = await supabase.from(table).insert(items.map(i => i.data))
+      if (!error) return markSynced(items)
+      for (const it of items) {
+        const { error: rowError } = await supabase.from(table).insert(it.data)
+        if (rowError) markFailed([it], rowError)
+        else await markSynced([it])
+      }
+    }
+
+    // Bulk delete via a single `IN (...)` query, same per-row fallback.
+    const bulkDelete = async (table: 'albums' | 'photos', items: QueueItem[]) => {
+      if (items.length === 0) return
+      const ids = items.map(i => i.data.id)
+      const { error } = await supabase.from(table).delete().in('id', ids)
+      if (!error) return markSynced(items)
+      for (const it of items) {
+        const { error: rowError } = await supabase.from(table).delete().eq('id', it.data.id)
+        if (rowError) markFailed([it], rowError)
+        else await markSynced([it])
+      }
+    }
+
+    // Updates carry distinct payloads and can't be one statement, but they can
+    // run concurrently instead of serially.
+    const runUpdates = async (table: 'albums' | 'photos', items: QueueItem[]) => {
+      await Promise.all(items.map(async (it) => {
+        const { error } = await supabase.from(table).update(it.data).eq('id', it.data.id)
+        if (error) markFailed([it], error)
+        else await markSynced([it])
+      }))
+    }
+
+    // Order respects FK constraints: create parents before children,
+    // delete children before parents.
+    await bulkCreate('albums', groups.albums.create)
+    await bulkCreate('photos', groups.photos.create)
+    await runUpdates('albums', groups.albums.update)
+    await runUpdates('photos', groups.photos.update)
+    await bulkDelete('photos', groups.photos.delete)
+    await bulkDelete('albums', groups.albums.delete)
 
     const success = syncStatus.errors.length === 0
 
@@ -250,46 +252,41 @@ export async function downloadAlbumsForOffline(
     position: 'bottom'
   })
 
-  for (const albumId of albumIds) {
+  // Download albums concurrently instead of one after another.
+  const results = await Promise.all(albumIds.map(async (albumId) => {
     try {
-      // Fetch album
-      const { data: album, error: albumError } = await supabase
-        .from('albums')
-        .select('*')
-        .eq('id', albumId)
-        .single()
+      // Fetch album and its photos in parallel.
+      const [albumRes, photosRes] = await Promise.all([
+        supabase.from('albums').select('*').eq('id', albumId).single(),
+        supabase.from('photos').select('*').eq('album_id', albumId)
+      ])
 
-      if (albumError) throw albumError
+      if (albumRes.error) throw albumRes.error
+      if (photosRes.error) throw photosRes.error
 
-      // Save album offline
-      await saveAlbumOffline(album)
+      // Save album + all its photos in parallel.
+      await Promise.all([
+        saveAlbumOffline(albumRes.data),
+        ...(photosRes.data || []).map(photo => savePhotoOffline(photo))
+      ])
 
-      // Fetch and save photos
-      const { data: photos, error: photosError } = await supabase
-        .from('photos')
-        .select('*')
-        .eq('album_id', albumId)
-
-      if (photosError) throw photosError
-
-      for (const photo of photos || []) {
-        await savePhotoOffline(photo)
-      }
-
-      success++
       log.info('Album downloaded for offline', {
         component: 'offline-sync',
         albumId
       })
+      return true
     } catch (error) {
-      failed++
       log.error('Failed to download album', {
         component: 'offline-sync',
         albumId,
         error
       })
+      return false
     }
-  }
+  }))
+
+  success = results.filter(Boolean).length
+  failed = results.length - success
 
   await Toast.show({
     text: `Downloaded ${success} albums for offline access!`,

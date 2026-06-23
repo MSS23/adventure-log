@@ -11,18 +11,28 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { LayoutDashboard, Settings, LogOut, Camera, Bookmark, Star, MapPin, MessageSquarePlus, User } from 'lucide-react'
+import { LayoutDashboard, Settings, LogOut, Camera, Bookmark, Star, MapPin, MessageSquarePlus, User, Sun, Moon, Monitor } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
+import { useTheme } from '@/lib/contexts/ThemeContext'
+
+const themeMeta = {
+  light: { icon: Sun, label: 'Light' },
+  dark: { icon: Moon, label: 'Dark' },
+  system: { icon: Monitor, label: 'System' },
+} as const
 
 export function UserNav() {
   const { user, profile, signOut } = useAuth()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const { theme, toggleTheme } = useTheme()
 
   if (!user) return null
+
+  const ThemeIcon = themeMeta[theme].icon
 
   const initials =
     profile?.display_name || profile?.username
@@ -107,6 +117,18 @@ export function UserNav() {
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onSelect={(e) => {
+            e.preventDefault()
+            toggleTheme()
+          }}
+        >
+          <ThemeIcon className="mr-2 h-4 w-4" />
+          <span className="flex-1">Theme</span>
+          <span className="text-xs text-muted-foreground">{themeMeta[theme].label}</span>
         </DropdownMenuItem>
 
         <DropdownMenuItem

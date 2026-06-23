@@ -15,9 +15,15 @@ import {
 interface NetworkStatusIndicatorProps {
   className?: string
   showLabel?: boolean
+  /**
+   * When true, render nothing while the connection is healthy (online and not
+   * slow). The dot only appears for offline / slow states. Used in the top nav
+   * to keep the bar uncluttered — no steady-state green dot.
+   */
+  onlyWhenOffline?: boolean
 }
 
-export function NetworkStatusIndicator({ className, showLabel = false }: NetworkStatusIndicatorProps) {
+export function NetworkStatusIndicator({ className, showLabel = false, onlyWhenOffline = false }: NetworkStatusIndicatorProps) {
   // Skip server render — navigator.onLine and prefers-reduced-motion both
   // depend on browser-only APIs, and rendering them server-side guesses
   // wrong roughly half the time, producing a hydration mismatch.
@@ -28,6 +34,9 @@ export function NetworkStatusIndicator({ className, showLabel = false }: Network
   const prefersReducedMotion = useReducedMotion()
 
   if (!mounted) return null
+
+  // Healthy connection + offline-only mode => render nothing.
+  if (onlyWhenOffline && isOnline && !isSlowConnection) return null
 
   const getStatusConfig = () => {
     if (!isOnline) {

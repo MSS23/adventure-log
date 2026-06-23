@@ -8,8 +8,6 @@ import { PassportScanner } from '@/components/passport/PassportScanner'
 import { UserNav } from './UserNav'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { NetworkStatusIndicator } from '@/components/pwa/NetworkStatusIndicator'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { FeedbackLauncher } from '@/components/feedback/FeedbackLauncher'
 import { cn } from '@/lib/utils'
 import { getAppScrollTop, onAppScroll } from '@/lib/utils/app-scroll'
 
@@ -83,9 +81,10 @@ export function TopNavigation() {
             >
               <ScanLine className="h-5 w-5" strokeWidth={1.9} />
             </button>
-            <ThemeToggle />
-            <NetworkStatusIndicator />
-            <FeedbackLauncher variant="icon" label="Send feedback" />
+            {/* Network dot only appears when offline/slow — no green dot in the
+                steady state, keeping the bar uncluttered. Theme + feedback now
+                live in the profile menu (UserNav). */}
+            <NetworkStatusIndicator onlyWhenOffline />
             <NotificationCenter />
             <UserNav />
           </nav>

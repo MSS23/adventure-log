@@ -241,7 +241,7 @@ export function AlbumImageModal({
                     boxShadow: '0 6px 18px rgba(226,85,58,0.33)',
                   }}
                 >
-                  Open album
+                  View Album
                   <ExternalLink className="h-3 w-3" />
                 </Link>
               ) : (
@@ -391,14 +391,14 @@ export function AlbumImageModal({
               {!isMultiCity && (
                 <Link
                   href={`/albums/${primaryCity.id}`}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold flex-shrink-0 active:scale-[0.97] transition-transform"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold flex-shrink-0 whitespace-nowrap active:scale-[0.97] transition-transform"
                   style={{
                     background: 'var(--color-coral)',
                     color: '#fff',
                     boxShadow: '0 4px 14px rgba(226,85,58,0.3)',
                   }}
                 >
-                  Open
+                  View Album
                   <ExternalLink className="h-3 w-3" />
                 </Link>
               )}

@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { calculateAge, MIN_AGE } from '@/lib/utils/age'
 
 type AccountVisibility = 'public' | 'private'
 
@@ -35,17 +36,33 @@ function SignupForm() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [visibility, setVisibility] = useState<AccountVisibility>('public')
+  const [dob, setDob] = useState('')
   const [ageConfirmed, setAgeConfirmed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [checkEmail, setCheckEmail] = useState(false)
 
+  // Adventure Log is 18+. Derive age from the self-declared DOB to drive the
+  // under-18 block; the value is also stored server-side for an audit record.
+  const age = dob ? calculateAge(dob) : null
+  const isUnderAge = age !== null && age < MIN_AGE
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
+    if (!dob || age === null) {
+      setError('Please enter a valid date of birth.')
+      return
+    }
+
+    if (isUnderAge) {
+      setError(`You must be at least ${MIN_AGE} to use Adventure Log.`)
+      return
+    }
+
     if (!ageConfirmed) {
-      setError('Please confirm you meet the minimum age and accept the Terms and Privacy Policy.')
+      setError('Please confirm your age and accept the Terms and Privacy Policy.')
       return
     }
 
@@ -63,7 +80,15 @@ function SignupForm() {
           // create_profile_on_signup trigger reads `privacy_level` when it
           // provisions the public.users row (migration 54), validating it and
           // falling back to 'public'.
-          data: { privacy_level: visibility },
+          //
+          // We record the self-declared DOB and age/terms acceptance for an
+          // auditable record that the user attested to being 18+ (GDPR Art. 7).
+          data: {
+            privacy_level: visibility,
+            date_of_birth: dob,
+            age_confirmed: true,
+            terms_accepted_at: new Date().toISOString(),
+          },
         },
       })
 
@@ -200,6 +225,32 @@ function SignupForm() {
             </div>
           </div>
 
+          <div className="space-y-1.5">
+            <label
+              htmlFor="dob"
+              className="block text-sm font-medium text-foreground"
+            >
+              Date of birth
+            </label>
+            <Input
+              id="dob"
+              type="date"
+              required
+              value={dob}
+              onChange={(e) => setDob(e.target.value)}
+              max={new Date().toISOString().split('T')[0]}
+            />
+            {isUnderAge ? (
+              <p className="text-xs text-destructive">
+                You must be at least {MIN_AGE} to use Adventure Log.
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Adventure Log is for adults aged {MIN_AGE} and over.
+              </p>
+            )}
+          </div>
+
           <fieldset className="space-y-1.5">
             <legend className="block text-sm font-medium text-foreground">
               Account visibility
@@ -245,7 +296,7 @@ function SignupForm() {
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
             <label htmlFor="age-consent" className="text-xs leading-relaxed text-muted-foreground">
-              I am at least 16 years old (or the minimum age required in my country) and I agree to the{' '}
+              The date of birth above is accurate, and I agree to the{' '}
               <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>{' '}and{' '}
               <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
             </label>
@@ -262,7 +313,7 @@ function SignupForm() {
 
           <Button
             type="submit"
-            disabled={loading || !ageConfirmed}
+            disabled={loading || !ageConfirmed || isUnderAge}
             className="w-full"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -281,8 +332,16 @@ function SignupForm() {
           </div>
         </div>
 
-        <GoogleSignInButton next={searchParams.get('redirectTo')} disabled={!ageConfirmed} />
-        {!ageConfirmed && (
+        <GoogleSignInButton
+          next={searchParams.get('redirectTo')}
+          disabled={!ageConfirmed || age === null || isUnderAge}
+        />
+        {(age === null || isUnderAge) && (
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            Continuing with Google requires confirming a date of birth of {MIN_AGE} or older above.
+          </p>
+        )}
+        {age !== null && !isUnderAge && !ageConfirmed && (
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
             Confirm the age &amp; terms checkbox above to continue with Google.
           </p>

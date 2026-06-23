@@ -16,6 +16,9 @@ export interface User {
   home_country?: string;
   home_latitude?: number;
   home_longitude?: number;
+  // Self-declared date of birth recorded at signup for the 18+ age gate
+  // (migration 60). Optional so older rows / pre-migration builds typecheck.
+  date_of_birth?: string | null;
   created_at: string;
   updated_at: string;
 }

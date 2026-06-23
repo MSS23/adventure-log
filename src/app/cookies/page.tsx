@@ -43,6 +43,7 @@ export default function CookiesPage() {
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Supabase</strong> — sets the cookies that keep you signed in (essential).</li>
             <li><strong>Vercel Web Analytics</strong> — aggregate, cookieless usage measurement (consent-gated).</li>
+            <li><strong>Google Analytics 4</strong> — aggregate usage analytics with IP anonymisation and ad-personalisation signals disabled (web only, consent-gated; not used in the mobile app).</li>
             <li><strong>Sentry</strong> — error/performance monitoring and limited session replay (consent-gated).</li>
           </ul>
           <p>We do not use advertising cookies or third-party ad trackers.</p>

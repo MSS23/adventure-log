@@ -29,12 +29,13 @@ export default function TermsPage() {
         </Section>
 
         <Section title="2. Your account">
-          <p>You are responsible for the security of your account and the accuracy of the information in it. You must be at least 13 years old (16 in the EEA) to create an account. Do not share your password or log in on behalf of someone else.</p>
+          <p>You are responsible for the security of your account and the accuracy of the information in it. Adventure Log is an adults-only service: <strong>you must be 18 or older to create an account</strong>, and we ask for your date of birth at sign-up to confirm this. Do not share your password or log in on behalf of someone else.</p>
         </Section>
 
         <Section title="3. Your content">
           <p>You keep all rights to the photos, captions, and descriptions you upload. By uploading, you grant us a worldwide, royalty-free license to store, transmit, and display that content on Adventure Log solely to operate the service you have asked us to provide.</p>
           <p>You warrant that you have the right to upload every photo you post and that the content does not violate anyone else&apos;s rights.</p>
+          <p>You are solely responsible for the content you upload. To the maximum extent permitted by law, you agree to indemnify and hold Adventure Log harmless from any claim, demand, loss, or cost (including reasonable legal fees) arising from content you post, your use of the service, or your breach of these Terms. We act only as a neutral host of user-generated content and do not endorse or verify what users post.</p>
         </Section>
 
         <Section title="4. Acceptable use">
@@ -57,16 +58,31 @@ export default function TermsPage() {
           <p>You may delete your account at any time from Settings. We may suspend or terminate accounts that violate these Terms or create legal, security, or abuse risk. On termination, your content is deleted within 30 days per our Privacy Policy.</p>
         </Section>
 
-        <Section title="7. Disclaimer and liability">
-          <p>Adventure Log is provided &quot;as is.&quot; We work hard to keep it running, but we can&apos;t guarantee it&apos;s error-free, uninterrupted, or secure. To the maximum extent permitted by law, our liability to you for any claim arising from these Terms or the service is limited to the amount you&apos;ve paid us in the preceding 12 months (which, if you&apos;re on a free plan, is zero).</p>
+        <Section title="7. Copyright and takedowns (DMCA)">
+          <p>We respect intellectual property rights and expect our users to do the same. If you believe content on Adventure Log infringes your copyright, you can ask us to remove it. See our <Link className="text-primary underline" href="/dmca">Copyright &amp; DMCA Policy</Link> for how to file a notice and how counter-notices work. We may remove infringing content and terminate the accounts of repeat infringers.</p>
         </Section>
 
-        <Section title="8. Changes">
+        <Section title="8. AI features">
+          <p>Some features use artificial intelligence — for example, reading a pasted link to suggest a place. AI output can be inaccurate or incomplete, and we present it for you to review and confirm before it is saved. You are responsible for checking AI-assisted results before relying on them.</p>
+        </Section>
+
+        <Section title="9. Disclaimer and liability">
+          <p>Adventure Log is provided &quot;as is.&quot; We work hard to keep it running, but we can&apos;t guarantee it&apos;s error-free, uninterrupted, or secure. To the maximum extent permitted by law, our liability to you for any claim arising from these Terms or the service is limited to the amount you&apos;ve paid us in the preceding 12 months (which, if you&apos;re on a free plan, is zero). Nothing in these Terms excludes liability that cannot be excluded under applicable law — including, for UK and EEA consumers, your statutory rights.</p>
+        </Section>
+
+        <Section title="10. Governing law and dispute resolution">
+          <p>These Terms are governed by the laws of England and Wales. We&apos;d always rather sort out a problem informally first, so please contact us before taking any formal step and we&apos;ll try to resolve it.</p>
+          <p>If we can&apos;t resolve a dispute within 60 days, you and Adventure Log agree that the dispute will be referred to and finally resolved by binding arbitration administered under the rules of the London Court of International Arbitration (LCIA), seated in London and conducted in English by a single arbitrator, rather than in court — except that either party may bring a claim in a small-claims court, and either party may seek injunctive relief in court to protect intellectual property or stop misuse of the service.</p>
+          <p>To the extent permitted by law, disputes will be resolved on an individual basis and not as part of a class or representative action.</p>
+          <p><strong>If you are a consumer:</strong> nothing in this section deprives you of the protection of mandatory consumer-law provisions, or of your right to bring proceedings in the courts of your country of residence, where applicable law gives you that right. UK and EU consumers may also use the relevant online dispute-resolution channels.</p>
+        </Section>
+
+        <Section title="11. Changes">
           <p>We may update these Terms. If a change is material, we will notify you in-app or by email at least 14 days before it takes effect. Continued use after the change means you accept the new Terms.</p>
         </Section>
 
-        <Section title="9. Contact">
-          <p>Questions about these Terms? Email <a className="text-primary underline" href="mailto:legal@adventurelog.app">legal@adventurelog.app</a>.</p>
+        <Section title="12. Contact">
+          <p>Questions about these Terms? Email <a className="text-primary underline" href="mailto:legal@adventurelog.app">legal@adventurelog.app</a>. Copyright notices: see the <Link className="text-primary underline" href="/dmca">DMCA Policy</Link>.</p>
         </Section>
       </div>
     </div>

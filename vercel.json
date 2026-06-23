@@ -49,5 +49,11 @@
       "destination": "/",
       "permanent": true
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/maintenance/cleanup?job=all",
+      "schedule": "0 3 * * *"
+    }
   ]
 }

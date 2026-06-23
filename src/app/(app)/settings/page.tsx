@@ -203,21 +203,71 @@ export default function SettingsPage() {
       setLoading(true)
       setError(null)
 
-      const [albumsResult, photosResult] = await Promise.all([
-        supabase.from('albums').select('*').eq('user_id', user?.id).neq('status', 'draft'),
-        supabase.from('photos').select('*').eq('user_id', user?.id),
+      const uid = user?.id
+      if (!uid) throw new Error('Not authenticated')
+
+      // GDPR Article 20 (portability): export ALL of the user's personal data
+      // in a machine-readable form, including direct download URLs for photos.
+      // Each query is independent (allSettled) so a table that doesn't exist in
+      // a given deployment never breaks the whole export.
+      const rows = async (
+        table: string,
+        column: string,
+        select = '*',
+      ): Promise<Record<string, unknown>[]> => {
+        const { data, error } = await supabase.from(table).select(select).eq(column, uid)
+        if (error) throw error
+        return (data as unknown as Record<string, unknown>[]) || []
+      }
+
+      const [
+        profileRow,
+        albums,
+        photos,
+        comments,
+        likes,
+        stories,
+        following,
+        followers,
+        savedPlaces,
+        trips,
+      ] = await Promise.allSettled([
+        supabase.from('users').select('*').eq('id', uid).maybeSingle().then(r => r.data),
+        rows('albums', 'user_id'),
+        rows('photos', 'user_id'),
+        rows('comments', 'user_id'),
+        rows('likes', 'user_id'),
+        rows('stories', 'user_id'),
+        rows('follows', 'follower_id'),
+        rows('follows', 'following_id'),
+        rows('saved_places', 'user_id'),
+        rows('trips', 'user_id'),
       ])
 
+      const settled = <T,>(r: PromiseSettledResult<T>, fallback: T): T =>
+        r.status === 'fulfilled' ? r.value : fallback
+
+      const photoRows = settled(photos, [] as Record<string, unknown>[])
+
       const userData = {
-        profile: { username: profile?.username, display_name: profile?.display_name, bio: profile?.bio },
-        albums: (albumsResult.data || []).map(a => ({
-          title: a.title, location: a.location_name, country: a.country_code,
-          dates: { start: a.date_start, end: a.date_end }, created: a.created_at,
-        })),
-        photos: (photosResult.data || []).map(p => ({
-          caption: p.caption, album_id: p.album_id, taken_at: p.taken_at, location: p.location_name,
-        })),
+        export_format: 'adventure-log-gdpr-export-v2',
         exported_at: new Date().toISOString(),
+        account: { id: uid, email: user?.email ?? null },
+        profile: settled(profileRow, null),
+        albums: settled(albums, []),
+        // Include the direct download URL so the export actually lets the user
+        // recover their photo files, not just metadata.
+        photos: photoRows.map(p => ({
+          ...p,
+          download_url: getPhotoUrl(p.file_path as string) || null,
+        })),
+        comments: settled(comments, []),
+        likes: settled(likes, []),
+        stories: settled(stories, []),
+        following: settled(following, []),
+        followers: settled(followers, []),
+        saved_places: settled(savedPlaces, []),
+        trips: settled(trips, []),
       }
 
       const blob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' })
@@ -230,7 +280,7 @@ export default function SettingsPage() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      setSuccess(`Downloaded ${albumsResult.data?.length || 0} albums, ${photosResult.data?.length || 0} photos`)
+      setSuccess(`Exported ${userData.albums.length} albums, ${userData.photos.length} photos, and your full account data`)
       setTimeout(() => setSuccess(null), 5000)
     } catch (err) {
       log.error('Error exporting data', { component: 'Settings' }, err)

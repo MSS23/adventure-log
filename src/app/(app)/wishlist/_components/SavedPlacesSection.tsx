@@ -111,7 +111,8 @@ export function SavedPlacesSection() {
           <h3 className="font-heading text-base font-semibold text-foreground">Save a place from a link</h3>
         </div>
         <p className="text-sm text-muted-foreground mb-3">
-          Paste a TikTok or Google Maps link — we&apos;ll work out the place and you confirm before it&apos;s saved.
+          Paste a TikTok or Google Maps link — AI reads the link and works out the place,
+          then you confirm before it&apos;s saved. AI can get things wrong, so do check the details.
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">

@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Check, Loader2, MapPin, Search, Plus } from 'lucide-react'
+import { Check, Loader2, MapPin, Search, Plus, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { apiFetch } from '@/lib/api/client'
 import { getFlagEmoji } from '@/lib/utils/country'
@@ -166,6 +166,18 @@ export function ReviewPlacesModal({ result, open, onClose, onSave }: ReviewPlace
         {/* Info / fallback message */}
         {result?.message && (
           <p className="text-sm text-muted-foreground rounded-lg bg-muted/50 px-3 py-2">{result.message}</p>
+        )}
+
+        {/* AI disclosure — only when the place details came from AI extraction
+            (not a purely manual entry). FTC-style "clear and conspicuous" notice. */}
+        {platform !== 'manual' && candidates.length > 0 && (
+          <p className="flex items-start gap-1.5 text-xs text-muted-foreground rounded-lg bg-muted/50 px-3 py-2">
+            <Sparkles className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[color:var(--color-coral)]" />
+            <span>
+              These details were auto-detected by AI from the link and may be inaccurate.
+              Please review and correct each place before saving.
+            </span>
+          </p>
         )}
 
         {/* Candidates to confirm */}

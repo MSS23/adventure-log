@@ -14,7 +14,7 @@ import { useGlobePageData, formatDistance } from './useGlobePageData'
 import { GlobePageHeader } from '@/components/globe/GlobePageHeader'
 import { GlobeStatsOverlay } from '@/components/globe/GlobeStatsOverlay'
 import { GlobeExploreStrip, GlobeExploreStatsIndicator } from '@/components/globe/GlobeExploreMode'
-import { GlobeSidePanel, MobileFeaturedAlbum, GlobeAlbumFilmstrip } from '@/components/globe/GlobeSidebar'
+import { GlobeSidePanel, GlobeAlbumFilmstrip } from '@/components/globe/GlobeSidebar'
 import { GlobeWishlistPrompt } from '@/components/globe/GlobeWishlistPrompt'
 
 const EnhancedGlobe = dynamic(() => import('@/components/globe/EnhancedGlobe').then(mod => ({ default: mod.EnhancedGlobe })), {
@@ -182,39 +182,20 @@ function GlobePageContent() {
           />
         )}
 
-        {/* My Globe mode: unified bottom dock — filmstrip OR (on mobile) the
-            selected-album detail card occupy the SAME bottom region so they
-            never overlap. */}
-        {!exploreMode && (albums.length > 0 || (showWishlist && wishlistItems.length > 0)) && (() => {
-          const featured = selectedAlbumId ? albums.find(a => a.id === selectedAlbumId) : null
-          return (
-            <>
-              {/* Mobile featured card: replaces the filmstrip in the dock when
-                  an album is selected. The filmstrip is hidden on mobile while
-                  this is shown (see md:hidden swap below). */}
-              {featured && (
-                <MobileFeaturedAlbum
-                  album={featured}
-                  isOwnProfile={isOwnProfile}
-                  onClose={() => setSelectedAlbumId(null)}
-                />
-              )}
-
-              {/* Album filmstrip — on mobile it collapses when an album is
-                  selected (the detail card takes its place); on desktop it
-                  always stays visible (the detail docks to the right). */}
-              <GlobeAlbumFilmstrip
-                albums={albums}
-                selectedAlbumId={selectedAlbumId}
-                onAlbumClick={handleAlbumClick}
-                showWishlist={showWishlist}
-                wishlistItems={wishlistItems}
-                onWishlistItemClick={handleWishlistItemClick}
-                hideOnMobileWhenSelected={!!featured}
-              />
-            </>
-          )
-        })()}
+        {/* My Globe mode: bottom dock filmstrip. The selected-album detail is
+            shown by the single AlbumImageModal preview (rendered inside the
+            globe), so the filmstrip stays visible on all breakpoints — no
+            second stacked card on mobile. */}
+        {!exploreMode && (albums.length > 0 || (showWishlist && wishlistItems.length > 0)) && (
+          <GlobeAlbumFilmstrip
+            albums={albums}
+            selectedAlbumId={selectedAlbumId}
+            onAlbumClick={handleAlbumClick}
+            showWishlist={showWishlist}
+            wishlistItems={wishlistItems}
+            onWishlistItemClick={handleWishlistItemClick}
+          />
+        )}
         </div>{/* end globe container */}
 
         {/* Desktop Side Panel -- shown when album selected, sits beside the globe */}

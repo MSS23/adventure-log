@@ -226,10 +226,13 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     const city = cityPins.find(pin => pin.id === albumId)
 
     if (city && globeReady) {
-      // Filmstrip/imperative navigation: fly + select WITHOUT opening the
-      // "Open" modal — the page shows the "View" card for the selection, so
-      // opening the modal here would duplicate the card on mobile.
-      handleCityClick(city, false)
+      // Filmstrip/imperative navigation: fly + select. On desktop the page
+      // shows the GlobeSidePanel for the selected album, so we don't also open
+      // the bottom preview. On mobile there is no side panel (the old
+      // MobileFeaturedAlbum "View" card was removed to stop two cards stacking),
+      // so the AlbumImageModal is the single album card and must open here.
+      const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 1024
+      handleCityClick(city, isMobileViewport)
     } else if (globeReady) {
       setIsAutoRotating(false)
       if (globeRef.current) {

@@ -797,10 +797,10 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     }
   }, [locations, animateCameraToPosition])
 
-  // `openModal` distinguishes a direct globe-pin tap (opens the AlbumImageModal
-  // "Open" card) from filmstrip-driven navigation (the page already shows the
-  // MobileFeaturedAlbum "View" card for the selected album — opening the modal
-  // too would stack two cards). Filmstrip nav passes openModal=false.
+  // `openModal` controls whether a city tap opens the AlbumImageModal preview.
+  // Both direct globe-pin taps and filmstrip-driven navigation now open it
+  // (it is the single album card); callers may still pass openModal=false to
+  // fly the camera without surfacing the card.
   function handleCityClick(city: CityPin, openModal: boolean = true) {
     setActiveCityId(city.id)
     setIsAutoRotating(false)

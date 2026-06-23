@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { log } from '@/lib/utils/logger'
+import { log, toError } from '@/lib/utils/logger'
 import { areFriends, type VisibilityLevel } from '@/lib/utils/privacy'
 import { formatLocationLabel } from '@/lib/utils/country'
 
@@ -422,7 +422,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         year,
         userId: user?.id,
         errorType: err instanceof Error ? err.name : 'Unknown'
-      }, err instanceof Error ? err : new Error(String(err)))
+      }, toError(err))
 
       // Return empty year data instead of throwing to prevent UI crashes
       return {
@@ -513,7 +513,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
             component: 'useTravelTimeline',
             year: selectedYear,
             userId: user?.id
-          }, err instanceof Error ? err : new Error(String(err)))
+          }, toError(err))
 
           setError(err instanceof Error ? err.message : 'Failed to load year data')
         })
@@ -551,7 +551,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
           log.error('Failed to load all year data', {
             component: 'useTravelTimeline',
             userId: user?.id
-          }, err instanceof Error ? err : new Error(String(err)))
+          }, toError(err))
 
           setError(err instanceof Error ? err.message : 'Failed to load all year data')
         })

@@ -12,7 +12,7 @@ import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2,
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
-import { log } from '@/lib/utils/logger'
+import { log, toError } from '@/lib/utils/logger'
 import { MissingLocationBanner } from '@/components/notifications/MissingLocationNotification'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -102,7 +102,7 @@ function AlbumsPageContent() {
           component: 'AlbumsPage',
           action: 'fetchAlbums',
           userId: user?.id
-        }, err instanceof Error ? err : new Error(String(err)))
+        }, toError(err))
         throw err
       }
     },
@@ -233,7 +233,7 @@ function AlbumsPageContent() {
         component: 'AlbumsPage',
         action: 'quickDelete',
         albumId: album.id
-      }, err instanceof Error ? err : new Error(String(err)))
+      }, toError(err))
       toast.error('Failed to delete album')
     } finally {
       setQuickDeleting(false)
@@ -267,7 +267,7 @@ function AlbumsPageContent() {
         component: 'AlbumsPage',
         action: 'deleteAlbums',
         albumIds: Array.from(selectedAlbums)
-      }, err instanceof Error ? err : new Error(String(err)))
+      }, toError(err))
       toast.error('Failed to delete albums. Please try again.')
     } finally {
       setDeleting(false)

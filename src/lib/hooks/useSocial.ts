@@ -46,7 +46,7 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string, o
       // Set likes without fetching user data to improve performance
       setLikes((likesData || []) as Like[])
     } catch (error) {
-      log.error('Error fetching likes', { error })
+      log.error('Error fetching likes', {}, error)
     }
   }, [albumId, photoId, storyId])
 

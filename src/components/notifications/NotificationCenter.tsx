@@ -24,7 +24,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { log } from '@/lib/utils/logger'
+import { log, toError } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
 import { UserAvatarLink } from '@/components/social/UserLink'
 import Link from 'next/link'
@@ -93,7 +93,7 @@ export function NotificationCenter() {
     } catch (error) {
       log.error('Failed to fetch notifications', {
         component: 'NotificationCenter'
-      }, error instanceof Error ? error : new Error(String(error)))
+      }, toError(error))
     } finally {
       setLoading(false)
     }
@@ -199,7 +199,7 @@ export function NotificationCenter() {
     } catch (error) {
       log.error('Failed to mark notification as read', {
         component: 'NotificationCenter'
-      }, error instanceof Error ? error : new Error(String(error)))
+      }, toError(error))
     }
   }
 
@@ -218,7 +218,7 @@ export function NotificationCenter() {
     } catch (error) {
       log.error('Failed to mark all as read', {
         component: 'NotificationCenter'
-      }, error instanceof Error ? error : new Error(String(error)))
+      }, toError(error))
     }
   }
 
@@ -239,7 +239,7 @@ export function NotificationCenter() {
     } catch (error) {
       log.error('Failed to delete notification', {
         component: 'NotificationCenter'
-      }, error instanceof Error ? error : new Error(String(error)))
+      }, toError(error))
     }
   }
 

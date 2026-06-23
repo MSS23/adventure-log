@@ -27,6 +27,47 @@ export interface LogEntry {
   error?: Error | unknown
 }
 
+/**
+ * Coerce an arbitrary thrown value into a real Error instance.
+ *
+ * Supabase's PostgrestError (and similar) is a plain object
+ * `{ code, details, hint, message }` — not an Error. Naively wrapping it with
+ * `new Error(String(err))` produces the useless message "[object Object]" and
+ * throws away the code/message/hint. This preserves them: the Error message
+ * embeds the code, and the original object is kept as `cause` plus surfaced as
+ * Sentry-visible properties.
+ *
+ * Prefer this over `err instanceof Error ? err : new Error(String(err))` at any
+ * `log.error(...)` call site that may receive a Supabase/Postgrest error.
+ */
+export function toError(error: Error | unknown): Error {
+  if (error instanceof Error) return error
+
+  if (typeof error === 'object' && error !== null) {
+    const e = error as Record<string, unknown>
+    let message: string
+    if (typeof e.message === 'string') {
+      message = e.message
+    } else {
+      try {
+        message = JSON.stringify(error)
+      } catch {
+        message = String(error)
+      }
+    }
+    const wrapped = new Error(e.code ? `[${e.code}] ${message}` : message, { cause: error })
+    // Surface common Postgrest fields as Sentry-visible properties.
+    // Cast through `unknown` — TS won't convert Error → Record directly.
+    const extra = wrapped as unknown as Record<string, unknown>
+    if (e.code) extra.code = e.code
+    if (e.details) extra.details = e.details
+    if (e.hint) extra.hint = e.hint
+    return wrapped
+  }
+
+  return new Error(String(error))
+}
+
 class Logger {
   private minLevel: LogLevel
   private isDevelopment: boolean
@@ -81,22 +122,7 @@ class Logger {
    * legible and groupable, while preserving the original as `cause`.
    */
   private toError(error: Error | unknown): Error {
-    if (error instanceof Error) return error
-
-    if (typeof error === 'object' && error !== null) {
-      const e = error as Record<string, unknown>
-      const message = typeof e.message === 'string' ? e.message : JSON.stringify(error)
-      const wrapped = new Error(e.code ? `[${e.code}] ${message}` : message, { cause: error })
-      // Surface common Postgrest fields as Sentry-visible properties.
-      // Cast through `unknown` — TS won't convert Error → Record directly.
-      const extra = wrapped as unknown as Record<string, unknown>
-      if (e.code) extra.code = e.code
-      if (e.details) extra.details = e.details
-      if (e.hint) extra.hint = e.hint
-      return wrapped
-    }
-
-    return new Error(String(error))
+    return toError(error)
   }
 
   private formatError(error: Error | unknown): string | Error {

@@ -17,6 +17,16 @@ export interface Like {
   }
 }
 
+// A Postgres statement timeout (57014) on the social RLS read is expected infra
+// noise (see migration 61). We degrade silently to "no likes / not liked"
+// instead of logging — anything else is surfaced as a real error.
+function isStatementTimeout(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false
+  const code = 'code' in error ? String((error as { code?: unknown }).code) : ''
+  const message = 'message' in error ? String((error as { message?: unknown }).message).toLowerCase() : ''
+  return code === '57014' || message.includes('canceling statement due to statement timeout')
+}
+
 export function useLikes(albumId?: string, photoId?: string, storyId?: string, options?: { fetchList?: boolean; subscribe?: boolean }) {
   const { fetchList = true, subscribe = true } = options ?? {}
   const [likes, setLikes] = useState<Like[]>([])
@@ -46,7 +56,10 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string, o
       // Set likes without fetching user data to improve performance
       setLikes((likesData || []) as Like[])
     } catch (error) {
-      log.error('Error fetching likes', {}, error)
+      // Expected timeout → leave the list empty (count 0) without reporting.
+      if (!isStatementTimeout(error)) {
+        log.error('Error fetching likes', { component: 'useLikes', action: 'fetch-likes' }, error)
+      }
     }
   }, [albumId, photoId, storyId])
 
@@ -77,7 +90,12 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string, o
       if (error) throw error
       setIsLiked((data?.length ?? 0) > 0)
     } catch (error) {
-      log.error('Error checking if liked', {}, error)
+      // Expected timeout → degrade to "not liked" without reporting.
+      if (isStatementTimeout(error)) {
+        setIsLiked(false)
+      } else {
+        log.error('Error checking if liked', { component: 'useLikes', action: 'check-liked' }, error)
+      }
     }
   }, [user, albumId, photoId, storyId])
 

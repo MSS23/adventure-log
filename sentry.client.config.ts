@@ -29,6 +29,25 @@ Sentry.init({
     }),
   ],
 
+  // Drop noise from third-party browser extensions injected into the page
+  // (these are NOT our code — e.g. content scripts and clipboard-hardening
+  // shims) and from expected DB statement timeouts. Left unfiltered, this
+  // floods Sentry ingest and trips a 429 rate-limit.
+  ignoreErrors: [
+    /Extension context invalidated/i,
+    /CONTENT_SHELL/i,
+    /Clipboard\.prototype\.writeText was already locked/i,
+    /ResizeObserver loop (limit exceeded|completed with undelivered notifications)/i,
+    'Non-Error promise rejection captured',
+  ],
+  denyUrls: [
+    /^chrome-extension:\/\//i,
+    /^moz-extension:\/\//i,
+    /^safari-web-extension:\/\//i,
+    /^chrome:\/\//i,
+    /\bcontent\.js$/i,
+  ],
+
   // You can remove this option if you're not planning to use the Sentry Session Replay feature
   beforeSend(event, hint) {
     // Filter out certain errors if needed
@@ -40,6 +59,21 @@ Sentry.init({
         if (message.includes('network error') || message.includes('failed to fetch')) {
           return null
         }
+      }
+      // Expected Postgres statement-timeout noise (social likes/comments RLS
+      // reads — see migration 61). Self-handled in the UI; don't report.
+      const code =
+        error && typeof error === 'object' && 'code' in error ? String((error as { code?: unknown }).code) : ''
+      const msg =
+        error && typeof error === 'object' && 'message' in error ? String((error as { message?: unknown }).message).toLowerCase() : ''
+      if (code === '57014' || msg.includes('canceling statement due to statement timeout')) {
+        return null
+      }
+      // Belt-and-suspenders: drop anything whose top frame is an extension script.
+      const frames = event.exception.values?.[0]?.stacktrace?.frames
+      const top = frames?.[frames.length - 1]?.filename || ''
+      if (/^(chrome|moz|safari-web)-extension:\/\//i.test(top) || /\bcontent\.js$/i.test(top)) {
+        return null
       }
     }
     return event

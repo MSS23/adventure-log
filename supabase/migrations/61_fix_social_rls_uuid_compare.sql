@@ -18,7 +18,7 @@
 -- not the outer filter (which the unique index already satisfies instantly).
 --
 -- Migration 57 tried to work around this with functional indexes on (id::text).
--- That is brittle (the planner doesn't reliably pick it) and cleaacccrly did NOT
+-- That is brittle (the planner doesn't reliably pick it) and clearly did NOT
 -- hold — the timeouts recurred. The clean fix is to compare uuid-to-uuid so the
 -- existing primary-key index is used as a plain index seek.
 --

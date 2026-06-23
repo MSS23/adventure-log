@@ -198,6 +198,20 @@ class Logger {
     }
   }
 
+  /**
+   * Whether an error is expected infra noise we deliberately don't report
+   * externally. Currently: Postgres statement timeouts (code 57014).
+   */
+  private isExpectedNoise(error: unknown, message: string): boolean {
+    const code =
+      error && typeof error === 'object' && 'code' in error
+        ? String((error as { code?: unknown }).code)
+        : ''
+    if (code === '57014') return true
+    const text = `${message} ${error && typeof error === 'object' && 'message' in error ? String((error as { message?: unknown }).message) : ''}`.toLowerCase()
+    return text.includes('canceling statement due to statement timeout')
+  }
+
   private async sendToExternalService(
     level: LogLevel,
     message: string,
@@ -206,6 +220,12 @@ class Logger {
   ): Promise<void> {
     // Only send errors and warnings to external services in production
     if (this.isDevelopment || level < LogLevel.WARN) return
+
+    // Skip expected Postgres statement-timeout noise (code 57014) — e.g. the
+    // social likes/comments RLS reads (see migration 61). These are infra/
+    // expected and self-handled in the UI; reporting them only burns the
+    // Sentry ingest quota (429s) and floods the error_events sink.
+    if (this.isExpectedNoise(error, message)) return
 
     // Always ship to our own DB sink (error_events) in addition to Sentry.
     // This is the fallback so we still see errors even without a Sentry DSN.

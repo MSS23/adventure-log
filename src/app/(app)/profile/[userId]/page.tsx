@@ -14,13 +14,39 @@ import {
   UserPlus,
   UserMinus,
   Loader2,
-  Users
+  Users,
+  Globe as GlobeIcon
 } from 'lucide-react'
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import Image from 'next/image'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+// Read-only footprint globe — reuses the Wrapped page's static globe (the same
+// component it renders as a dimmed backdrop with `animate={false}`). Lazy-loaded
+// with ssr:false so react-globe.gl/Three.js never enter the server bundle.
+const FootprintGlobe = dynamic(
+  () => import('@/components/wrapped/WrappedGlobe').then((m) => ({ default: m.WrappedGlobe })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-black">
+        <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+      </div>
+    ),
+  }
+)
+
+// ISO 3166-1 alpha-2 → regional-indicator flag emoji.
+function countryCodeToFlag(code: string): string {
+  return code
+    .toUpperCase()
+    .split('')
+    .map((c) => String.fromCodePoint(127397 + c.charCodeAt(0)))
+    .join('')
+}
 
 // View-model returned by the profile query. The sentinel `redirectToOwn`
 // signals that the viewer is looking at their own profile.
@@ -254,15 +280,34 @@ export default function UserProfilePage() {
   const loading = (queryLoading && !!userIdOrUsername && !authLoading) || authLoading || !!viewModel?.redirectToOwn
   const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load profile') : null
 
-  // Calculate unique countries from albums
-  const countriesCount = useMemo(() => {
-    const uniqueCountryCodes = new Set(
+  // Unique country codes from albums — drives both the stat and the flag row.
+  const countryCodes = useMemo(
+    () => [
+      ...new Set(
+        albums
+          .filter((album) => album.country_code)
+          .map((album) => (album.country_code as string).toUpperCase())
+      ),
+    ],
+    [albums]
+  )
+  const countriesCount = countryCodes.length
+
+  // Geocoded albums → pins for the footprint globe (chronological).
+  const footprint = useMemo(
+    () =>
       albums
-        .filter(album => album.country_code)
-        .map(album => album.country_code)
-    )
-    return uniqueCountryCodes.size
-  }, [albums])
+        .filter((a) => typeof a.latitude === 'number' && typeof a.longitude === 'number')
+        .map((a) => ({
+          lat: a.latitude as number,
+          lng: a.longitude as number,
+          name: a.location_name?.split(',')[0]?.trim() || a.title,
+          date: a.date_start || a.created_at || '',
+          albumId: a.id,
+        }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+    [albums]
+  )
 
   useEffect(() => {
     if (queryError) {
@@ -435,6 +480,46 @@ export default function UserProfilePage() {
             ))}
           </div>
         </div>
+
+        {/* ───────── Footprint ───────── */}
+        {(footprint.length > 0 || countryCodes.length > 0) && (
+          <div>
+            <p className="al-eyebrow mb-3">Footprint</p>
+
+            {footprint.length > 0 && (
+              <div className="relative h-72 sm:h-80 w-full overflow-hidden rounded-2xl border border-border bg-black">
+                <FootprintGlobe
+                  locations={footprint}
+                  animate={false}
+                  onPinClick={(loc) => {
+                    if (loc.albumId) router.push(`/albums/${loc.albumId}`)
+                  }}
+                />
+                {/* Places-visited badge */}
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+                  <GlobeIcon className="h-3.5 w-3.5 text-olive-400" />
+                  {footprint.length} {footprint.length === 1 ? 'place' : 'places'}
+                </div>
+              </div>
+            )}
+
+            {/* Country flags */}
+            {countryCodes.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                {countryCodes.slice(0, 24).map((code) => (
+                  <span key={code} title={code} className="text-2xl leading-none">
+                    {countryCodeToFlag(code)}
+                  </span>
+                ))}
+                {countryCodes.length > 24 && (
+                  <span className="text-sm font-medium text-muted-foreground">
+                    +{countryCodes.length - 24}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ───────── Albums ───────── */}
         <div>

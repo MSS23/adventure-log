@@ -80,48 +80,114 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
 
   const displayedComments = showAll ? comments : comments.slice(0, 5)
   const hasMore = comments.length > 5
+  const remaining = Math.max(0, 500 - newComment.length)
 
   return (
     <div className={className}>
-      {/* Comments Section with Card */}
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        {/* Comments Header */}
-        <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-b border-border">
-          <h3 className="font-heading text-base md:text-lg font-semibold text-foreground flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-primary" />
+        {/* Header */}
+        <div className="flex items-center gap-2.5 px-4 py-3.5 sm:px-6 border-b border-border">
+          <MessageCircle className="h-[18px] w-[18px] text-muted-foreground" />
+          <h3 className="font-heading text-base font-semibold text-foreground">
             Comments
-            {commentsCount > 0 && (
-              <span className="text-sm font-normal text-muted-foreground">
-                {commentsCount}
-              </span>
-            )}
           </h3>
+          {commentsCount > 0 && (
+            <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-xs font-semibold tabular-nums text-muted-foreground">
+              {commentsCount}
+            </span>
+          )}
         </div>
 
-        {/* Comments List */}
-        <div className="px-4 py-4 sm:px-6 sm:py-5">
+        {/* Composer — top of the thread, modern flat input */}
+        {user ? (
+          <motion.form
+            onSubmit={handleSubmit}
+            className="px-4 py-4 sm:px-6 border-b border-border"
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          >
+            <div className="flex items-start gap-3">
+              <Avatar className="mt-0.5 h-9 w-9 shrink-0">
+                <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} />
+                <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                  {getDisplayInitial(profile?.display_name, profile?.username)}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex-1 min-w-0">
+                <MentionInput
+                  value={newComment}
+                  onChange={(value, mentioned) => {
+                    setNewComment(value.slice(0, 500))
+                    if (mentioned) setMentionedUsers(mentioned)
+                  }}
+                  placeholder="Add a comment…"
+                  rows={1}
+                  disabled={isSubmitting}
+                  className="rounded-2xl bg-muted/40 focus:bg-card transition-colors"
+                />
+                <div className="mt-2 flex items-center justify-end gap-3">
+                  <span
+                    className={`text-[11px] tabular-nums transition-colors ${
+                      remaining <= 20 ? 'text-destructive' : 'text-muted-foreground/60'
+                    }`}
+                  >
+                    {newComment.length > 0 ? `${remaining} left` : ''}
+                  </span>
+                  <motion.button
+                    type="submit"
+                    disabled={!newComment.trim() || isSubmitting}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-all disabled:bg-muted disabled:text-muted-foreground/60 disabled:shadow-none"
+                    whileTap={prefersReducedMotion || !newComment.trim() ? {} : { scale: 0.94 }}
+                  >
+                    {isSubmitting ? (
+                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <Send className="h-3.5 w-3.5" />
+                    )}
+                    Post
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          </motion.form>
+        ) : (
+          <div className="px-4 py-4 sm:px-6 border-b border-border">
+            <div className="rounded-xl bg-muted/50 px-4 py-3 text-center text-sm text-muted-foreground">
+              <Link href="/login" className="text-primary hover:underline font-semibold">
+                Sign in
+              </Link>{' '}
+              to join the conversation
+            </div>
+          </div>
+        )}
+
+        {/* Comments list */}
+        <div className="px-4 py-4 sm:px-6">
           {displayedComments.length > 0 ? (
-            <div className="space-y-3 sm:space-y-4 mb-5 sm:mb-6">
+            <div className="space-y-1">
               <AnimatePresence mode="popLayout">
                 {displayedComments.map((comment, index) => {
                   const commentUser = comment.users || comment.profiles || comment.user
+                  const isOwner = user?.id === comment.user_id
                   return (
                     <motion.div
                       key={comment.id}
-                      className="flex items-start gap-2.5 sm:gap-3 group"
-                      initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
+                      className="group flex items-start gap-3 rounded-xl -mx-2 px-2 py-2 transition-colors hover:bg-muted/40"
+                      initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
+                      exit={prefersReducedMotion ? {} : { opacity: 0, x: -16 }}
                       transition={{
                         type: 'spring',
                         stiffness: 300,
                         damping: 25,
-                        delay: prefersReducedMotion ? 0 : index * 0.05
+                        delay: prefersReducedMotion ? 0 : index * 0.04
                       }}
                       layout={!prefersReducedMotion}
                     >
                       <UserAvatarLink user={commentUser}>
-                        <Avatar className="h-8 w-8 sm:h-9 sm:w-9 ring-2 ring-background shrink-0">
+                        <Avatar className="h-9 w-9 shrink-0">
                           <AvatarImage src={getAvatarUrl(commentUser?.avatar_url, commentUser?.username)} />
                           <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                             {getDisplayInitial(commentUser?.display_name, commentUser?.username)}
@@ -130,138 +196,55 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                       </UserAvatarLink>
 
                       <div className="flex-1 min-w-0">
-                        <div className="bg-muted/50 rounded-2xl px-3.5 py-2.5 sm:px-5 sm:py-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <UserLink
-                                user={commentUser}
-                                className="text-sm font-semibold text-foreground hover:underline"
-                              />
-                              <p className="text-sm text-foreground mt-1 leading-relaxed break-words">
-                                {comment.content}
-                              </p>
-                            </div>
-
-                            {/* Delete button for comment owner */}
-                            {user?.id === comment.user_id && (
-                              <motion.div
-                                whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
-                                whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
-                              >
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  aria-label="Delete comment"
-                                  className="-mr-1.5 h-7 w-7 p-0 text-muted-foreground hover:text-destructive opacity-60 group-hover:opacity-100 transition-opacity"
-                                  onClick={() => handleDelete(comment.id)}
-                                  disabled={loading}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
-                              </motion.div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="px-3.5 mt-1 sm:px-5">
-                          <span className="text-[11px] text-muted-foreground/70">
+                        <div className="flex items-baseline gap-2">
+                          <UserLink
+                            user={commentUser}
+                            className="text-sm font-semibold text-foreground hover:underline"
+                          />
+                          <span className="text-[11px] text-muted-foreground/70 shrink-0">
                             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                           </span>
                         </div>
+                        <p className="text-sm text-foreground/90 mt-0.5 leading-relaxed break-words">
+                          {comment.content}
+                        </p>
                       </div>
+
+                      {/* Delete — appears on hover for the owner */}
+                      {isOwner && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label="Delete comment"
+                          className="h-7 w-7 shrink-0 p-0 text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                          onClick={() => handleDelete(comment.id)}
+                          disabled={loading}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                     </motion.div>
                   )
                 })}
               </AnimatePresence>
 
-              {/* Show more/less button */}
+              {/* Show more / less */}
               {hasMore && (
-                <motion.div
-                  className="pt-2"
-                  initial={prefersReducedMotion ? {} : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
+                <div className="pt-2 pl-12">
                   <button
                     type="button"
-                    className="text-sm text-primary hover:underline font-semibold px-4 py-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded"
                     onClick={() => setShowAll(!showAll)}
                   >
-                    {showAll
-                      ? 'Show less'
-                      : `View all ${comments.length} comments`
-                    }
+                    {showAll ? 'Show less' : `View all ${comments.length} comments`}
                   </button>
-                </motion.div>
+                </div>
               )}
             </div>
           ) : (
-            <div className="py-7 text-center">
-              <div className="mx-auto mb-2.5 flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <MessageCircle className="h-5 w-5" />
-              </div>
+            <div className="py-8 text-center">
               <p className="text-sm font-medium text-foreground">No comments yet</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Be the first to comment!</p>
-            </div>
-          )}
-
-          {/* Add Comment Form */}
-          {user ? (
-            <motion.div
-              className="border-t border-border pt-4 mt-4"
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 25 }}
-            >
-              <form onSubmit={handleSubmit}>
-                <div className="flex items-end gap-2.5 sm:gap-3">
-                  <Avatar className="h-8 w-8 sm:h-9 sm:w-9 ring-2 ring-background shrink-0">
-                    <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-                      {getDisplayInitial(profile?.display_name, profile?.username)}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex-1 min-w-0">
-                    <MentionInput
-                      value={newComment}
-                      onChange={(value, mentioned) => {
-                        setNewComment(value)
-                        if (mentioned) setMentionedUsers(mentioned)
-                      }}
-                      placeholder="Add a comment…"
-                      maxLength={500}
-                      rows={1}
-                      disabled={isSubmitting}
-                      className="px-4 py-3 bg-muted/50 border border-border rounded-2xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent focus:bg-card transition-all"
-                    />
-                  </div>
-
-                  {/* Modern circular send button — springs to primary once there's
-                      text to post, fades back when empty (Instagram-style). */}
-                  <motion.button
-                    type="submit"
-                    disabled={!newComment.trim() || isSubmitting}
-                    aria-label="Post comment"
-                    className="mb-[26px] grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-all disabled:scale-90 disabled:bg-muted disabled:text-muted-foreground/60 disabled:shadow-none"
-                    whileTap={prefersReducedMotion || !newComment.trim() ? {} : { scale: 0.88 }}
-                  >
-                    {isSubmitting ? (
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </motion.button>
-                </div>
-              </form>
-            </motion.div>
-          ) : (
-            <div className="mt-4 rounded-xl bg-muted/50 p-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                <Link href="/login" className="text-primary hover:underline font-semibold">
-                  Sign in
-                </Link>{' '}
-                to join the conversation
-              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">Be the first to share your thoughts.</p>
             </div>
           )}
         </div>

@@ -68,12 +68,6 @@ export function ProfileHero({
                 </h1>
                 <p className="font-mono text-[11px] tracking-wider text-muted-foreground mt-1">
                   @{username}
-                  {profile.location && (
-                    <>
-                      {' · '}
-                      {profile.location}
-                    </>
-                  )}
                 </p>
               </div>
 

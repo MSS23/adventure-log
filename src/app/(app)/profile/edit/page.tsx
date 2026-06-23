@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ArrowLeft, Save, Check, X, Loader2, Camera } from 'lucide-react'
+import { ArrowLeft, Save, Check, X, Loader2, Camera, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
@@ -28,6 +28,12 @@ export default function EditProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
   const [checkingUsername, setCheckingUsername] = useState(false)
+  // Private home location — never shown to anyone; geocoded on save and used
+  // only to measure how far the user has travelled. Same data model as the
+  // Settings "home base" (home_city/home_country/home_latitude/home_longitude),
+  // so the two stay in sync.
+  const [homeCity, setHomeCity] = useState('')
+  const [homeCountry, setHomeCountry] = useState('')
   const avatarObjectUrlRef = useRef<string | null>(null)
   const supabase = createClient()
 
@@ -48,7 +54,8 @@ export default function EditProfilePage() {
       setValue('display_name', profile.display_name || profile.name || '')
       setValue('bio', profile.bio || '')
       setValue('website', profile.website || '')
-      setValue('location', profile.location || '')
+      setHomeCity(profile.home_city || '')
+      setHomeCountry(profile.home_country || '')
       setAvatarPreview(getPhotoUrl(profile.avatar_url, 'avatars') || null)
     }
   }, [profile, setValue])
@@ -155,6 +162,41 @@ export default function EditProfilePage() {
         websiteUrl = `https://${websiteUrl}`
       }
 
+      // Geocode the private home location → coordinates for distance stats.
+      // Best-effort: if geocoding fails we still persist the city/country text
+      // and keep any previously-resolved coordinates rather than blanking them.
+      const trimmedCity = homeCity.trim()
+      const trimmedCountry = homeCountry.trim()
+      let homeLatitude: number | null = profile?.home_latitude ?? null
+      let homeLongitude: number | null = profile?.home_longitude ?? null
+      const homeChanged =
+        trimmedCity !== (profile?.home_city || '') ||
+        trimmedCountry !== (profile?.home_country || '')
+
+      if (homeChanged) {
+        homeLatitude = null
+        homeLongitude = null
+        if (trimmedCity || trimmedCountry) {
+          try {
+            const q = [trimmedCity, trimmedCountry].filter(Boolean).join(', ')
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`
+            )
+            const geo = await response.json()
+            if (geo?.[0]) {
+              homeLatitude = parseFloat(geo[0].lat)
+              homeLongitude = parseFloat(geo[0].lon)
+            }
+          } catch (geoErr) {
+            log.warn('Home location geocode failed; saving without coordinates', {
+              component: 'EditProfile',
+              action: 'geocode-home',
+            })
+            void geoErr
+          }
+        }
+      }
+
       const { error } = await supabase
         .from('users')
         .update({
@@ -163,7 +205,13 @@ export default function EditProfilePage() {
           name: data.display_name || data.username || null,
           bio: data.bio || null,
           website: websiteUrl,
-          location: data.location || null,
+          // Public profile location is retired — the location here is private,
+          // so clear any legacy public value.
+          location: null,
+          home_city: trimmedCity || null,
+          home_country: trimmedCountry || null,
+          home_latitude: homeLatitude,
+          home_longitude: homeLongitude,
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
         })
@@ -327,33 +375,50 @@ export default function EditProfilePage() {
             {errors.bio && <p className="text-xs text-destructive">{errors.bio.message}</p>}
           </div>
 
-          {/* Location + Website */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="location" className="text-foreground font-medium">
-                Location <span className="text-muted-foreground font-normal">(optional)</span>
+          {/* Website */}
+          <div className="space-y-1.5">
+            <Label htmlFor="website" className="text-foreground font-medium">
+              Website <span className="text-muted-foreground font-normal">(optional)</span>
+            </Label>
+            <Input
+              id="website"
+              {...register('website')}
+              placeholder="your-site.com"
+              className={cn(errors.website ? 'border-destructive' : '')}
+            />
+          </div>
+
+          {/* Home location — private, distance stats only */}
+          <div className="space-y-2 rounded-xl border border-border bg-muted/30 p-4">
+            <div className="flex items-center gap-2">
+              <Lock className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+              <Label className="text-foreground font-medium">
+                Home location <span className="text-muted-foreground font-normal">(private)</span>
               </Label>
-              <Input
-                id="location"
-                {...register('location')}
-                placeholder="City, Country"
-                className={cn(errors.location ? 'border-destructive' : '')}
-              />
-              <p className="text-xs text-muted-foreground">
-                Shown on your profile. Your home base for distance stats lives in Settings.
-              </p>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="website" className="text-foreground font-medium">
-                Website <span className="text-muted-foreground font-normal">(optional)</span>
-              </Label>
-              <Input
-                id="website"
-                {...register('website')}
-                placeholder="your-site.com"
-                className={cn(errors.website ? 'border-destructive' : '')}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="home-city" className="text-xs font-medium text-muted-foreground">City</Label>
+                <Input
+                  id="home-city"
+                  value={homeCity}
+                  onChange={(e) => setHomeCity(e.target.value)}
+                  placeholder="London"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="home-country" className="text-xs font-medium text-muted-foreground">Country</Label>
+                <Input
+                  id="home-country"
+                  value={homeCountry}
+                  onChange={(e) => setHomeCountry(e.target.value)}
+                  placeholder="United Kingdom"
+                />
+              </div>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Never shown to anyone. Used only to measure how far you&apos;ve travelled from home.
+            </p>
           </div>
         </div>
 

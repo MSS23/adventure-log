@@ -88,6 +88,13 @@ export default function WrappedPage() {
   const currentYear = new Date().getFullYear()
   const [mode, setMode] = useState<'year' | 'all'>('year')
   const data = useWrappedData(user?.id, mode === 'all' ? 'all' : currentYear)
+  // All-time lookup so the year view knows whether the account has *any*
+  // trips. If both this year and all-time are empty, there's no point sending
+  // the user to an equally-empty All-Time screen — just point them at creating
+  // an album. (The hook fetches every album regardless of mode, so this is the
+  // same query; in 'all' mode `data` already is the all-time data.)
+  const allTimeData = useWrappedData(user?.id, 'all')
+  const allTimeEmpty = !allTimeData.loading && allTimeData.totalTrips === 0
 
   // Pin click: jump into the album on the globe, so user can dive deeper
   const handlePinClick = useCallback(
@@ -198,12 +205,19 @@ export default function WrappedPage() {
         </div>
         <Plane className="h-16 w-16 text-olive-400 mb-6" />
         <h1 className="text-3xl font-bold mb-3">
-          {mode === 'all' ? 'No Trips Yet' : `No Trips in ${currentYear}`}
+          {allTimeEmpty
+            ? 'No Adventures Yet'
+            : mode === 'all'
+              ? 'No Trips Yet'
+              : `No Trips in ${currentYear}`}
         </h1>
         <p className="text-white/75 text-center mb-6 max-w-md">
-          Start logging your adventures to see your travel wrapped!
+          {allTimeEmpty
+            ? 'Create your first album — add a few photos and a location — to unlock your Travel Wrapped.'
+            : 'Start logging your adventures to see your travel wrapped!'}
         </p>
-        {mode === 'year' && (
+        {/* Only offer the All-Time detour when it actually has something to show. */}
+        {mode === 'year' && !allTimeEmpty && (
           <Button
             onClick={() => switchMode('all')}
             variant="outline"

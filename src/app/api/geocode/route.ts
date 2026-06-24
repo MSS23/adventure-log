@@ -56,10 +56,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Nominatim's usage policy requires a valid identifying User-Agent with a
+    // way to contact us (app URL or email).
+    const contact =
+      process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://adventure-log.app'
     const response = await fetch(nominatimUrl, {
       headers: {
-        'User-Agent': 'Adventure Log App (contact@example.com)'
-      }
+        'User-Agent': `AdventureLog/1.0 (+${contact})`,
+      },
     })
 
     if (!response.ok) {

@@ -147,6 +147,12 @@ export interface RateLimitConfig {
   windowMs?: number
   /** Optional prefix for the key (useful for different rate limits per route) */
   keyPrefix?: string
+  /**
+   * Explicit identifier to rate-limit on instead of the client IP. Pass the
+   * authenticated user id here for per-USER limits (e.g. expensive AI calls),
+   * so a single account can't multiply its budget by rotating IPs.
+   */
+  identifier?: string
 }
 
 /**
@@ -166,9 +172,9 @@ export function rateLimit(
   request: NextRequest,
   config: RateLimitConfig = {}
 ): RateLimitResult {
-  const { limit = 100, windowMs = 15 * 60 * 1000, keyPrefix = '' } = config
+  const { limit = 100, windowMs = 15 * 60 * 1000, keyPrefix = '', identifier } = config
 
-  const clientId = getClientId(request)
+  const clientId = identifier || getClientId(request)
   const key = keyPrefix ? `${keyPrefix}:${clientId}` : clientId
 
   // Synchronous path: try Redis asynchronously but don't block.
@@ -193,9 +199,9 @@ export async function rateLimitAsync(
   request: NextRequest,
   config: RateLimitConfig = {}
 ): Promise<RateLimitResult> {
-  const { limit = 100, windowMs = 15 * 60 * 1000, keyPrefix = '' } = config
+  const { limit = 100, windowMs = 15 * 60 * 1000, keyPrefix = '', identifier } = config
 
-  const clientId = getClientId(request)
+  const clientId = identifier || getClientId(request)
   const key = keyPrefix ? `${keyPrefix}:${clientId}` : clientId
 
   const redis = await getRedis()

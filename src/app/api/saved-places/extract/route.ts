@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { rateLimit, rateLimitResponse } from '@/lib/utils/rate-limit'
+import { rateLimitAsync, rateLimitResponse } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
 import {
   detectPlatform,
@@ -36,18 +36,22 @@ interface ExtractResponse {
   message?: string
 }
 
-// Paste-a-link is interactive but hits external services + Claude, so cap it.
+// Paste-a-link is interactive but hits external services + Claude (a paid API),
+// so cap it PER USER via the distributed (Upstash) limiter — keying on the user
+// id rather than IP stops one account from multiplying its Claude budget by
+// rotating IPs / hitting different serverless instances.
 const EXTRACT_LIMIT = { limit: 30, windowMs: 10 * 60 * 1000, keyPrefix: 'sp-extract' }
 
 export async function POST(request: NextRequest) {
-  const limit = rateLimit(request, EXTRACT_LIMIT)
-  if (!limit.success) return rateLimitResponse(limit.reset)
-
+  // Authenticate first so we can rate-limit on the user id.
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const limit = await rateLimitAsync(request, { ...EXTRACT_LIMIT, identifier: user.id })
+  if (!limit.success) return rateLimitResponse(limit.reset)
 
   let body: { url?: string }
   try {

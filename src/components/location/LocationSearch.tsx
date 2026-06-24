@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { MapPin, Search, X, Loader2, Navigation } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { apiFetch } from '@/lib/api/client'
 import { log } from '@/lib/utils/logger'
 
 interface LocationResult {
@@ -66,16 +67,11 @@ export function LocationSearch({
     setError(null)
 
     try {
-      // Using Nominatim (OpenStreetMap) for geocoding
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?` +
-        new URLSearchParams({
-          q: searchQuery,
-          format: 'json',
-          limit: '10',
-          dedupe: '1',
-          'accept-language': 'en'
-        })
+      // Geocode via our authenticated server proxy (/api/geocode) — keeps OSM
+      // Nominatim usage server-side (proper User-Agent + throttling) instead of
+      // hammering the public endpoint directly from every keystroke.
+      const response = await apiFetch(
+        `/api/geocode?` + new URLSearchParams({ q: searchQuery }).toString()
       )
 
       if (!response.ok) {
@@ -137,15 +133,14 @@ export function LocationSearch({
         const { latitude, longitude } = position.coords
 
         try {
-          // Reverse geocode to get location name
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?` +
+          // Reverse geocode to get location name (via server proxy)
+          const response = await apiFetch(
+            `/api/geocode?` +
             new URLSearchParams({
+              reverse: 'true',
               lat: latitude.toString(),
               lon: longitude.toString(),
-              format: 'json',
-              'accept-language': 'en'
-            })
+            }).toString()
           )
 
           if (response.ok) {

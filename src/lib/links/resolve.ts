@@ -8,7 +8,12 @@ import { log } from '@/lib/utils/logger'
  * the extract route can degrade to "couldn't detect — add manually".
  */
 
-const NOMINATIM_UA = 'Adventure Log App (contact@example.com)'
+// Nominatim's usage policy requires an identifying User-Agent with contact info.
+const NOMINATIM_UA = `AdventureLog/1.0 (+${
+  process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  'https://adventure-log.app'
+})`
 
 export type LinkPlatform = 'tiktok' | 'google_maps' | 'instagram' | 'other'
 
@@ -42,18 +47,100 @@ export function detectPlatform(rawUrl: string): LinkPlatform {
   return 'other'
 }
 
-/** Follow redirects (short links) and return the final URL. Falls back to input. */
-export async function followRedirects(url: string): Promise<string> {
+/**
+ * Hosts we're willing to make a server-side request to when expanding a pasted
+ * link. This is an allow-list (not a deny-list) precisely because the input is
+ * user-controlled: without it, a user could paste a "google maps" URL that
+ * redirects to `http://169.254.169.254/...` (cloud metadata) or an internal
+ * service and turn this expander into an SSRF probe.
+ */
+function isHostAllowedForLinkFetch(host: string): boolean {
+  const h = host.toLowerCase().replace(/^www\./, '')
+  if (h === 'tiktok.com' || h.endsWith('.tiktok.com')) return true
+  if (h === 'google.com' || h.endsWith('.google.com') || h === 'maps.google.com') return true
+  if (h === 'goo.gl' || h === 'maps.app.goo.gl') return true
+  return false
+}
+
+/** Block requests to IP literals in private/loopback/link-local/metadata ranges. */
+function isPrivateIpLiteral(host: string): boolean {
+  const v4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/)
+  if (v4) {
+    const a = Number(v4[1])
+    const b = Number(v4[2])
+    if (a === 0 || a === 10 || a === 127) return true // this-host, private, loopback
+    if (a === 169 && b === 254) return true // link-local (incl. 169.254.169.254 metadata)
+    if (a === 172 && b >= 16 && b <= 31) return true // private
+    if (a === 192 && b === 168) return true // private
+    return false
+  }
+  const h = host.toLowerCase().replace(/^\[|\]$/g, '')
+  if (h === '::1' || h === '::') return true // IPv6 loopback / unspecified
+  if (h.startsWith('fe80:') || h.startsWith('fc') || h.startsWith('fd')) return true // link-local / ULA
+  return false
+}
+
+/** Parse + validate a URL is a public, http(s), allow-listed link target. */
+function safeLinkUrl(raw: string): URL | null {
+  let u: URL
   try {
-    const res = await fetch(url, {
-      method: 'GET',
-      redirect: 'follow',
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AdventureLogBot/1.0)' },
+    u = new URL(raw)
+  } catch {
+    return null
+  }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return null
+  if (isPrivateIpLiteral(u.hostname)) return null
+  if (!isHostAllowedForLinkFetch(u.hostname)) return null
+  return u
+}
+
+/**
+ * Follow redirects (short links) and return the final URL. Falls back to input.
+ *
+ * SSRF-hardened: only fetches allow-listed public hosts, follows redirects
+ * MANUALLY (re-validating each hop so a 30x can't smuggle the request to an
+ * internal address), and times out so a hanging upstream can't pin the function.
+ */
+export async function followRedirects(url: string): Promise<string> {
+  let current = safeLinkUrl(url)
+  if (!current) {
+    log.warn('followRedirects rejected unsafe/non-allowlisted URL', {
+      component: 'LinkResolve',
+      action: 'follow-rejected',
     })
-    return res.url || url
+    return url
+  }
+
+  try {
+    for (let hop = 0; hop < 5; hop++) {
+      const res = await fetch(current.toString(), {
+        method: 'GET',
+        redirect: 'manual',
+        signal: AbortSignal.timeout(5000),
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AdventureLogBot/1.0)' },
+      })
+
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get('location')
+        if (!location) return current.toString()
+        const next = safeLinkUrl(new URL(location, current).toString())
+        if (!next) {
+          log.warn('followRedirects stopped at non-allowlisted redirect target', {
+            component: 'LinkResolve',
+            action: 'follow-redirect-blocked',
+          })
+          return current.toString()
+        }
+        current = next
+        continue
+      }
+
+      return current.toString()
+    }
+    return current.toString()
   } catch (error) {
     log.warn('followRedirects failed', { component: 'LinkResolve', action: 'follow' }, error as Error)
-    return url
+    return current.toString()
   }
 }
 

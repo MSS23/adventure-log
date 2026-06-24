@@ -4,12 +4,14 @@
 // we bounce to /login so the user always has a recoverable entry point.
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { safeInternalPath } from '@/lib/utils/safe-redirect'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const nextParam = searchParams.get('next')
-  const next = nextParam && nextParam.startsWith('/') ? nextParam : '/dashboard'
+  // Guard against open-redirect: "//evil.com" / "/\evil.com" pass a naive
+  // startsWith('/') check but resolve to an external origin.
+  const next = safeInternalPath(searchParams.get('next'), '/dashboard')
 
   if (code) {
     const supabase = await createClient()

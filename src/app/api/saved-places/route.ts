@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { log } from '@/lib/utils/logger'
+import { sanitizeText, safeHttpUrl } from '@/lib/utils/input-validation'
 
 const CATEGORIES = ['see', 'eat', 'do', 'stay', 'other']
 const PLATFORMS = ['manual', 'tiktok', 'google_maps', 'instagram', 'other']
@@ -72,17 +73,21 @@ export async function POST(request: NextRequest) {
       .from('saved_places')
       .insert({
         user_id: user.id,
-        place_name: String(body.place_name).trim().slice(0, 200),
-        location_name: body.location_name ? String(body.location_name).slice(0, 300) : null,
-        city: body.city ? String(body.city).slice(0, 120) : null,
+        // Strip any HTML at the write boundary (defense-in-depth — these render
+        // as plain text today, but this keeps stored data clean for any future
+        // surface: emails, OG cards, non-React render paths).
+        place_name: sanitizeText(String(body.place_name)).trim().slice(0, 200),
+        location_name: body.location_name ? sanitizeText(String(body.location_name)).slice(0, 300) : null,
+        city: body.city ? sanitizeText(String(body.city)).slice(0, 120) : null,
         country_code: body.country_code ? String(body.country_code).toUpperCase().slice(0, 2) : null,
         latitude,
         longitude,
         category,
-        notes: body.notes ? String(body.notes).slice(0, 2000) : null,
+        notes: body.notes ? sanitizeText(String(body.notes)).slice(0, 2000) : null,
         source_platform: sourcePlatform,
-        source_url: body.source_url ? String(body.source_url).slice(0, 1000) : null,
-        thumbnail_url: body.thumbnail_url ? String(body.thumbnail_url).slice(0, 1000) : null,
+        // Only store well-formed http(s) URLs — these end up in <img src>/<a href>.
+        source_url: safeHttpUrl(body.source_url),
+        thumbnail_url: safeHttpUrl(body.thumbnail_url),
       })
       .select('*')
       .single()

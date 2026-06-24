@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MapPin, Search, X, Loader2, Navigation } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { apiFetch } from '@/lib/api/client'
 import {
   validateLocationData,
   sanitizeLocationInput,
@@ -171,16 +172,8 @@ export function LocationDropdown({
     setError(null)
 
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?` +
-        new URLSearchParams({
-          q: searchQuery,
-          format: 'json',
-          limit: '6',
-          dedupe: '1',
-          'accept-language': 'en',
-          addressdetails: '1'
-        })
+      const response = await apiFetch(
+        `/api/geocode?` + new URLSearchParams({ q: searchQuery }).toString()
       )
 
       if (!response.ok) throw new Error('Search failed')
@@ -258,15 +251,13 @@ export function LocationDropdown({
       async (position) => {
         const { latitude, longitude } = position.coords
         try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?` +
+          const response = await apiFetch(
+            `/api/geocode?` +
             new URLSearchParams({
+              reverse: 'true',
               lat: latitude.toString(),
               lon: longitude.toString(),
-              format: 'json',
-              addressdetails: '1',
-              'accept-language': 'en'
-            })
+            }).toString()
           )
 
           const data = response.ok ? await response.json() : null

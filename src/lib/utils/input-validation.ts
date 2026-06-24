@@ -79,6 +79,25 @@ export const schemas = {
 }
 
 /**
+ * Validate a value is a safe http(s) URL and return it (trimmed), or null.
+ * Use at write boundaries before storing user-supplied URLs that later get
+ * rendered into `<img src>` / `<a href>` — blocks `javascript:`, `data:`,
+ * `file:` and other non-http schemes.
+ */
+export function safeHttpUrl(value: unknown, maxLen = 1000): string | null {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  if (!trimmed || trimmed.length > maxLen) return null
+  try {
+    const u = new URL(trimmed)
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null
+    return trimmed
+  } catch {
+    return null
+  }
+}
+
+/**
  * Validate file upload
  */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {

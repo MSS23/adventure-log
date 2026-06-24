@@ -8,6 +8,7 @@
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { safeInternalPath } from '@/lib/utils/safe-redirect'
 import { Loader2, MailCheck, Eye, EyeOff, Globe, Lock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -116,9 +117,7 @@ function SignupForm() {
           }
         }
 
-        const redirectTo = searchParams.get('redirectTo')
-        const target =
-          redirectTo && redirectTo.startsWith('/') ? redirectTo : '/dashboard'
+        const target = safeInternalPath(searchParams.get('redirectTo'), '/dashboard')
         router.push(target)
         return
       }

@@ -6,6 +6,7 @@ import { LocationSuggestions } from './LocationSuggestions'
 import { Button } from '@/components/ui/button'
 import { useSmartLocation } from '@/lib/hooks/useSmartLocation'
 import { cn } from '@/lib/utils'
+import { apiFetch } from '@/lib/api/client'
 import { log } from '@/lib/utils/logger'
 
 interface SmartLocationInputProps {
@@ -59,11 +60,13 @@ export function SmartLocationInput({
 
           // Reverse geocode
           try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-              {
-                headers: { 'User-Agent': 'AdventureLog/1.0' }
-              }
+            const response = await apiFetch(
+              `/api/geocode?` +
+              new URLSearchParams({
+                reverse: 'true',
+                lat: String(latitude),
+                lon: String(longitude),
+              }).toString()
             )
             const data = await response.json()
             const address = data.address || {}

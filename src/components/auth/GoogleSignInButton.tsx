@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { safeInternalPath } from '@/lib/utils/safe-redirect'
 import { Button } from '@/components/ui/button'
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -50,7 +51,7 @@ export function GoogleSignInButton({ next, disabled = false }: GoogleSignInButto
     setLoading(true)
     try {
       const supabase = createClient()
-      const safeNext = next && next.startsWith('/') ? next : '/dashboard'
+      const safeNext = safeInternalPath(next, '/dashboard')
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

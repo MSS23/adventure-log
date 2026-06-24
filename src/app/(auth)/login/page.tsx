@@ -8,6 +8,7 @@
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { safeInternalPath } from '@/lib/utils/safe-redirect'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
@@ -40,9 +41,7 @@ function LoginForm() {
         return
       }
 
-      const redirectTo = searchParams.get('redirectTo')
-      const target =
-        redirectTo && redirectTo.startsWith('/') ? redirectTo : '/dashboard'
+      const target = safeInternalPath(searchParams.get('redirectTo'), '/dashboard')
       router.push(target)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')

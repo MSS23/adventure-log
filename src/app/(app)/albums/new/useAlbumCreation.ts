@@ -15,6 +15,7 @@ import { type UploadedPhoto } from '@/components/albums/CoverPhotoSelector'
 import { useAchievementNotifications } from '@/components/achievements/AchievementProvider'
 import { type Season, convertYearSeasonToDateRange } from '@/components/albums/YearSeasonSelector'
 import { sanitizeText, validateImageFile } from '@/lib/utils/input-validation'
+import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 import { takePhoto, selectFromGallery } from '@/lib/capacitor/camera'
 
 const albumSchema = z.object({
@@ -424,12 +425,15 @@ export function useAlbumCreation() {
 
         for (let i = 0; i < photos.length; i++) {
           const photo = photos[i]
-          const fileExt = photo.file.name.split('.').pop()
+          // Strip GPS/EXIF before upload — buckets are public, so the original
+          // bytes (with home coordinates baked in) must never reach storage.
+          const preparedFile = await prepareImageForUpload(photo.file)
+          const fileExt = preparedFile.name.split('.').pop()
           const fileName = `${album.id}/${Date.now()}-${i}.${fileExt}`
 
           const { error: uploadError } = await supabase.storage
             .from('photos')
-            .upload(fileName, photo.file, {
+            .upload(fileName, preparedFile, {
               cacheControl: '3600',
               upsert: false
             })

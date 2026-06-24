@@ -38,6 +38,17 @@ BEGIN
     dob := NULL;
   END;
 
+  -- Server-side backstop for the 18+ gate. The signup UI blocks under-18s
+  -- client-side, but a crafted call straight to supabase.auth.signUp could
+  -- bypass that. If a DOB was supplied and it is under 18, refuse to provision
+  -- the profile — raising here rolls back the auth.users insert, so the signup
+  -- fails. OAuth signups don't collect a DOB (dob IS NULL) and are not blocked
+  -- at this layer; their age is gated at the client.
+  IF dob IS NOT NULL AND dob > (CURRENT_DATE - INTERVAL '18 years') THEN
+    RAISE EXCEPTION 'You must be at least 18 years old to use this service'
+      USING ERRCODE = 'check_violation';
+  END IF;
+
   INSERT INTO public.users (id, email, username, display_name, privacy_level, date_of_birth, created_at, updated_at)
   VALUES (
     NEW.id,

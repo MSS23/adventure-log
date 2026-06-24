@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 import type { UploadQueueItem } from '@/types/database'
 
 interface QueueAlbumUpload {
@@ -173,11 +174,15 @@ export function useOfflineSync() {
 
       const photoIds: string[] = []
       for (const photo of storedData.photos) {
-        const fileName = `${album.id}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`
+        // Strip GPS/EXIF before upload — the public bucket must never receive
+        // original bytes with embedded home coordinates.
+        const preparedFile = await prepareImageForUpload(photo.file)
+        const ext = preparedFile.name.split('.').pop() || 'jpg'
+        const fileName = `${album.id}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`
 
         const { error: uploadError } = await supabase.storage
           .from('photos')
-          .upload(fileName, photo.file)
+          .upload(fileName, preparedFile)
 
         if (uploadError) throw uploadError
 

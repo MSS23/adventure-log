@@ -14,6 +14,7 @@ import {
   type AlbumListResponse
 } from '@/types/database'
 import { isValidCountryCode } from '@/lib/countries'
+import { sanitizeText } from '@/lib/utils/input-validation'
 
 /**
  * Revalidate all pages that display album data.
@@ -37,9 +38,11 @@ function revalidateAlbumPaths(albumId?: string) {
 const createAlbumSchema = z.object({
   title: z.string()
     .min(1, 'Album title is required')
-    .max(200, 'Album title must be less than 200 characters'),
+    .max(200, 'Album title must be less than 200 characters')
+    .transform(sanitizeText),
   caption: z.string()
     .max(2000, 'Caption must be less than 2000 characters')
+    .transform(sanitizeText)
     .optional(),
   privacy: z.enum(['public', 'friends', 'private']).default('private'),
   country_code: z.string()
@@ -53,9 +56,11 @@ const updateAlbumSchema = z.object({
   title: z.string()
     .min(1, 'Album title is required')
     .max(200, 'Album title must be less than 200 characters')
+    .transform(sanitizeText)
     .optional(),
   caption: z.string()
     .max(2000, 'Caption must be less than 2000 characters')
+    .transform(sanitizeText)
     .optional(),
   privacy: z.enum(['public', 'friends', 'private']).optional(),
   country_code: z.string()
@@ -118,7 +123,11 @@ export async function createAlbumWithPhotos(
         user_id: userId,
         title: validatedAlbumInput.title,
         caption: validatedAlbumInput.caption || null,
+        // `privacy` and `visibility` must stay in lockstep: RLS read policies
+        // gate on `visibility`, so writing only `privacy` would leave a
+        // "private" album at the column's 'public' default and leak it.
         privacy: validatedAlbumInput.privacy,
+        visibility: validatedAlbumInput.privacy,
         country_code: validatedAlbumInput.country_code || null
       })
       .select('*')
@@ -216,7 +225,11 @@ export async function updateAlbum(input: UpdateAlbumRequest): Promise<{ success:
     const updateData: Record<string, unknown> = {}
     if (validatedInput.title !== undefined) updateData.title = validatedInput.title
     if (validatedInput.caption !== undefined) updateData.caption = validatedInput.caption
-    if (validatedInput.privacy !== undefined) updateData.privacy = validatedInput.privacy
+    // Keep `privacy` and `visibility` in lockstep — RLS reads `visibility`.
+    if (validatedInput.privacy !== undefined) {
+      updateData.privacy = validatedInput.privacy
+      updateData.visibility = validatedInput.privacy
+    }
     if (validatedInput.country_code !== undefined) updateData.country_code = validatedInput.country_code
     if (validatedInput.cover_image_url !== undefined) updateData.cover_image_url = validatedInput.cover_image_url
 

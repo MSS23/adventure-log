@@ -17,8 +17,94 @@ import { verifyBearer } from '@/lib/utils/bearer'
  * - Hourly: Stories cleanup only (job=stories)
  */
 
-const ALLOWED_JOBS = ['all', 'stories', 'notifications', 'activity_feed', 'storage'] as const
+const ALLOWED_JOBS = ['all', 'stories', 'notifications', 'activity_feed', 'storage', 'drain_storage'] as const
 type CleanupJob = typeof ALLOWED_JOBS[number]
+
+interface QueueRow {
+  id: string
+  storage_bucket: string
+  file_path: string
+}
+
+/**
+ * Convert a queued value into a bucket-relative storage path. Photo paths are
+ * already relative; avatar/story values may be full public URLs, so strip the
+ * `…/object/public/<bucket>/` prefix.
+ */
+function toStoragePath(bucket: string, raw: string): string | null {
+  if (!raw) return null
+  if (!/^https?:\/\//i.test(raw)) return raw.replace(/^\/+/, '')
+  for (const marker of [`/storage/v1/object/public/${bucket}/`, `/public/${bucket}/`, `/${bucket}/`]) {
+    const idx = raw.indexOf(marker)
+    if (idx >= 0) return raw.slice(idx + marker.length)
+  }
+  return null
+}
+
+/**
+ * Drain storage_cleanup_queue: actually remove the orphaned files (deleted
+ * users' photos/avatars, expired story media) from storage and mark the rows
+ * done. This is the step that makes account-deletion erasure real.
+ *
+ * Typed as `any` because `storage_cleanup_queue` isn't in the generated DB
+ * types (same reason the `.rpc()` calls above are untyped).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function drainStorageQueue(db: any) {
+  const { data: rows, error } = (await db
+    .from('storage_cleanup_queue')
+    .select('id, storage_bucket, file_path')
+    .eq('status', 'pending')
+    .limit(1000)) as { data: QueueRow[] | null; error: { message: string } | null }
+
+  if (error) throw error
+  if (!rows || rows.length === 0) return { processed: 0, removed: 0, failed: 0 }
+
+  const byBucket = new Map<string, Array<{ id: string; path: string | null }>>()
+  for (const r of rows) {
+    const path = toStoragePath(r.storage_bucket, r.file_path)
+    const list = byBucket.get(r.storage_bucket) ?? []
+    list.push({ id: r.id, path })
+    byBucket.set(r.storage_bucket, list)
+  }
+
+  const completedIds: string[] = []
+  const failed: Array<{ id: string; msg: string }> = []
+  const nowIso = new Date().toISOString()
+
+  for (const [bucket, items] of byBucket) {
+    for (const it of items.filter((i) => !i.path)) {
+      failed.push({ id: it.id, msg: 'Unresolvable storage path' })
+    }
+    const valid = items.filter((i) => i.path) as Array<{ id: string; path: string }>
+    if (valid.length === 0) continue
+
+    const { error: rmError } = await db.storage
+      .from(bucket)
+      .remove(valid.map((v) => v.path))
+
+    if (rmError) {
+      for (const v of valid) failed.push({ id: v.id, msg: String(rmError.message).slice(0, 500) })
+    } else {
+      for (const v of valid) completedIds.push(v.id)
+    }
+  }
+
+  if (completedIds.length > 0) {
+    await db
+      .from('storage_cleanup_queue')
+      .update({ status: 'completed', processed_at: nowIso })
+      .in('id', completedIds)
+  }
+  for (const f of failed) {
+    await db
+      .from('storage_cleanup_queue')
+      .update({ status: 'failed', error_message: f.msg, processed_at: nowIso })
+      .eq('id', f.id)
+  }
+
+  return { processed: rows.length, removed: completedIds.length, failed: failed.length }
+}
 
 export async function POST(request: NextRequest) {
   // Verify authorization. Secret env var: CRON_SECRET.
@@ -75,10 +161,12 @@ export async function POST(request: NextRequest) {
 
     switch (job) {
       case 'all': {
-        // Run all cleanups
+        // Run all cleanups (queues orphaned storage first), then actually
+        // delete the queued files from storage.
         const { data, error } = await supabaseAdmin.rpc('run_all_cleanups')
         if (error) throw error
-        results = { cleanups: data }
+        const storageDrain = await drainStorageQueue(supabaseAdmin)
+        results = { cleanups: data, storage_drain: storageDrain }
         break
       }
 
@@ -107,10 +195,17 @@ export async function POST(request: NextRequest) {
       }
 
       case 'storage': {
-        // Queue orphaned storage files
+        // Queue orphaned storage files, then drain them.
         const { data, error } = await supabaseAdmin.rpc('queue_orphaned_storage_cleanup')
         if (error) throw error
-        results = { storage_queued: data }
+        const storageDrain = await drainStorageQueue(supabaseAdmin)
+        results = { storage_queued: data, storage_drain: storageDrain }
+        break
+      }
+
+      case 'drain_storage': {
+        // Just delete already-queued files (no re-queue).
+        results = { storage_drain: await drainStorageQueue(supabaseAdmin) }
         break
       }
     }

@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/button'
 
 export default function ResetPasswordUpdatePage() {
@@ -125,9 +125,8 @@ export default function ResetPasswordUpdatePage() {
                   <label htmlFor="password" className="block text-sm font-medium text-foreground">
                     New password
                   </label>
-                  <Input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     autoComplete="new-password"
                     required
                     value={password}
@@ -141,9 +140,8 @@ export default function ResetPasswordUpdatePage() {
                   <label htmlFor="confirm" className="block text-sm font-medium text-foreground">
                     Confirm password
                   </label>
-                  <Input
+                  <PasswordInput
                     id="confirm"
-                    type="password"
                     autoComplete="new-password"
                     required
                     value={confirm}

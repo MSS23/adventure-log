@@ -9,10 +9,11 @@ import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { safeInternalPath } from '@/lib/utils/safe-redirect'
-import { Loader2, MailCheck, Eye, EyeOff, Globe, Lock } from 'lucide-react'
+import { Loader2, MailCheck, Globe, Lock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/button'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { calculateAge, MIN_AGE } from '@/lib/utils/age'
@@ -35,7 +36,6 @@ function SignupForm() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [visibility, setVisibility] = useState<AccountVisibility>('public')
   const [dob, setDob] = useState('')
   const [ageConfirmed, setAgeConfirmed] = useState(false)
@@ -196,32 +196,15 @@ function SignupForm() {
             >
               Password
             </label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                aria-pressed={showPassword}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-xl"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" strokeWidth={1.8} />
-                ) : (
-                  <Eye className="h-4 w-4" strokeWidth={1.8} />
-                )}
-              </button>
-            </div>
+            <PasswordInput
+              id="password"
+              autoComplete="new-password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+            />
           </div>
 
           <div className="space-y-1.5">

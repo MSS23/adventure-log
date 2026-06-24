@@ -18,6 +18,7 @@ import QRCode from 'qrcode'
 import { StreakBadge } from '@/components/profile/StreakBadge'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { PassportScanner } from '@/components/passport/PassportScanner'
+import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
 
 // ---------------------------------------------------------------------------
 // Country-to-continent mapping
@@ -640,6 +641,19 @@ export default function TravelPassportPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* ── Countries Visited map ── */}
+      {data.countryCodes.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+          className="mb-6"
+        >
+          <p className="al-eyebrow mb-3 px-1">Your World</p>
+          <PassportWorldMap albums={data.albums} countryNames={countryNames} />
+        </motion.div>
+      )}
 
       {/* ── Travel Personality ── */}
       <motion.div

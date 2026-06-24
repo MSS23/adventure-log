@@ -326,9 +326,7 @@ export function useBulkImport() {
           user_id: user.id,
           title: group.name || 'Imported Album',
           caption: `Imported ${group.photos.length} photos`,
-          // Set BOTH columns — RLS reads `visibility`; writing only `privacy`
-          // would leave this "private" import readable by anyone.
-          privacy: 'private',
+          // Album privacy is stored in the `visibility` column (RLS reads it).
           visibility: 'private',
         }
 

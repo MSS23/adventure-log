@@ -123,10 +123,8 @@ export async function createAlbumWithPhotos(
         user_id: userId,
         title: validatedAlbumInput.title,
         caption: validatedAlbumInput.caption || null,
-        // `privacy` and `visibility` must stay in lockstep: RLS read policies
-        // gate on `visibility`, so writing only `privacy` would leave a
-        // "private" album at the column's 'public' default and leak it.
-        privacy: validatedAlbumInput.privacy,
+        // Album privacy is stored in the `visibility` column (which RLS reads).
+        // The request field is named `privacy`; map it onto `visibility`.
         visibility: validatedAlbumInput.privacy,
         country_code: validatedAlbumInput.country_code || null
       })
@@ -225,9 +223,9 @@ export async function updateAlbum(input: UpdateAlbumRequest): Promise<{ success:
     const updateData: Record<string, unknown> = {}
     if (validatedInput.title !== undefined) updateData.title = validatedInput.title
     if (validatedInput.caption !== undefined) updateData.caption = validatedInput.caption
-    // Keep `privacy` and `visibility` in lockstep — RLS reads `visibility`.
+    // Album privacy is stored in the `visibility` column (RLS reads it); the
+    // request field is named `privacy`.
     if (validatedInput.privacy !== undefined) {
-      updateData.privacy = validatedInput.privacy
       updateData.visibility = validatedInput.privacy
     }
     if (validatedInput.country_code !== undefined) updateData.country_code = validatedInput.country_code

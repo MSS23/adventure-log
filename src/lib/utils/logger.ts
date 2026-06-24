@@ -200,7 +200,11 @@ class Logger {
 
   /**
    * Whether an error is expected infra noise we deliberately don't report
-   * externally. Currently: Postgres statement timeouts (code 57014).
+   * externally. Currently:
+   * - Postgres statement timeouts (code 57014)
+   * - Service-worker registration rejections (non-actionable progressive-
+   *   enhancement failures: private mode, storage-blocked sessions, in-app
+   *   WebViews, extensions). See PWAManager.registerServiceWorker.
    */
   private isExpectedNoise(error: unknown, message: string): boolean {
     const code =
@@ -209,7 +213,9 @@ class Logger {
         : ''
     if (code === '57014') return true
     const text = `${message} ${error && typeof error === 'object' && 'message' in error ? String((error as { message?: unknown }).message) : ''}`.toLowerCase()
-    return text.includes('canceling statement due to statement timeout')
+    if (text.includes('canceling statement due to statement timeout')) return true
+    if (text.includes('service worker registration failed')) return true
+    return false
   }
 
   private async sendToExternalService(

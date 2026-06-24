@@ -140,7 +140,13 @@ export class PWAManager {
 
       return registration
     } catch (error) {
-      log.error('Service Worker registration failed', {
+      // The SW is a progressive enhancement. register() rejects with a generic
+      // "Rejected"/SecurityError in plenty of normal contexts — private-mode
+      // sessions, storage-blocked browsers, in-app WebViews, some extensions —
+      // none of which are actionable for us. Log at WARN (dev console only; the
+      // logger filters this out of Sentry/error_events as expected noise) and
+      // degrade gracefully rather than reporting a non-bug as an error.
+      log.warn('Service Worker registration failed', {
         component: 'PWAManager',
         action: 'register-sw'
       }, error)

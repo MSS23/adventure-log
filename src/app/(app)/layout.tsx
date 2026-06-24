@@ -8,6 +8,7 @@ import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { KeyboardShortcuts } from '@/components/layout/KeyboardShortcuts'
+import { LegalFooter } from '@/components/layout/LegalFooter'
 import { PageTransition } from '@/components/animations/PageTransition'
 import { PWAProvider } from '@/components/pwa'
 import { UnreadCountProvider } from '@/components/activity/UnreadCountProvider'
@@ -70,6 +71,7 @@ export default function AppLayout({
               <PageTransition>
                 {children}
               </PageTransition>
+              <LegalFooter />
             </div>
           </main>
 

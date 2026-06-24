@@ -10,6 +10,7 @@ import { MessageCircle, Trash2, Send } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { formatDistanceToNow } from 'date-fns'
 import { UserLink, UserAvatarLink } from './UserLink'
+import { UserActionsMenu } from './UserActionsMenu'
 import { toast } from 'sonner'
 import { MentionInput } from '@/components/mentions/MentionInput'
 import { useMentions } from '@/lib/hooks/useMentions'
@@ -222,6 +223,18 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
+                      )}
+
+                      {/* Report / block — for everyone else's comments. The menu
+                          hides itself for your own content and logged-out users. */}
+                      {!isOwner && (
+                        <UserActionsMenu
+                          userId={comment.user_id}
+                          username={commentUser?.username || 'user'}
+                          targetType="comment"
+                          targetId={comment.id}
+                          className="shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                        />
                       )}
                     </motion.div>
                   )

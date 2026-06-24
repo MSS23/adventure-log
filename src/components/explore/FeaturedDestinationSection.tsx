@@ -246,6 +246,21 @@ export function FeaturedDestinationSection({ className }: FeaturedDestinationSec
               </div>
             </div>
           )}
+
+          {/* Attribution when we're showing a stock fallback image. */}
+          {destination.imageUrl.includes('unsplash.com') && (
+            <div className="absolute bottom-2 right-3 text-[10px] text-white/70 drop-shadow">
+              Photo via{' '}
+              <a
+                href="https://unsplash.com?utm_source=adventure_log&utm_medium=referral"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Unsplash
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -16,11 +16,10 @@ import {
   CalendarDays,
   ArrowRight,
   Plane,
-  Flag,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { ReportDialog } from '@/components/social/ReportDialog'
+import { UserActionsMenu } from '@/components/social/UserActionsMenu'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import Image from 'next/image'
@@ -90,7 +89,6 @@ export function PublicProfileContent({
   const isPrivate = user.privacy_level !== 'public'
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedEmbed, setCopiedEmbed] = useState(false)
-  const [reportOpen, setReportOpen] = useState(false)
 
   const profileUrl =
     typeof window !== 'undefined'
@@ -506,24 +504,12 @@ export function PublicProfileContent({
           </motion.div>
         )}
 
-        {/* ───────── Report User ───────── */}
+        {/* ───────── Report / Block User ───────── */}
+        {/* UserActionsMenu provides both Report and Block, and hides itself on
+            your own profile (and for logged-out viewers). */}
         <div className="mb-10 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setReportOpen(true)}
-            className="cursor-pointer flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors duration-200 py-2 px-3 rounded-xl hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none min-h-[44px]"
-          >
-            <Flag className="h-3 w-3" />
-            Report this profile
-          </button>
+          <UserActionsMenu userId={user.id} username={user.username} />
         </div>
-        <ReportDialog
-          open={reportOpen}
-          onOpenChange={setReportOpen}
-          targetType="user"
-          targetId={user.id}
-          targetUserId={user.id}
-        />
 
         {/* ───────── Footer ───────── */}
         <motion.footer

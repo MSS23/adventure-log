@@ -340,6 +340,19 @@ export function TrendingDestinations() {
           <ChevronRight className="h-5 w-5" />
         </button>
       </div>
+
+      {/* Some cards fall back to stock destination imagery — credit Unsplash. */}
+      <p className="mt-2 text-[10px] text-muted-foreground/50">
+        Some destination photos via{' '}
+        <a
+          href="https://unsplash.com?utm_source=adventure_log&utm_medium=referral"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline"
+        >
+          Unsplash
+        </a>
+      </p>
     </div>
   )
 }

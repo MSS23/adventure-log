@@ -595,10 +595,10 @@ export function useSearchState({ initialQuery = '', onWeatherLocationDetected }:
       if (onWeatherLocationDetected && albumResults.length > 0) {
         // Find first album with lat/lng
         const albumWithLocation = albumResults.find(album =>
-          album.latitude && album.longitude
+          album.latitude != null && album.longitude != null
         )
 
-        if (albumWithLocation && albumWithLocation.latitude && albumWithLocation.longitude) {
+        if (albumWithLocation && albumWithLocation.latitude != null && albumWithLocation.longitude != null) {
           onWeatherLocationDetected(
             albumWithLocation.latitude,
             albumWithLocation.longitude,

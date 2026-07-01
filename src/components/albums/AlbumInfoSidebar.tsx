@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayInitial } from '@/lib/utils/display-name'
 import { format } from 'date-fns'
+import { formatCount } from '@/components/ui/animated-count'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -30,12 +31,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-
-function formatViewCount(count: number): string {
-  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
-  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
-  return count.toString()
-}
 
 interface AlbumInfoSidebarProps {
   album: Album
@@ -310,7 +305,7 @@ export function AlbumInfoSidebar({
           <div className="flex items-center justify-center gap-1">
             <Eye className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />
             <p className="text-xl font-bold text-stone-900 dark:text-stone-100">
-              {formatViewCount(album.view_count || 0)}
+              {formatCount(album.view_count || 0)}
             </p>
           </div>
           <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Views</p>

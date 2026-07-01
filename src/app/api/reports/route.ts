@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
+import { sanitizeText } from '@/lib/utils/input-validation'
 import type { ReportReason, ReportTargetType } from '@/types/database'
 
 const VALID_REASONS: ReportReason[] = ['spam', 'harassment', 'inappropriate', 'copyright', 'misinformation', 'other']
 const VALID_TARGET_TYPES: ReportTargetType[] = ['user', 'album', 'photo', 'comment']
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /**
  * POST /api/reports
@@ -58,15 +60,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // target_id / reported_user_id must be UUID strings — reject anything else
+    // before it reaches the query (a non-string produces a malformed filter/500).
+    if (typeof target_id !== 'string' || !UUID_RE.test(target_id)) {
+      return NextResponse.json({ error: 'Invalid target_id' }, { status: 400 })
+    }
+    if (reported_user_id !== undefined && reported_user_id !== null &&
+        (typeof reported_user_id !== 'string' || !UUID_RE.test(reported_user_id))) {
+      return NextResponse.json({ error: 'Invalid reported_user_id' }, { status: 400 })
+    }
+
     // Cannot report yourself
     if (reported_user_id === userId) {
       return NextResponse.json({ error: 'Cannot report yourself' }, { status: 400 })
     }
 
-    // Validate description length
+    // Validate description length, then sanitize (it's shown to moderators —
+    // strip any HTML so a report can't stored-XSS the moderation UI).
+    if (description !== undefined && typeof description !== 'string') {
+      return NextResponse.json({ error: 'Invalid description' }, { status: 400 })
+    }
     if (description && description.length > 1000) {
       return NextResponse.json({ error: 'Description must be 1000 characters or less' }, { status: 400 })
     }
+    const cleanDescription = description ? sanitizeText(description) : null
 
     // Prevent duplicate reports from the same user for the same target
     const { data: existingReport } = await supabase
@@ -94,7 +111,7 @@ export async function POST(request: NextRequest) {
         target_type,
         target_id,
         reason,
-        description: description || null,
+        description: cleanDescription,
         status: 'pending',
       })
       .select()

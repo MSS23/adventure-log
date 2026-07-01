@@ -6,6 +6,8 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { log, toError } from '@/lib/utils/logger'
 import { areFriends, type VisibilityLevel } from '@/lib/utils/privacy'
 import { formatLocationLabel } from '@/lib/utils/country'
+import { parseLocalDate } from '@/lib/utils/travel-date'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface TravelLocation {
   id: string
@@ -115,8 +117,9 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       data?.forEach(album => {
         // Prioritize date_start over created_at for travel year
         const dateField = album.date_start || album.created_at
-        if (dateField) {
-          const year = new Date(dateField).getFullYear()
+        const parsedYear = parseLocalDate(dateField)?.getFullYear()
+        if (parsedYear !== undefined) {
+          const year = parsedYear
 
           // Track unique locations per year (by location name or coordinates)
           if (!yearLocationCounts.has(year)) {
@@ -217,9 +220,8 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
 
         // Filter by year
         const dateField = album.date_start || album.created_at
-        if (!dateField) continue
-        const albumYear = new Date(dateField).getFullYear()
-        if (albumYear !== year) continue
+        const albumYear = parseLocalDate(dateField)?.getFullYear()
+        if (albumYear === undefined || albumYear !== year) continue
 
         // Privacy check - done locally, no database calls
         const visibility = (album.visibility || 'public') as VisibilityLevel
@@ -319,40 +321,20 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         // First, try the cover_photo_url field
         const coverPhotoPath = item.cover_photo_url
         if (coverPhotoPath) {
-          // If it's already a full URL (external like Unsplash), use it directly
-          if (coverPhotoPath.startsWith('http')) {
-            coverPhotoUrl = coverPhotoPath
-          } else {
-            // Convert storage file path to public URL
-            const { data } = supabase.storage.from('photos').getPublicUrl(coverPhotoPath)
-            if (data.publicUrl && data.publicUrl.startsWith('http')) {
-              coverPhotoUrl = data.publicUrl
-            }
-          }
+          // getPhotoUrl handles full-URL passthrough + storage conversion + validation
+          coverPhotoUrl = getPhotoUrl(coverPhotoPath)
         }
 
         // Fallback to first photo if no cover photo is set
         if (!coverPhotoUrl && item.photos && item.photos.length > 0 && item.photos[0].file_path) {
-          const filePath = item.photos[0].file_path
-          // If it's already a full URL (external like Unsplash), use it directly
-          if (filePath.startsWith('http')) {
-            coverPhotoUrl = filePath
-          } else {
-            const { data } = supabase.storage.from('photos').getPublicUrl(filePath)
-            if (data.publicUrl && data.publicUrl.startsWith('http')) {
-              coverPhotoUrl = data.publicUrl
-            }
-          }
+          coverPhotoUrl = getPhotoUrl(item.photos[0].file_path)
         }
 
         // Get favorite photo URLs if available
         let favoritePhotoUrls: string[] | undefined = undefined
         if (item.favorite_photo_urls && Array.isArray(item.favorite_photo_urls)) {
           favoritePhotoUrls = item.favorite_photo_urls
-            .map(path => {
-              const { data } = supabase.storage.from('photos').getPublicUrl(path)
-              return (data.publicUrl && data.publicUrl.startsWith('http')) ? data.publicUrl : ''
-            })
+            .map(path => getPhotoUrl(path) || '')
             .filter(url => url) // Filter out invalid URLs
         }
 
@@ -370,9 +352,8 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         // Create photo objects - convert file paths to public URLs
         const photoData: Photo[] = Array.isArray(item.photos)
           ? item.photos.slice(0, 5).map(photo => {
-              const { data } = supabase.storage.from('photos').getPublicUrl(photo.file_path)
-              // Validate the URL before using it
-              const photoUrl = (data.publicUrl && data.publicUrl.startsWith('http')) ? data.publicUrl : ''
+              // getPhotoUrl handles storage conversion + validation
+              const photoUrl = getPhotoUrl(photo.file_path) || ''
               return {
                 id: photo.id,
                 url: photoUrl,

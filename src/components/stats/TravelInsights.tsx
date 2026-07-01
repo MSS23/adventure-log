@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { getContinent } from '@/lib/utils/continents'
 import { Globe, Camera, MapPin, Plane } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -124,10 +125,10 @@ export function TravelInsights() {
 
       // Calculate total distance traveled
       let totalDistance = 0
-      const locationsWithCoords = albums.filter(a => a.latitude && a.longitude)
+      const locationsWithCoords = albums.filter(a => a.latitude != null && a.longitude != null)
 
       // If user has set home location, calculate distance from home to each destination
-      if (profile?.home_latitude && profile?.home_longitude && locationsWithCoords.length > 0) {
+      if (profile?.home_latitude != null && profile?.home_longitude != null && locationsWithCoords.length > 0) {
         locationsWithCoords.forEach(location => {
           totalDistance += calculateDistance(
             profile.home_latitude!,
@@ -174,16 +175,7 @@ export function TravelInsights() {
   }
 
   function detectContinent(countryCode: string): string {
-    // Simplified continent mapping
-    const continentMap: Record<string, string> = {
-      US: 'North America', CA: 'North America', MX: 'North America',
-      GB: 'Europe', FR: 'Europe', DE: 'Europe', IT: 'Europe', ES: 'Europe', PT: 'Portugal', NL: 'Europe',
-      JP: 'Asia', CN: 'Asia', IN: 'Asia', TH: 'Asia', KR: 'Asia', SG: 'Asia', VN: 'Asia',
-      BR: 'South America', AR: 'South America', CL: 'South America', PE: 'South America',
-      AU: 'Oceania', NZ: 'Oceania',
-      EG: 'Africa', ZA: 'Africa', KE: 'Africa', MA: 'Africa', TN: 'Africa'
-    }
-    return continentMap[countryCode] || 'Other'
+    return getContinent(countryCode) || 'Other'
   }
 
   if (loading) {
@@ -199,7 +191,7 @@ export function TravelInsights() {
     )
   }
 
-  const hasHomeLocation = profile?.home_latitude && profile?.home_longitude
+  const hasHomeLocation = profile?.home_latitude != null && profile?.home_longitude != null
   const distanceLabel = hasHomeLocation ? 'From Home' : 'Est. Distance'
 
   const insights = [

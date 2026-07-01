@@ -44,14 +44,6 @@ export interface FeedAlbum {
   }>
 }
 
-export function getFlag(code: string): string {
-  return code
-    .toUpperCase()
-    .split('')
-    .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))
-    .join('')
-}
-
 const ActionButton = memo(
   ({
     onClick,

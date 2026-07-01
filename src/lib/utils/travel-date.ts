@@ -14,21 +14,47 @@ export type TravelDateView = 'precise' | 'fuzzy'
 type Season = 'Winter' | 'Spring' | 'Summer' | 'Autumn'
 
 /**
- * Coerce the supported date inputs into a valid `Date`, or `null` when the
- * input is missing or cannot be parsed.
+ * Parse a date input into a `Date`, treating date-only strings as LOCAL
+ * calendar dates.
+ *
+ * Album travel dates (`date_start`/`date_end`) are Postgres `DATE` columns, so
+ * PostgREST returns them as `"YYYY-MM-DD"`. `new Date("2025-01-01")` parses that
+ * as UTC midnight, which in any timezone behind UTC rolls back to the previous
+ * day/month/year — shifting displayed dates and year/month bucketing. Parsing
+ * the components into a local `Date` keeps the calendar date the user entered.
+ *
+ * Full timestamps (e.g. `created_at`, ISO strings with a time component) and
+ * `Date` instances are passed through to the native parser unchanged.
+ *
+ * Returns `null` when the input is missing or cannot be parsed.
  */
-function toValidDate(date: string | Date | null | undefined): Date | null {
+export function parseLocalDate(date: string | Date | null | undefined): Date | null {
   if (date === null || date === undefined) {
     return null
   }
 
-  const parsed = date instanceof Date ? date : new Date(date)
-
-  if (Number.isNaN(parsed.getTime())) {
-    return null
+  if (date instanceof Date) {
+    return Number.isNaN(date.getTime()) ? null : date
   }
 
-  return parsed
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date.trim())
+  if (dateOnly) {
+    const [, y, m, d] = dateOnly
+    const local = new Date(Number(y), Number(m) - 1, Number(d))
+    return Number.isNaN(local.getTime()) ? null : local
+  }
+
+  const parsed = new Date(date)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+/**
+ * Coerce the supported date inputs into a valid `Date`, or `null` when the
+ * input is missing or cannot be parsed. Date-only strings are treated as local
+ * calendar dates (see {@link parseLocalDate}).
+ */
+function toValidDate(date: string | Date | null | undefined): Date | null {
+  return parseLocalDate(date)
 }
 
 /**

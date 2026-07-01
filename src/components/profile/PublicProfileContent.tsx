@@ -22,23 +22,11 @@ import { Button } from '@/components/ui/button'
 import { UserActionsMenu } from '@/components/social/UserActionsMenu'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getFlagEmoji } from '@/lib/utils/country'
+import { getDisplayInitial } from '@/lib/utils/display-name'
+import { formatDistanceKm } from '@/lib/utils/geoCalculations'
 import Image from 'next/image'
 import Link from 'next/link'
-
-function countryCodeToFlag(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split('')
-    .map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
-  return String.fromCodePoint(...codePoints)
-}
-
-function formatDistance(km: number): string {
-  if (km >= 1000) {
-    return `${(km / 1000).toFixed(1)}k`
-  }
-  return km.toLocaleString()
-}
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return ''
@@ -136,7 +124,7 @@ export function PublicProfileContent({
     { icon: Camera, value: albums.length, label: 'Adventures' },
     { icon: Globe, value: countryCodes.length, label: 'Countries' },
     { icon: Users, value: followerCount, label: 'Followers' },
-    { icon: Plane, value: formatDistance(totalDistance), label: 'km traveled' },
+    { icon: Plane, value: formatDistanceKm(totalDistance), label: 'traveled' },
   ]
 
   return (
@@ -170,7 +158,7 @@ export function PublicProfileContent({
                   alt={displayName}
                 />
                 <AvatarFallback className="bg-accent text-3xl text-accent-foreground font-heading">
-                  {displayName.charAt(0).toUpperCase()}
+                  {getDisplayInitial(user.display_name, user.username)}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -255,7 +243,7 @@ export function PublicProfileContent({
                   transition={{ duration: 0.2, delay: 0.5 + i * 0.03 }}
                   title={code}
                 >
-                  <span className="text-lg leading-none">{countryCodeToFlag(code)}</span>
+                  <span className="text-lg leading-none">{getFlagEmoji(code)}</span>
                   <span className="font-medium">{code}</span>
                 </motion.span>
               ))}
@@ -352,7 +340,7 @@ export function PublicProfileContent({
                           <div className="flex items-center gap-1.5 text-muted-foreground text-sm min-w-0">
                             {album.country_code && (
                               <span className="text-base leading-none flex-shrink-0">
-                                {countryCodeToFlag(album.country_code)}
+                                {getFlagEmoji(album.country_code)}
                               </span>
                             )}
                             {album.location_name && (

@@ -37,7 +37,7 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
   const [entry, setEntry] = useState<IntersectionObserverEntry | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
-  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
+  const handleIntersection = useCallback((entries: IntersectionObserverEntry[], observer: IntersectionObserver) => {
     const [entry] = entries
     setEntry(entry)
 
@@ -50,6 +50,12 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
       } else {
         setIsIntersecting(true)
         setHasIntersected(true)
+      }
+      // Once triggered, stop observing so we don't re-fire on every scroll
+      // crossing (the previous "disconnect" effect operated on a throwaway
+      // observer and never actually detached this one).
+      if (triggerOnce) {
+        observer.unobserve(entry.target)
       }
     } else {
       if (timeoutRef.current) {
@@ -90,16 +96,6 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>({
       observer.disconnect()
     }
   }, [handleIntersection, threshold, rootMargin, skip])
-
-  // Stop observing after first intersection if triggerOnce is true
-  useEffect(() => {
-    if (triggerOnce && hasIntersected && ref.current) {
-      const element = ref.current
-      // Create a new observer just to disconnect the element
-      const observer = new IntersectionObserver(() => {})
-      observer.unobserve(element)
-    }
-  }, [triggerOnce, hasIntersected])
 
   return {
     ref,

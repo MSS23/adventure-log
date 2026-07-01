@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { haversineKm } from '@/lib/utils/geoCalculations'
+import { countContinents } from '@/lib/utils/continents'
+import { getTravelPersonality } from '@/lib/utils/travel-personality'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 export interface WrappedData {
   year: number | 'all'
@@ -37,34 +41,6 @@ export interface WrappedData {
     /** ISO 2-letter country code, when known. */
     country?: string
   }[]
-}
-
-function getTravelPersonality(data: {
-  totalTrips: number
-  countryCodes: string[]
-  cities: string[]
-}): string {
-  const { totalTrips, countryCodes, cities } = data
-  if (countryCodes.length >= 10) return 'Globe Trotter'
-  if (totalTrips >= 12) return 'Perpetual Nomad'
-  if (cities.length >= 15) return 'City Explorer'
-  if (countryCodes.length >= 5) return 'World Wanderer'
-  if (totalTrips >= 6) return 'Adventure Seeker'
-  if (totalTrips >= 3) return 'Weekend Explorer'
-  if (totalTrips >= 1) return 'Rising Adventurer'
-  return 'Future Explorer'
-}
-
-/** Haversine distance in km */
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371
-  const dLat = (lat2 - lat1) * Math.PI / 180
-  const dLng = (lng2 - lng1) * Math.PI / 180
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
 const EMPTY_DATA: WrappedData = {
@@ -127,17 +103,15 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       // Filter by year if not "all" — check both date_start and created_at
       if (mode !== 'all') {
         albums = albums.filter(a => {
-          const dateStr = a.date_start || a.created_at
-          if (!dateStr) return false
-          const albumYear = new Date(dateStr).getFullYear()
-          return albumYear === mode
+          const parsed = parseLocalDate(a.date_start || a.created_at)
+          return parsed?.getFullYear() === mode
         })
       }
 
       // Sort by effective date (date_start preferred, fallback to created_at)
       albums.sort((a, b) => {
-        const dateA = new Date(a.date_start || a.created_at).getTime()
-        const dateB = new Date(b.date_start || b.created_at).getTime()
+        const dateA = parseLocalDate(a.date_start || a.created_at)?.getTime() ?? 0
+        const dateB = parseLocalDate(b.date_start || b.created_at)?.getTime() ?? 0
         return dateA - dateB
       })
 
@@ -158,19 +132,14 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
         const cities = [...new Set(albumList.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
 
         const months = albumList
-          .map(a => {
-            const dateStr = a.date_start || a.created_at
-            return dateStr ? new Date(dateStr).getMonth() + 1 : null
-          })
-          .filter((m): m is number => m !== null)
+          .map(a => parseLocalDate(a.date_start || a.created_at)?.getMonth())
+          .filter((m): m is number => m !== undefined)
+          .map(m => m + 1)
         const uniqueMonths = [...new Set(months)]
 
         const years = albumList
-          .map(a => {
-            const dateStr = a.date_start || a.created_at
-            return dateStr ? new Date(dateStr).getFullYear() : null
-          })
-          .filter((y): y is number => y !== null)
+          .map(a => parseLocalDate(a.date_start || a.created_at)?.getFullYear())
+          .filter((y): y is number => y !== undefined)
         const yearsActive = new Set(years).size
 
         const topAlbums = albumList
@@ -194,7 +163,7 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
         const locations: WrappedData['locations'] = []
         let totalDistanceKm = 0
         for (const a of albumList) {
-          if (a.latitude && a.longitude) {
+          if (a.latitude != null && a.longitude != null) {
             const dateStr = a.date_start || a.created_at || ''
             const loc: WrappedData['locations'][number] = {
               lat: a.latitude,
@@ -214,7 +183,12 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
           }
         }
 
-        const personality = getTravelPersonality({ totalTrips: albumList.length, countryCodes, cities })
+        const personality = getTravelPersonality({
+          countries: countryCodes.length,
+          trips: albumList.length,
+          cities: cities.length,
+          continents: countContinents(countryCodes),
+        }).type
 
         setData({
           year: mode,

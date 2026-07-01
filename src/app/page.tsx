@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getFlagEmoji } from '@/lib/utils/country'
 
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -63,10 +64,6 @@ const DEMO_ARCS = [
   { startLat: 52.52, startLng: 13.405, endLat: 55.7558, endLng: 37.6173 },
   { startLat: 41.3874, startLng: 2.1686, endLat: 30.0444, endLng: 31.2357 },
 ]
-
-function getFlag(code: string): string {
-  return code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
-}
 
 const FEATURES = [
   {
@@ -265,7 +262,7 @@ export default function HomePage() {
                   className="text-base sm:text-lg opacity-50 hover:opacity-100 transition-opacity cursor-default"
                   title={loc.name}
                 >
-                  {getFlag(loc.country)}
+                  {getFlagEmoji(loc.country)}
                 </span>
               ))}
             </div>
@@ -418,7 +415,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {['FR','IT','JP','US','AU','GB','DE','ES','TH','BR','KR','AE'].map(code => (
-                    <span key={code} role="img" aria-label={`${code} flag`} className="text-lg">{getFlag(code)}</span>
+                    <span key={code} role="img" aria-label={`${code} flag`} className="text-lg">{getFlagEmoji(code)}</span>
                   ))}
                 </div>
                 <div className="flex gap-2 flex-wrap">

@@ -38,6 +38,7 @@ import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { YouWereHereBadge } from '@/components/albums/YouWereHereBadge'
 import { AlbumQualityNudges } from '@/components/albums/AlbumQualityNudges'
 import { FavoriteAlbumToggle } from '@/components/albums/FavoriteAlbumToggle'
+import { placeSlug } from '@/lib/utils/places'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -666,12 +667,25 @@ export default function AlbumDetailPage() {
               )}
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground">
-                {album.location_name && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 text-primary" />
-                    {album.location_name}
-                  </span>
-                )}
+                {album.location_name && (() => {
+                  const slug = placeSlug(album.location_name)
+                  const content = (
+                    <>
+                      <MapPin className="h-3.5 w-3.5 text-primary" />
+                      {album.location_name}
+                    </>
+                  )
+                  return slug ? (
+                    <Link
+                      href={`/places/${slug}`}
+                      className="inline-flex items-center gap-1.5 transition-colors hover:text-primary"
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5">{content}</span>
+                  )
+                })()}
                 {album.date_start && album.date_end && album.date_start !== album.date_end && (
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-primary" />

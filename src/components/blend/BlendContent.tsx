@@ -20,7 +20,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { getDisplayName } from '@/lib/utils/display-name'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import { log } from '@/lib/utils/logger'
 import type { User } from '@/types/database'
@@ -483,7 +483,7 @@ function PersonAvatar({
             : 'bg-olive-200 text-olive-800 text-base font-semibold'
         }
       >
-        {person.name.charAt(0).toUpperCase()}
+        {getDisplayInitial(person.name, undefined)}
       </AvatarFallback>
     </Avatar>
   )

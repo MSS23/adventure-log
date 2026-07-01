@@ -20,6 +20,8 @@ import {
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getDisplayInitial } from '@/lib/utils/display-name'
+import { getFlagEmoji } from '@/lib/utils/country'
 import Image from 'next/image'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -38,15 +40,6 @@ const FootprintGlobe = dynamic(
     ),
   }
 )
-
-// ISO 3166-1 alpha-2 → regional-indicator flag emoji.
-function countryCodeToFlag(code: string): string {
-  return code
-    .toUpperCase()
-    .split('')
-    .map((c) => String.fromCodePoint(127397 + c.charCodeAt(0)))
-    .join('')
-}
 
 // View-model returned by the profile query. The sentinel `redirectToOwn`
 // signals that the viewer is looking at their own profile.
@@ -405,7 +398,7 @@ export default function UserProfilePage() {
           <Avatar className="h-24 w-24 mx-auto ring-2 ring-background">
             <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={displayName} />
             <AvatarFallback className="bg-accent text-2xl text-accent-foreground">
-              {displayName.charAt(0).toUpperCase()}
+              {getDisplayInitial(displayName, undefined)}
             </AvatarFallback>
           </Avatar>
 
@@ -447,7 +440,7 @@ export default function UserProfilePage() {
             <Avatar className="h-24 w-24 shrink-0 ring-2 ring-background">
               <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={displayName} />
               <AvatarFallback className="bg-accent text-2xl text-accent-foreground">
-                {displayName.charAt(0).toUpperCase()}
+                {getDisplayInitial(displayName, undefined)}
               </AvatarFallback>
             </Avatar>
 
@@ -508,7 +501,7 @@ export default function UserProfilePage() {
               <div className="mt-3 flex flex-wrap items-center gap-1.5">
                 {countryCodes.slice(0, 24).map((code) => (
                   <span key={code} title={code} className="text-2xl leading-none">
-                    {countryCodeToFlag(code)}
+                    {getFlagEmoji(code)}
                   </span>
                 ))}
                 {countryCodes.length > 24 && (

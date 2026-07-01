@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { haversineKm } from '@/lib/utils/geoCalculations'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import { createClient } from '@/lib/supabase/client'
 import {
   Images,
@@ -233,17 +235,6 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
 }
 
 // ---------------------------------------------------------------------------
-// Haversine distance
-// ---------------------------------------------------------------------------
-function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLon = ((lon2 - lon1) * Math.PI) / 180
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
-
-// ---------------------------------------------------------------------------
 // Card wrapper
 // ---------------------------------------------------------------------------
 function Section({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
@@ -318,8 +309,8 @@ export default function AnalyticsPage() {
       const sorted = [...(albums || [])].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
       for (let i = 1; i < sorted.length; i++) {
         const prev = sorted[i - 1], curr = sorted[i]
-        if (prev.latitude && prev.longitude && curr.latitude && curr.longitude) {
-          totalDistance += haversineDistance(prev.latitude, prev.longitude, curr.latitude, curr.longitude)
+        if (prev.latitude != null && prev.longitude != null && curr.latitude != null && curr.longitude != null) {
+          totalDistance += haversineKm(prev.latitude, prev.longitude, curr.latitude, curr.longitude)
         }
       }
 
@@ -340,8 +331,9 @@ export default function AnalyticsPage() {
       albums?.forEach(a => { albumDateMap[a.id] = a.date_start || a.created_at })
       photos?.forEach(p => {
         const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
-        if (date) {
-          const y = new Date(date).getFullYear().toString()
+        const parsedYear = parseLocalDate(date)?.getFullYear()
+        if (parsedYear !== undefined) {
+          const y = parsedYear.toString()
           if (y in photosByYearMap) photosByYearMap[y] = (photosByYearMap[y] || 0) + 1
         }
       })

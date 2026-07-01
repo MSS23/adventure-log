@@ -17,6 +17,7 @@ import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
 import { uploadAvatar } from '@/lib/utils/storage'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import { cn } from '@/lib/utils'
 
 export default function EditProfilePage() {
@@ -281,7 +282,7 @@ export default function EditProfilePage() {
               <Avatar className="h-20 w-20 ring-2 ring-background">
                 <AvatarImage src={avatarPreview || undefined} alt="Profile picture" />
                 <AvatarFallback className="bg-accent text-lg text-accent-foreground">
-                  {(watch('display_name') || watch('username') || 'U').charAt(0).toUpperCase()}
+                  {getDisplayInitial(watch('display_name'), watch('username'))}
                 </AvatarFallback>
               </Avatar>
               <Label

@@ -19,144 +19,10 @@ import { StreakBadge } from '@/components/profile/StreakBadge'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { PassportScanner } from '@/components/passport/PassportScanner'
 import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
-
-// ---------------------------------------------------------------------------
-// Country-to-continent mapping
-// ---------------------------------------------------------------------------
-const continentMap: Record<string, string> = {
-  US: 'North America', CA: 'North America', MX: 'North America',
-  GT: 'North America', BZ: 'North America', HN: 'North America',
-  SV: 'North America', NI: 'North America', CR: 'North America',
-  PA: 'North America', CU: 'North America', JM: 'North America',
-  HT: 'North America', DO: 'North America', TT: 'North America',
-  BB: 'North America', BS: 'North America', PR: 'North America',
-  AG: 'North America', DM: 'North America', GD: 'North America',
-  KN: 'North America', LC: 'North America', VC: 'North America',
-  BR: 'South America', AR: 'South America', CL: 'South America',
-  CO: 'South America', PE: 'South America', VE: 'South America',
-  EC: 'South America', BO: 'South America', PY: 'South America',
-  UY: 'South America', GY: 'South America', SR: 'South America',
-  GF: 'South America',
-  GB: 'Europe', FR: 'Europe', DE: 'Europe', IT: 'Europe',
-  ES: 'Europe', PT: 'Europe', NL: 'Europe', BE: 'Europe',
-  CH: 'Europe', AT: 'Europe', SE: 'Europe', NO: 'Europe',
-  DK: 'Europe', FI: 'Europe', IE: 'Europe', PL: 'Europe',
-  CZ: 'Europe', RO: 'Europe', HU: 'Europe', GR: 'Europe',
-  HR: 'Europe', BG: 'Europe', SK: 'Europe', SI: 'Europe',
-  LT: 'Europe', LV: 'Europe', EE: 'Europe', CY: 'Europe',
-  MT: 'Europe', LU: 'Europe', IS: 'Europe', AL: 'Europe',
-  RS: 'Europe', BA: 'Europe', ME: 'Europe', MK: 'Europe',
-  XK: 'Europe', MD: 'Europe', UA: 'Europe', BY: 'Europe',
-  RU: 'Europe', GE: 'Europe', AM: 'Europe', AZ: 'Europe',
-  TR: 'Europe', MC: 'Europe', AD: 'Europe', SM: 'Europe',
-  VA: 'Europe', LI: 'Europe',
-  ZA: 'Africa', NG: 'Africa', KE: 'Africa', EG: 'Africa',
-  MA: 'Africa', GH: 'Africa', TZ: 'Africa', ET: 'Africa',
-  UG: 'Africa', SN: 'Africa', CI: 'Africa', CM: 'Africa',
-  MZ: 'Africa', MG: 'Africa', AO: 'Africa', ZM: 'Africa',
-  ZW: 'Africa', BW: 'Africa', NA: 'Africa', RW: 'Africa',
-  TN: 'Africa', DZ: 'Africa', LY: 'Africa', SD: 'Africa',
-  ML: 'Africa', NE: 'Africa', TD: 'Africa', GA: 'Africa',
-  CG: 'Africa', CD: 'Africa', BJ: 'Africa', BF: 'Africa',
-  TG: 'Africa', SL: 'Africa', LR: 'Africa', GN: 'Africa',
-  GW: 'Africa', CV: 'Africa', MU: 'Africa', SC: 'Africa',
-  ER: 'Africa', DJ: 'Africa', SO: 'Africa', MW: 'Africa',
-  LS: 'Africa', SZ: 'Africa', GM: 'Africa', MR: 'Africa',
-  SS: 'Africa', CF: 'Africa', GQ: 'Africa', ST: 'Africa',
-  KM: 'Africa',
-  CN: 'Asia', JP: 'Asia', KR: 'Asia', IN: 'Asia',
-  ID: 'Asia', TH: 'Asia', VN: 'Asia', PH: 'Asia',
-  MY: 'Asia', SG: 'Asia', MM: 'Asia', KH: 'Asia',
-  LA: 'Asia', BD: 'Asia', LK: 'Asia', NP: 'Asia',
-  PK: 'Asia', AF: 'Asia', IR: 'Asia', IQ: 'Asia',
-  SA: 'Asia', AE: 'Asia', QA: 'Asia', KW: 'Asia',
-  BH: 'Asia', OM: 'Asia', YE: 'Asia', JO: 'Asia',
-  LB: 'Asia', SY: 'Asia', IL: 'Asia', PS: 'Asia',
-  UZ: 'Asia', KZ: 'Asia', KG: 'Asia', TJ: 'Asia',
-  TM: 'Asia', MN: 'Asia', BN: 'Asia', TL: 'Asia',
-  MV: 'Asia', BT: 'Asia', TW: 'Asia', HK: 'Asia',
-  MO: 'Asia', KP: 'Asia',
-  AU: 'Oceania', NZ: 'Oceania', FJ: 'Oceania', PG: 'Oceania',
-  WS: 'Oceania', TO: 'Oceania', VU: 'Oceania', SB: 'Oceania',
-  KI: 'Oceania', FM: 'Oceania', MH: 'Oceania', PW: 'Oceania',
-  NR: 'Oceania', TV: 'Oceania', CK: 'Oceania', NU: 'Oceania',
-  NC: 'Oceania', PF: 'Oceania', GU: 'Oceania',
-}
-
-const continentTotals: Record<string, number> = {
-  'North America': 23, 'South America': 13, 'Europe': 50,
-  'Africa': 54, 'Asia': 48, 'Oceania': 14,
-}
-
-const continentEmoji: Record<string, string> = {
-  'Europe': '🏰', 'Asia': '🏯', 'North America': '🗽',
-  'South America': '🌿', 'Africa': '🦁', 'Oceania': '🏝️',
-}
-
-const countryNames: Record<string, string> = {
-  US: 'United States', CA: 'Canada', MX: 'Mexico', GT: 'Guatemala',
-  BZ: 'Belize', HN: 'Honduras', SV: 'El Salvador', NI: 'Nicaragua',
-  CR: 'Costa Rica', PA: 'Panama', CU: 'Cuba', JM: 'Jamaica',
-  HT: 'Haiti', DO: 'Dominican Republic', TT: 'Trinidad & Tobago',
-  BB: 'Barbados', BS: 'Bahamas', PR: 'Puerto Rico',
-  BR: 'Brazil', AR: 'Argentina', CL: 'Chile', CO: 'Colombia',
-  PE: 'Peru', VE: 'Venezuela', EC: 'Ecuador', BO: 'Bolivia',
-  PY: 'Paraguay', UY: 'Uruguay', GY: 'Guyana', SR: 'Suriname',
-  GB: 'United Kingdom', FR: 'France', DE: 'Germany', IT: 'Italy',
-  ES: 'Spain', PT: 'Portugal', NL: 'Netherlands', BE: 'Belgium',
-  CH: 'Switzerland', AT: 'Austria', SE: 'Sweden', NO: 'Norway',
-  DK: 'Denmark', FI: 'Finland', IE: 'Ireland', PL: 'Poland',
-  CZ: 'Czechia', RO: 'Romania', HU: 'Hungary', GR: 'Greece',
-  HR: 'Croatia', BG: 'Bulgaria', SK: 'Slovakia', SI: 'Slovenia',
-  LT: 'Lithuania', LV: 'Latvia', EE: 'Estonia', CY: 'Cyprus',
-  MT: 'Malta', LU: 'Luxembourg', IS: 'Iceland', AL: 'Albania',
-  RS: 'Serbia', BA: 'Bosnia', ME: 'Montenegro', MK: 'North Macedonia',
-  UA: 'Ukraine', TR: 'Turkey', RU: 'Russia', GE: 'Georgia',
-  ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', EG: 'Egypt',
-  MA: 'Morocco', GH: 'Ghana', TZ: 'Tanzania', ET: 'Ethiopia',
-  UG: 'Uganda', SN: 'Senegal', TN: 'Tunisia', RW: 'Rwanda',
-  BW: 'Botswana', NA: 'Namibia', MZ: 'Mozambique', MG: 'Madagascar',
-  ZW: 'Zimbabwe', ZM: 'Zambia', AO: 'Angola', CM: 'Cameroon',
-  MU: 'Mauritius', SC: 'Seychelles',
-  CN: 'China', JP: 'Japan', KR: 'South Korea', IN: 'India',
-  ID: 'Indonesia', TH: 'Thailand', VN: 'Vietnam', PH: 'Philippines',
-  MY: 'Malaysia', SG: 'Singapore', MM: 'Myanmar', KH: 'Cambodia',
-  LA: 'Laos', BD: 'Bangladesh', LK: 'Sri Lanka', NP: 'Nepal',
-  PK: 'Pakistan', IR: 'Iran', SA: 'Saudi Arabia', AE: 'UAE',
-  QA: 'Qatar', KW: 'Kuwait', BH: 'Bahrain', OM: 'Oman',
-  JO: 'Jordan', LB: 'Lebanon', IL: 'Israel', TW: 'Taiwan',
-  HK: 'Hong Kong', MN: 'Mongolia', UZ: 'Uzbekistan', KZ: 'Kazakhstan',
-  MV: 'Maldives', BT: 'Bhutan',
-  AU: 'Australia', NZ: 'New Zealand', FJ: 'Fiji', PG: 'Papua New Guinea',
-  WS: 'Samoa', TO: 'Tonga', VU: 'Vanuatu', NC: 'New Caledonia',
-  PF: 'French Polynesia',
-}
-
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLon = ((lon2 - lon1) * Math.PI) / 180
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
-
-// ---------------------------------------------------------------------------
-// Travel personality
-// ---------------------------------------------------------------------------
-interface PersonalityResult { type: string; emoji: string; description: string }
-
-function computePersonality(countryCodes: string[], albumCount: number): PersonalityResult {
-  const unique = countryCodes.length
-  const continents = new Set(countryCodes.map(c => continentMap[c]).filter(Boolean))
-
-  if (unique === 0) return { type: 'Rising Explorer', emoji: '🌱', description: 'Your journey is just beginning. Every great explorer started with a single step — your first adventure awaits.' }
-  if (continents.size >= 4) return { type: 'Cultural Nomad', emoji: '🌍', description: 'You seek diversity across continents, immersing yourself in cultures far and wide.' }
-  if (unique >= 10) return { type: 'Globe Trotter', emoji: '✈️', description: 'With 10+ countries under your belt, you\'re a seasoned traveler who thrives on new horizons.' }
-  if (unique <= 3 && albumCount >= 8) return { type: 'Deep Diver', emoji: '🤿', description: 'You believe in truly knowing a place. Rather than skimming, you explore every corner.' }
-  if (albumCount >= 10 && unique <= 5) return { type: 'Weekend Warrior', emoji: '🎒', description: 'You make the most of every opportunity, packing adventures into every spare moment.' }
-  if (unique >= 3) return { type: 'Urban Explorer', emoji: '🏙️', description: 'Cities are your playground. From hidden alleys to rooftop bars, you uncover a city\'s soul.' }
-  return { type: 'Rising Explorer', emoji: '🌱', description: 'Your journey is just beginning — keep going!' }
-}
+import { haversineKm } from '@/lib/utils/geoCalculations'
+import { getCountryName } from '@/lib/utils/country'
+import { getContinent, CONTINENT_TOTALS, CONTINENT_EMOJI, countContinents, type Continent } from '@/lib/utils/continents'
+import { getTravelPersonality, type TravelPersonality } from '@/lib/utils/travel-personality'
 
 // ---------------------------------------------------------------------------
 // Journey narrative statements — generates 2–5 storytelling lines from data
@@ -270,7 +136,7 @@ interface PassportAlbum {
 
 interface PassportData {
   albums: PassportAlbum[]; photoCount: number; countryCodes: string[]; cityCount: number
-  totalDistanceKm: number; personality: PersonalityResult
+  totalDistanceKm: number; personality: TravelPersonality
   continentProgress: { name: string; visited: number; total: number }[]
   firstTrip: { date: string; location: string } | null
   latestTrip: { date: string; location: string } | null
@@ -280,7 +146,12 @@ async function backfillMissingCountryCodes(
   albums: PassportAlbum[],
   supabase: ReturnType<typeof createClient>
 ): Promise<Record<string, string>> {
-  const missing = albums.filter(a => !a.country_code && a.latitude && a.longitude)
+  // Cap per-load geocodes: Nominatim is rate-limited (1 req/s) and this runs
+  // client-side keyed by the user's IP. Backfilling a handful per visit keeps
+  // the page snappy and converges over a few visits for large libraries.
+  const missing = albums
+    .filter(a => !a.country_code && a.latitude != null && a.longitude != null)
+    .slice(0, 8)
   if (missing.length === 0) return {}
 
   const resolved: Record<string, string> = {}
@@ -320,84 +191,112 @@ async function backfillMissingCountryCodes(
   return resolved
 }
 
+function computePassportData(validAlbums: PassportAlbum[], photoCount: number): PassportData {
+  const countryCodes = [...new Set(validAlbums.map(a => a.country_code?.toUpperCase()).filter((c): c is string => !!c))]
+  const cities = new Set(validAlbums.map(a => a.location_name?.split(',')[0]?.trim()).filter(Boolean))
+
+  const sorted = [...validAlbums].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
+  let totalDistanceKm = 0
+  for (let i = 1; i < sorted.length; i++) {
+    totalDistanceKm += haversineKm(sorted[i - 1].latitude, sorted[i - 1].longitude, sorted[i].latitude, sorted[i].longitude)
+  }
+
+  const visitedByCont: Record<string, Set<string>> = {}
+  for (const code of countryCodes) {
+    const cont = getContinent(code)
+    if (cont) { if (!visitedByCont[cont]) visitedByCont[cont] = new Set(); visitedByCont[cont].add(code) }
+  }
+
+  let firstTrip: PassportData['firstTrip'] = null
+  let latestTrip: PassportData['latestTrip'] = null
+  if (sorted.length > 0) {
+    const first = sorted[0]
+    firstTrip = { date: first.date_start || first.created_at, location: first.location_name || first.title }
+  }
+  // Only a distinct "latest" when there's more than one album — otherwise the
+  // single album is both first and latest and the UI shows two identical cards.
+  if (sorted.length > 1) {
+    const latest = sorted[sorted.length - 1]
+    latestTrip = { date: latest.date_start || latest.created_at, location: latest.location_name || latest.title }
+  }
+
+  return {
+    albums: validAlbums,
+    photoCount,
+    countryCodes,
+    cityCount: cities.size,
+    totalDistanceKm: Math.round(totalDistanceKm),
+    personality: getTravelPersonality({
+      countries: countryCodes.length,
+      trips: validAlbums.length,
+      cities: cities.size,
+      continents: countContinents(countryCodes),
+    }),
+    continentProgress: Object.entries(CONTINENT_TOTALS).map(([name, total]) => ({
+      name, visited: visitedByCont[name]?.size || 0, total,
+    })),
+    firstTrip,
+    latestTrip,
+  }
+}
+
 function useTravelPassport() {
   const { user } = useAuth()
   const [data, setData] = useState<PassportData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchData = useCallback(async () => {
+  useEffect(() => {
     if (!user) return
+    let cancelled = false
     setLoading(true)
-    try {
-      const supabase = createClient()
-      const { data: albums } = await supabase
-        .from('albums')
-        .select('id, title, location_name, country_code, latitude, longitude, date_start, created_at, cover_photo_url')
-        .eq('user_id', user.id)
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-        .neq('status', 'draft')
-        .order('date_start', { ascending: true, nullsFirst: false })
 
-      const { count: photoCount } = await supabase
-        .from('photos')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+    ;(async () => {
+      try {
+        const supabase = createClient()
+        const { data: albums } = await supabase
+          .from('albums')
+          .select('id, title, location_name, country_code, latitude, longitude, date_start, created_at, cover_photo_url')
+          .eq('user_id', user.id)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .neq('status', 'draft')
+          .order('date_start', { ascending: true, nullsFirst: false })
 
-      const validAlbums = (albums || []) as PassportAlbum[]
+        const { count: photoCount } = await supabase
+          .from('photos')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
 
-      const backfilled = await backfillMissingCountryCodes(validAlbums, supabase)
-      for (const album of validAlbums) {
-        if (!album.country_code && backfilled[album.id]) {
-          album.country_code = backfilled[album.id]
+        if (cancelled) return
+
+        const validAlbums = (albums || []) as PassportAlbum[]
+
+        // Render immediately with the data we have — don't block the whole page
+        // behind slow, rate-limited reverse-geocoding.
+        setData(computePassportData(validAlbums, photoCount || 0))
+        setLoading(false)
+
+        // Backfill any missing country codes in the background, then merge the
+        // results in with a second, non-blocking update.
+        const backfilled = await backfillMissingCountryCodes(validAlbums, supabase)
+        if (cancelled || Object.keys(backfilled).length === 0) return
+        for (const album of validAlbums) {
+          if (!album.country_code && backfilled[album.id]) {
+            album.country_code = backfilled[album.id]
+          }
         }
+        setData(computePassportData(validAlbums, photoCount || 0))
+      } catch (err) {
+        if (cancelled) return
+        log.error('Failed to load passport', { component: 'TravelPassport', action: 'fetch' }, err as Error)
+        setLoading(false)
       }
+    })()
 
-      const countryCodes = [...new Set(validAlbums.map(a => a.country_code?.toUpperCase()).filter((c): c is string => !!c))]
-      const cities = new Set(validAlbums.map(a => a.location_name?.split(',')[0]?.trim()).filter(Boolean))
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the identity that matters
+  }, [user?.id])
 
-      const sorted = [...validAlbums].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
-      let totalDistanceKm = 0
-      for (let i = 1; i < sorted.length; i++) {
-        totalDistanceKm += haversineKm(sorted[i - 1].latitude, sorted[i - 1].longitude, sorted[i].latitude, sorted[i].longitude)
-      }
-
-      const visitedByCont: Record<string, Set<string>> = {}
-      for (const code of countryCodes) {
-        const cont = continentMap[code]
-        if (cont) { if (!visitedByCont[cont]) visitedByCont[cont] = new Set(); visitedByCont[cont].add(code) }
-      }
-
-      let firstTrip: PassportData['firstTrip'] = null
-      let latestTrip: PassportData['latestTrip'] = null
-      if (sorted.length > 0) {
-        const first = sorted[0]
-        firstTrip = { date: first.date_start || first.created_at, location: first.location_name || first.title }
-        const latest = sorted[sorted.length - 1]
-        latestTrip = { date: latest.date_start || latest.created_at, location: latest.location_name || latest.title }
-      }
-
-      setData({
-        albums: validAlbums,
-        photoCount: photoCount || 0,
-        countryCodes,
-        cityCount: cities.size,
-        totalDistanceKm: Math.round(totalDistanceKm),
-        personality: computePersonality(countryCodes, validAlbums.length),
-        continentProgress: Object.entries(continentTotals).map(([name, total]) => ({
-          name, visited: visitedByCont[name]?.size || 0, total,
-        })),
-        firstTrip,
-        latestTrip,
-      })
-    } catch (err) {
-      log.error('Failed to load passport', { component: 'TravelPassport', action: 'fetch' }, err as Error)
-    } finally {
-      setLoading(false)
-    }
-  }, [user])
-
-  useEffect(() => { fetchData() }, [fetchData])
   return { data, loading }
 }
 
@@ -464,15 +363,19 @@ function GlobeCoverageRing({ percentage, countriesCount }: { percentage: number;
 // Page
 // ---------------------------------------------------------------------------
 export default function TravelPassportPage() {
-  const { user, profile } = useAuth()
+  const { profile } = useAuth()
   const { data, loading } = useTravelPassport()
   const [copied, setCopied] = useState(false)
   const [scannerOpen, setScannerOpen] = useState(false)
 
+  // Share links must resolve to /u/[username] — the public passport looks the
+  // user up by username, and the QR scanner's validator rejects anything that
+  // isn't a bare username (a UUID fallback would fail both). So only build a
+  // share URL when the account actually has a username.
   const shareUrl = useMemo(() => {
-    if (typeof window === 'undefined') return ''
-    return `${window.location.origin}/u/${profile?.username || user?.id || ''}/passport?connect=true`
-  }, [profile, user])
+    if (typeof window === 'undefined' || !profile?.username) return ''
+    return `${window.location.origin}/u/${profile.username}/passport?connect=true`
+  }, [profile?.username])
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
@@ -651,7 +554,7 @@ export default function TravelPassportPage() {
           className="mb-6"
         >
           <p className="al-eyebrow mb-3 px-1">Your World</p>
-          <PassportWorldMap albums={data.albums} countryNames={countryNames} />
+          <PassportWorldMap albums={data.albums} />
         </motion.div>
       )}
 
@@ -702,7 +605,7 @@ export default function TravelPassportPage() {
                 )}
               >
                 <div className="flex items-center gap-2 mb-2.5">
-                  <span className="text-lg">{continentEmoji[cont.name] || '🌍'}</span>
+                  <span className="text-lg">{CONTINENT_EMOJI[cont.name as Continent] || '🌍'}</span>
                   <span className="text-xs font-semibold text-foreground truncate">{cont.name}</span>
                 </div>
                 <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
@@ -737,7 +640,7 @@ export default function TravelPassportPage() {
           const date = earliestByCountry.get(code)
           return {
             code,
-            name: countryNames[code] || code,
+            name: getCountryName(code),
             rotation: rotations[i % rotations.length],
             dateLabel: date
               ? new Date(date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase()
@@ -953,30 +856,43 @@ export default function TravelPassportPage() {
               Scan to see my travel profile
             </p>
 
-            <div className="mb-6">
-              <PassportQRCode url={shareUrl} size={180} />
-            </div>
+            {shareUrl ? (
+              <>
+                <div className="mb-6">
+                  <PassportQRCode url={shareUrl} size={180} />
+                </div>
 
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopy}
-                className="gap-2 cursor-pointer"
-              >
-                {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
-                {copied ? 'Copied!' : 'Copy Link'}
-              </Button>
-              {typeof navigator !== 'undefined' && 'share' in navigator && (
-                <Button
-                  size="sm"
-                  onClick={handleShare}
-                  className="gap-2 cursor-pointer"
-                >
-                  <Share2 className="size-4" /> Share
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopy}
+                    className="gap-2 cursor-pointer"
+                  >
+                    {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
+                    {copied ? 'Copied!' : 'Copy Link'}
+                  </Button>
+                  {typeof navigator !== 'undefined' && 'share' in navigator && (
+                    <Button
+                      size="sm"
+                      onClick={handleShare}
+                      className="gap-2 cursor-pointer"
+                    >
+                      <Share2 className="size-4" /> Share
+                    </Button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="mb-2 rounded-xl border border-border bg-muted/40 px-4 py-5 text-center max-w-xs">
+                <p className="text-sm text-muted-foreground">
+                  Add a username to get a shareable passport link.
+                </p>
+                <Button asChild size="sm" className="mt-3 cursor-pointer">
+                  <a href="/settings">Set a username</a>
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* ── Reciprocal action: scan someone else's passport ── */}
             <div className="w-full mt-7 pt-6 border-t border-border flex flex-col items-center">

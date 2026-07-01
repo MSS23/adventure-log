@@ -6,7 +6,7 @@ import { User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getAvatarUrl } from '@/lib/utils/avatar'
-import { getDisplayName } from '@/lib/utils/display-name'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { Settings, Pencil } from 'lucide-react'
 import { AnimatedCounter } from '@/components/ui/animated-count'
 import { FollowButton } from '@/components/social/FollowButton'
@@ -27,7 +27,7 @@ export function ProfileHero({
 }: ProfileHeroProps) {
   const displayName = getDisplayName(profile.display_name, profile.username)
   const username = profile.username || 'anonymous'
-  const initials = displayName.charAt(0).toUpperCase()
+  const initials = getDisplayInitial(profile.display_name, profile.username)
 
   return (
     <div className="relative px-4 sm:px-6">

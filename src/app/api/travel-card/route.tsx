@@ -2,61 +2,18 @@ import { ImageResponse } from '@vercel/og'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
+import { haversineKm } from '@/lib/utils/geoCalculations'
+import { getFlagEmoji } from '@/lib/utils/country'
+import { countContinents } from '@/lib/utils/continents'
+import { getTravelPersonality } from '@/lib/utils/travel-personality'
 
 export const runtime = 'nodejs'
-
-function countryCodeToFlag(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split('')
-    .map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
-  return String.fromCodePoint(...codePoints)
-}
-
-function haversine(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const R = 6371
-  const dLat = ((b.lat - a.lat) * Math.PI) / 180
-  const dLng = ((b.lng - a.lng) * Math.PI) / 180
-  const sinDLat = Math.sin(dLat / 2)
-  const sinDLng = Math.sin(dLng / 2)
-  const h = sinDLat * sinDLat + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * sinDLng * sinDLng
-  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
-}
 
 function formatDistance(km: number): string {
   if (km >= 1000) return `${(km / 1000).toFixed(1)}k`
   return km.toLocaleString()
 }
 
-function getPersonality(countries: number, trips: number, continents: number): string {
-  if (continents >= 5) return 'World Explorer'
-  if (countries >= 15) return 'Globe Trotter'
-  if (countries >= 10) return 'Cultural Nomad'
-  if (trips >= 12) return 'Perpetual Nomad'
-  if (countries >= 5) return 'World Wanderer'
-  if (trips >= 6) return 'Adventure Seeker'
-  if (trips >= 3) return 'Weekend Warrior'
-  if (trips >= 1) return 'Rising Explorer'
-  return 'Future Explorer'
-}
-
-const continentMap: Record<string, string> = {
-  US: 'NA', CA: 'NA', MX: 'NA', GT: 'NA', BZ: 'NA', HN: 'NA', SV: 'NA', NI: 'NA', CR: 'NA', PA: 'NA',
-  CU: 'NA', JM: 'NA', HT: 'NA', DO: 'NA', TT: 'NA', BB: 'NA', BS: 'NA', PR: 'NA',
-  BR: 'SA', AR: 'SA', CL: 'SA', CO: 'SA', PE: 'SA', VE: 'SA', EC: 'SA', BO: 'SA', PY: 'SA', UY: 'SA', GY: 'SA', SR: 'SA',
-  GB: 'EU', FR: 'EU', DE: 'EU', IT: 'EU', ES: 'EU', PT: 'EU', NL: 'EU', BE: 'EU', CH: 'EU', AT: 'EU',
-  SE: 'EU', NO: 'EU', DK: 'EU', FI: 'EU', IE: 'EU', PL: 'EU', CZ: 'EU', GR: 'EU', HR: 'EU', RO: 'EU',
-  HU: 'EU', BG: 'EU', SK: 'EU', SI: 'EU', LT: 'EU', LV: 'EU', EE: 'EU', MT: 'EU', CY: 'EU', LU: 'EU',
-  IS: 'EU', RS: 'EU', BA: 'EU', ME: 'EU', MK: 'EU', AL: 'EU', XK: 'EU', MD: 'EU', UA: 'EU', BY: 'EU',
-  CN: 'AS', JP: 'AS', KR: 'AS', IN: 'AS', TH: 'AS', VN: 'AS', ID: 'AS', MY: 'AS', SG: 'AS', PH: 'AS',
-  TW: 'AS', HK: 'AS', MO: 'AS', MM: 'AS', KH: 'AS', LA: 'AS', BD: 'AS', LK: 'AS', NP: 'AS', PK: 'AS',
-  AE: 'AS', SA: 'AS', QA: 'AS', KW: 'AS', BH: 'AS', OM: 'AS', JO: 'AS', LB: 'AS', IL: 'AS', TR: 'AS',
-  GE: 'AS', AM: 'AS', AZ: 'AS', KZ: 'AS', UZ: 'AS', MN: 'AS',
-  ZA: 'AF', EG: 'AF', MA: 'AF', KE: 'AF', TZ: 'AF', NG: 'AF', GH: 'AF', ET: 'AF', UG: 'AF', RW: 'AF',
-  SN: 'AF', CI: 'AF', CM: 'AF', TN: 'AF', DZ: 'AF', MZ: 'AF', ZW: 'AF', BW: 'AF', NA: 'AF', MU: 'AF',
-  AU: 'OC', NZ: 'OC', FJ: 'OC', PG: 'OC', WS: 'OC', TO: 'OC', VU: 'OC', PF: 'OC', NC: 'OC', GU: 'OC',
-  RU: 'EU',
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
@@ -79,11 +36,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // This is an unauthenticated, shareable card. Only public accounts get a
-    // populated card; private/friends accounts return 404 rather than leak
-    // aggregate stats. (RLS already gates the album rows, but this endpoint is
-    // public so we make the privacy contract explicit and RLS-independent.)
-    if (user.privacy_level !== 'public') {
+    // This is a shareable card. Only public accounts get a populated card for
+    // OTHER viewers; private/friends accounts return 404 rather than leak
+    // aggregate stats. The owner, however, can always download their own card
+    // (the /wrapped "Download" button hits this authenticated with ?download=1),
+    // so we allow the request through when the caller IS the profile owner.
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const isOwner = !!authUser && authUser.id === userId
+    if (user.privacy_level !== 'public' && !isOwner) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
@@ -94,32 +54,48 @@ export async function GET(request: NextRequest) {
       .eq('visibility', 'public')
       .neq('status', 'draft')
 
-    const { count: photoCount } = await supabase
-      .from('photos')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
-
     const allAlbums = albums || []
+
+    // Count photos scoped to the SAME public, non-draft albums shown on the
+    // card. Counting by user_id alone would include photos from private/draft
+    // albums — leaking private-content volume onto a public share asset.
+    let photoCount = 0
+    const albumIds = allAlbums.map(a => a.id)
+    if (albumIds.length > 0) {
+      const { count } = await supabase
+        .from('photos')
+        .select('id', { count: 'exact', head: true })
+        .in('album_id', albumIds)
+      photoCount = count || 0
+    }
     const countryCodes = [...new Set(allAlbums.filter(a => a.country_code).map(a => a.country_code as string))]
     const cities = [...new Set(allAlbums.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
-    const flags = countryCodes.slice(0, 24).map(countryCodeToFlag)
+    const flags = countryCodes.slice(0, 24).map(getFlagEmoji)
 
     // Calculate distance
     const coords = allAlbums
-      .filter(a => a.latitude && a.longitude && (a.date_start || a.created_at))
-      .sort((a, b) => ((a.date_start || a.created_at) > (b.date_start || b.created_at) ? 1 : -1))
+      .filter(a => a.latitude != null && a.longitude != null && (a.date_start || a.created_at))
+      .sort((a, b) =>
+        new Date(a.date_start || a.created_at).getTime() -
+        new Date(b.date_start || b.created_at).getTime()
+      )
       .map(a => ({ lat: a.latitude!, lng: a.longitude! }))
 
     let totalDistance = 0
     for (let i = 1; i < coords.length; i++) {
-      totalDistance += haversine(coords[i - 1], coords[i])
+      totalDistance += haversineKm(coords[i - 1].lat, coords[i - 1].lng, coords[i].lat, coords[i].lng)
     }
 
     // Count continents
-    const continents = new Set(countryCodes.map(c => continentMap[c]).filter(Boolean))
+    const continentCount = countContinents(countryCodes)
 
     const displayName = user.display_name || user.username || 'Traveler'
-    const personality = getPersonality(countryCodes.length, allAlbums.length, continents.size)
+    const personality = getTravelPersonality({
+      countries: countryCodes.length,
+      trips: allAlbums.length,
+      cities: cities.length,
+      continents: continentCount,
+    }).type
     const worldPercent = Math.round((countryCodes.length / 195) * 100)
 
     return new ImageResponse(

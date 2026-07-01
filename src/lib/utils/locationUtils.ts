@@ -285,18 +285,6 @@ export function isValidTravelDestination(latitude: number, longitude: number): b
 }
 
 /**
- * Generates a location slug for URLs
- */
-export function generateLocationSlug(locationName: string): string {
-  return locationName
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .trim()
-}
-
-/**
  * Sanitizes location input to prevent XSS
  */
 export function sanitizeLocationInput(input: string): string {

@@ -9,6 +9,7 @@ import { useWrappedData } from '@/lib/hooks/useWrappedData'
 import { FlightReelOverlay } from '@/components/wrapped/FlightReelOverlay'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
+import { getFlagEmoji } from '@/lib/utils/country'
 import {
   Share2,
   Download,
@@ -71,14 +72,6 @@ const WrappedGlobe = dynamic(
     ),
   }
 )
-
-function countryCodeToFlag(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split('')
-    .map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
-  return String.fromCodePoint(...codePoints)
-}
 
 type Phase = 'intro' | 'globe' | 'stats'
 
@@ -573,7 +566,7 @@ export default function WrappedPage() {
                         type: 'spring',
                       }}
                     >
-                      {countryCodeToFlag(code)}
+                      {getFlagEmoji(code)}
                     </motion.span>
                   ))}
                   {data.countryCodes.length > 18 && (

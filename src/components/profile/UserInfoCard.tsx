@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, UserMinus, UserPlus } from 'lucide-react'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import Link from 'next/link'
 
 interface UserInfoCardProps {
@@ -38,7 +39,7 @@ export function UserInfoCard({
               alt={profile.display_name || profile.username || 'User'}
             />
             <AvatarFallback className="text-5xl bg-gradient-to-br from-olive-500 to-olive-500 text-white">
-              {(profile.display_name || profile.username || 'U').charAt(0).toUpperCase()}
+              {getDisplayInitial(profile.display_name, profile.username)}
             </AvatarFallback>
           </Avatar>
         </div>

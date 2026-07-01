@@ -15,6 +15,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Plane, Calendar, MapPin } from 'lucide-react'
+import { getFlagEmoji } from '@/lib/utils/country'
 
 interface ReelLocation {
   lat: number
@@ -38,15 +39,6 @@ interface FlightReelOverlayProps {
   segmentIndex: number
   /** 0..1 — fraction of the journey completed across all segments. */
   progress: number
-}
-
-function countryCodeToFlag(code: string | undefined): string {
-  if (!code || code.length !== 2) return ''
-  return code
-    .toUpperCase()
-    .split('')
-    .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
-    .join('')
 }
 
 function formatDate(iso: string): string {
@@ -131,7 +123,7 @@ export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightR
                 </h3>
                 {active.country && (
                   <span aria-hidden className="text-base">
-                    {countryCodeToFlag(active.country)}
+                    {getFlagEmoji(active.country ?? '')}
                   </span>
                 )}
               </div>

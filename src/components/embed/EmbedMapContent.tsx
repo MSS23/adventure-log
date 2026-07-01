@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { Globe, ExternalLink, MapPin, Plane } from 'lucide-react'
 import Link from 'next/link'
+import { getFlagEmoji } from '@/lib/utils/country'
 
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -17,14 +18,6 @@ interface Location {
   country_code: string
   lat: number
   lng: number
-}
-
-function countryCodeToFlag(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split('')
-    .map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
-  return String.fromCodePoint(...codePoints)
 }
 
 interface EmbedMapContentProps {
@@ -218,7 +211,7 @@ export function EmbedMapContent({
                       className="text-base leading-none"
                       title={code}
                     >
-                      {countryCodeToFlag(code)}
+                      {getFlagEmoji(code)}
                     </span>
                   ))}
                   {countryCodes.length > 20 && (

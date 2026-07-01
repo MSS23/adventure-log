@@ -296,11 +296,15 @@ export async function deleteAlbum(albumId: string): Promise<{ success: boolean; 
     }
 
     revalidateAlbumPaths()
-    redirect('/albums')
   } catch (error) {
     log.error('Delete album error', { component: 'AlbumActions', action: 'delete-album' }, error as Error)
     return { success: false, error: 'Failed to delete album' }
   }
+
+  // redirect() throws NEXT_REDIRECT to signal navigation; it MUST run outside
+  // the try/catch above, otherwise the catch swallows it and reports a spurious
+  // failure while the album has actually been deleted.
+  redirect('/albums')
 }
 
 /**

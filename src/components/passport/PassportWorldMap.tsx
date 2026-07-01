@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { WORLD_DOTS } from '@/components/explore/world-map-dots'
+import { getCountryName } from '@/lib/utils/country'
 
 /**
  * Flat "countries visited" map for the passport page. Renders the shared dotted
@@ -28,10 +29,8 @@ function geoToSvg(lat: number, lng: number): { x: number; y: number } {
 
 export function PassportWorldMap({
   albums,
-  countryNames,
 }: {
   albums: VisitedAlbum[]
-  countryNames: Record<string, string>
 }) {
   const [hovered, setHovered] = useState<string | null>(null)
 
@@ -128,7 +127,7 @@ export function PassportWorldMap({
                 }}
               >
                 <div className="whitespace-nowrap rounded-lg border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-md">
-                  {countryNames[hovered] || hovered}
+                  {getCountryName(hovered)}
                 </div>
               </div>
             )

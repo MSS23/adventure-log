@@ -10,7 +10,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getAvatarUrl } from '@/lib/utils/avatar'
-import { getDisplayName } from '@/lib/utils/display-name'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
+import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
+import { formatDistanceKm } from '@/lib/utils/geoCalculations'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -20,59 +22,11 @@ import { cn } from '@/lib/utils'
 import QRCode from 'qrcode'
 import { MutualTravelPanel } from './MutualTravelPanel'
 
-function countryCodeToFlag(code: string): string {
-  return code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
-}
-
-function formatDistance(km: number): string {
-  if (km >= 10000) return `${(km / 1000).toFixed(0)}k`
-  if (km >= 1000) return `${(km / 1000).toFixed(1)}k`
-  return km.toLocaleString()
-}
-
 const continentIcon: Record<string, React.ComponentType<{ className?: string }>> = {
   'Europe': Landmark, 'Asia': Mountain, 'North America': TreePine,
   'South America': TreePine, 'Africa': Sun, 'Oceania': Waves,
 }
 
-const countryNames: Record<string, string> = {
-  US: 'United States', CA: 'Canada', MX: 'Mexico', GT: 'Guatemala',
-  BZ: 'Belize', HN: 'Honduras', SV: 'El Salvador', NI: 'Nicaragua',
-  CR: 'Costa Rica', PA: 'Panama', CU: 'Cuba', JM: 'Jamaica',
-  HT: 'Haiti', DO: 'Dominican Republic', TT: 'Trinidad & Tobago',
-  BB: 'Barbados', BS: 'Bahamas', PR: 'Puerto Rico',
-  BR: 'Brazil', AR: 'Argentina', CL: 'Chile', CO: 'Colombia',
-  PE: 'Peru', VE: 'Venezuela', EC: 'Ecuador', BO: 'Bolivia',
-  PY: 'Paraguay', UY: 'Uruguay', GY: 'Guyana', SR: 'Suriname',
-  GB: 'United Kingdom', FR: 'France', DE: 'Germany', IT: 'Italy',
-  ES: 'Spain', PT: 'Portugal', NL: 'Netherlands', BE: 'Belgium',
-  CH: 'Switzerland', AT: 'Austria', SE: 'Sweden', NO: 'Norway',
-  DK: 'Denmark', FI: 'Finland', IE: 'Ireland', PL: 'Poland',
-  CZ: 'Czechia', RO: 'Romania', HU: 'Hungary', GR: 'Greece',
-  HR: 'Croatia', BG: 'Bulgaria', SK: 'Slovakia', SI: 'Slovenia',
-  LT: 'Lithuania', LV: 'Latvia', EE: 'Estonia', CY: 'Cyprus',
-  MT: 'Malta', LU: 'Luxembourg', IS: 'Iceland', AL: 'Albania',
-  RS: 'Serbia', BA: 'Bosnia', ME: 'Montenegro', MK: 'North Macedonia',
-  UA: 'Ukraine', TR: 'Turkey', RU: 'Russia', GE: 'Georgia',
-  ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', EG: 'Egypt',
-  MA: 'Morocco', GH: 'Ghana', TZ: 'Tanzania', ET: 'Ethiopia',
-  UG: 'Uganda', SN: 'Senegal', TN: 'Tunisia', RW: 'Rwanda',
-  BW: 'Botswana', NA: 'Namibia', MZ: 'Mozambique', MG: 'Madagascar',
-  ZW: 'Zimbabwe', ZM: 'Zambia', AO: 'Angola', CM: 'Cameroon',
-  MU: 'Mauritius', SC: 'Seychelles',
-  CN: 'China', JP: 'Japan', KR: 'South Korea', IN: 'India',
-  ID: 'Indonesia', TH: 'Thailand', VN: 'Vietnam', PH: 'Philippines',
-  MY: 'Malaysia', SG: 'Singapore', MM: 'Myanmar', KH: 'Cambodia',
-  LA: 'Laos', BD: 'Bangladesh', LK: 'Sri Lanka', NP: 'Nepal',
-  PK: 'Pakistan', IR: 'Iran', SA: 'Saudi Arabia', AE: 'UAE',
-  QA: 'Qatar', KW: 'Kuwait', BH: 'Bahrain', OM: 'Oman',
-  JO: 'Jordan', LB: 'Lebanon', IL: 'Israel', TW: 'Taiwan',
-  HK: 'Hong Kong', MN: 'Mongolia', UZ: 'Uzbekistan', KZ: 'Kazakhstan',
-  MV: 'Maldives', BT: 'Bhutan',
-  AU: 'Australia', NZ: 'New Zealand', FJ: 'Fiji', PG: 'Papua New Guinea',
-  WS: 'Samoa', TO: 'Tonga', VU: 'Vanuatu', NC: 'New Caledonia',
-  PF: 'French Polynesia',
-}
 
 // ---------------------------------------------------------------------------
 // QR Code component
@@ -249,7 +203,7 @@ export function PublicPassportContent({
                 <Avatar className="size-16 ring-2 ring-background shadow">
                   <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} alt={viewerName} />
                   <AvatarFallback className="bg-primary/15 text-primary font-semibold">
-                    {viewerName.charAt(0).toUpperCase()}
+                    {getDisplayInitial(profile?.display_name, profile?.username)}
                   </AvatarFallback>
                 </Avatar>
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-coral)] text-white shadow-md">
@@ -258,7 +212,7 @@ export function PublicPassportContent({
                 <Avatar className="size-16 ring-2 ring-background shadow">
                   <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={displayName} />
                   <AvatarFallback className="bg-olive-200 text-olive-800 font-semibold">
-                    {displayName.charAt(0).toUpperCase()}
+                    {getDisplayInitial(user.display_name, user.username)}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -301,7 +255,7 @@ export function PublicPassportContent({
             <Avatar className="w-24 h-24 mx-auto mb-4 ring-2 ring-white/20">
               <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={displayName} />
               <AvatarFallback className="text-2xl bg-olive-700 text-white font-heading">
-                {displayName.charAt(0).toUpperCase()}
+                {getDisplayInitial(user.display_name, user.username)}
               </AvatarFallback>
             </Avatar>
 
@@ -391,7 +345,7 @@ export function PublicPassportContent({
               { icon: Globe, value: countryCodes.length, label: 'Countries' },
               { icon: MapPin, value: cities.length, label: 'Cities' },
               { icon: Camera, value: totalPhotos, label: 'Photos' },
-              { icon: Route, value: `${formatDistance(totalDistance)}km`, label: 'Traveled' },
+              { icon: Route, value: formatDistanceKm(totalDistance), label: 'Traveled' },
               { icon: Users, value: followerCount, label: 'Followers' },
               { icon: Globe, value: `${worldPercent.toFixed(1)}%`, label: 'of World' },
             ].map((stat, i) => (
@@ -484,11 +438,11 @@ export function PublicPassportContent({
                     transition={{ delay: 0.7 + i * 0.02, type: 'spring', stiffness: 200, damping: 15 }}
                   >
                     <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-2 hover:bg-primary/15 hover:border-primary/30 transition-colors duration-200 cursor-default">
-                      <span className="text-xl leading-none">{countryCodeToFlag(code)}</span>
+                      <span className="text-xl leading-none">{getFlagEmoji(code)}</span>
                       <span className="font-mono text-xs font-semibold text-primary">{code}</span>
                     </div>
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-foreground text-background text-[10px] font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                      {countryNames[code] || code}
+                      {getCountryName(code)}
                     </div>
                   </motion.div>
                 ))}

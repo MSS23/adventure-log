@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useToggleBump } from '@/lib/hooks/usePlaceRecommendations'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import { PLACE_TYPE_CONFIG } from './place-type'
 import type { PlaceRecommendation } from '@/types/database'
 
@@ -34,7 +35,7 @@ export function RecommendationCard({ recommendation }: RecommendationCardProps) 
   const creatorName =
     creator?.display_name || creator?.username || 'A traveler'
   const avatarUrl = getPhotoUrl(creator?.avatar_url, 'avatars')
-  const creatorInitial = creatorName.trim().charAt(0).toUpperCase() || 'A'
+  const creatorInitial = getDisplayInitial(creatorName, undefined)
 
   const locationLabel = [recommendation.city, recommendation.country_code]
     .filter(Boolean)

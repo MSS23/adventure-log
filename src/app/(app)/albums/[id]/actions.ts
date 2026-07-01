@@ -94,7 +94,12 @@ export async function deletePhoto(photoId: string, albumId: string): Promise<{
         .eq('id', albumId)
 
       if (albumDeleteError) {
+        // The photo was removed but the now-empty album could not be deleted.
+        // Report albumDeleted:false so the client doesn't navigate away as if
+        // the album is gone (it would reappear, empty, on refresh).
         log.error('Failed to delete empty album', { component: 'AlbumDetailActions', action: 'delete-album' }, albumDeleteError as Error)
+        revalidateAlbumPaths()
+        return { success: true, albumDeleted: false }
       }
 
       revalidateAlbumPaths()

@@ -242,7 +242,7 @@ export function CountdownDisplay({
 }
 
 // Helper function to format large numbers
-function formatCount(count: number): string {
+export function formatCount(count: number): string {
   if (count >= 1000000) {
     return `${(count / 1000000).toFixed(1)}M`
   }

@@ -72,13 +72,10 @@ export function calculateTotalDistance(albums: AlbumPreview[]): number {
 
 /**
  * Format a distance in km into a human-readable string.
+ * Re-exported for the globe page/components that thread it as a prop; delegates
+ * to the shared canonical formatter.
  */
-export function formatDistance(km: number): string {
-  if (km >= 1000) {
-    return `${(km / 1000).toFixed(1)}k km`
-  }
-  return `${km.toLocaleString()} km`
-}
+export { formatDistanceKm as formatDistance } from '@/lib/utils/geoCalculations'
 
 export function useGlobePageData() {
   const searchParams = useSearchParams()

@@ -427,6 +427,16 @@ export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: numb
   return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
 }
 
+/**
+ * Format a kilometre distance for display, abbreviating thousands and always
+ * including the unit — e.g. `500 km`, `1.2k km`. The single source of truth for
+ * the several travel-stat surfaces that used to each define this inline.
+ */
+export function formatDistanceKm(km: number): string {
+  if (km >= 1000) return `${(km / 1000).toFixed(1)}k km`
+  return `${km.toLocaleString()} km`
+}
+
 export {
   type Coordinates,
   type BoundingBox,

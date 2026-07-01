@@ -256,27 +256,12 @@ export function useGlobePageData() {
   // Calculate total distance from album coordinates
   const totalDistance = useMemo(() => calculateTotalDistance(albums), [albums])
 
-  // Preserve the original visibility/focus refetch behavior — when the tab
-  // becomes visible or the window regains focus, re-run the albums query.
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        albumsQuery.refetch()
-      }
-    }
-
-    const handleFocus = () => {
-      albumsQuery.refetch()
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [albumsQuery])
+  // NOTE: we deliberately do NOT refetch on window focus / tab visibility here.
+  // React Query already governs freshness via staleTime, and the app sets
+  // refetchOnWindowFocus:false globally. The previous manual focus/visibility
+  // listeners re-ran this page's entire data waterfall (users → albums embed →
+  // photo count) on every app-switch — especially costly in an installed PWA
+  // where focus fires constantly — for the heaviest page in the app.
 
   const handleAlbumClick = useCallback((albumId: string) => {
     const album = albums.find(a => a.id === albumId)

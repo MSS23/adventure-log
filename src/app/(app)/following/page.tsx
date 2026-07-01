@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import type { Follower } from '@/types/database'
 
 // Animated counter component
@@ -260,7 +261,7 @@ export default function FollowingPage() {
                             alt={followingUser.display_name || followingUser.username || 'User'}
                           />
                           <AvatarFallback className="bg-accent text-accent-foreground font-semibold">
-                            {(followingUser.display_name || followingUser.username || 'U').charAt(0).toUpperCase()}
+                            {getDisplayInitial(followingUser.display_name, followingUser.username)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">

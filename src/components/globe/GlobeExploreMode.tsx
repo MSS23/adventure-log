@@ -4,6 +4,7 @@ import { Camera, Loader2, Compass, Users } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface ExploreAlbum {
@@ -79,7 +80,7 @@ export function GlobeExploreStrip({
                           alt={album.owner.display_name}
                         />
                         <AvatarFallback className="text-[7px] bg-olive-600 text-white">
-                          {(album.owner.display_name || album.owner.username || '?').charAt(0).toUpperCase()}
+                          {getDisplayInitial(album.owner.display_name, album.owner.username)}
                         </AvatarFallback>
                       </Avatar>
                     </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { getPhotoUrl } from '@/lib/utils/photo-url'
 
 interface AlbumLocationInfo {
   id: string
@@ -92,9 +93,8 @@ export function useAlbumLocationData(): UseAlbumLocationDataReturn {
             if (url?.startsWith('http')) {
               return url
             } else if (url) {
-              // Construct Supabase storage URL
-              const { data } = supabase.storage.from('photos').getPublicUrl(url)
-              return data.publicUrl
+              // getPhotoUrl handles storage conversion + validation
+              return getPhotoUrl(url) || album.cover_photo_url || '/placeholder-image.jpg'
             }
             return album.cover_photo_url || '/placeholder-image.jpg'
           }) || []

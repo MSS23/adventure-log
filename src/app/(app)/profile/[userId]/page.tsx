@@ -20,6 +20,7 @@ import {
 import { User, Album } from '@/types/database'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji } from '@/lib/utils/country'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -397,7 +398,7 @@ export default function UserProfilePage() {
           <Avatar className="h-24 w-24 mx-auto ring-2 ring-background">
             <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={displayName} />
             <AvatarFallback className="bg-accent text-2xl text-accent-foreground">
-              {displayName.charAt(0).toUpperCase()}
+              {getDisplayInitial(displayName, undefined)}
             </AvatarFallback>
           </Avatar>
 
@@ -439,7 +440,7 @@ export default function UserProfilePage() {
             <Avatar className="h-24 w-24 shrink-0 ring-2 ring-background">
               <AvatarImage src={getPhotoUrl(profile.avatar_url, 'avatars') || ''} alt={displayName} />
               <AvatarFallback className="bg-accent text-2xl text-accent-foreground">
-                {displayName.charAt(0).toUpperCase()}
+                {getDisplayInitial(displayName, undefined)}
               </AvatarFallback>
             </Avatar>
 

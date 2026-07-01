@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import { cn } from '@/lib/utils'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
@@ -203,7 +204,7 @@ export function GlobePageHeader({
                         alt={friend.display_name}
                       />
                       <AvatarFallback className="text-xs bg-olive-500 text-white">
-                        {friend.display_name.charAt(0).toUpperCase()}
+                        {getDisplayInitial(friend.display_name, friend.username)}
                       </AvatarFallback>
                     </Avatar>
                   </button>

@@ -23,15 +23,10 @@ import { UserActionsMenu } from '@/components/social/UserActionsMenu'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getFlagEmoji } from '@/lib/utils/country'
+import { getDisplayInitial } from '@/lib/utils/display-name'
+import { formatDistanceKm } from '@/lib/utils/geoCalculations'
 import Image from 'next/image'
 import Link from 'next/link'
-
-function formatDistance(km: number): string {
-  if (km >= 1000) {
-    return `${(km / 1000).toFixed(1)}k`
-  }
-  return km.toLocaleString()
-}
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return ''
@@ -129,7 +124,7 @@ export function PublicProfileContent({
     { icon: Camera, value: albums.length, label: 'Adventures' },
     { icon: Globe, value: countryCodes.length, label: 'Countries' },
     { icon: Users, value: followerCount, label: 'Followers' },
-    { icon: Plane, value: formatDistance(totalDistance), label: 'km traveled' },
+    { icon: Plane, value: formatDistanceKm(totalDistance), label: 'traveled' },
   ]
 
   return (
@@ -163,7 +158,7 @@ export function PublicProfileContent({
                   alt={displayName}
                 />
                 <AvatarFallback className="bg-accent text-3xl text-accent-foreground font-heading">
-                  {displayName.charAt(0).toUpperCase()}
+                  {getDisplayInitial(user.display_name, user.username)}
                 </AvatarFallback>
               </Avatar>
             </div>

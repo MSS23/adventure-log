@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Globe, MapPin, Camera, Plane, LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatDistanceKm } from '@/lib/utils/geoCalculations'
 
 interface StatCardProps {
   value: number | string
@@ -124,13 +125,6 @@ interface AnimatedStatsGridProps {
 }
 
 export function AnimatedStatsGrid({ stats, onStatClick }: AnimatedStatsGridProps) {
-  const formatDistance = (km: number): string => {
-    if (km >= 1000) {
-      return `${Math.floor(km / 1000)}k km`
-    }
-    return `${km} km`
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -162,7 +156,7 @@ export function AnimatedStatsGrid({ stats, onStatClick }: AnimatedStatsGridProps
         onClick={() => onStatClick?.('photos')}
       />
       <StatCard
-        value={formatDistance(stats.distance)}
+        value={formatDistanceKm(stats.distance)}
         label="Distance"
         icon={Plane}
         gradient="orange"

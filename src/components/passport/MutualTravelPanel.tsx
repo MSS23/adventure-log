@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getAvatarUrl } from '@/lib/utils/avatar'
-import { getDisplayName } from '@/lib/utils/display-name'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import { log } from '@/lib/utils/logger'
 
@@ -117,7 +117,7 @@ export function MutualTravelPanel({
           <Avatar className="size-12 ring-2 ring-background shadow-sm">
             <AvatarImage src={viewerAvatar} alt={viewerName} />
             <AvatarFallback className="bg-primary/15 text-primary text-sm font-semibold">
-              {viewerName.charAt(0).toUpperCase()}
+              {getDisplayInitial(profile?.display_name, profile?.username)}
             </AvatarFallback>
           </Avatar>
 
@@ -139,7 +139,7 @@ export function MutualTravelPanel({
           <Avatar className="size-12 ring-2 ring-background shadow-sm">
             <AvatarImage src={getAvatarUrl(ownerAvatarUrl, ownerUsername)} alt={ownerName} />
             <AvatarFallback className="bg-olive-200 text-olive-800 text-sm font-semibold">
-              {ownerName.charAt(0).toUpperCase()}
+              {getDisplayInitial(ownerName, undefined)}
             </AvatarFallback>
           </Avatar>
         </div>

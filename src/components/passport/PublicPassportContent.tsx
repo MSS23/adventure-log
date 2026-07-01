@@ -10,8 +10,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getAvatarUrl } from '@/lib/utils/avatar'
-import { getDisplayName } from '@/lib/utils/display-name'
+import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
+import { formatDistanceKm } from '@/lib/utils/geoCalculations'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -20,12 +21,6 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import QRCode from 'qrcode'
 import { MutualTravelPanel } from './MutualTravelPanel'
-
-function formatDistance(km: number): string {
-  if (km >= 10000) return `${(km / 1000).toFixed(0)}k`
-  if (km >= 1000) return `${(km / 1000).toFixed(1)}k`
-  return km.toLocaleString()
-}
 
 const continentIcon: Record<string, React.ComponentType<{ className?: string }>> = {
   'Europe': Landmark, 'Asia': Mountain, 'North America': TreePine,
@@ -208,7 +203,7 @@ export function PublicPassportContent({
                 <Avatar className="size-16 ring-2 ring-background shadow">
                   <AvatarImage src={getAvatarUrl(profile?.avatar_url, profile?.username)} alt={viewerName} />
                   <AvatarFallback className="bg-primary/15 text-primary font-semibold">
-                    {viewerName.charAt(0).toUpperCase()}
+                    {getDisplayInitial(profile?.display_name, profile?.username)}
                   </AvatarFallback>
                 </Avatar>
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-coral)] text-white shadow-md">
@@ -217,7 +212,7 @@ export function PublicPassportContent({
                 <Avatar className="size-16 ring-2 ring-background shadow">
                   <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={displayName} />
                   <AvatarFallback className="bg-olive-200 text-olive-800 font-semibold">
-                    {displayName.charAt(0).toUpperCase()}
+                    {getDisplayInitial(user.display_name, user.username)}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -260,7 +255,7 @@ export function PublicPassportContent({
             <Avatar className="w-24 h-24 mx-auto mb-4 ring-2 ring-white/20">
               <AvatarImage src={getAvatarUrl(user.avatar_url, user.username)} alt={displayName} />
               <AvatarFallback className="text-2xl bg-olive-700 text-white font-heading">
-                {displayName.charAt(0).toUpperCase()}
+                {getDisplayInitial(user.display_name, user.username)}
               </AvatarFallback>
             </Avatar>
 
@@ -350,7 +345,7 @@ export function PublicPassportContent({
               { icon: Globe, value: countryCodes.length, label: 'Countries' },
               { icon: MapPin, value: cities.length, label: 'Cities' },
               { icon: Camera, value: totalPhotos, label: 'Photos' },
-              { icon: Route, value: `${formatDistance(totalDistance)} km`, label: 'Traveled' },
+              { icon: Route, value: formatDistanceKm(totalDistance), label: 'Traveled' },
               { icon: Users, value: followerCount, label: 'Followers' },
               { icon: Globe, value: `${worldPercent.toFixed(1)}%`, label: 'of World' },
             ].map((stat, i) => (

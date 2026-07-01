@@ -13,6 +13,7 @@ import { FollowButton } from '@/components/social/FollowButton'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getDisplayInitial } from '@/lib/utils/display-name'
 import type { Follower } from '@/types/database'
 
 // Animated counter component
@@ -295,7 +296,7 @@ export default function FollowersPage() {
                               alt={requester.display_name || requester.username || 'User'}
                             />
                             <AvatarFallback className="bg-accent text-accent-foreground font-semibold">
-                              {(requester.display_name || requester.username || 'U').charAt(0).toUpperCase()}
+                              {getDisplayInitial(requester.display_name, requester.username)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
@@ -414,7 +415,7 @@ export default function FollowersPage() {
                             alt={followerUser.display_name || followerUser.username || 'User'}
                           />
                           <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                            {(followerUser.display_name || followerUser.username || 'U').charAt(0).toUpperCase()}
+                            {getDisplayInitial(followerUser.display_name, followerUser.username)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">

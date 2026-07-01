@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { log } from '@/lib/utils/logger'
+import { getFlagEmoji } from '@/lib/utils/country'
 
 // Dynamically import Globe with no SSR
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
@@ -452,15 +453,6 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
   const [isHovered, setIsHovered] = useState(false)
   const router = useRouter()
 
-  // Country code to flag emoji
-  const getFlag = (code: string) => {
-    return code
-      .toUpperCase()
-      .split('')
-      .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
-      .join('')
-  }
-
   const globeUrl = userId
     ? `/globe?user=${userId}${albumId ? `&album=${albumId}` : ''}&lat=${lat}&lng=${lng}`
     : `/globe?lat=${lat}&lng=${lng}${albumId ? `&album=${albumId}` : ''}`
@@ -502,7 +494,7 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
       </motion.div>
 
       {/* Flag and location */}
-      {countryCode && <span className="text-base">{getFlag(countryCode)}</span>}
+      {countryCode && <span className="text-base">{getFlagEmoji(countryCode)}</span>}
       {location && (
         <span className="truncate max-w-[120px] font-medium">{location}</span>
       )}
@@ -541,15 +533,6 @@ export const LocationBadge = memo(function LocationBadge({
   className,
   showGlobe = false
 }: LocationBadgeProps) {
-  // Country code to flag emoji
-  const getFlag = (code: string) => {
-    return code
-      .toUpperCase()
-      .split('')
-      .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
-      .join('')
-  }
-
   const linkUrl = albumId
     ? `/globe?album=${albumId}&lat=${lat}&lng=${lng}${userId ? `&user=${userId}` : ''}`
     : `/globe?lat=${lat}&lng=${lng}`
@@ -568,7 +551,7 @@ export const LocationBadge = memo(function LocationBadge({
         href={linkUrl}
         className="flex items-center gap-1.5 text-sm text-stone-600 dark:text-stone-400 hover:text-olive-600 transition-colors"
       >
-        {countryCode && <span>{getFlag(countryCode)}</span>}
+        {countryCode && <span>{getFlagEmoji(countryCode)}</span>}
         <MapPin className="w-3.5 h-3.5" />
         <span className="truncate max-w-[150px]">{location}</span>
       </Link>

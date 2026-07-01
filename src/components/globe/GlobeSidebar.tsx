@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
 import { formatTravelDateForViewer } from '@/lib/utils/travel-date'
+import { getFlagEmoji } from '@/lib/utils/country'
 import type { WishlistItem } from '@/lib/hooks/useWishlist'
 
 interface AlbumPreview {
@@ -23,14 +24,6 @@ interface AlbumPreview {
   description?: string
 }
 
-function getCountryFlag(countryCode: string): string {
-  return countryCode
-    .toUpperCase()
-    .split('')
-    .map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65))
-    .join('')
-}
-
 // --------------- Desktop Side Panel ---------------
 
 interface GlobeSidePanelProps {
@@ -40,7 +33,7 @@ interface GlobeSidePanelProps {
 }
 
 export function GlobeSidePanel({ album, isOwnProfile, onClose }: GlobeSidePanelProps) {
-  const flag = album.country_code ? getCountryFlag(album.country_code) : null
+  const flag = album.country_code ? getFlagEmoji(album.country_code) : null
   const travelDate = formatTravelDateForViewer(
     album.date_start || album.start_date,
     isOwnProfile,
@@ -126,7 +119,7 @@ interface MobileFeaturedAlbumProps {
 }
 
 export function MobileFeaturedAlbum({ album, isOwnProfile, onClose }: MobileFeaturedAlbumProps) {
-  const flag = album.country_code ? getCountryFlag(album.country_code) : null
+  const flag = album.country_code ? getFlagEmoji(album.country_code) : null
   const travelDate = formatTravelDateForViewer(
     album.date_start || album.start_date,
     isOwnProfile,

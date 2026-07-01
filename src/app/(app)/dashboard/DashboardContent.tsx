@@ -9,6 +9,7 @@ import { motion, MotionConfig } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getFlagEmoji } from '@/lib/utils/country'
 import { log } from '@/lib/utils/logger'
 import {
   MapPin,
@@ -63,15 +64,6 @@ const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 // Ghost button styled for the dark hero (translucent white on the gradient).
 const HERO_GHOST_BTN =
   'bg-white/[0.12] text-white border border-white/20 shadow-none hover:bg-white/[0.18] hover:text-white active:scale-[0.97] focus-visible:ring-offset-transparent'
-
-function flagEmoji(code?: string | null): string {
-  if (!code || code.length !== 2) return ''
-  return code
-    .toUpperCase()
-    .split('')
-    .map((c) => String.fromCodePoint(127397 + c.charCodeAt(0)))
-    .join('')
-}
 
 export default function DashboardContent() {
   const supabase = useMemo(() => createClient(), [])
@@ -400,7 +392,7 @@ export default function DashboardContent() {
                         />
                         {album.country_code && (
                           <span className="absolute top-3 left-3 text-xl drop-shadow">
-                            {flagEmoji(album.country_code)}
+                            {getFlagEmoji(album.country_code)}
                           </span>
                         )}
                       </motion.div>

@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { getCountryName, extractCountryFromLocation } from '@/lib/utils/country'
+import { getCountryName, extractCountryFromLocation, getFlagEmoji } from '@/lib/utils/country'
 import { PageHeader } from '@/components/layout/PageHeader'
 import SavedLoading from './loading'
 
@@ -651,14 +651,6 @@ function getCountryLabel(album: SavedAlbum): string {
   // Last resort: show the code in a neutral, readable tone (the caller renders
   // group.label inside a text-foreground heading, never a green/primary token).
   return album.country_code ? album.country_code.toUpperCase() : 'Unknown Location'
-}
-
-function getFlagEmoji(code: string): string {
-  return code
-    .toUpperCase()
-    .split('')
-    .map(char => String.fromCodePoint(127397 + char.charCodeAt(0)))
-    .join('')
 }
 
 // ─── Album Card Component ────────────────────────────────────────────────────

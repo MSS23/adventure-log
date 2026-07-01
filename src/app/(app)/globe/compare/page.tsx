@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { getFlagEmoji } from '@/lib/utils/country'
 import { cn } from '@/lib/utils'
 
 interface FriendUser {
@@ -24,12 +25,6 @@ interface ComparisonData {
   onlyYou: string[]
   onlyThem: string[]
   overlapPercent: number
-}
-
-function countryCodeToFlag(code: string): string {
-  const upper = code.toUpperCase()
-  const offset = 0x1F1E6 - 65
-  return String.fromCodePoint(upper.charCodeAt(0) + offset, upper.charCodeAt(1) + offset)
 }
 
 function FriendPicker({
@@ -130,7 +125,7 @@ function CountryColumn({
               className="text-2xl"
               title={code.toUpperCase()}
             >
-              {countryCodeToFlag(code)}
+              {getFlagEmoji(code)}
             </motion.span>
           ))
         )}

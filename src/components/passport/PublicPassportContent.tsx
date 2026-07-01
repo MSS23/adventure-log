@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName } from '@/lib/utils/display-name'
+import { getFlagEmoji } from '@/lib/utils/country'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -19,10 +20,6 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import QRCode from 'qrcode'
 import { MutualTravelPanel } from './MutualTravelPanel'
-
-function countryCodeToFlag(code: string): string {
-  return code.toUpperCase().split('').map(c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)).join('')
-}
 
 function formatDistance(km: number): string {
   if (km >= 10000) return `${(km / 1000).toFixed(0)}k`
@@ -484,7 +481,7 @@ export function PublicPassportContent({
                     transition={{ delay: 0.7 + i * 0.02, type: 'spring', stiffness: 200, damping: 15 }}
                   >
                     <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-2 hover:bg-primary/15 hover:border-primary/30 transition-colors duration-200 cursor-default">
-                      <span className="text-xl leading-none">{countryCodeToFlag(code)}</span>
+                      <span className="text-xl leading-none">{getFlagEmoji(code)}</span>
                       <span className="font-mono text-xs font-semibold text-primary">{code}</span>
                     </div>
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-foreground text-background text-[10px] font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">

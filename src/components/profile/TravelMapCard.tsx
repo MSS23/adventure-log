@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Share2, Download, Check, Loader2, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { getFlagEmoji } from '@/lib/utils/country'
 
 interface TravelMapCardProps {
   userId: string
@@ -12,14 +13,6 @@ interface TravelMapCardProps {
   countryCodes: string[]
   cityCount: number
   albumCount: number
-}
-
-function countryCodeToFlag(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split('')
-    .map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
-  return String.fromCodePoint(...codePoints)
 }
 
 export function TravelMapCard({
@@ -93,7 +86,7 @@ export function TravelMapCard({
     }
   }
 
-  const flags = countryCodes.slice(0, 12).map(countryCodeToFlag)
+  const flags = countryCodes.slice(0, 12).map((code) => getFlagEmoji(code))
 
   return (
     <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#111111] overflow-hidden shadow-sm">

@@ -3,16 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 import { haversineKm } from '@/lib/utils/geoCalculations'
+import { getFlagEmoji } from '@/lib/utils/country'
 
 export const runtime = 'nodejs'
-
-function countryCodeToFlag(code: string): string {
-  const codePoints = code
-    .toUpperCase()
-    .split('')
-    .map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
-  return String.fromCodePoint(...codePoints)
-}
 
 function formatDistance(km: number): string {
   if (km >= 1000) return `${(km / 1000).toFixed(1)}k`
@@ -104,7 +97,7 @@ export async function GET(request: NextRequest) {
     }
     const countryCodes = [...new Set(allAlbums.filter(a => a.country_code).map(a => a.country_code as string))]
     const cities = [...new Set(allAlbums.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
-    const flags = countryCodes.slice(0, 24).map(countryCodeToFlag)
+    const flags = countryCodes.slice(0, 24).map(getFlagEmoji)
 
     // Calculate distance
     const coords = allAlbums

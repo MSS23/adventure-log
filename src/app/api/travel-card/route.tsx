@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 import { haversineKm } from '@/lib/utils/geoCalculations'
 import { getFlagEmoji } from '@/lib/utils/country'
+import { countContinents } from '@/lib/utils/continents'
 
 export const runtime = 'nodejs'
 
@@ -22,24 +23,6 @@ function getPersonality(countries: number, trips: number, continents: number): s
   if (trips >= 3) return 'Weekend Warrior'
   if (trips >= 1) return 'Rising Explorer'
   return 'Future Explorer'
-}
-
-const continentMap: Record<string, string> = {
-  US: 'NA', CA: 'NA', MX: 'NA', GT: 'NA', BZ: 'NA', HN: 'NA', SV: 'NA', NI: 'NA', CR: 'NA', PA: 'NA',
-  CU: 'NA', JM: 'NA', HT: 'NA', DO: 'NA', TT: 'NA', BB: 'NA', BS: 'NA', PR: 'NA',
-  BR: 'SA', AR: 'SA', CL: 'SA', CO: 'SA', PE: 'SA', VE: 'SA', EC: 'SA', BO: 'SA', PY: 'SA', UY: 'SA', GY: 'SA', SR: 'SA',
-  GB: 'EU', FR: 'EU', DE: 'EU', IT: 'EU', ES: 'EU', PT: 'EU', NL: 'EU', BE: 'EU', CH: 'EU', AT: 'EU',
-  SE: 'EU', NO: 'EU', DK: 'EU', FI: 'EU', IE: 'EU', PL: 'EU', CZ: 'EU', GR: 'EU', HR: 'EU', RO: 'EU',
-  HU: 'EU', BG: 'EU', SK: 'EU', SI: 'EU', LT: 'EU', LV: 'EU', EE: 'EU', MT: 'EU', CY: 'EU', LU: 'EU',
-  IS: 'EU', RS: 'EU', BA: 'EU', ME: 'EU', MK: 'EU', AL: 'EU', XK: 'EU', MD: 'EU', UA: 'EU', BY: 'EU',
-  CN: 'AS', JP: 'AS', KR: 'AS', IN: 'AS', TH: 'AS', VN: 'AS', ID: 'AS', MY: 'AS', SG: 'AS', PH: 'AS',
-  TW: 'AS', HK: 'AS', MO: 'AS', MM: 'AS', KH: 'AS', LA: 'AS', BD: 'AS', LK: 'AS', NP: 'AS', PK: 'AS',
-  AE: 'AS', SA: 'AS', QA: 'AS', KW: 'AS', BH: 'AS', OM: 'AS', JO: 'AS', LB: 'AS', IL: 'AS', TR: 'AS',
-  GE: 'AS', AM: 'AS', AZ: 'AS', KZ: 'AS', UZ: 'AS', MN: 'AS',
-  ZA: 'AF', EG: 'AF', MA: 'AF', KE: 'AF', TZ: 'AF', NG: 'AF', GH: 'AF', ET: 'AF', UG: 'AF', RW: 'AF',
-  SN: 'AF', CI: 'AF', CM: 'AF', TN: 'AF', DZ: 'AF', MZ: 'AF', ZW: 'AF', BW: 'AF', NA: 'AF', MU: 'AF',
-  AU: 'OC', NZ: 'OC', FJ: 'OC', PG: 'OC', WS: 'OC', TO: 'OC', VU: 'OC', PF: 'OC', NC: 'OC', GU: 'OC',
-  RU: 'EU',
 }
 
 export async function GET(request: NextRequest) {
@@ -114,10 +97,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Count continents
-    const continents = new Set(countryCodes.map(c => continentMap[c]).filter(Boolean))
+    const continentCount = countContinents(countryCodes)
 
     const displayName = user.display_name || user.username || 'Traveler'
-    const personality = getPersonality(countryCodes.length, allAlbums.length, continents.size)
+    const personality = getPersonality(countryCodes.length, allAlbums.length, continentCount)
     const worldPercent = Math.round((countryCodes.length / 195) * 100)
 
     return new ImageResponse(

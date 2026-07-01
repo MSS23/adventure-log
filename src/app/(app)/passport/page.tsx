@@ -21,79 +21,7 @@ import { PassportScanner } from '@/components/passport/PassportScanner'
 import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
 import { haversineKm } from '@/lib/utils/geoCalculations'
 import { getCountryName } from '@/lib/utils/country'
-
-// ---------------------------------------------------------------------------
-// Country-to-continent mapping
-// ---------------------------------------------------------------------------
-const continentMap: Record<string, string> = {
-  US: 'North America', CA: 'North America', MX: 'North America',
-  GT: 'North America', BZ: 'North America', HN: 'North America',
-  SV: 'North America', NI: 'North America', CR: 'North America',
-  PA: 'North America', CU: 'North America', JM: 'North America',
-  HT: 'North America', DO: 'North America', TT: 'North America',
-  BB: 'North America', BS: 'North America', PR: 'North America',
-  AG: 'North America', DM: 'North America', GD: 'North America',
-  KN: 'North America', LC: 'North America', VC: 'North America',
-  BR: 'South America', AR: 'South America', CL: 'South America',
-  CO: 'South America', PE: 'South America', VE: 'South America',
-  EC: 'South America', BO: 'South America', PY: 'South America',
-  UY: 'South America', GY: 'South America', SR: 'South America',
-  GF: 'South America',
-  GB: 'Europe', FR: 'Europe', DE: 'Europe', IT: 'Europe',
-  ES: 'Europe', PT: 'Europe', NL: 'Europe', BE: 'Europe',
-  CH: 'Europe', AT: 'Europe', SE: 'Europe', NO: 'Europe',
-  DK: 'Europe', FI: 'Europe', IE: 'Europe', PL: 'Europe',
-  CZ: 'Europe', RO: 'Europe', HU: 'Europe', GR: 'Europe',
-  HR: 'Europe', BG: 'Europe', SK: 'Europe', SI: 'Europe',
-  LT: 'Europe', LV: 'Europe', EE: 'Europe', CY: 'Europe',
-  MT: 'Europe', LU: 'Europe', IS: 'Europe', AL: 'Europe',
-  RS: 'Europe', BA: 'Europe', ME: 'Europe', MK: 'Europe',
-  XK: 'Europe', MD: 'Europe', UA: 'Europe', BY: 'Europe',
-  RU: 'Europe', GE: 'Europe', AM: 'Europe', AZ: 'Europe',
-  TR: 'Europe', MC: 'Europe', AD: 'Europe', SM: 'Europe',
-  VA: 'Europe', LI: 'Europe',
-  ZA: 'Africa', NG: 'Africa', KE: 'Africa', EG: 'Africa',
-  MA: 'Africa', GH: 'Africa', TZ: 'Africa', ET: 'Africa',
-  UG: 'Africa', SN: 'Africa', CI: 'Africa', CM: 'Africa',
-  MZ: 'Africa', MG: 'Africa', AO: 'Africa', ZM: 'Africa',
-  ZW: 'Africa', BW: 'Africa', NA: 'Africa', RW: 'Africa',
-  TN: 'Africa', DZ: 'Africa', LY: 'Africa', SD: 'Africa',
-  ML: 'Africa', NE: 'Africa', TD: 'Africa', GA: 'Africa',
-  CG: 'Africa', CD: 'Africa', BJ: 'Africa', BF: 'Africa',
-  TG: 'Africa', SL: 'Africa', LR: 'Africa', GN: 'Africa',
-  GW: 'Africa', CV: 'Africa', MU: 'Africa', SC: 'Africa',
-  ER: 'Africa', DJ: 'Africa', SO: 'Africa', MW: 'Africa',
-  LS: 'Africa', SZ: 'Africa', GM: 'Africa', MR: 'Africa',
-  SS: 'Africa', CF: 'Africa', GQ: 'Africa', ST: 'Africa',
-  KM: 'Africa',
-  CN: 'Asia', JP: 'Asia', KR: 'Asia', IN: 'Asia',
-  ID: 'Asia', TH: 'Asia', VN: 'Asia', PH: 'Asia',
-  MY: 'Asia', SG: 'Asia', MM: 'Asia', KH: 'Asia',
-  LA: 'Asia', BD: 'Asia', LK: 'Asia', NP: 'Asia',
-  PK: 'Asia', AF: 'Asia', IR: 'Asia', IQ: 'Asia',
-  SA: 'Asia', AE: 'Asia', QA: 'Asia', KW: 'Asia',
-  BH: 'Asia', OM: 'Asia', YE: 'Asia', JO: 'Asia',
-  LB: 'Asia', SY: 'Asia', IL: 'Asia', PS: 'Asia',
-  UZ: 'Asia', KZ: 'Asia', KG: 'Asia', TJ: 'Asia',
-  TM: 'Asia', MN: 'Asia', BN: 'Asia', TL: 'Asia',
-  MV: 'Asia', BT: 'Asia', TW: 'Asia', HK: 'Asia',
-  MO: 'Asia', KP: 'Asia',
-  AU: 'Oceania', NZ: 'Oceania', FJ: 'Oceania', PG: 'Oceania',
-  WS: 'Oceania', TO: 'Oceania', VU: 'Oceania', SB: 'Oceania',
-  KI: 'Oceania', FM: 'Oceania', MH: 'Oceania', PW: 'Oceania',
-  NR: 'Oceania', TV: 'Oceania', CK: 'Oceania', NU: 'Oceania',
-  NC: 'Oceania', PF: 'Oceania', GU: 'Oceania',
-}
-
-const continentTotals: Record<string, number> = {
-  'North America': 23, 'South America': 13, 'Europe': 50,
-  'Africa': 54, 'Asia': 48, 'Oceania': 14,
-}
-
-const continentEmoji: Record<string, string> = {
-  'Europe': '🏰', 'Asia': '🏯', 'North America': '🗽',
-  'South America': '🌿', 'Africa': '🦁', 'Oceania': '🏝️',
-}
+import { getContinent, CONTINENT_TOTALS, CONTINENT_EMOJI, type Continent } from '@/lib/utils/continents'
 
 
 // ---------------------------------------------------------------------------
@@ -103,7 +31,7 @@ interface PersonalityResult { type: string; emoji: string; description: string }
 
 function computePersonality(countryCodes: string[], albumCount: number): PersonalityResult {
   const unique = countryCodes.length
-  const continents = new Set(countryCodes.map(c => continentMap[c]).filter(Boolean))
+  const continents = new Set(countryCodes.map(c => getContinent(c)).filter(Boolean))
 
   if (unique === 0) return { type: 'Rising Explorer', emoji: '🌱', description: 'Your journey is just beginning. Every great explorer started with a single step — your first adventure awaits.' }
   if (continents.size >= 4) return { type: 'Cultural Nomad', emoji: '🌍', description: 'You seek diversity across continents, immersing yourself in cultures far and wide.' }
@@ -293,7 +221,7 @@ function computePassportData(validAlbums: PassportAlbum[], photoCount: number): 
 
   const visitedByCont: Record<string, Set<string>> = {}
   for (const code of countryCodes) {
-    const cont = continentMap[code]
+    const cont = getContinent(code)
     if (cont) { if (!visitedByCont[cont]) visitedByCont[cont] = new Set(); visitedByCont[cont].add(code) }
   }
 
@@ -317,7 +245,7 @@ function computePassportData(validAlbums: PassportAlbum[], photoCount: number): 
     cityCount: cities.size,
     totalDistanceKm: Math.round(totalDistanceKm),
     personality: computePersonality(countryCodes, validAlbums.length),
-    continentProgress: Object.entries(continentTotals).map(([name, total]) => ({
+    continentProgress: Object.entries(CONTINENT_TOTALS).map(([name, total]) => ({
       name, visited: visitedByCont[name]?.size || 0, total,
     })),
     firstTrip,
@@ -690,7 +618,7 @@ export default function TravelPassportPage() {
                 )}
               >
                 <div className="flex items-center gap-2 mb-2.5">
-                  <span className="text-lg">{continentEmoji[cont.name] || '🌍'}</span>
+                  <span className="text-lg">{CONTINENT_EMOJI[cont.name as Continent] || '🌍'}</span>
                   <span className="text-xs font-semibold text-foreground truncate">{cont.name}</span>
                 </div>
                 <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">

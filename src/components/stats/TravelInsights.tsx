@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { getContinent } from '@/lib/utils/continents'
 import { Globe, Camera, MapPin, Plane } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -174,16 +175,7 @@ export function TravelInsights() {
   }
 
   function detectContinent(countryCode: string): string {
-    // Simplified continent mapping
-    const continentMap: Record<string, string> = {
-      US: 'North America', CA: 'North America', MX: 'North America',
-      GB: 'Europe', FR: 'Europe', DE: 'Europe', IT: 'Europe', ES: 'Europe', PT: 'Portugal', NL: 'Europe',
-      JP: 'Asia', CN: 'Asia', IN: 'Asia', TH: 'Asia', KR: 'Asia', SG: 'Asia', VN: 'Asia',
-      BR: 'South America', AR: 'South America', CL: 'South America', PE: 'South America',
-      AU: 'Oceania', NZ: 'Oceania',
-      EG: 'Africa', ZA: 'Africa', KE: 'Africa', MA: 'Africa', TN: 'Africa'
-    }
-    return continentMap[countryCode] || 'Other'
+    return getContinent(countryCode) || 'Other'
   }
 
   if (loading) {

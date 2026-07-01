@@ -2,29 +2,8 @@ import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { PublicPassportContent } from '@/components/passport/PublicPassportContent'
 import { haversineKm } from '@/lib/utils/geoCalculations'
+import { getContinent, type Continent } from '@/lib/utils/continents'
 
-const continentMap: Record<string, string> = {
-  US: 'North America', CA: 'North America', MX: 'North America', GT: 'North America',
-  CR: 'North America', PA: 'North America', CU: 'North America', JM: 'North America',
-  DO: 'North America', TT: 'North America', BS: 'North America', PR: 'North America',
-  BR: 'South America', AR: 'South America', CL: 'South America', CO: 'South America',
-  PE: 'South America', VE: 'South America', EC: 'South America', BO: 'South America',
-  PY: 'South America', UY: 'South America',
-  GB: 'Europe', FR: 'Europe', DE: 'Europe', IT: 'Europe', ES: 'Europe', PT: 'Europe',
-  NL: 'Europe', BE: 'Europe', CH: 'Europe', AT: 'Europe', SE: 'Europe', NO: 'Europe',
-  DK: 'Europe', FI: 'Europe', IE: 'Europe', PL: 'Europe', CZ: 'Europe', GR: 'Europe',
-  HR: 'Europe', RO: 'Europe', HU: 'Europe', BG: 'Europe', RS: 'Europe', IS: 'Europe',
-  SK: 'Europe', SI: 'Europe', LT: 'Europe', LV: 'Europe', EE: 'Europe', MT: 'Europe',
-  CY: 'Europe', LU: 'Europe', AL: 'Europe', ME: 'Europe', MK: 'Europe', BA: 'Europe',
-  UA: 'Europe', RU: 'Europe',
-  CN: 'Asia', JP: 'Asia', KR: 'Asia', IN: 'Asia', TH: 'Asia', VN: 'Asia', ID: 'Asia',
-  MY: 'Asia', SG: 'Asia', PH: 'Asia', TW: 'Asia', HK: 'Asia', MM: 'Asia', KH: 'Asia',
-  LA: 'Asia', BD: 'Asia', LK: 'Asia', NP: 'Asia', PK: 'Asia', AE: 'Asia', SA: 'Asia',
-  QA: 'Asia', KW: 'Asia', JO: 'Asia', LB: 'Asia', IL: 'Asia', TR: 'Asia', GE: 'Asia',
-  ZA: 'Africa', EG: 'Africa', MA: 'Africa', KE: 'Africa', TZ: 'Africa', NG: 'Africa',
-  GH: 'Africa', ET: 'Africa', TN: 'Africa', SN: 'Africa', RW: 'Africa', MU: 'Africa',
-  AU: 'Oceania', NZ: 'Oceania', FJ: 'Oceania', PG: 'Oceania',
-}
 
 export async function generateMetadata({
   params,
@@ -134,7 +113,7 @@ export default async function PublicPassportPage({
   }
 
   // Compute continents
-  const continentsVisited = [...new Set(countryCodes.map(c => continentMap[c]).filter(Boolean))]
+  const continentsVisited = [...new Set(countryCodes.map(c => getContinent(c)).filter((c): c is Continent => !!c))]
 
   // Compute personality
   let personality = 'Future Explorer'

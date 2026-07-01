@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName } from '@/lib/utils/display-name'
-import { getFlagEmoji } from '@/lib/utils/country'
+import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -32,44 +32,6 @@ const continentIcon: Record<string, React.ComponentType<{ className?: string }>>
   'South America': TreePine, 'Africa': Sun, 'Oceania': Waves,
 }
 
-const countryNames: Record<string, string> = {
-  US: 'United States', CA: 'Canada', MX: 'Mexico', GT: 'Guatemala',
-  BZ: 'Belize', HN: 'Honduras', SV: 'El Salvador', NI: 'Nicaragua',
-  CR: 'Costa Rica', PA: 'Panama', CU: 'Cuba', JM: 'Jamaica',
-  HT: 'Haiti', DO: 'Dominican Republic', TT: 'Trinidad & Tobago',
-  BB: 'Barbados', BS: 'Bahamas', PR: 'Puerto Rico',
-  BR: 'Brazil', AR: 'Argentina', CL: 'Chile', CO: 'Colombia',
-  PE: 'Peru', VE: 'Venezuela', EC: 'Ecuador', BO: 'Bolivia',
-  PY: 'Paraguay', UY: 'Uruguay', GY: 'Guyana', SR: 'Suriname',
-  GB: 'United Kingdom', FR: 'France', DE: 'Germany', IT: 'Italy',
-  ES: 'Spain', PT: 'Portugal', NL: 'Netherlands', BE: 'Belgium',
-  CH: 'Switzerland', AT: 'Austria', SE: 'Sweden', NO: 'Norway',
-  DK: 'Denmark', FI: 'Finland', IE: 'Ireland', PL: 'Poland',
-  CZ: 'Czechia', RO: 'Romania', HU: 'Hungary', GR: 'Greece',
-  HR: 'Croatia', BG: 'Bulgaria', SK: 'Slovakia', SI: 'Slovenia',
-  LT: 'Lithuania', LV: 'Latvia', EE: 'Estonia', CY: 'Cyprus',
-  MT: 'Malta', LU: 'Luxembourg', IS: 'Iceland', AL: 'Albania',
-  RS: 'Serbia', BA: 'Bosnia', ME: 'Montenegro', MK: 'North Macedonia',
-  UA: 'Ukraine', TR: 'Turkey', RU: 'Russia', GE: 'Georgia',
-  ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', EG: 'Egypt',
-  MA: 'Morocco', GH: 'Ghana', TZ: 'Tanzania', ET: 'Ethiopia',
-  UG: 'Uganda', SN: 'Senegal', TN: 'Tunisia', RW: 'Rwanda',
-  BW: 'Botswana', NA: 'Namibia', MZ: 'Mozambique', MG: 'Madagascar',
-  ZW: 'Zimbabwe', ZM: 'Zambia', AO: 'Angola', CM: 'Cameroon',
-  MU: 'Mauritius', SC: 'Seychelles',
-  CN: 'China', JP: 'Japan', KR: 'South Korea', IN: 'India',
-  ID: 'Indonesia', TH: 'Thailand', VN: 'Vietnam', PH: 'Philippines',
-  MY: 'Malaysia', SG: 'Singapore', MM: 'Myanmar', KH: 'Cambodia',
-  LA: 'Laos', BD: 'Bangladesh', LK: 'Sri Lanka', NP: 'Nepal',
-  PK: 'Pakistan', IR: 'Iran', SA: 'Saudi Arabia', AE: 'UAE',
-  QA: 'Qatar', KW: 'Kuwait', BH: 'Bahrain', OM: 'Oman',
-  JO: 'Jordan', LB: 'Lebanon', IL: 'Israel', TW: 'Taiwan',
-  HK: 'Hong Kong', MN: 'Mongolia', UZ: 'Uzbekistan', KZ: 'Kazakhstan',
-  MV: 'Maldives', BT: 'Bhutan',
-  AU: 'Australia', NZ: 'New Zealand', FJ: 'Fiji', PG: 'Papua New Guinea',
-  WS: 'Samoa', TO: 'Tonga', VU: 'Vanuatu', NC: 'New Caledonia',
-  PF: 'French Polynesia',
-}
 
 // ---------------------------------------------------------------------------
 // QR Code component
@@ -485,7 +447,7 @@ export function PublicPassportContent({
                       <span className="font-mono text-xs font-semibold text-primary">{code}</span>
                     </div>
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-foreground text-background text-[10px] font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                      {countryNames[code] || code}
+                      {getCountryName(code)}
                     </div>
                   </motion.div>
                 ))}

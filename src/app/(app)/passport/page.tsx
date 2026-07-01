@@ -20,6 +20,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { PassportScanner } from '@/components/passport/PassportScanner'
 import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
 import { haversineKm } from '@/lib/utils/geoCalculations'
+import { getCountryName } from '@/lib/utils/country'
 
 // ---------------------------------------------------------------------------
 // Country-to-continent mapping
@@ -94,44 +95,6 @@ const continentEmoji: Record<string, string> = {
   'South America': '🌿', 'Africa': '🦁', 'Oceania': '🏝️',
 }
 
-const countryNames: Record<string, string> = {
-  US: 'United States', CA: 'Canada', MX: 'Mexico', GT: 'Guatemala',
-  BZ: 'Belize', HN: 'Honduras', SV: 'El Salvador', NI: 'Nicaragua',
-  CR: 'Costa Rica', PA: 'Panama', CU: 'Cuba', JM: 'Jamaica',
-  HT: 'Haiti', DO: 'Dominican Republic', TT: 'Trinidad & Tobago',
-  BB: 'Barbados', BS: 'Bahamas', PR: 'Puerto Rico',
-  BR: 'Brazil', AR: 'Argentina', CL: 'Chile', CO: 'Colombia',
-  PE: 'Peru', VE: 'Venezuela', EC: 'Ecuador', BO: 'Bolivia',
-  PY: 'Paraguay', UY: 'Uruguay', GY: 'Guyana', SR: 'Suriname',
-  GB: 'United Kingdom', FR: 'France', DE: 'Germany', IT: 'Italy',
-  ES: 'Spain', PT: 'Portugal', NL: 'Netherlands', BE: 'Belgium',
-  CH: 'Switzerland', AT: 'Austria', SE: 'Sweden', NO: 'Norway',
-  DK: 'Denmark', FI: 'Finland', IE: 'Ireland', PL: 'Poland',
-  CZ: 'Czechia', RO: 'Romania', HU: 'Hungary', GR: 'Greece',
-  HR: 'Croatia', BG: 'Bulgaria', SK: 'Slovakia', SI: 'Slovenia',
-  LT: 'Lithuania', LV: 'Latvia', EE: 'Estonia', CY: 'Cyprus',
-  MT: 'Malta', LU: 'Luxembourg', IS: 'Iceland', AL: 'Albania',
-  RS: 'Serbia', BA: 'Bosnia', ME: 'Montenegro', MK: 'North Macedonia',
-  UA: 'Ukraine', TR: 'Turkey', RU: 'Russia', GE: 'Georgia',
-  ZA: 'South Africa', NG: 'Nigeria', KE: 'Kenya', EG: 'Egypt',
-  MA: 'Morocco', GH: 'Ghana', TZ: 'Tanzania', ET: 'Ethiopia',
-  UG: 'Uganda', SN: 'Senegal', TN: 'Tunisia', RW: 'Rwanda',
-  BW: 'Botswana', NA: 'Namibia', MZ: 'Mozambique', MG: 'Madagascar',
-  ZW: 'Zimbabwe', ZM: 'Zambia', AO: 'Angola', CM: 'Cameroon',
-  MU: 'Mauritius', SC: 'Seychelles',
-  CN: 'China', JP: 'Japan', KR: 'South Korea', IN: 'India',
-  ID: 'Indonesia', TH: 'Thailand', VN: 'Vietnam', PH: 'Philippines',
-  MY: 'Malaysia', SG: 'Singapore', MM: 'Myanmar', KH: 'Cambodia',
-  LA: 'Laos', BD: 'Bangladesh', LK: 'Sri Lanka', NP: 'Nepal',
-  PK: 'Pakistan', IR: 'Iran', SA: 'Saudi Arabia', AE: 'UAE',
-  QA: 'Qatar', KW: 'Kuwait', BH: 'Bahrain', OM: 'Oman',
-  JO: 'Jordan', LB: 'Lebanon', IL: 'Israel', TW: 'Taiwan',
-  HK: 'Hong Kong', MN: 'Mongolia', UZ: 'Uzbekistan', KZ: 'Kazakhstan',
-  MV: 'Maldives', BT: 'Bhutan',
-  AU: 'Australia', NZ: 'New Zealand', FJ: 'Fiji', PG: 'Papua New Guinea',
-  WS: 'Samoa', TO: 'Tonga', VU: 'Vanuatu', NC: 'New Caledonia',
-  PF: 'French Polynesia',
-}
 
 // ---------------------------------------------------------------------------
 // Travel personality
@@ -676,7 +639,7 @@ export default function TravelPassportPage() {
           className="mb-6"
         >
           <p className="al-eyebrow mb-3 px-1">Your World</p>
-          <PassportWorldMap albums={data.albums} countryNames={countryNames} />
+          <PassportWorldMap albums={data.albums} />
         </motion.div>
       )}
 
@@ -762,7 +725,7 @@ export default function TravelPassportPage() {
           const date = earliestByCountry.get(code)
           return {
             code,
-            name: countryNames[code] || code,
+            name: getCountryName(code),
             rotation: rotations[i % rotations.length],
             dateLabel: date
               ? new Date(date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase()

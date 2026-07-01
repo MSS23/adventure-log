@@ -21,26 +21,8 @@ import { PassportScanner } from '@/components/passport/PassportScanner'
 import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
 import { haversineKm } from '@/lib/utils/geoCalculations'
 import { getCountryName } from '@/lib/utils/country'
-import { getContinent, CONTINENT_TOTALS, CONTINENT_EMOJI, type Continent } from '@/lib/utils/continents'
-
-
-// ---------------------------------------------------------------------------
-// Travel personality
-// ---------------------------------------------------------------------------
-interface PersonalityResult { type: string; emoji: string; description: string }
-
-function computePersonality(countryCodes: string[], albumCount: number): PersonalityResult {
-  const unique = countryCodes.length
-  const continents = new Set(countryCodes.map(c => getContinent(c)).filter(Boolean))
-
-  if (unique === 0) return { type: 'Rising Explorer', emoji: '🌱', description: 'Your journey is just beginning. Every great explorer started with a single step — your first adventure awaits.' }
-  if (continents.size >= 4) return { type: 'Cultural Nomad', emoji: '🌍', description: 'You seek diversity across continents, immersing yourself in cultures far and wide.' }
-  if (unique >= 10) return { type: 'Globe Trotter', emoji: '✈️', description: 'With 10+ countries under your belt, you\'re a seasoned traveler who thrives on new horizons.' }
-  if (unique <= 3 && albumCount >= 8) return { type: 'Deep Diver', emoji: '🤿', description: 'You believe in truly knowing a place. Rather than skimming, you explore every corner.' }
-  if (albumCount >= 10 && unique <= 5) return { type: 'Weekend Warrior', emoji: '🎒', description: 'You make the most of every opportunity, packing adventures into every spare moment.' }
-  if (unique >= 3) return { type: 'Urban Explorer', emoji: '🏙️', description: 'Cities are your playground. From hidden alleys to rooftop bars, you uncover a city\'s soul.' }
-  return { type: 'Rising Explorer', emoji: '🌱', description: 'Your journey is just beginning — keep going!' }
-}
+import { getContinent, CONTINENT_TOTALS, CONTINENT_EMOJI, countContinents, type Continent } from '@/lib/utils/continents'
+import { getTravelPersonality, type TravelPersonality } from '@/lib/utils/travel-personality'
 
 // ---------------------------------------------------------------------------
 // Journey narrative statements — generates 2–5 storytelling lines from data
@@ -154,7 +136,7 @@ interface PassportAlbum {
 
 interface PassportData {
   albums: PassportAlbum[]; photoCount: number; countryCodes: string[]; cityCount: number
-  totalDistanceKm: number; personality: PersonalityResult
+  totalDistanceKm: number; personality: TravelPersonality
   continentProgress: { name: string; visited: number; total: number }[]
   firstTrip: { date: string; location: string } | null
   latestTrip: { date: string; location: string } | null
@@ -244,7 +226,12 @@ function computePassportData(validAlbums: PassportAlbum[], photoCount: number): 
     countryCodes,
     cityCount: cities.size,
     totalDistanceKm: Math.round(totalDistanceKm),
-    personality: computePersonality(countryCodes, validAlbums.length),
+    personality: getTravelPersonality({
+      countries: countryCodes.length,
+      trips: validAlbums.length,
+      cities: cities.size,
+      continents: countContinents(countryCodes),
+    }),
     continentProgress: Object.entries(CONTINENT_TOTALS).map(([name, total]) => ({
       name, visited: visitedByCont[name]?.size || 0, total,
     })),

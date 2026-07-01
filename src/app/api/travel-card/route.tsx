@@ -5,6 +5,7 @@ import { log } from '@/lib/utils/logger'
 import { haversineKm } from '@/lib/utils/geoCalculations'
 import { getFlagEmoji } from '@/lib/utils/country'
 import { countContinents } from '@/lib/utils/continents'
+import { getTravelPersonality } from '@/lib/utils/travel-personality'
 
 export const runtime = 'nodejs'
 
@@ -13,17 +14,6 @@ function formatDistance(km: number): string {
   return km.toLocaleString()
 }
 
-function getPersonality(countries: number, trips: number, continents: number): string {
-  if (continents >= 5) return 'World Explorer'
-  if (countries >= 15) return 'Globe Trotter'
-  if (countries >= 10) return 'Cultural Nomad'
-  if (trips >= 12) return 'Perpetual Nomad'
-  if (countries >= 5) return 'World Wanderer'
-  if (trips >= 6) return 'Adventure Seeker'
-  if (trips >= 3) return 'Weekend Warrior'
-  if (trips >= 1) return 'Rising Explorer'
-  return 'Future Explorer'
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
@@ -100,7 +90,12 @@ export async function GET(request: NextRequest) {
     const continentCount = countContinents(countryCodes)
 
     const displayName = user.display_name || user.username || 'Traveler'
-    const personality = getPersonality(countryCodes.length, allAlbums.length, continentCount)
+    const personality = getTravelPersonality({
+      countries: countryCodes.length,
+      trips: allAlbums.length,
+      cities: cities.length,
+      continents: continentCount,
+    }).type
     const worldPercent = Math.round((countryCodes.length / 195) * 100)
 
     return new ImageResponse(

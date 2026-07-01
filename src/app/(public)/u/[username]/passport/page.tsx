@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PublicPassportContent } from '@/components/passport/PublicPassportContent'
 import { haversineKm } from '@/lib/utils/geoCalculations'
 import { getContinent, type Continent } from '@/lib/utils/continents'
+import { getTravelPersonality } from '@/lib/utils/travel-personality'
 
 
 export async function generateMetadata({
@@ -116,15 +117,12 @@ export default async function PublicPassportPage({
   const continentsVisited = [...new Set(countryCodes.map(c => getContinent(c)).filter((c): c is Continent => !!c))]
 
   // Compute personality
-  let personality = 'Future Explorer'
-  if (continentsVisited.length >= 5) personality = 'World Explorer'
-  else if (countryCodes.length >= 15) personality = 'Globe Trotter'
-  else if (countryCodes.length >= 10) personality = 'Cultural Nomad'
-  else if (safeAlbums.length >= 12) personality = 'Perpetual Nomad'
-  else if (countryCodes.length >= 5) personality = 'World Wanderer'
-  else if (safeAlbums.length >= 6) personality = 'Adventure Seeker'
-  else if (safeAlbums.length >= 3) personality = 'Weekend Warrior'
-  else if (safeAlbums.length >= 1) personality = 'Rising Explorer'
+  const personality = getTravelPersonality({
+    countries: countryCodes.length,
+    trips: safeAlbums.length,
+    cities: cities.length,
+    continents: continentsVisited.length,
+  }).type
 
   // First and latest trip. Only expose a distinct "latest" when there's more
   // than one album — otherwise the single album is both first and latest and

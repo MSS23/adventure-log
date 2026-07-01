@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { haversineKm } from '@/lib/utils/geoCalculations'
+import { countContinents } from '@/lib/utils/continents'
+import { getTravelPersonality } from '@/lib/utils/travel-personality'
 
 export interface WrappedData {
   year: number | 'all'
@@ -38,22 +40,6 @@ export interface WrappedData {
     /** ISO 2-letter country code, when known. */
     country?: string
   }[]
-}
-
-function getTravelPersonality(data: {
-  totalTrips: number
-  countryCodes: string[]
-  cities: string[]
-}): string {
-  const { totalTrips, countryCodes, cities } = data
-  if (countryCodes.length >= 10) return 'Globe Trotter'
-  if (totalTrips >= 12) return 'Perpetual Nomad'
-  if (cities.length >= 15) return 'City Explorer'
-  if (countryCodes.length >= 5) return 'World Wanderer'
-  if (totalTrips >= 6) return 'Adventure Seeker'
-  if (totalTrips >= 3) return 'Weekend Explorer'
-  if (totalTrips >= 1) return 'Rising Adventurer'
-  return 'Future Explorer'
 }
 
 const EMPTY_DATA: WrappedData = {
@@ -203,7 +189,12 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
           }
         }
 
-        const personality = getTravelPersonality({ totalTrips: albumList.length, countryCodes, cities })
+        const personality = getTravelPersonality({
+          countries: countryCodes.length,
+          trips: albumList.length,
+          cities: cities.length,
+          continents: countContinents(countryCodes),
+        }).type
 
         setData({
           year: mode,

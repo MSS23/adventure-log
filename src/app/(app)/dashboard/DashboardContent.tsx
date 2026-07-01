@@ -100,7 +100,7 @@ export default function DashboardContent() {
       ])
 
       const albums = (albumsResult.data || []).filter((a) => a.status !== 'draft')
-      const albumsWithLocation = albums.filter((a) => a.latitude && a.longitude)
+      const albumsWithLocation = albums.filter((a) => a.latitude != null && a.longitude != null)
 
       const uniqueCountries = new Set(
         albumsWithLocation

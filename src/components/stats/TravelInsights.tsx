@@ -125,10 +125,10 @@ export function TravelInsights() {
 
       // Calculate total distance traveled
       let totalDistance = 0
-      const locationsWithCoords = albums.filter(a => a.latitude && a.longitude)
+      const locationsWithCoords = albums.filter(a => a.latitude != null && a.longitude != null)
 
       // If user has set home location, calculate distance from home to each destination
-      if (profile?.home_latitude && profile?.home_longitude && locationsWithCoords.length > 0) {
+      if (profile?.home_latitude != null && profile?.home_longitude != null && locationsWithCoords.length > 0) {
         locationsWithCoords.forEach(location => {
           totalDistance += calculateDistance(
             profile.home_latitude!,
@@ -191,7 +191,7 @@ export function TravelInsights() {
     )
   }
 
-  const hasHomeLocation = profile?.home_latitude && profile?.home_longitude
+  const hasHomeLocation = profile?.home_latitude != null && profile?.home_longitude != null
   const distanceLabel = hasHomeLocation ? 'From Home' : 'Est. Distance'
 
   const insights = [

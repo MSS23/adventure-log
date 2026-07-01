@@ -309,7 +309,7 @@ export default function AnalyticsPage() {
       const sorted = [...(albums || [])].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
       for (let i = 1; i < sorted.length; i++) {
         const prev = sorted[i - 1], curr = sorted[i]
-        if (prev.latitude && prev.longitude && curr.latitude && curr.longitude) {
+        if (prev.latitude != null && prev.longitude != null && curr.latitude != null && curr.longitude != null) {
           totalDistance += haversineKm(prev.latitude, prev.longitude, curr.latitude, curr.longitude)
         }
       }

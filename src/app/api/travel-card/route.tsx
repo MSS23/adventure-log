@@ -2,6 +2,7 @@ import { ImageResponse } from '@vercel/og'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
+import { haversineKm } from '@/lib/utils/geoCalculations'
 
 export const runtime = 'nodejs'
 
@@ -11,16 +12,6 @@ function countryCodeToFlag(code: string): string {
     .split('')
     .map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
   return String.fromCodePoint(...codePoints)
-}
-
-function haversine(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const R = 6371
-  const dLat = ((b.lat - a.lat) * Math.PI) / 180
-  const dLng = ((b.lng - a.lng) * Math.PI) / 180
-  const sinDLat = Math.sin(dLat / 2)
-  const sinDLng = Math.sin(dLng / 2)
-  const h = sinDLat * sinDLat + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * sinDLng * sinDLng
-  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
 }
 
 function formatDistance(km: number): string {
@@ -126,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     let totalDistance = 0
     for (let i = 1; i < coords.length; i++) {
-      totalDistance += haversine(coords[i - 1], coords[i])
+      totalDistance += haversineKm(coords[i - 1].lat, coords[i - 1].lng, coords[i].lat, coords[i].lng)
     }
 
     // Count continents

@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { PublicProfileContent } from '@/components/profile/PublicProfileContent'
+import { haversineKm } from '@/lib/utils/geoCalculations'
 
 function getServerStorageUrl(
   filePath: string | null | undefined,
@@ -30,24 +31,9 @@ function calculateTotalDistance(
 
   let total = 0
   for (let i = 1; i < coords.length; i++) {
-    total += haversine(coords[i - 1], coords[i])
+    total += haversineKm(coords[i - 1].lat, coords[i - 1].lng, coords[i].lat, coords[i].lng)
   }
   return Math.round(total)
-}
-
-function haversine(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const R = 6371 // Earth radius in km
-  const dLat = toRad(b.lat - a.lat)
-  const dLng = toRad(b.lng - a.lng)
-  const sinDLat = Math.sin(dLat / 2)
-  const sinDLng = Math.sin(dLng / 2)
-  const h =
-    sinDLat * sinDLat + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * sinDLng * sinDLng
-  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
-}
-
-function toRad(deg: number): number {
-  return (deg * Math.PI) / 180
 }
 
 export async function generateMetadata({

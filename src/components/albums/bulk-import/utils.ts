@@ -1,19 +1,5 @@
 import type { ProcessedPhoto, PhotoGroup } from './types'
-
-export function haversineDistance(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number
-): number {
-  const R = 6371 // Earth's radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180
-  const dLng = (lng2 - lng1) * Math.PI / 180
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
-}
+import { haversineKm } from '@/lib/utils/geoCalculations'
 
 export function generateGroupId(): string {
   return `group-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -81,7 +67,7 @@ export function groupPhotosByTrip(photos: ProcessedPhoto[]): PhotoGroup[] {
     // Check distance if both have coordinates
     let distanceKm = 0
     if (lastPhoto.lat !== null && lastPhoto.lng !== null && photo.lat !== null && photo.lng !== null) {
-      distanceKm = haversineDistance(lastPhoto.lat, lastPhoto.lng, photo.lat, photo.lng)
+      distanceKm = haversineKm(lastPhoto.lat, lastPhoto.lng, photo.lat, photo.lng)
     }
 
     // New group if more than 3 days gap OR more than 200km apart

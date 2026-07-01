@@ -408,6 +408,25 @@ export class GeoCalculations {
   }
 }
 
+/**
+ * Great-circle distance in kilometres between two lat/lng points (Haversine).
+ *
+ * Standalone helper mirroring {@link GeoCalculations.calculateDistance} for the
+ * common `(lat1, lng1, lat2, lng2)` call shape used across travel-stats code —
+ * so features don't each hand-roll their own copy.
+ */
+export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371 // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const sinDLat = Math.sin(dLat / 2)
+  const sinDLng = Math.sin(dLng / 2)
+  const h =
+    sinDLat * sinDLat +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * sinDLng * sinDLng
+  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
+}
+
 export {
   type Coordinates,
   type BoundingBox,

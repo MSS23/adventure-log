@@ -1,16 +1,7 @@
 import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { PublicPassportContent } from '@/components/passport/PublicPassportContent'
-
-function haversine(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const R = 6371
-  const dLat = ((b.lat - a.lat) * Math.PI) / 180
-  const dLng = ((b.lng - a.lng) * Math.PI) / 180
-  const sinDLat = Math.sin(dLat / 2)
-  const sinDLng = Math.sin(dLng / 2)
-  const h = sinDLat * sinDLat + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * sinDLng * sinDLng
-  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
-}
+import { haversineKm } from '@/lib/utils/geoCalculations'
 
 const continentMap: Record<string, string> = {
   US: 'North America', CA: 'North America', MX: 'North America', GT: 'North America',
@@ -139,7 +130,7 @@ export default async function PublicPassportPage({
     .map(a => ({ lat: a.latitude!, lng: a.longitude! }))
   let totalDistance = 0
   for (let i = 1; i < coords.length; i++) {
-    totalDistance += haversine(coords[i - 1], coords[i])
+    totalDistance += haversineKm(coords[i - 1].lat, coords[i - 1].lng, coords[i].lat, coords[i].lng)
   }
 
   // Compute continents

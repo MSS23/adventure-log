@@ -45,7 +45,7 @@ export async function generateMetadata({
 
   const { data: user } = await supabase
     .from('users')
-    .select('display_name, username')
+    .select('id, display_name, username')
     .eq('username', username)
     .single()
 
@@ -60,7 +60,8 @@ export async function generateMetadata({
       description: `Explore ${displayName}'s travel history on Adventure Log`,
       type: 'profile',
       url: `${appUrl}/u/${username}/passport`,
-      images: user ? [`${appUrl}/api/travel-card?userId=${user.username}`] : [],
+      // The travel-card endpoint resolves the profile by user id, not username.
+      images: user ? [`${appUrl}/api/travel-card?userId=${user.id}`] : [],
     },
   }
 }
@@ -109,10 +110,19 @@ export default async function PublicPassportPage({
     .neq('status', 'draft')
     .order('date_start', { ascending: true })
 
-  const { count: photoCount } = await supabase
-    .from('photos')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
+  const safeAlbums = albums || []
+
+  // Count photos scoped to the public, non-draft albums shown here — counting
+  // by user_id alone would leak the volume of private/draft-album photos.
+  let photoCount = 0
+  const albumIds = safeAlbums.map(a => a.id)
+  if (albumIds.length > 0) {
+    const { count } = await supabase
+      .from('photos')
+      .select('id', { count: 'exact', head: true })
+      .in('album_id', albumIds)
+    photoCount = count || 0
+  }
 
   const { count: followerCount } = await supabase
     .from('follows')
@@ -120,13 +130,12 @@ export default async function PublicPassportPage({
     .eq('following_id', user.id)
     .eq('status', 'accepted')
 
-  const safeAlbums = albums || []
-  const countryCodes = [...new Set(safeAlbums.filter(a => a.country_code).map(a => a.country_code as string))]
+  const countryCodes = [...new Set(safeAlbums.filter(a => a.country_code).map(a => (a.country_code as string).toUpperCase()))]
   const cities = [...new Set(safeAlbums.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
 
   // Compute distance
   const coords = safeAlbums
-    .filter(a => a.latitude && a.longitude)
+    .filter(a => a.latitude != null && a.longitude != null)
     .map(a => ({ lat: a.latitude!, lng: a.longitude! }))
   let totalDistance = 0
   for (let i = 1; i < coords.length; i++) {
@@ -147,9 +156,11 @@ export default async function PublicPassportPage({
   else if (safeAlbums.length >= 3) personality = 'Weekend Warrior'
   else if (safeAlbums.length >= 1) personality = 'Rising Explorer'
 
-  // First and latest trip
+  // First and latest trip. Only expose a distinct "latest" when there's more
+  // than one album — otherwise the single album is both first and latest and
+  // the UI would render two identical "First / Latest Adventure" cards.
   const firstTrip = safeAlbums[0] || null
-  const latestTrip = safeAlbums.length > 0 ? safeAlbums[safeAlbums.length - 1] : null
+  const latestTrip = safeAlbums.length > 1 ? safeAlbums[safeAlbums.length - 1] : null
 
   return (
     <PublicPassportContent

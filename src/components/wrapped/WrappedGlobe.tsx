@@ -209,7 +209,12 @@ export function WrappedGlobe({
       const from = sortedLocations[i]
       const to = sortedLocations[i + 1]
       const dLat = to.lat - from.lat
-      const dLng = to.lng - from.lng
+      // Normalize longitude delta into [-180, 180] so an antimeridian crossing
+      // (e.g. Tokyo → LA) measures the short way — matching the great-circle
+      // arc that's actually rendered — instead of ballooning the camera zoom.
+      let dLng = to.lng - from.lng
+      if (dLng > 180) dLng -= 360
+      else if (dLng < -180) dLng += 360
       const distance = Math.sqrt(dLat * dLat + dLng * dLng)
       paths.push({
         startLat: from.lat,

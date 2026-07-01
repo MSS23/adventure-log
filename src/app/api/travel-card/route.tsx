@@ -79,11 +79,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // This is an unauthenticated, shareable card. Only public accounts get a
-    // populated card; private/friends accounts return 404 rather than leak
-    // aggregate stats. (RLS already gates the album rows, but this endpoint is
-    // public so we make the privacy contract explicit and RLS-independent.)
-    if (user.privacy_level !== 'public') {
+    // This is a shareable card. Only public accounts get a populated card for
+    // OTHER viewers; private/friends accounts return 404 rather than leak
+    // aggregate stats. The owner, however, can always download their own card
+    // (the /wrapped "Download" button hits this authenticated with ?download=1),
+    // so we allow the request through when the caller IS the profile owner.
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const isOwner = !!authUser && authUser.id === userId
+    if (user.privacy_level !== 'public' && !isOwner) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
@@ -94,20 +97,31 @@ export async function GET(request: NextRequest) {
       .eq('visibility', 'public')
       .neq('status', 'draft')
 
-    const { count: photoCount } = await supabase
-      .from('photos')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
-
     const allAlbums = albums || []
+
+    // Count photos scoped to the SAME public, non-draft albums shown on the
+    // card. Counting by user_id alone would include photos from private/draft
+    // albums — leaking private-content volume onto a public share asset.
+    let photoCount = 0
+    const albumIds = allAlbums.map(a => a.id)
+    if (albumIds.length > 0) {
+      const { count } = await supabase
+        .from('photos')
+        .select('id', { count: 'exact', head: true })
+        .in('album_id', albumIds)
+      photoCount = count || 0
+    }
     const countryCodes = [...new Set(allAlbums.filter(a => a.country_code).map(a => a.country_code as string))]
     const cities = [...new Set(allAlbums.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
     const flags = countryCodes.slice(0, 24).map(countryCodeToFlag)
 
     // Calculate distance
     const coords = allAlbums
-      .filter(a => a.latitude && a.longitude && (a.date_start || a.created_at))
-      .sort((a, b) => ((a.date_start || a.created_at) > (b.date_start || b.created_at) ? 1 : -1))
+      .filter(a => a.latitude != null && a.longitude != null && (a.date_start || a.created_at))
+      .sort((a, b) =>
+        new Date(a.date_start || a.created_at).getTime() -
+        new Date(b.date_start || b.created_at).getTime()
+      )
       .map(a => ({ lat: a.latitude!, lng: a.longitude! }))
 
     let totalDistance = 0

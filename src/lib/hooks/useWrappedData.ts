@@ -194,7 +194,7 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
         const locations: WrappedData['locations'] = []
         let totalDistanceKm = 0
         for (const a of albumList) {
-          if (a.latitude && a.longitude) {
+          if (a.latitude != null && a.longitude != null) {
             const dateStr = a.date_start || a.created_at || ''
             const loc: WrappedData['locations'][number] = {
               lat: a.latitude,

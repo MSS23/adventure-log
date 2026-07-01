@@ -391,7 +391,7 @@ export function PublicPassportContent({
               { icon: Globe, value: countryCodes.length, label: 'Countries' },
               { icon: MapPin, value: cities.length, label: 'Cities' },
               { icon: Camera, value: totalPhotos, label: 'Photos' },
-              { icon: Route, value: `${formatDistance(totalDistance)}km`, label: 'Traveled' },
+              { icon: Route, value: `${formatDistance(totalDistance)} km`, label: 'Traveled' },
               { icon: Users, value: followerCount, label: 'Followers' },
               { icon: Globe, value: `${worldPercent.toFixed(1)}%`, label: 'of World' },
             ].map((stat, i) => (

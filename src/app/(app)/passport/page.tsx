@@ -280,7 +280,12 @@ async function backfillMissingCountryCodes(
   albums: PassportAlbum[],
   supabase: ReturnType<typeof createClient>
 ): Promise<Record<string, string>> {
-  const missing = albums.filter(a => !a.country_code && a.latitude && a.longitude)
+  // Cap per-load geocodes: Nominatim is rate-limited (1 req/s) and this runs
+  // client-side keyed by the user's IP. Backfilling a handful per visit keeps
+  // the page snappy and converges over a few visits for large libraries.
+  const missing = albums
+    .filter(a => !a.country_code && a.latitude != null && a.longitude != null)
+    .slice(0, 8)
   if (missing.length === 0) return {}
 
   const resolved: Record<string, string> = {}
@@ -320,84 +325,107 @@ async function backfillMissingCountryCodes(
   return resolved
 }
 
+function computePassportData(validAlbums: PassportAlbum[], photoCount: number): PassportData {
+  const countryCodes = [...new Set(validAlbums.map(a => a.country_code?.toUpperCase()).filter((c): c is string => !!c))]
+  const cities = new Set(validAlbums.map(a => a.location_name?.split(',')[0]?.trim()).filter(Boolean))
+
+  const sorted = [...validAlbums].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
+  let totalDistanceKm = 0
+  for (let i = 1; i < sorted.length; i++) {
+    totalDistanceKm += haversineKm(sorted[i - 1].latitude, sorted[i - 1].longitude, sorted[i].latitude, sorted[i].longitude)
+  }
+
+  const visitedByCont: Record<string, Set<string>> = {}
+  for (const code of countryCodes) {
+    const cont = continentMap[code]
+    if (cont) { if (!visitedByCont[cont]) visitedByCont[cont] = new Set(); visitedByCont[cont].add(code) }
+  }
+
+  let firstTrip: PassportData['firstTrip'] = null
+  let latestTrip: PassportData['latestTrip'] = null
+  if (sorted.length > 0) {
+    const first = sorted[0]
+    firstTrip = { date: first.date_start || first.created_at, location: first.location_name || first.title }
+  }
+  // Only a distinct "latest" when there's more than one album — otherwise the
+  // single album is both first and latest and the UI shows two identical cards.
+  if (sorted.length > 1) {
+    const latest = sorted[sorted.length - 1]
+    latestTrip = { date: latest.date_start || latest.created_at, location: latest.location_name || latest.title }
+  }
+
+  return {
+    albums: validAlbums,
+    photoCount,
+    countryCodes,
+    cityCount: cities.size,
+    totalDistanceKm: Math.round(totalDistanceKm),
+    personality: computePersonality(countryCodes, validAlbums.length),
+    continentProgress: Object.entries(continentTotals).map(([name, total]) => ({
+      name, visited: visitedByCont[name]?.size || 0, total,
+    })),
+    firstTrip,
+    latestTrip,
+  }
+}
+
 function useTravelPassport() {
   const { user } = useAuth()
   const [data, setData] = useState<PassportData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchData = useCallback(async () => {
+  useEffect(() => {
     if (!user) return
+    let cancelled = false
     setLoading(true)
-    try {
-      const supabase = createClient()
-      const { data: albums } = await supabase
-        .from('albums')
-        .select('id, title, location_name, country_code, latitude, longitude, date_start, created_at, cover_photo_url')
-        .eq('user_id', user.id)
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-        .neq('status', 'draft')
-        .order('date_start', { ascending: true, nullsFirst: false })
 
-      const { count: photoCount } = await supabase
-        .from('photos')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+    ;(async () => {
+      try {
+        const supabase = createClient()
+        const { data: albums } = await supabase
+          .from('albums')
+          .select('id, title, location_name, country_code, latitude, longitude, date_start, created_at, cover_photo_url')
+          .eq('user_id', user.id)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .neq('status', 'draft')
+          .order('date_start', { ascending: true, nullsFirst: false })
 
-      const validAlbums = (albums || []) as PassportAlbum[]
+        const { count: photoCount } = await supabase
+          .from('photos')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
 
-      const backfilled = await backfillMissingCountryCodes(validAlbums, supabase)
-      for (const album of validAlbums) {
-        if (!album.country_code && backfilled[album.id]) {
-          album.country_code = backfilled[album.id]
+        if (cancelled) return
+
+        const validAlbums = (albums || []) as PassportAlbum[]
+
+        // Render immediately with the data we have — don't block the whole page
+        // behind slow, rate-limited reverse-geocoding.
+        setData(computePassportData(validAlbums, photoCount || 0))
+        setLoading(false)
+
+        // Backfill any missing country codes in the background, then merge the
+        // results in with a second, non-blocking update.
+        const backfilled = await backfillMissingCountryCodes(validAlbums, supabase)
+        if (cancelled || Object.keys(backfilled).length === 0) return
+        for (const album of validAlbums) {
+          if (!album.country_code && backfilled[album.id]) {
+            album.country_code = backfilled[album.id]
+          }
         }
+        setData(computePassportData(validAlbums, photoCount || 0))
+      } catch (err) {
+        if (cancelled) return
+        log.error('Failed to load passport', { component: 'TravelPassport', action: 'fetch' }, err as Error)
+        setLoading(false)
       }
+    })()
 
-      const countryCodes = [...new Set(validAlbums.map(a => a.country_code?.toUpperCase()).filter((c): c is string => !!c))]
-      const cities = new Set(validAlbums.map(a => a.location_name?.split(',')[0]?.trim()).filter(Boolean))
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the identity that matters
+  }, [user?.id])
 
-      const sorted = [...validAlbums].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
-      let totalDistanceKm = 0
-      for (let i = 1; i < sorted.length; i++) {
-        totalDistanceKm += haversineKm(sorted[i - 1].latitude, sorted[i - 1].longitude, sorted[i].latitude, sorted[i].longitude)
-      }
-
-      const visitedByCont: Record<string, Set<string>> = {}
-      for (const code of countryCodes) {
-        const cont = continentMap[code]
-        if (cont) { if (!visitedByCont[cont]) visitedByCont[cont] = new Set(); visitedByCont[cont].add(code) }
-      }
-
-      let firstTrip: PassportData['firstTrip'] = null
-      let latestTrip: PassportData['latestTrip'] = null
-      if (sorted.length > 0) {
-        const first = sorted[0]
-        firstTrip = { date: first.date_start || first.created_at, location: first.location_name || first.title }
-        const latest = sorted[sorted.length - 1]
-        latestTrip = { date: latest.date_start || latest.created_at, location: latest.location_name || latest.title }
-      }
-
-      setData({
-        albums: validAlbums,
-        photoCount: photoCount || 0,
-        countryCodes,
-        cityCount: cities.size,
-        totalDistanceKm: Math.round(totalDistanceKm),
-        personality: computePersonality(countryCodes, validAlbums.length),
-        continentProgress: Object.entries(continentTotals).map(([name, total]) => ({
-          name, visited: visitedByCont[name]?.size || 0, total,
-        })),
-        firstTrip,
-        latestTrip,
-      })
-    } catch (err) {
-      log.error('Failed to load passport', { component: 'TravelPassport', action: 'fetch' }, err as Error)
-    } finally {
-      setLoading(false)
-    }
-  }, [user])
-
-  useEffect(() => { fetchData() }, [fetchData])
   return { data, loading }
 }
 
@@ -464,15 +492,19 @@ function GlobeCoverageRing({ percentage, countriesCount }: { percentage: number;
 // Page
 // ---------------------------------------------------------------------------
 export default function TravelPassportPage() {
-  const { user, profile } = useAuth()
+  const { profile } = useAuth()
   const { data, loading } = useTravelPassport()
   const [copied, setCopied] = useState(false)
   const [scannerOpen, setScannerOpen] = useState(false)
 
+  // Share links must resolve to /u/[username] — the public passport looks the
+  // user up by username, and the QR scanner's validator rejects anything that
+  // isn't a bare username (a UUID fallback would fail both). So only build a
+  // share URL when the account actually has a username.
   const shareUrl = useMemo(() => {
-    if (typeof window === 'undefined') return ''
-    return `${window.location.origin}/u/${profile?.username || user?.id || ''}/passport?connect=true`
-  }, [profile, user])
+    if (typeof window === 'undefined' || !profile?.username) return ''
+    return `${window.location.origin}/u/${profile.username}/passport?connect=true`
+  }, [profile?.username])
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
@@ -953,30 +985,43 @@ export default function TravelPassportPage() {
               Scan to see my travel profile
             </p>
 
-            <div className="mb-6">
-              <PassportQRCode url={shareUrl} size={180} />
-            </div>
+            {shareUrl ? (
+              <>
+                <div className="mb-6">
+                  <PassportQRCode url={shareUrl} size={180} />
+                </div>
 
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopy}
-                className="gap-2 cursor-pointer"
-              >
-                {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
-                {copied ? 'Copied!' : 'Copy Link'}
-              </Button>
-              {typeof navigator !== 'undefined' && 'share' in navigator && (
-                <Button
-                  size="sm"
-                  onClick={handleShare}
-                  className="gap-2 cursor-pointer"
-                >
-                  <Share2 className="size-4" /> Share
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopy}
+                    className="gap-2 cursor-pointer"
+                  >
+                    {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
+                    {copied ? 'Copied!' : 'Copy Link'}
+                  </Button>
+                  {typeof navigator !== 'undefined' && 'share' in navigator && (
+                    <Button
+                      size="sm"
+                      onClick={handleShare}
+                      className="gap-2 cursor-pointer"
+                    >
+                      <Share2 className="size-4" /> Share
+                    </Button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="mb-2 rounded-xl border border-border bg-muted/40 px-4 py-5 text-center max-w-xs">
+                <p className="text-sm text-muted-foreground">
+                  Add a username to get a shareable passport link.
+                </p>
+                <Button asChild size="sm" className="mt-3 cursor-pointer">
+                  <a href="/settings">Set a username</a>
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* ── Reciprocal action: scan someone else's passport ── */}
             <div className="w-full mt-7 pt-6 border-t border-border flex flex-col items-center">

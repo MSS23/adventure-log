@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin, isRlsError } from '@/lib/supabase/admin'
 import { log } from '@/lib/utils/logger'
 
-const VALID_ROLES = ['contributor', 'editor', 'viewer'] as const
+const VALID_ROLES = ['contributor', 'editor', 'viewer', 'tagged'] as const
 type Role = (typeof VALID_ROLES)[number]
 
 /**
@@ -135,13 +135,17 @@ export async function POST(
         .maybeSingle()
       const inviterName = inviter?.display_name || inviter?.username || 'Someone'
 
+      // A "tagged" credit reads differently from a collaboration invite.
+      const isTag = role === 'tagged'
       const notification = {
         user_id: inviteeId,
         sender_id: userId,
-        type: 'album_invite',
-        title: 'Album invitation',
-        message: `${inviterName} invited you to collaborate on "${album.title}"`,
-        link: '/dashboard',
+        type: isTag ? 'album_tag' : 'album_invite',
+        title: isTag ? 'You were tagged' : 'Album invitation',
+        message: isTag
+          ? `${inviterName} tagged you in "${album.title}"`
+          : `${inviterName} invited you to collaborate on "${album.title}"`,
+        link: isTag ? `/albums/${albumId}` : '/dashboard',
         metadata: { album_id: albumId, collaborator_id: collaborator!.id },
       }
 

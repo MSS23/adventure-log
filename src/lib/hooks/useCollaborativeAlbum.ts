@@ -5,11 +5,13 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 
+export type CollaboratorRole = 'contributor' | 'editor' | 'viewer' | 'tagged'
+
 export interface Collaborator {
   id: string
   album_id: string
   user_id: string
-  role: 'contributor' | 'editor' | 'viewer'
+  role: CollaboratorRole
   status: 'pending' | 'accepted' | 'declined'
   invited_by: string
   created_at: string
@@ -85,7 +87,7 @@ export function useCollaborativeAlbum(albumId: string | undefined) {
   }, [albumId, user?.id])
 
   const inviteCollaborator = useCallback(
-    async (userId: string, role: 'contributor' | 'editor' | 'viewer' = 'contributor') => {
+    async (userId: string, role: CollaboratorRole = 'contributor') => {
       if (!albumId || !user) throw new Error('Not authenticated')
 
       // Go through the server route so the invite AND the in-app notification

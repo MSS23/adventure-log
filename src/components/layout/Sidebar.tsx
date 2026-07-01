@@ -17,6 +17,7 @@ import {
   Bookmark,
   Star,
   MapPin,
+  MapPinned,
   LayoutDashboard,
   MessageSquarePlus,
 } from 'lucide-react'
@@ -42,6 +43,7 @@ const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 const browseNavItems: NavItem[] = [
   { name: 'Feed', href: '/feed', icon: Home },
   { name: 'Explore', href: '/explore', icon: Compass },
+  { name: 'Places', href: '/places', icon: MapPinned },
 ]
 
 // "Yours" — everything about the signed-in traveler: their overview, maps,

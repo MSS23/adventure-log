@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import { useCollaborativeAlbum } from '@/lib/hooks/useCollaborativeAlbum'
+import { useCollaborativeAlbum, type CollaboratorRole } from '@/lib/hooks/useCollaborativeAlbum'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -44,7 +44,7 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
   const [searchQuery, setSearchQuery] = useState('')
   const [friends, setFriends] = useState<FriendUser[]>([])
   const [friendsLoading, setFriendsLoading] = useState(false)
-  const [inviteRole, setInviteRole] = useState<'contributor' | 'editor' | 'viewer'>('contributor')
+  const [inviteRole, setInviteRole] = useState<CollaboratorRole>('tagged')
   const [inviting, setInviting] = useState<string | null>(null)
 
   const supabase = createClient()
@@ -98,7 +98,7 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
     setInviting(friendId)
     try {
       await inviteCollaborator(friendId, inviteRole)
-      toast.success('Invitation sent!')
+      toast.success(inviteRole === 'tagged' ? 'Friend tagged!' : 'Invitation sent!')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to send invite'
       if (message.includes('duplicate') || message.includes('unique')) {
@@ -177,6 +177,8 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
         return 'Editor'
       case 'viewer':
         return 'Viewer'
+      case 'tagged':
+        return 'Tagged'
       default:
         return role
     }
@@ -190,7 +192,7 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Collaborators
+            Friends & collaborators
           </div>
           {isOwner && (
             <Button
@@ -201,14 +203,14 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
               onClick={() => setShowInvite(!showInvite)}
             >
               <UserPlus className="h-4 w-4" />
-              {showInvite ? 'Close' : 'Invite'}
+              {showInvite ? 'Close' : 'Add'}
             </Button>
           )}
         </CardTitle>
         <CardDescription>
           {isOwner
-            ? 'Invite friends to contribute photos to this album'
-            : 'People contributing to this album'}
+            ? 'Tag friends who were there, or invite collaborators to contribute photos'
+            : 'People tagged in and contributing to this album'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -227,12 +229,13 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
               </div>
               <Select
                 value={inviteRole}
-                onValueChange={(v) => setInviteRole(v as 'contributor' | 'editor' | 'viewer')}
+                onValueChange={(v) => setInviteRole(v as CollaboratorRole)}
               >
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger className="w-[150px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="tagged">Tag (credit only)</SelectItem>
                   <SelectItem value="contributor">Contributor</SelectItem>
                   <SelectItem value="editor">Editor</SelectItem>
                   <SelectItem value="viewer">Viewer</SelectItem>
@@ -306,6 +309,8 @@ export function CollaboratorManager({ albumId, isOwner }: CollaboratorManagerPro
                       >
                         {inviting === friend.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : inviteRole === 'tagged' ? (
+                          'Tag'
                         ) : (
                           'Invite'
                         )}

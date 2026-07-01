@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { Home, Globe, BookOpen, User, Compass } from 'lucide-react'
+import { Home, Globe, BookOpen, User, MapPinned, Compass } from 'lucide-react'
 import { motion, MotionConfig } from 'framer-motion'
 
 interface NavItem {
@@ -15,6 +15,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'Feed', href: '/feed', icon: Home },
   { name: 'Explore', href: '/explore', icon: Compass },
+  { name: 'Places', href: '/places', icon: MapPinned },
   { name: 'Globe', href: '/globe', icon: Globe },
   { name: 'Albums', href: '/albums', icon: BookOpen },
   { name: 'You', href: '/profile', icon: User },
@@ -42,7 +43,7 @@ export function BottomNavigation() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'relative flex flex-col items-center justify-center py-1.5 px-3 rounded-xl',
+                  'relative flex flex-col items-center justify-center py-1.5 px-2 rounded-xl',
                   'touch-manipulation select-none transition-colors duration-200',
                   'min-h-[44px] min-w-[44px]',
                   isActive

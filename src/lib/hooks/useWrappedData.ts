@@ -6,6 +6,7 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { haversineKm } from '@/lib/utils/geoCalculations'
 import { countContinents } from '@/lib/utils/continents'
 import { getTravelPersonality } from '@/lib/utils/travel-personality'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 export interface WrappedData {
   year: number | 'all'
@@ -102,17 +103,15 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       // Filter by year if not "all" — check both date_start and created_at
       if (mode !== 'all') {
         albums = albums.filter(a => {
-          const dateStr = a.date_start || a.created_at
-          if (!dateStr) return false
-          const albumYear = new Date(dateStr).getFullYear()
-          return albumYear === mode
+          const parsed = parseLocalDate(a.date_start || a.created_at)
+          return parsed?.getFullYear() === mode
         })
       }
 
       // Sort by effective date (date_start preferred, fallback to created_at)
       albums.sort((a, b) => {
-        const dateA = new Date(a.date_start || a.created_at).getTime()
-        const dateB = new Date(b.date_start || b.created_at).getTime()
+        const dateA = parseLocalDate(a.date_start || a.created_at)?.getTime() ?? 0
+        const dateB = parseLocalDate(b.date_start || b.created_at)?.getTime() ?? 0
         return dateA - dateB
       })
 
@@ -133,19 +132,14 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
         const cities = [...new Set(albumList.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
 
         const months = albumList
-          .map(a => {
-            const dateStr = a.date_start || a.created_at
-            return dateStr ? new Date(dateStr).getMonth() + 1 : null
-          })
-          .filter((m): m is number => m !== null)
+          .map(a => parseLocalDate(a.date_start || a.created_at)?.getMonth())
+          .filter((m): m is number => m !== undefined)
+          .map(m => m + 1)
         const uniqueMonths = [...new Set(months)]
 
         const years = albumList
-          .map(a => {
-            const dateStr = a.date_start || a.created_at
-            return dateStr ? new Date(dateStr).getFullYear() : null
-          })
-          .filter((y): y is number => y !== null)
+          .map(a => parseLocalDate(a.date_start || a.created_at)?.getFullYear())
+          .filter((y): y is number => y !== undefined)
         const yearsActive = new Set(years).size
 
         const topAlbums = albumList

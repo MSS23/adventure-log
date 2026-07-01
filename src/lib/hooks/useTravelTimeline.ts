@@ -6,6 +6,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { log, toError } from '@/lib/utils/logger'
 import { areFriends, type VisibilityLevel } from '@/lib/utils/privacy'
 import { formatLocationLabel } from '@/lib/utils/country'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 interface TravelLocation {
   id: string
@@ -115,8 +116,9 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       data?.forEach(album => {
         // Prioritize date_start over created_at for travel year
         const dateField = album.date_start || album.created_at
-        if (dateField) {
-          const year = new Date(dateField).getFullYear()
+        const parsedYear = parseLocalDate(dateField)?.getFullYear()
+        if (parsedYear !== undefined) {
+          const year = parsedYear
 
           // Track unique locations per year (by location name or coordinates)
           if (!yearLocationCounts.has(year)) {
@@ -217,9 +219,8 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
 
         // Filter by year
         const dateField = album.date_start || album.created_at
-        if (!dateField) continue
-        const albumYear = new Date(dateField).getFullYear()
-        if (albumYear !== year) continue
+        const albumYear = parseLocalDate(dateField)?.getFullYear()
+        if (albumYear === undefined || albumYear !== year) continue
 
         // Privacy check - done locally, no database calls
         const visibility = (album.visibility || 'public') as VisibilityLevel

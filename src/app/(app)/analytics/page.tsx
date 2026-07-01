@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { haversineKm } from '@/lib/utils/geoCalculations'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import { createClient } from '@/lib/supabase/client'
 import {
   Images,
@@ -330,8 +331,9 @@ export default function AnalyticsPage() {
       albums?.forEach(a => { albumDateMap[a.id] = a.date_start || a.created_at })
       photos?.forEach(p => {
         const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
-        if (date) {
-          const y = new Date(date).getFullYear().toString()
+        const parsedYear = parseLocalDate(date)?.getFullYear()
+        if (parsedYear !== undefined) {
+          const y = parsedYear.toString()
           if (y in photosByYearMap) photosByYearMap[y] = (photosByYearMap[y] || 0) + 1
         }
       })

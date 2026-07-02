@@ -1,9 +1,7 @@
 import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { PublicPassportContent } from '@/components/passport/PublicPassportContent'
-import { haversineKm } from '@/lib/utils/geoCalculations'
-import { getContinent, type Continent } from '@/lib/utils/continents'
-import { getTravelPersonality } from '@/lib/utils/travel-personality'
+import { computeTravelStats } from '@/lib/utils/travel-stats'
 
 
 export async function generateMetadata({
@@ -101,48 +99,25 @@ export default async function PublicPassportPage({
     .eq('following_id', user.id)
     .eq('status', 'accepted')
 
-  const countryCodes = [...new Set(safeAlbums.filter(a => a.country_code).map(a => (a.country_code as string).toUpperCase()))]
-  const cities = [...new Set(safeAlbums.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
-
-  // Compute distance
-  const coords = safeAlbums
-    .filter(a => a.latitude != null && a.longitude != null)
-    .map(a => ({ lat: a.latitude!, lng: a.longitude! }))
-  let totalDistance = 0
-  for (let i = 1; i < coords.length; i++) {
-    totalDistance += haversineKm(coords[i - 1].lat, coords[i - 1].lng, coords[i].lat, coords[i].lng)
-  }
-
-  // Compute continents
-  const continentsVisited = [...new Set(countryCodes.map(c => getContinent(c)).filter((c): c is Continent => !!c))]
-
-  // Compute personality
-  const personality = getTravelPersonality({
-    countries: countryCodes.length,
-    trips: safeAlbums.length,
-    cities: cities.length,
-    continents: continentsVisited.length,
-  }).type
-
-  // First and latest trip. Only expose a distinct "latest" when there's more
-  // than one album — otherwise the single album is both first and latest and
-  // the UI would render two identical "First / Latest Adventure" cards.
-  const firstTrip = safeAlbums[0] || null
-  const latestTrip = safeAlbums.length > 1 ? safeAlbums[safeAlbums.length - 1] : null
+  // Shared aggregation — the same math the app passport, Wrapped, and the
+  // travel-card image use, so public numbers can't drift from private ones.
+  // (First/latest trip follow the "latest only when >1 album" convention so
+  // the UI never renders two identical adventure cards.)
+  const stats = computeTravelStats(safeAlbums)
 
   return (
     <PublicPassportContent
       user={user}
-      countryCodes={countryCodes}
-      cities={cities}
+      countryCodes={stats.countryCodes}
+      cities={stats.cities}
       totalAlbums={safeAlbums.length}
       totalPhotos={photoCount || 0}
-      totalDistance={Math.round(totalDistance)}
+      totalDistance={stats.totalDistanceKm}
       followerCount={followerCount || 0}
-      continentsVisited={continentsVisited}
-      personality={personality}
-      firstTrip={firstTrip ? { title: firstTrip.title, location: firstTrip.location_name, date: firstTrip.date_start || firstTrip.created_at } : null}
-      latestTrip={latestTrip ? { title: latestTrip.title, location: latestTrip.location_name, date: latestTrip.date_start || latestTrip.created_at } : null}
+      continentsVisited={stats.continentsVisited}
+      personality={stats.personality.type}
+      firstTrip={stats.firstTrip ? { title: stats.firstTrip.title, location: stats.firstTrip.location_name ?? null, date: stats.firstTrip.date_start || stats.firstTrip.created_at } : null}
+      latestTrip={stats.latestTrip ? { title: stats.latestTrip.title, location: stats.latestTrip.location_name ?? null, date: stats.latestTrip.date_start || stats.latestTrip.created_at } : null}
       memberSince={user.created_at}
     />
   )

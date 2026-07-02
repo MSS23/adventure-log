@@ -99,7 +99,7 @@ export const ROUTE_OPTIMIZATIONS = {
     maxSize: 200,
     preload: ['auth', 'navigation'],
     defer: ['globe-rendering'],
-    lazyLoad: ['EnhancedGlobe', 'GlobeControls']
+    lazyLoad: ['EnhancedGlobe']
   },
 
   // Dashboard - defer charts and analytics

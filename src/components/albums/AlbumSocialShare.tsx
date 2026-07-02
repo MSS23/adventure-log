@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Toast } from '@capacitor/toast'
-import QRCode from 'qrcode'
 
 interface AlbumSocialShareProps {
   url: string
@@ -38,14 +37,21 @@ export function AlbumSocialShare({
 
   useEffect(() => {
     if (showQR && !qrDataUrl) {
-      QRCode.toDataURL(url, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#B45309',
-          light: '#ffffff'
-        }
-      }).then(setQrDataUrl)
+      // qrcode is lazy-loaded: it's only needed once the user opens the QR
+      // panel, so it stays out of the shared vendor bundle.
+      import('qrcode')
+        .then(({ default: QRCode }) =>
+          QRCode.toDataURL(url, {
+            width: 200,
+            margin: 2,
+            color: {
+              dark: '#B45309',
+              light: '#ffffff'
+            }
+          })
+        )
+        .then(setQrDataUrl)
+        .catch(() => {})
     }
   }, [showQR, url, qrDataUrl])
 

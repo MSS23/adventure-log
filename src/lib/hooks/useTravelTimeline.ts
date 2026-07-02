@@ -8,6 +8,7 @@ import { areFriends, type VisibilityLevel } from '@/lib/utils/privacy'
 import { formatLocationLabel } from '@/lib/utils/country'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { haversineKm } from '@/lib/utils/geoCalculations'
 
 interface TravelLocation {
   id: string
@@ -420,18 +421,10 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
   }, [supabase, targetUserId, user?.id])
 
   /**
-   * Calculate distance between two locations
+   * Calculate distance between two locations (shared haversine).
    */
-  const calculateDistance = (loc1: TravelLocation, loc2: TravelLocation): number => {
-    const R = 6371 // Earth's radius in km
-    const dLat = (loc2.latitude - loc1.latitude) * Math.PI / 180
-    const dLon = (loc2.longitude - loc1.longitude) * Math.PI / 180
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(loc1.latitude * Math.PI / 180) * Math.cos(loc2.latitude * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return R * c
-  }
+  const calculateDistance = (loc1: TravelLocation, loc2: TravelLocation): number =>
+    haversineKm(loc1.latitude, loc1.longitude, loc2.latitude, loc2.longitude)
 
   /**
    * Refresh all data

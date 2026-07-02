@@ -801,7 +801,11 @@ export function useGlobeState(options: UseGlobeStateOptions) {
   // Both direct globe-pin taps and filmstrip-driven navigation now open it
   // (it is the single album card); callers may still pass openModal=false to
   // fly the camera without surfacing the card.
-  function handleCityClick(city: CityPin, openModal: boolean = true) {
+  //
+  // Both handlers are useCallback'd because they feed (via useCityPinSystem
+  // and the memoized htmlElement accessor) into three-globe's pin layer —
+  // unstable identities here would rebuild every pin's DOM element per render.
+  const handleCityClick = useCallback((city: CityPin, openModal: boolean = true) => {
     setActiveCityId(city.id)
     setIsAutoRotating(false)
 
@@ -834,9 +838,9 @@ export function useGlobeState(options: UseGlobeStateOptions) {
         altitude: 2.8
       }, 1200, 'easeInOutCubic')
     }
-  }
+  }, [chronologicalAlbums, setCurrentAlbumIndex, animateCameraToPosition, globeRef])
 
-  function handleClusterClick(cluster: CityCluster) {
+  const handleClusterClick = useCallback((cluster: CityCluster) => {
     setSelectedCluster(cluster)
     setShowAlbumModal(true)
     setIsAutoRotating(false)
@@ -864,7 +868,7 @@ export function useGlobeState(options: UseGlobeStateOptions) {
         altitude: 2.5
       }, 1200, 'easeInOutCubic')
     }
-  }
+  }, [chronologicalAlbums, setCurrentAlbumIndex, progressionMode, pause, animateCameraToPosition, globeRef])
 
   // Location toggle handler for floating controls
   const handleLocationToggle = useCallback(async () => {

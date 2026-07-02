@@ -1,11 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { haversineKm } from '@/lib/utils/geoCalculations'
-import { countContinents } from '@/lib/utils/continents'
-import { getTravelPersonality } from '@/lib/utils/travel-personality'
+import { computeTravelStats } from '@/lib/utils/travel-stats'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 
 export interface WrappedData {
@@ -16,7 +14,7 @@ export interface WrappedData {
   /** Share of the world's ~195 countries visited, 0–100 (rounded). */
   countryPercentage: number
   cities: string[]
-  topAlbums: { id: string; title: string; location_name?: string; cover_photo_url?: string; like_count: number }[]
+  topAlbums: { id: string; title: string; location_name?: string; cover_photo_url?: string; photo_count: number }[]
   firstTrip: { title: string; location_name?: string; date_start?: string } | null
   lastTrip: { title: string; location_name?: string; date_start?: string } | null
   travelMonths: number[]
@@ -26,6 +24,10 @@ export interface WrappedData {
   yearsActive: number
   /** Total distance between consecutive pins in km (great-circle) */
   totalDistanceKm: number
+  /** Whether the account has ANY photo-bearing trips at all (all-time),
+   *  regardless of the selected year — drives empty-state messaging without
+   *  a second all-time query. */
+  hasAnyTrips: boolean
   /** Chronologically sorted locations used for the flight-reel playback. */
   locations: {
     lat: number
@@ -43,8 +45,20 @@ export interface WrappedData {
   }[]
 }
 
-const EMPTY_DATA: WrappedData = {
-  year: 'all',
+interface WrappedAlbum {
+  id: string
+  title: string
+  location_name: string | null
+  country_code: string | null
+  date_start: string | null
+  created_at: string
+  cover_photo_url: string | null
+  latitude: number | null
+  longitude: number | null
+  photos: { id: string; file_path: string }[] | null
+}
+
+const EMPTY_DATA: Omit<WrappedData, 'year' | 'loading' | 'hasAnyTrips'> = {
   totalTrips: 0,
   totalPhotos: 0,
   countryCodes: [],
@@ -55,7 +69,6 @@ const EMPTY_DATA: WrappedData = {
   lastTrip: null,
   travelMonths: [],
   personality: 'Future Explorer',
-  loading: true,
   yearsActive: 0,
   totalDistanceKm: 0,
   locations: [],
@@ -64,156 +77,114 @@ const EMPTY_DATA: WrappedData = {
 /**
  * Fetch wrapped data for a user.
  * Pass `year` as a number for a specific year, or `'all'` for all-time stats.
+ *
+ * Fetches the user's albums ONCE (keyed by userId) and derives the selected
+ * view in memory — switching between "this year" and "all-time" is instant
+ * and costs no extra queries. (The previous version ran the full album query
+ * once per mode, and the page mounted it twice.)
  */
 export function useWrappedData(userId: string | undefined, year?: number | 'all'): WrappedData {
   const mode = year ?? new Date().getFullYear()
-  const [data, setData] = useState<WrappedData>({ ...EMPTY_DATA, year: mode })
+  const [albums, setAlbums] = useState<WrappedAlbum[] | null>(null)
 
   useEffect(() => {
     // Keep loading true while waiting for auth
     if (!userId) return
 
     let cancelled = false
-
-    // Reset to loading when userId or mode changes
-    setData(prev => ({ ...prev, loading: true, year: mode }))
+    setAlbums(null)
 
     const fetchData = async () => {
       const supabase = createClient()
 
-      // Fetch all user albums with photos — use created_at as ordering fallback
-      const query = supabase
+      const { data: allAlbums } = await supabase
         .from('albums')
         .select('id, title, location_name, country_code, date_start, created_at, cover_photo_url, latitude, longitude, photos(id, file_path)')
         .eq('user_id', userId)
         .order('created_at', { ascending: true })
 
-      const { data: allAlbums } = await query
-
       if (cancelled) return
 
-      if (!allAlbums || allAlbums.length === 0) {
-        setData({ ...EMPTY_DATA, year: mode, loading: false })
-        return
-      }
-
       // Filter out empty albums (drafts with no photos)
-      let albums = allAlbums.filter(a => (a.photos?.length || 0) > 0)
-
-      // Filter by year if not "all" — check both date_start and created_at
-      if (mode !== 'all') {
-        albums = albums.filter(a => {
-          const parsed = parseLocalDate(a.date_start || a.created_at)
-          return parsed?.getFullYear() === mode
-        })
-      }
-
-      // Sort by effective date (date_start preferred, fallback to created_at)
-      albums.sort((a, b) => {
-        const dateA = parseLocalDate(a.date_start || a.created_at)?.getTime() ?? 0
-        const dateB = parseLocalDate(b.date_start || b.created_at)?.getTime() ?? 0
-        return dateA - dateB
-      })
-
-      if (albums.length === 0) {
-        setData({ ...EMPTY_DATA, year: mode, loading: false })
-        return
-      }
-
-      processAlbums(albums)
-
-      function processAlbums(albumList: NonNullable<typeof albums>) {
-        if (cancelled) return
-
-        const totalPhotos = albumList.reduce((sum, a) => sum + (a.photos?.length || 0), 0)
-        const countryCodes = [...new Set(albumList.filter(a => a.country_code).map(a => a.country_code as string))]
-        // 195 = standard world-country count used by travel apps (UN members + observers)
-        const countryPercentage = Math.min(100, Math.round((countryCodes.length / 195) * 100))
-        const cities = [...new Set(albumList.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
-
-        const months = albumList
-          .map(a => parseLocalDate(a.date_start || a.created_at)?.getMonth())
-          .filter((m): m is number => m !== undefined)
-          .map(m => m + 1)
-        const uniqueMonths = [...new Set(months)]
-
-        const years = albumList
-          .map(a => parseLocalDate(a.date_start || a.created_at)?.getFullYear())
-          .filter((y): y is number => y !== undefined)
-        const yearsActive = new Set(years).size
-
-        const topAlbums = albumList
-          .map(a => ({
-            id: a.id,
-            title: a.title,
-            location_name: a.location_name || undefined,
-            cover_photo_url: getPhotoUrl(a.cover_photo_url || a.photos?.[0]?.file_path),
-            like_count: a.photos?.length || 0,
-          }))
-          .sort((a, b) => b.like_count - a.like_count)
-          .slice(0, 3)
-
-        const firstTrip = albumList[0]
-          ? { title: albumList[0].title, location_name: albumList[0].location_name || undefined, date_start: albumList[0].date_start || undefined }
-          : null
-        const lastTrip = albumList[albumList.length - 1]
-          ? { title: albumList[albumList.length - 1].title, location_name: albumList[albumList.length - 1].location_name || undefined, date_start: albumList[albumList.length - 1].date_start || undefined }
-          : null
-
-        const locations: WrappedData['locations'] = []
-        let totalDistanceKm = 0
-        for (const a of albumList) {
-          if (a.latitude != null && a.longitude != null) {
-            const dateStr = a.date_start || a.created_at || ''
-            const loc: WrappedData['locations'][number] = {
-              lat: a.latitude,
-              lng: a.longitude,
-              name: a.location_name?.split(',')[0]?.trim() || a.title,
-              date: dateStr,
-              albumId: a.id,
-              coverUrl: getPhotoUrl(a.cover_photo_url || a.photos?.[0]?.file_path),
-              albumTitle: a.title,
-              country: a.country_code || undefined,
-            }
-            if (locations.length > 0) {
-              const prev = locations[locations.length - 1]
-              totalDistanceKm += haversineKm(prev.lat, prev.lng, loc.lat, loc.lng)
-            }
-            locations.push(loc)
-          }
-        }
-
-        const personality = getTravelPersonality({
-          countries: countryCodes.length,
-          trips: albumList.length,
-          cities: cities.length,
-          continents: countContinents(countryCodes),
-        }).type
-
-        setData({
-          year: mode,
-          totalTrips: albumList.length,
-          totalPhotos,
-          countryCodes,
-          countryPercentage,
-          cities,
-          topAlbums,
-          firstTrip,
-          lastTrip,
-          travelMonths: uniqueMonths,
-          personality,
-          loading: false,
-          yearsActive,
-          totalDistanceKm: Math.round(totalDistanceKm),
-          locations,
-        })
-      }
+      setAlbums((allAlbums || []).filter(a => (a.photos?.length || 0) > 0))
     }
 
     fetchData()
 
     return () => { cancelled = true }
-  }, [userId, mode])
+  }, [userId])
 
-  return data
+  return useMemo<WrappedData>(() => {
+    if (albums === null) {
+      return { ...EMPTY_DATA, year: mode, loading: true, hasAnyTrips: false }
+    }
+
+    const hasAnyTrips = albums.length > 0
+
+    // Filter by year if not "all" — check both date_start and created_at
+    const selected = mode === 'all'
+      ? albums
+      : albums.filter(a => parseLocalDate(a.date_start || a.created_at)?.getFullYear() === mode)
+
+    if (selected.length === 0) {
+      return { ...EMPTY_DATA, year: mode, loading: false, hasAnyTrips }
+    }
+
+    const stats = computeTravelStats(selected)
+
+    const totalPhotos = selected.reduce((sum, a) => sum + (a.photos?.length || 0), 0)
+
+    const topAlbums = [...selected]
+      .map(a => ({
+        id: a.id,
+        title: a.title,
+        location_name: a.location_name || undefined,
+        cover_photo_url: getPhotoUrl(a.cover_photo_url || a.photos?.[0]?.file_path),
+        photo_count: a.photos?.length || 0,
+      }))
+      .sort((a, b) => b.photo_count - a.photo_count)
+      .slice(0, 3)
+
+    const locations: WrappedData['locations'] = []
+    for (const a of stats.sortedAlbums) {
+      if (a.latitude != null && a.longitude != null) {
+        locations.push({
+          lat: a.latitude,
+          lng: a.longitude,
+          name: a.location_name?.split(',')[0]?.trim() || a.title,
+          date: a.date_start || a.created_at || '',
+          albumId: a.id,
+          coverUrl: getPhotoUrl(a.cover_photo_url || a.photos?.[0]?.file_path),
+          albumTitle: a.title,
+          country: a.country_code || undefined,
+        })
+      }
+    }
+
+    const first = stats.sortedAlbums[0]
+    const last = stats.sortedAlbums[stats.sortedAlbums.length - 1]
+
+    return {
+      year: mode,
+      totalTrips: stats.totalTrips,
+      totalPhotos,
+      countryCodes: stats.countryCodes,
+      countryPercentage: stats.countryPercentage,
+      cities: stats.cities,
+      topAlbums,
+      firstTrip: first
+        ? { title: first.title, location_name: first.location_name || undefined, date_start: first.date_start || undefined }
+        : null,
+      lastTrip: last
+        ? { title: last.title, location_name: last.location_name || undefined, date_start: last.date_start || undefined }
+        : null,
+      travelMonths: stats.travelMonths,
+      personality: stats.personality.type,
+      loading: false,
+      yearsActive: stats.yearsActive,
+      totalDistanceKm: stats.totalDistanceKm,
+      hasAnyTrips,
+      locations,
+    }
+  }, [albums, mode])
 }

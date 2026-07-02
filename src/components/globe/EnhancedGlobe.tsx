@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
 import dynamic from 'next/dynamic'
 import type { GlobeInstance } from '@/types/globe'
-import { CityPinSystem, type CityCluster } from './CityPinSystem'
+import { useCityPinSystem, clusterParamsForAltitude, type CityCluster, type ClusterLevel } from './CityPinSystem'
 import { AlbumImageModal } from './AlbumImageModal'
 import { GlobeSearch } from './GlobeSearch'
 import { Card, CardContent } from '@/components/ui/card'
@@ -26,6 +26,55 @@ import type { FlightPath, GlobeInternals } from './types'
 
 // Dynamically import the Globe component to avoid SSR issues
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false })
+
+/* ── Stable globe accessors ────────────────────────────────────────────────
+ * react-globe.gl re-applies a layer whenever an accessor prop changes
+ * identity, so anything that doesn't need component state lives at module
+ * scope. Rebuilding the HTML pin layer in particular is expensive — each pin
+ * is a real DOM element. */
+
+const EMPTY_DATA: object[] = []
+const EMPTY_ARC_PLANES: FlightPath[] = []
+
+const htmlLatAccessor = (d: object) => (d as { lat: number }).lat
+const htmlLngAccessor = (d: object) => (d as { lng: number }).lng
+const htmlAltitudeAccessor = (d: object) => (d as { size: number }).size * 0.01
+
+const ringLatAccessor = (d: object) => (d as { lat: number }).lat
+const ringLngAccessor = (d: object) => (d as { lng: number }).lng
+const ringColorAccessor = () => 'transparent'
+
+const arcColorAccessor = (d: object) => {
+  const path = d as FlightPath
+  const progress = path.total > 1 ? path.index / (path.total - 1) : 0.5
+  const colors = [
+    ['rgba(124,154,62,0.8)', 'rgba(153,177,105,0.4)'],
+    ['rgba(196,175,93,0.8)', 'rgba(218,200,130,0.4)'],
+    ['rgba(99,206,180,0.75)', 'rgba(134,220,200,0.35)'],
+    ['rgba(147,165,220,0.75)', 'rgba(170,185,235,0.35)'],
+  ]
+  const idx = Math.floor(progress * (colors.length - 1))
+  const pair = colors[Math.min(idx, colors.length - 1)]
+  return [pair[0], pair[1]]
+}
+
+const arcAltitudeAccessor = (d: object) => {
+  const path = d as FlightPath
+  const minAlt = 0.08
+  const distFactor = Math.min(path.distance / 90, 1)
+  return minAlt + distFactor * 0.45
+}
+
+const arcDashAnimateTimeAccessor = (d: object) => {
+  const path = d as FlightPath
+  const speedFactor = Math.min(path.distance / 60, 1)
+  return 3000 + speedFactor * 3000
+}
+
+const arcDashInitialGapAccessor = (d: object) => {
+  const path = d as FlightPath
+  return (path.index * 0.37) % 1
+}
 
 export interface WishlistPin {
   id: string
@@ -121,11 +170,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
   }), [globeContainerRef, navigationHandlerRef, availableYearsRef, globeRef])
 
-  // Zoom-aware clustering: track the camera altitude so the cluster radius
-  // recomputes as the user zooms. Bucketed + throttled so we only rebuild the
-  // (expensive) HTML pin elements when the altitude actually crosses a band,
-  // not on every frame of an inertial zoom.
-  const [cameraAltitude, setCameraAltitude] = useState<number>(2.5)
+  // Zoom-aware clustering: track the clustering BAND (radius + level), not the
+  // raw camera altitude. Bands only change at a handful of thresholds, so a
+  // whole inertial zoom within one band causes zero re-renders — and the
+  // (expensive) HTML pin elements only rebuild when clustering actually
+  // changes.
+  const [clusterBand, setClusterBand] = useState<{ radiusDeg: number; level: ClusterLevel }>(
+    () => clusterParamsForAltitude(2.5)
+  )
   const lastZoomTickRef = useRef<number>(0)
 
   const handleZoom = useCallback((pov: { lat: number; lng: number; altitude: number }) => {
@@ -137,21 +189,20 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     if (now - lastZoomTickRef.current < 120) return
     lastZoomTickRef.current = now
 
-    setCameraAltitude(prev => {
-      // Only update state when the change is meaningful enough to possibly
-      // cross a clustering band — avoids re-render churn from tiny deltas.
-      if (Math.abs(prev - altitude) < 0.02) return prev
-      return altitude
-    })
+    const band = clusterParamsForAltitude(altitude)
+    setClusterBand(prev =>
+      prev.radiusDeg === band.radiusDeg && prev.level === band.level ? prev : band
+    )
   }, [])
 
-  // Get city pin system data (recomputed when the zoom band changes)
-  const cityPinSystem = CityPinSystem({
+  // Memoized city pin system (recomputed only when pins/active/zoom band change)
+  const cityPinSystem = useCityPinSystem({
     cities: cityPins,
     onCityClick: handleCityClick,
     onClusterClick: handleClusterClick,
     activeCity: state.activeCityId,
-    altitude: cameraAltitude
+    radiusDeg: clusterBand.radiusDeg,
+    level: clusterBand.level
   })
 
   // Combine city pins with current location pin and any wishlist pins
@@ -219,7 +270,26 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     }
 
     return pins
-  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation, wishlistPins])
+    // isOwnProfile gates the current-location pin above — omitting it here
+    // left a stale GPS pin visible after switching to someone else's globe.
+  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation, wishlistPins, isOwnProfile])
+
+  // Pin DOM factory — memoized so three-globe doesn't regenerate every pin
+  // element whenever this component re-renders for unrelated reasons.
+  const htmlElementFactory = useCallback((d: object) => createPinElement(d, {
+    locations,
+    getYearColor,
+    cityPins,
+    cityPinSystem,
+    handleCityClick,
+    onWishlistPinClick
+  }), [locations, getYearColor, cityPins, cityPinSystem, handleCityClick, onWishlistPinClick])
+
+  const arcStrokeAccessor = useCallback((d: object) => {
+    const path = d as FlightPath
+    const recency = path.total > 1 ? (path.index / (path.total - 1)) : 1
+    return performanceConfig.arcStroke * (0.7 + recency * 0.5)
+  }, [performanceConfig.arcStroke])
 
   // Set navigation handler for imperative handle
   navigationHandlerRef.current = (albumId: string, lat: number, lng: number) => {
@@ -399,68 +469,33 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
                   // City pins + current location pin
                   htmlElementsData={allPinData}
-                  htmlLat={(d: object) => (d as { lat: number }).lat}
-                  htmlLng={(d: object) => (d as { lng: number }).lng}
-                  htmlAltitude={(d: object) => (d as { size: number }).size * 0.01}
-                  htmlElement={(d: object) => createPinElement(d, {
-                    locations,
-                    getYearColor,
-                    cityPins,
-                    cityPinSystem,
-                    handleCityClick,
-                    onWishlistPinClick
-                  })}
+                  htmlLat={htmlLatAccessor}
+                  htmlLng={htmlLngAccessor}
+                  htmlAltitude={htmlAltitudeAccessor}
+                  htmlElement={htmlElementFactory}
 
                   // Animation rings disabled for performance
-                  ringsData={[]}
-                  ringLat={(d: object) => (d as { lat: number }).lat}
-                  ringLng={(d: object) => (d as { lng: number }).lng}
+                  ringsData={EMPTY_DATA}
+                  ringLat={ringLatAccessor}
+                  ringLng={ringLngAccessor}
                   ringMaxRadius={0}
                   ringPropagationSpeed={0}
                   ringRepeatPeriod={0}
-                  ringColor={() => 'transparent'}
+                  ringColor={ringColorAccessor}
 
                   // Animated travel arcs with moving dash
-                  arcsData={performanceConfig.showArcs && showStaticConnections ? staticConnections : []}
+                  arcsData={performanceConfig.showArcs && showStaticConnections ? staticConnections : EMPTY_DATA}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
                   arcEndLng="endLng"
-                  arcColor={(d: object) => {
-                    const path = d as FlightPath
-                    const progress = path.total > 1 ? path.index / (path.total - 1) : 0.5
-                    const colors = [
-                      ['rgba(124,154,62,0.8)', 'rgba(153,177,105,0.4)'],
-                      ['rgba(196,175,93,0.8)', 'rgba(218,200,130,0.4)'],
-                      ['rgba(99,206,180,0.75)', 'rgba(134,220,200,0.35)'],
-                      ['rgba(147,165,220,0.75)', 'rgba(170,185,235,0.35)'],
-                    ]
-                    const idx = Math.floor(progress * (colors.length - 1))
-                    const pair = colors[Math.min(idx, colors.length - 1)]
-                    return [pair[0], pair[1]]
-                  }}
-                  arcAltitude={(d: object) => {
-                    const path = d as FlightPath
-                    const minAlt = 0.08
-                    const distFactor = Math.min(path.distance / 90, 1)
-                    return minAlt + distFactor * 0.45
-                  }}
-                  arcStroke={(d: object) => {
-                    const path = d as FlightPath
-                    const recency = path.total > 1 ? (path.index / (path.total - 1)) : 1
-                    return performanceConfig.arcStroke * (0.7 + recency * 0.5)
-                  }}
+                  arcColor={arcColorAccessor}
+                  arcAltitude={arcAltitudeAccessor}
+                  arcStroke={arcStrokeAccessor}
                   arcDashLength={0.25}
                   arcDashGap={0.15}
-                  arcDashAnimateTime={(d: object) => {
-                    const path = d as FlightPath
-                    const speedFactor = Math.min(path.distance / 60, 1)
-                    return 3000 + speedFactor * 3000
-                  }}
-                  arcDashInitialGap={(d: object) => {
-                    const path = d as FlightPath
-                    return (path.index * 0.37) % 1
-                  }}
+                  arcDashAnimateTime={arcDashAnimateTimeAccessor}
+                  arcDashInitialGap={arcDashInitialGapAccessor}
                   arcCurveResolution={performanceConfig.arcCurveResolution}
                   arcCircularResolution={performanceConfig.arcCircularResolution}
 
@@ -507,8 +542,9 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                         }
                       }
 
-                      // Set initial view
-                      if (initialAlbumId && initialLat && initialLng) {
+                      // Set initial view (null checks, not truthiness — lat/lng
+                      // of 0 are valid coordinates on the equator/meridian)
+                      if (initialAlbumId && initialLat != null && initialLng != null) {
                         // Let the initial navigation effect handle camera positioning
                       } else if (locations.length > 0) {
                         const optimalPosition = calculateOptimalCameraPosition(locations)
@@ -563,7 +599,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
                 <ArcPlanes
                   globe={globeRef.current as GlobeInstance | null}
-                  arcs={performanceConfig.showArcs && showStaticConnections ? staticConnections : []}
+                  arcs={performanceConfig.showArcs && showStaticConnections ? staticConnections : EMPTY_ARC_PLANES}
                   visible={globeReady && !isPlaying}
                 />
 

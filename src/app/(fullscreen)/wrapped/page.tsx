@@ -81,13 +81,11 @@ export default function WrappedPage() {
   const currentYear = new Date().getFullYear()
   const [mode, setMode] = useState<'year' | 'all'>('year')
   const data = useWrappedData(user?.id, mode === 'all' ? 'all' : currentYear)
-  // All-time lookup so the year view knows whether the account has *any*
-  // trips. If both this year and all-time are empty, there's no point sending
-  // the user to an equally-empty All-Time screen — just point them at creating
-  // an album. (The hook fetches every album regardless of mode, so this is the
-  // same query; in 'all' mode `data` already is the all-time data.)
-  const allTimeData = useWrappedData(user?.id, 'all')
-  const allTimeEmpty = !allTimeData.loading && allTimeData.totalTrips === 0
+  // The hook fetches albums once and derives the selected view in memory, so
+  // it also knows whether the account has *any* trips all-time. If both this
+  // year and all-time are empty, there's no point sending the user to an
+  // equally-empty All-Time screen — just point them at creating an album.
+  const allTimeEmpty = !data.loading && !data.hasAnyTrips
 
   // Pin click: jump into the album on the globe, so user can dive deeper
   const handlePinClick = useCallback(
@@ -607,6 +605,58 @@ export default function WrappedPage() {
                     ? `That's ${(data.totalDistanceKm / 40075).toFixed(1)}x around the Earth!`
                     : `That's ${((data.totalDistanceKm / 40075) * 100).toFixed(0)}% around the Earth`}
                 </motion.p>
+              )}
+
+              {/* Top adventures — the albums with the most photos this period.
+                  Tapping one dives into it on the globe. */}
+              {data.topAlbums.length > 0 && (
+                <motion.div
+                  className="w-full max-w-md mb-6"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.05 }}
+                >
+                  <p className="al-eyebrow !text-olive-400 text-center mb-2.5">
+                    Top adventures
+                  </p>
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {data.topAlbums.map((album, i) => (
+                      <motion.button
+                        key={album.id}
+                        type="button"
+                        onClick={() => router.push(`/globe?album=${album.id}`)}
+                        className="cursor-pointer group relative aspect-[4/5] rounded-xl overflow-hidden border border-white/15 shadow-lg shadow-black/30 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-400 active:scale-[0.97] transition-transform duration-200"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 1.1 + i * 0.08, type: 'spring', stiffness: 220, damping: 20 }}
+                        aria-label={`View ${album.title} on the globe`}
+                      >
+                        {album.cover_photo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- decorative cover in a fixed-size tile; next/image adds no value at this size
+                          <img
+                            src={album.cover_photo_url}
+                            alt=""
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-white/[0.07] flex items-center justify-center">
+                            <Camera className="h-6 w-6 text-white/30" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                        <div className="absolute inset-x-0 bottom-0 p-2">
+                          <p className="text-white text-[11px] font-semibold leading-tight line-clamp-2">
+                            {album.title}
+                          </p>
+                          <p className="text-white/65 text-[10px] mt-0.5 tabular-nums">
+                            {album.photo_count} photo{album.photo_count === 1 ? '' : 's'}
+                          </p>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
               )}
 
               {/* Share actions — the viral moment. Lead with a prominent

@@ -2,27 +2,30 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
-import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
 import {
   Globe, MapPin, Camera, Route, Share2, Loader2, Compass, Plane,
   Copy, Check, ScanLine,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import QRCode from 'qrcode'
+import dynamic from 'next/dynamic'
 import { StreakBadge } from '@/components/profile/StreakBadge'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { PassportScanner } from '@/components/passport/PassportScanner'
 import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
-import { haversineKm } from '@/lib/utils/geoCalculations'
 import { getCountryName } from '@/lib/utils/country'
-import { getContinent, CONTINENT_TOTALS, CONTINENT_EMOJI, countContinents, type Continent } from '@/lib/utils/continents'
-import { getTravelPersonality, type TravelPersonality } from '@/lib/utils/travel-personality'
+import { CONTINENT_EMOJI, type Continent } from '@/lib/utils/continents'
+import { useTravelPassport } from '@/lib/hooks/useTravelPassport'
+
+// Camera + QR-decode stack loads only when the user actually opens the
+// scanner — it's dead weight for a passport page view otherwise.
+const PassportScanner = dynamic(
+  () => import('@/components/passport/PassportScanner').then(m => ({ default: m.PassportScanner })),
+  { ssr: false }
+)
 
 // ---------------------------------------------------------------------------
 // Journey narrative statements — generates 2–5 storytelling lines from data
@@ -127,180 +130,6 @@ function buildJourneyStatements(d: {
 }
 
 // ---------------------------------------------------------------------------
-// Data hook
-// ---------------------------------------------------------------------------
-interface PassportAlbum {
-  id: string; title: string; location_name: string | null; country_code: string | null
-  latitude: number; longitude: number; date_start: string | null; created_at: string; cover_photo_url: string | null
-}
-
-interface PassportData {
-  albums: PassportAlbum[]; photoCount: number; countryCodes: string[]; cityCount: number
-  totalDistanceKm: number; personality: TravelPersonality
-  continentProgress: { name: string; visited: number; total: number }[]
-  firstTrip: { date: string; location: string } | null
-  latestTrip: { date: string; location: string } | null
-}
-
-async function backfillMissingCountryCodes(
-  albums: PassportAlbum[],
-  supabase: ReturnType<typeof createClient>
-): Promise<Record<string, string>> {
-  // Cap per-load geocodes: Nominatim is rate-limited (1 req/s) and this runs
-  // client-side keyed by the user's IP. Backfilling a handful per visit keeps
-  // the page snappy and converges over a few visits for large libraries.
-  const missing = albums
-    .filter(a => !a.country_code && a.latitude != null && a.longitude != null)
-    .slice(0, 8)
-  if (missing.length === 0) return {}
-
-  const resolved: Record<string, string> = {}
-
-  for (const album of missing) {
-    try {
-      const resp = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?` +
-        new URLSearchParams({
-          lat: album.latitude.toString(),
-          lon: album.longitude.toString(),
-          format: 'json',
-          addressdetails: '1',
-          'accept-language': 'en',
-        }),
-        { headers: { 'User-Agent': 'AdventureLog/1.0' } }
-      )
-      if (resp.ok) {
-        const data = await resp.json()
-        const code = data?.address?.country_code?.toUpperCase()
-        if (code && code.length === 2) {
-          resolved[album.id] = code
-          await supabase
-            .from('albums')
-            .update({ country_code: code })
-            .eq('id', album.id)
-        }
-      }
-      if (missing.indexOf(album) < missing.length - 1) {
-        await new Promise(r => setTimeout(r, 1100))
-      }
-    } catch {
-      // Skip failed geocoding
-    }
-  }
-
-  return resolved
-}
-
-function computePassportData(validAlbums: PassportAlbum[], photoCount: number): PassportData {
-  const countryCodes = [...new Set(validAlbums.map(a => a.country_code?.toUpperCase()).filter((c): c is string => !!c))]
-  const cities = new Set(validAlbums.map(a => a.location_name?.split(',')[0]?.trim()).filter(Boolean))
-
-  const sorted = [...validAlbums].sort((a, b) => new Date(a.date_start || a.created_at).getTime() - new Date(b.date_start || b.created_at).getTime())
-  let totalDistanceKm = 0
-  for (let i = 1; i < sorted.length; i++) {
-    totalDistanceKm += haversineKm(sorted[i - 1].latitude, sorted[i - 1].longitude, sorted[i].latitude, sorted[i].longitude)
-  }
-
-  const visitedByCont: Record<string, Set<string>> = {}
-  for (const code of countryCodes) {
-    const cont = getContinent(code)
-    if (cont) { if (!visitedByCont[cont]) visitedByCont[cont] = new Set(); visitedByCont[cont].add(code) }
-  }
-
-  let firstTrip: PassportData['firstTrip'] = null
-  let latestTrip: PassportData['latestTrip'] = null
-  if (sorted.length > 0) {
-    const first = sorted[0]
-    firstTrip = { date: first.date_start || first.created_at, location: first.location_name || first.title }
-  }
-  // Only a distinct "latest" when there's more than one album — otherwise the
-  // single album is both first and latest and the UI shows two identical cards.
-  if (sorted.length > 1) {
-    const latest = sorted[sorted.length - 1]
-    latestTrip = { date: latest.date_start || latest.created_at, location: latest.location_name || latest.title }
-  }
-
-  return {
-    albums: validAlbums,
-    photoCount,
-    countryCodes,
-    cityCount: cities.size,
-    totalDistanceKm: Math.round(totalDistanceKm),
-    personality: getTravelPersonality({
-      countries: countryCodes.length,
-      trips: validAlbums.length,
-      cities: cities.size,
-      continents: countContinents(countryCodes),
-    }),
-    continentProgress: Object.entries(CONTINENT_TOTALS).map(([name, total]) => ({
-      name, visited: visitedByCont[name]?.size || 0, total,
-    })),
-    firstTrip,
-    latestTrip,
-  }
-}
-
-function useTravelPassport() {
-  const { user } = useAuth()
-  const [data, setData] = useState<PassportData | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (!user) return
-    let cancelled = false
-    setLoading(true)
-
-    ;(async () => {
-      try {
-        const supabase = createClient()
-        const { data: albums } = await supabase
-          .from('albums')
-          .select('id, title, location_name, country_code, latitude, longitude, date_start, created_at, cover_photo_url')
-          .eq('user_id', user.id)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-          .neq('status', 'draft')
-          .order('date_start', { ascending: true, nullsFirst: false })
-
-        const { count: photoCount } = await supabase
-          .from('photos')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-
-        if (cancelled) return
-
-        const validAlbums = (albums || []) as PassportAlbum[]
-
-        // Render immediately with the data we have — don't block the whole page
-        // behind slow, rate-limited reverse-geocoding.
-        setData(computePassportData(validAlbums, photoCount || 0))
-        setLoading(false)
-
-        // Backfill any missing country codes in the background, then merge the
-        // results in with a second, non-blocking update.
-        const backfilled = await backfillMissingCountryCodes(validAlbums, supabase)
-        if (cancelled || Object.keys(backfilled).length === 0) return
-        for (const album of validAlbums) {
-          if (!album.country_code && backfilled[album.id]) {
-            album.country_code = backfilled[album.id]
-          }
-        }
-        setData(computePassportData(validAlbums, photoCount || 0))
-      } catch (err) {
-        if (cancelled) return
-        log.error('Failed to load passport', { component: 'TravelPassport', action: 'fetch' }, err as Error)
-        setLoading(false)
-      }
-    })()
-
-    return () => { cancelled = true }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is the identity that matters
-  }, [user?.id])
-
-  return { data, loading }
-}
-
-// ---------------------------------------------------------------------------
 // QR Code component — premium passport style
 // ---------------------------------------------------------------------------
 function PassportQRCode({ url, size = 180 }: { url: string; size?: number }) {
@@ -308,12 +137,19 @@ function PassportQRCode({ url, size = 180 }: { url: string; size?: number }) {
 
   useEffect(() => {
     if (!url) return
-    QRCode.toDataURL(url, {
-      width: size * 2,
-      margin: 2,
-      color: { dark: '#2d3a1a', light: '#ffffff' },
-      errorCorrectionLevel: 'M',
-    }).then(setQrDataUrl).catch(() => {})
+    // qrcode is lazy-loaded: QR generation only happens on this page, so the
+    // library shouldn't ride in the shared vendor bundle on every route.
+    import('qrcode')
+      .then(({ default: QRCode }) =>
+        QRCode.toDataURL(url, {
+          width: size * 2,
+          margin: 2,
+          color: { dark: '#2d3a1a', light: '#ffffff' },
+          errorCorrectionLevel: 'M',
+        })
+      )
+      .then(setQrDataUrl)
+      .catch(() => {})
   }, [url, size])
 
   if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-muted rounded-xl animate-pulse" />

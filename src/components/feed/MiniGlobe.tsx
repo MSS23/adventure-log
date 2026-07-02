@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState, memo, useCallback } from 'react'
+import { useEffect, useRef, useState, memo } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { Loader2, MapPin, Globe, Expand } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { log } from '@/lib/utils/logger'
@@ -451,24 +450,18 @@ export const CompactGlobeLink = memo(function CompactGlobeLink({
 }: CompactGlobeLinkProps) {
   const prefersReducedMotion = useReducedMotion()
   const [isHovered, setIsHovered] = useState(false)
-  const router = useRouter()
 
+  // The globe page is fully mobile-capable (full-bleed layout, touch pins,
+  // filmstrip dock, album preview modal), so this deep-link goes to the globe
+  // on every breakpoint — it used to bail to the album page on small screens,
+  // which hid the app's hero feature exactly where it matters most.
   const globeUrl = userId
     ? `/globe?user=${userId}${albumId ? `&album=${albumId}` : ''}&lat=${lat}&lng=${lng}`
     : `/globe?lat=${lat}&lng=${lng}${albumId ? `&album=${albumId}` : ''}`
 
-  // On mobile, navigate to user profile instead of globe (globe doesn't work well on small screens)
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    if (window.innerWidth < 768 && albumId) {
-      e.preventDefault()
-      router.push(`/albums/${albumId}`)
-    }
-  }, [albumId, router])
-
   return (
     <Link
       href={globeUrl}
-      onClick={handleClick}
       className={cn(
         'inline-flex items-center gap-2 px-3 py-1.5 rounded-full',
         'bg-gradient-to-r from-olive-50 to-olive-50',

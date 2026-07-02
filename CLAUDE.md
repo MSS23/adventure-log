@@ -813,7 +813,7 @@ mobile WebView calls back to the deployed web URL for `/api/*`.
 ┌──────────────────────────┐         ┌──────────────────────────┐
 │ iOS / Android WebView    │  HTTPS  │ Vercel (Next.js server)  │
 │  · static UI bundle      │ ──────▶ │  · /api/*                │
-│  · Clerk JS (auth)       │         │  · server actions        │
+│  · Supabase JS (auth)    │         │  · server actions        │
 │  · apiFetch() helper     │         │  · webhooks              │
 └──────────────────────────┘         └──────────────────────────┘
 ```
@@ -840,7 +840,7 @@ filesystem mutations under `MOBILE_BUILD=true` and reverses them in a
      `src/app/(auth)/auth/callback/route.ts`)
    - `src/app/opengraph-image.tsx`, `src/app/twitter-image.tsx`
      (`runtime = 'edge'`)
-   - `src/middleware.ts` (Clerk middleware needs an active server)
+   - `src/middleware.ts` (Supabase session middleware needs an active server)
    - `instrumentation.ts` (Sentry server bootstrap)
    - **Dynamic page routes** (`[id]`, `[username]`, etc.) — `output: 'export'`
      requires `generateStaticParams()` on every dynamic page, but most pages
@@ -850,24 +850,17 @@ filesystem mutations under `MOBILE_BUILD=true` and reverses them in a
      countries, profile) — they call `headers()` transitively, which static
      export forbids.
    - Server-component login redirect page that reads `searchParams`.
-   - Clerk catch-all sign-in/sign-up pages — Clerk's hosted UI is not a
-     static-exportable surface; mobile uses the Clerk SDK directly.
+   - Legacy `/sign-in` / `/sign-up` redirect shims (optional catch-all
+     segments aren't supported by `output: 'export'`; they only bounce old
+     links to `/login`, which the mobile bundle doesn't need).
 
 2. **Stubs** files that ARE imported by client/UI code (so we can't delete
    them) but contain server-only logic:
-   - Our 5 server-action files (`src/app/actions/*.ts`,
+   - Our server-action files (`src/app/actions/*.ts`,
      `src/app/(app)/albums/actions.ts`, `src/app/(app)/albums/[id]/actions.ts`)
      are swapped with throwing stubs under `scripts/mobile-stubs/`. The
      mobile UI must not call these — if it does, the stub throws a
      `MobileStubError` with instructions to port to `apiFetch()`.
-   - Clerk SDK's internal action files
-     (`@clerk/nextjs/dist/{esm,cjs}/app-router/{server-actions,keyless-actions}.js`)
-     are swapped with no-op stubs (`scripts/mobile-stubs/clerk-actions-stub*.js`).
-     These contain `'use server'` directives that, when bundled into pages
-     using `<ClerkProvider>`, populate Next.js's `serverActionsManifest` and
-     trip the static-export check. The stubs export the same names without
-     the directive. Cache invalidation and keyless setup don't apply to a
-     static bundle.
 
 3. **Runs `next build` with `MOBILE_BUILD=true`** so `next.config.ts`
    switches to `output: 'export'` and writes static assets to `./out/`.
@@ -882,9 +875,6 @@ before doing anything else, so a `Ctrl+C`'d build never strands files.
   knob in Next.js 15.x.
 - *Conditional `export const dynamic`*: only changes render mode, doesn't
   exempt a route from static export.
-- *Webpack `resolve.alias` for Clerk's actions*: too late — Next.js's RSC
-  compiler reads `'use server'` directives directly from disk, before
-  webpack alias resolution kicks in.
 - *Two project directories*: invasive, breaks shared imports.
 
 ### Calling APIs from mobile UI
@@ -904,7 +894,7 @@ const res = await apiFetch('/api/wishlist')
 
 On web, `apiFetch('/api/foo')` resolves to `/api/foo` (same-origin).
 On Capacitor, it resolves to `${NEXT_PUBLIC_API_BASE_URL}/api/foo` and sets
-`credentials: 'include'` so the Clerk session cookie is sent cross-origin.
+`credentials: 'include'` so the Supabase session cookie is sent cross-origin.
 
 ### Required env for mobile builds
 
@@ -917,16 +907,23 @@ If unset, the build still succeeds but `apiFetch()` falls back to relative
 paths, which 404 against `capacitor://localhost` at runtime. The build prints
 a loud warning when this env is missing.
 
-### Cross-origin cookie requirements
+### Cross-origin auth requirements
 
-For Clerk auth to work on mobile, the deployed API must:
+Auth is Supabase email/password. In the WebView, the Supabase JS client
+persists its session via the Capacitor `Preferences` plugin (see the custom
+storage adapter in `src/lib/supabase/client.ts`) — direct Supabase queries
+from the mobile UI authenticate with the stored access token, no cookies
+involved.
+
+Calls to our own `/api/*` on the deployed web origin are a different story:
+those route handlers authenticate via the cookie-based server client
+(`@supabase/ssr`), so for them to see a session the deployed API must:
 1. Send `Access-Control-Allow-Credentials: true`
 2. Echo the WebView origin in `Access-Control-Allow-Origin` (cannot be `*`)
-3. Set its session cookie with `SameSite=None; Secure`
+3. Have a session cookie set with `SameSite=None; Secure`
 
-Clerk's production frontend API does this by default. Symptoms of a
-misconfiguration: 401 on every mobile API call, even when the same call
-works on web.
+Symptoms of a misconfiguration: 401 on every mobile `/api/*` call, even when
+the same call works on web and direct Supabase queries work on mobile.
 
 ### What does NOT work in mobile builds
 
@@ -934,7 +931,7 @@ works on web.
 |---------|-----|-------------|
 | Server actions (`'use server'`) | Need a server | Add a route handler under `/api/*`, call via `apiFetch()` |
 | `revalidatePath()` / `revalidateTag()` | Need a server | Refetch on the client |
-| Middleware (Clerk auth gate) | Static export ignores middleware | API auth runs on the deployed server; client gates UI via `useUser()` |
+| Middleware (session refresh / security headers) | Static export ignores middleware | API auth runs on the deployed server; client gates UI via `useAuth()` + `ProtectedRoute` |
 | `next/og` ImageResponse | Edge runtime | Pre-render or host on the web target |
 | `headers()`, `cookies()` from `next/headers` (server) | Need a server | Use the Capacitor `Preferences` plugin |
 
@@ -948,7 +945,7 @@ WebView until refactored to client-only):
 | `/profile/[userId]`, `/trips/[id]` | Same | Same |
 | `/u/[username]`, `/u/[username]/passport`, `/t/[slug]` | Same (public dynamic) | Same |
 | `/embed/[username]`, `/albums/shared/[token]`, `/albums/[id]/public` | Same | Same |
-| `/sign-in/[[...sign-in]]`, `/sign-up/[[...sign-up]]` | Clerk catch-all routes | Mobile uses Clerk's React SDK directly (Capacitor OAuth bridge was prototyped in `src/lib/auth/clerk-capacitor.ts` and removed pending wire-up — recreate from git history when needed) |
+| `/sign-in/[[...sign-in]]`, `/sign-up/[[...sign-up]]` | Legacy redirect shims on optional catch-all segments (not static-exportable) | Mobile links straight to `/login` / `/signup` |
 | `/login` (server-component redirect) | Reads `searchParams` server-side | Mobile doesn't need this back-compat redirect |
 
 UI that links to any of these should branch on `isNativePlatform()` and
@@ -960,10 +957,10 @@ either disable the affordance or open the URL in the system browser via
 Camera, Geolocation, Filesystem, Network, Preferences, Share, Toast.
 
 Native OAuth (when wired up) needs `@capacitor/browser` + `@capacitor/app` for
-the in-app browser + deep-link round-trip. The bridge code was prototyped in
-`src/lib/auth/clerk-capacitor.ts` and removed pending an active wire-up —
-recreate from git history before the first native build that needs OAuth.
-Both plugins must also be added to package.json then.
+the in-app browser + deep-link round-trip (the
+`com.adventurelog.app://auth/callback` scheme is already reserved in
+`capacitor.config.ts`; the web PKCE callback lives at `/sso-callback`).
+Both plugins must be added to package.json when that work starts.
 
 ### After code changes
 

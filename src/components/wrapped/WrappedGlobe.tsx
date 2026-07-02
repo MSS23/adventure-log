@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import type { GlobeMethods } from 'react-globe.gl'
+import { gcInterpolate, gcBearing, easeInOutCubic } from '@/lib/utils/geoCalculations'
 
 const Globe = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -59,56 +60,8 @@ interface WrappedGlobeProps {
 }
 
 /* ───────────────────────────────────────────────────────────────────────
- * Great-circle helpers
+ * Arc visual tuning (the spherical math itself lives in geoCalculations)
  * ─────────────────────────────────────────────────────────────────────── */
-
-/** Spherical (great-circle) interpolation between two lat/lng points. */
-function gcInterpolate(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-  t: number,
-): { lat: number; lng: number } {
-  const φ1 = (a.lat * Math.PI) / 180
-  const φ2 = (b.lat * Math.PI) / 180
-  const λ1 = (a.lng * Math.PI) / 180
-  const λ2 = (b.lng * Math.PI) / 180
-
-  const Δφ = φ2 - φ1
-  const Δλ = λ2 - λ1
-  const c =
-    Math.sin(Δφ / 2) ** 2 +
-    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2
-  const δ = 2 * Math.atan2(Math.sqrt(c), Math.sqrt(1 - c))
-
-  // Same point — no need to interpolate.
-  if (δ < 1e-9) return { lat: a.lat, lng: a.lng }
-
-  const A = Math.sin((1 - t) * δ) / Math.sin(δ)
-  const B = Math.sin(t * δ) / Math.sin(δ)
-
-  const x = A * Math.cos(φ1) * Math.cos(λ1) + B * Math.cos(φ2) * Math.cos(λ2)
-  const y = A * Math.cos(φ1) * Math.sin(λ1) + B * Math.cos(φ2) * Math.sin(λ2)
-  const z = A * Math.sin(φ1) + B * Math.sin(φ2)
-
-  const lat = (Math.atan2(z, Math.sqrt(x * x + y * y)) * 180) / Math.PI
-  const lng = (Math.atan2(y, x) * 180) / Math.PI
-  return { lat, lng }
-}
-
-/** Initial-bearing in degrees from a → b along the great circle. */
-function gcBearing(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-): number {
-  const φ1 = (a.lat * Math.PI) / 180
-  const φ2 = (b.lat * Math.PI) / 180
-  const Δλ = ((b.lng - a.lng) * Math.PI) / 180
-  const y = Math.sin(Δλ) * Math.cos(φ2)
-  const x =
-    Math.cos(φ1) * Math.sin(φ2) -
-    Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
-  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
-}
 
 /** Same eased curve used for the arc rendering, so the plane rides the
  *  visual arc instead of skimming the surface. Peaks at t=0.5. */
@@ -120,12 +73,6 @@ function arcAltitude(t: number, peak: number): number {
  *  plane stays on top of its arc rather than under it. */
 function peakAltitudeFor(distance: number): number {
   return 0.12 + Math.min(distance / 120, 1) * 0.3
-}
-
-/** Easing curve: ease-in-out for a graceful "ascent → cruise → descent"
- *  feeling instead of a constant-speed crawl. */
-function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
 export function WrappedGlobe({

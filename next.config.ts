@@ -127,17 +127,25 @@ const nextConfig: NextConfig = {
             // `three[-\w.]*` form those ~480KB leak into the shared `vendor`
             // chunk and load on every route, even though the globe component is
             // dynamically imported and only renders on globe pages.
+            // The second alternation row covers globe.gl's TRANSITIVE deps
+            // (d3-*, kapsule, tinycolor2, polished, tween.js, earcut, …).
+            // Nothing else in the app imports these; without listing them they
+            // are shared between the several async globe mounts (globe page,
+            // wrapped, feed mini-globe, discover, embed) and webpack hoists
+            // them into the `common` chunk — which every route loads.
             globe: {
               name: 'globe',
-              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three[-\w.]*|h3-js)[\\/]/,
+              test: /[\\/]node_modules[\\/](react-globe\.gl|globe\.gl|three[-\w.]*|h3-js|d3-[\w-]+|kapsule|accessor-fn|index-array-by|float-tooltip|@tweenjs|tinycolor2|polished|earcut|delaunator|robust-predicates|internmap)[\\/]/,
               chunks: 'all',
               priority: 40,
               enforce: true
             },
-            // Framer Motion - separate chunk, only loaded by pages that need it
+            // Framer Motion - separate chunk, only loaded by pages that need it.
+            // motion-dom/motion-utils are framer-motion v12's internal packages —
+            // without them here they leak into the shared vendor chunk.
             framerMotion: {
               name: 'framer-motion',
-              test: /[\\/]node_modules[\\/](framer-motion|@motionone)[\\/]/,
+              test: /[\\/]node_modules[\\/](framer-motion|motion-dom|motion-utils|@motionone)[\\/]/,
               chunks: 'all',
               priority: 35,
               enforce: true
@@ -148,14 +156,6 @@ const nextConfig: NextConfig = {
               test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
               chunks: 'all',
               priority: 30,
-              enforce: true
-            },
-            // Mapbox - only loaded on map pages
-            mapbox: {
-              name: 'mapbox',
-              test: /[\\/]node_modules[\\/](mapbox-gl|react-map-gl)[\\/]/,
-              chunks: 'all',
-              priority: 35,
               enforce: true
             },
             // Leaflet - only rendered by TripMap (trips/[id] + public trip view),
@@ -187,9 +187,17 @@ const nextConfig: NextConfig = {
               enforce: true
             },
             // Core vendor (Supabase, React Query, etc.)
+            //
+            // `chunks: 'initial'` is load-bearing: with 'all', ASYNC-ONLY
+            // node_modules (jsqr behind the passport scanner's lazy import,
+            // globe.gl's d3-* transitive deps behind dynamic(react-globe.gl),
+            // …) were merged into this single named chunk that every page
+            // downloads — silently defeating every `await import()` of a
+            // dependency in the app. With 'initial', lazily-imported deps stay
+            // in their own on-demand async chunks.
             vendor: {
               name: 'vendor',
-              chunks: 'all',
+              chunks: 'initial',
               test: /node_modules/,
               priority: 10
             },
@@ -373,10 +381,15 @@ const finalConfig = isMobile || !sentryEnabled
         deleteSourcemapsAfterUpload: true,
       },
 
-      // Automatically tree-shake Sentry debug statements to reduce bundle size
+      // Automatically tree-shake Sentry debug statements to reduce bundle size.
+      // The replay iframe/shadow-DOM recorders are excluded too: replay is
+      // consent-gated and the app records neither iframes nor shadow DOM, so
+      // this is pure bundle savings for every visitor.
       webpack: {
         treeshake: {
           removeDebugLogging: true,
+          excludeReplayIframe: true,
+          excludeReplayShadowDOM: true,
         },
       },
     });

@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getContinent } from '@/lib/utils/continents'
+import { haversineKm } from '@/lib/utils/geoCalculations'
 import { Globe, Camera, MapPin, Plane } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -75,18 +76,8 @@ export function TravelInsights() {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- calculateStats is a stable function defined below
   }, [user])
 
-  // Calculate distance between two coordinates using Haversine formula
-  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371 // Radius of the Earth in kilometers
-    const dLat = (lat2 - lat1) * Math.PI / 180
-    const dLon = (lon2 - lon1) * Math.PI / 180
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return R * c // Distance in kilometers
-  }
+  // Distance between two coordinates — shared haversine implementation.
+  const calculateDistance = haversineKm
 
   async function calculateStats() {
     if (!user) return

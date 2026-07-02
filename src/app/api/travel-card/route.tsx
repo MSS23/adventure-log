@@ -2,10 +2,8 @@ import { ImageResponse } from '@vercel/og'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
-import { haversineKm } from '@/lib/utils/geoCalculations'
 import { getFlagEmoji } from '@/lib/utils/country'
-import { countContinents } from '@/lib/utils/continents'
-import { getTravelPersonality } from '@/lib/utils/travel-personality'
+import { computeTravelStats } from '@/lib/utils/travel-stats'
 
 export const runtime = 'nodejs'
 
@@ -68,35 +66,16 @@ export async function GET(request: NextRequest) {
         .in('album_id', albumIds)
       photoCount = count || 0
     }
-    const countryCodes = [...new Set(allAlbums.filter(a => a.country_code).map(a => a.country_code as string))]
-    const cities = [...new Set(allAlbums.filter(a => a.location_name).map(a => a.location_name!.split(',')[0]?.trim()))]
+    // Shared aggregation — identical numbers to the passport/wrapped surfaces.
+    const stats = computeTravelStats(allAlbums)
+    const countryCodes = stats.countryCodes
+    const cities = stats.cities
     const flags = countryCodes.slice(0, 24).map(getFlagEmoji)
-
-    // Calculate distance
-    const coords = allAlbums
-      .filter(a => a.latitude != null && a.longitude != null && (a.date_start || a.created_at))
-      .sort((a, b) =>
-        new Date(a.date_start || a.created_at).getTime() -
-        new Date(b.date_start || b.created_at).getTime()
-      )
-      .map(a => ({ lat: a.latitude!, lng: a.longitude! }))
-
-    let totalDistance = 0
-    for (let i = 1; i < coords.length; i++) {
-      totalDistance += haversineKm(coords[i - 1].lat, coords[i - 1].lng, coords[i].lat, coords[i].lng)
-    }
-
-    // Count continents
-    const continentCount = countContinents(countryCodes)
+    const totalDistance = stats.totalDistanceKm
 
     const displayName = user.display_name || user.username || 'Traveler'
-    const personality = getTravelPersonality({
-      countries: countryCodes.length,
-      trips: allAlbums.length,
-      cities: cities.length,
-      continents: continentCount,
-    }).type
-    const worldPercent = Math.round((countryCodes.length / 195) * 100)
+    const personality = stats.personality.type
+    const worldPercent = stats.countryPercentage
 
     return new ImageResponse(
       (

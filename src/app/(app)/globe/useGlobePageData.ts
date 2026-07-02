@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { useWishlist, type WishlistItem } from '@/lib/hooks/useWishlist'
 import { log } from '@/lib/utils/logger'
+import { haversineKm } from '@/lib/utils/geoCalculations'
 
 export interface AlbumPreview {
   id: string
@@ -50,21 +51,14 @@ export function calculateTotalDistance(albums: AlbumPreview[]): number {
 
   if (located.length < 2) return 0
 
-  const toRad = (deg: number) => (deg * Math.PI) / 180
-  const R = 6371 // Earth radius in km
-
   let total = 0
   for (let i = 1; i < located.length; i++) {
-    const lat1 = toRad(located[i - 1].latitude!)
-    const lat2 = toRad(located[i].latitude!)
-    const dLat = lat2 - lat1
-    const dLon = toRad(located[i].longitude! - located[i - 1].longitude!)
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    total += R * c
+    total += haversineKm(
+      located[i - 1].latitude!,
+      located[i - 1].longitude!,
+      located[i].latitude!,
+      located[i].longitude!
+    )
   }
 
   return Math.round(total)

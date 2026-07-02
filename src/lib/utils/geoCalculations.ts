@@ -437,6 +437,98 @@ export function formatDistanceKm(km: number): string {
   return `${km.toLocaleString()} km`
 }
 
+/* ───────────────────────────────────────────────────────────────────────────
+ * Globe-flavoured `{lat, lng}` helpers
+ *
+ * The 3D globe surfaces (EnhancedGlobe arcs/planes, the Wrapped flight globe)
+ * all work in the `{lat, lng}` shape react-globe.gl uses. These standalone
+ * functions are THE implementations of the spherical math those features need
+ * — WrappedGlobe, ArcPlanes and FlightAnimation used to each carry their own
+ * copy, which is exactly how the passport/wrapped personality labels diverged
+ * once before. Visual tuning (arc peak heights, easing choices per animation)
+ * stays local to each feature; the math lives here.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+export interface LatLng {
+  lat: number
+  lng: number
+}
+
+const DEG = Math.PI / 180
+const RAD = 180 / Math.PI
+
+/**
+ * Spherical (great-circle) interpolation between two points.
+ * `t` ∈ [0, 1]; returns `a` when the points coincide.
+ */
+export function gcInterpolate(a: LatLng, b: LatLng, t: number): LatLng {
+  const φ1 = a.lat * DEG
+  const φ2 = b.lat * DEG
+  const λ1 = a.lng * DEG
+  const λ2 = b.lng * DEG
+
+  const h =
+    Math.sin((φ2 - φ1) / 2) ** 2 +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin((λ2 - λ1) / 2) ** 2
+  const δ = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))
+
+  // Same point — nothing to interpolate.
+  if (δ < 1e-9) return { lat: a.lat, lng: a.lng }
+
+  const A = Math.sin((1 - t) * δ) / Math.sin(δ)
+  const B = Math.sin(t * δ) / Math.sin(δ)
+
+  const x = A * Math.cos(φ1) * Math.cos(λ1) + B * Math.cos(φ2) * Math.cos(λ2)
+  const y = A * Math.cos(φ1) * Math.sin(λ1) + B * Math.cos(φ2) * Math.sin(λ2)
+  const z = A * Math.sin(φ1) + B * Math.sin(φ2)
+
+  return {
+    lat: Math.atan2(z, Math.sqrt(x * x + y * y)) * RAD,
+    lng: Math.atan2(y, x) * RAD,
+  }
+}
+
+/** Initial bearing in degrees (0 = north, clockwise) from `a` toward `b`. */
+export function gcBearing(a: LatLng, b: LatLng): number {
+  const φ1 = a.lat * DEG
+  const φ2 = b.lat * DEG
+  const Δλ = (b.lng - a.lng) * DEG
+  const y = Math.sin(Δλ) * Math.cos(φ2)
+  const x =
+    Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+  return (Math.atan2(y, x) * RAD + 360) % 360
+}
+
+/**
+ * Convert lat/lng/altitude to three-globe's scene coordinates (globe radius
+ * 100, altitude in globe-radius units). Returned as a plain `{x, y, z}` so
+ * this module stays free of a Three.js import — globe components wrap it in
+ * a `THREE.Vector3` themselves.
+ */
+export function latLngToGlobeXYZ(
+  lat: number,
+  lng: number,
+  altitude: number,
+  radius = 100
+): { x: number; y: number; z: number } {
+  const phi = (90 - lat) * DEG
+  const theta = (lng + 180) * DEG
+  const r = radius * (1 + altitude)
+  return {
+    x: -r * Math.sin(phi) * Math.cos(theta),
+    y: r * Math.cos(phi),
+    z: r * Math.sin(phi) * Math.sin(theta),
+  }
+}
+
+/**
+ * Ease-in-out cubic — the shared "ascent → cruise → descent" pacing curve for
+ * flight animations. Kept here so every globe surface's plane feels the same.
+ */
+export function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+}
+
 export {
   type Coordinates,
   type BoundingBox,

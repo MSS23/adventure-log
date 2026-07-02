@@ -19,7 +19,6 @@ import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import QRCode from 'qrcode'
 import { MutualTravelPanel } from './MutualTravelPanel'
 
 const continentIcon: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -36,12 +35,18 @@ function ProfileQRCode({ url, size = 160 }: { url: string; size?: number }) {
 
   useEffect(() => {
     if (!url) return
-    QRCode.toDataURL(url, {
-      width: size * 2,
-      margin: 2,
-      color: { dark: '#2d3a1a', light: '#ffffff' },
-      errorCorrectionLevel: 'M',
-    }).then(setQrDataUrl).catch(() => {})
+    // qrcode is lazy-loaded so it stays out of the shared vendor bundle.
+    import('qrcode')
+      .then(({ default: QRCode }) =>
+        QRCode.toDataURL(url, {
+          width: size * 2,
+          margin: 2,
+          color: { dark: '#2d3a1a', light: '#ffffff' },
+          errorCorrectionLevel: 'M',
+        })
+      )
+      .then(setQrDataUrl)
+      .catch(() => {})
   }, [url, size])
 
   if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-muted rounded-xl animate-pulse" />

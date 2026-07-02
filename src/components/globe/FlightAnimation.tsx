@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import type { GlobeInstance } from '@/types/globe'
+import { gcInterpolate, latLngToGlobeXYZ } from '@/lib/utils/geoCalculations'
 
 export interface FlightState {
   isFlying: boolean
@@ -57,19 +58,16 @@ export function FlightAnimation({
     // Update airplane position based on flight state
     const { fromLat, fromLng, toLat, toLng, progress, altitude } = airplaneState
 
-    // Interpolate position
-    const lat = fromLat + (toLat - fromLat) * progress
-    const lng = fromLng + (toLng - fromLng) * progress
+    // Ride the great circle (matching the rendered arc) — linear lat/lng
+    // interpolation cuts the corner on long routes and drifts off the arc.
+    const { lat, lng } = gcInterpolate(
+      { lat: fromLat, lng: fromLng },
+      { lat: toLat, lng: toLng },
+      progress
+    )
     const alt = altitude * 0.01 // Convert to globe units
 
-    // Convert lat/lng to 3D coordinates
-    const phi = (90 - lat) * (Math.PI / 180)
-    const theta = (lng + 180) * (Math.PI / 180)
-    const radius = 100 + alt * 100
-
-    const x = -radius * Math.sin(phi) * Math.cos(theta)
-    const y = radius * Math.cos(phi)
-    const z = radius * Math.sin(phi) * Math.sin(theta)
+    const { x, y, z } = latLngToGlobeXYZ(lat, lng, alt)
 
     if (airplaneRef.current) {
       airplaneRef.current.position.set(x, y, z)

@@ -22,12 +22,17 @@ Sentry.init({
     ? (process.env.NODE_ENV === 'production' ? 0.05 : 0.1)
     : 0,
 
-  integrations: [
-    Sentry.replayIntegration({
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
+  // Only register the replay integration when the user has actually
+  // consented — for everyone else the recorder isn't just sampled at 0, it's
+  // never constructed (no rrweb bootstrapping, no mutation observers).
+  integrations: replayConsented
+    ? [
+        Sentry.replayIntegration({
+          maskAllText: true,
+          blockAllMedia: true,
+        }),
+      ]
+    : [],
 
   // Drop noise from third-party browser extensions injected into the page
   // (these are NOT our code — e.g. content scripts and clipboard-hardening

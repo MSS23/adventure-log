@@ -4,8 +4,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import type { GlobeInstance } from '@/types/globe'
 import type { FlightPath } from './types'
-
-const GLOBE_RADIUS = 100
+import { gcInterpolate, latLngToGlobeXYZ } from '@/lib/utils/geoCalculations'
 
 interface ArcPlanesProps {
   globe: GlobeInstance | null
@@ -56,53 +55,10 @@ function createPlaneShape(): THREE.BufferGeometry {
   return geometry
 }
 
-/** Interpolate along a great circle arc */
-function interpolateGreatCircle(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number,
-  t: number
-): { lat: number; lng: number } {
-  const toRad = Math.PI / 180
-  const toDeg = 180 / Math.PI
-
-  const φ1 = lat1 * toRad
-  const λ1 = lng1 * toRad
-  const φ2 = lat2 * toRad
-  const λ2 = lng2 * toRad
-
-  const dφ = φ2 - φ1
-  const dλ = λ2 - λ1
-  const a = Math.sin(dφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(dλ / 2) ** 2
-  const d = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-
-  if (d < 1e-6) {
-    return { lat: lat1, lng: lng1 }
-  }
-
-  const A = Math.sin((1 - t) * d) / Math.sin(d)
-  const B = Math.sin(t * d) / Math.sin(d)
-
-  const x = A * Math.cos(φ1) * Math.cos(λ1) + B * Math.cos(φ2) * Math.cos(λ2)
-  const y = A * Math.cos(φ1) * Math.sin(λ1) + B * Math.cos(φ2) * Math.sin(λ2)
-  const z = A * Math.sin(φ1) + B * Math.sin(φ2)
-
-  return {
-    lat: Math.atan2(z, Math.sqrt(x * x + y * y)) * toDeg,
-    lng: Math.atan2(y, x) * toDeg
-  }
-}
-
-/** Convert lat/lng/altitude to 3D position */
+/** Convert lat/lng/altitude to a scene-space Vector3 (shared globe math). */
 function latLngToVec3(lat: number, lng: number, altitude: number): THREE.Vector3 {
-  const phi = (90 - lat) * (Math.PI / 180)
-  const theta = (lng + 180) * (Math.PI / 180)
-  const r = GLOBE_RADIUS * (1 + altitude)
-
-  return new THREE.Vector3(
-    -r * Math.sin(phi) * Math.cos(theta),
-    r * Math.cos(phi),
-    r * Math.sin(phi) * Math.sin(theta)
-  )
+  const { x, y, z } = latLngToGlobeXYZ(lat, lng, altitude)
+  return new THREE.Vector3(x, y, z)
 }
 
 /** Calculate arc altitude matching the globe's arcAltitude callback */
@@ -184,9 +140,9 @@ export function ArcPlanes({ globe, arcs, visible }: ArcPlanesProps) {
         const t = ((elapsed / cycleDuration) + offset) % 1
 
         // Interpolate position along great circle
-        const pos = interpolateGreatCircle(
-          arc.startLat, arc.startLng,
-          arc.endLat, arc.endLng,
+        const pos = gcInterpolate(
+          { lat: arc.startLat, lng: arc.startLng },
+          { lat: arc.endLat, lng: arc.endLng },
           t
         )
 
@@ -202,9 +158,9 @@ export function ArcPlanes({ globe, arcs, visible }: ArcPlanesProps) {
 
         // Calculate forward direction (tangent along the arc)
         const tNext = Math.min(t + 0.01, 1)
-        const posNext = interpolateGreatCircle(
-          arc.startLat, arc.startLng,
-          arc.endLat, arc.endLng,
+        const posNext = gcInterpolate(
+          { lat: arc.startLat, lng: arc.startLng },
+          { lat: arc.endLat, lng: arc.endLng },
           tNext
         )
         const altNext = getArcAltitude(arc.distance, tNext)

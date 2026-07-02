@@ -59,7 +59,10 @@ export function ProfileAlbumGrid({ albums, isOwnProfile = false, className }: Pr
       initial="hidden"
       animate="visible"
       className={cn(
-        'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4',
+        // The profile column is max-w-2xl (~672px), so 4 columns produced
+        // ~145px cells whose text overlay overflowed the cover image. Cap at
+        // 3 columns so every cell stays large enough for its title.
+        'grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4',
         className
       )}
     >

@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 import { User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -31,8 +32,20 @@ export function ProfileHero({
 
   return (
     <div className="relative px-4 sm:px-6">
-      {/* Calm cover band — single quiet accent surface, same inset as info below */}
-      <div className="h-32 sm:h-40 rounded-2xl bg-primary/10 dark:bg-primary/15" />
+      {/* Cover band — the photo uploaded in Settings when set (this is the
+          only surface that displays it), otherwise a quiet accent surface. */}
+      <div className="relative h-32 sm:h-40 rounded-2xl overflow-hidden bg-primary/10 dark:bg-primary/15">
+        {profile.cover_photo_url && (
+          <Image
+            src={profile.cover_photo_url}
+            alt=""
+            fill
+            priority
+            className="object-cover"
+            sizes="(max-width: 672px) 100vw, 672px"
+          />
+        )}
+      </div>
 
       <div className="relative z-10 pb-7 -mt-12 sm:-mt-14">
         <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">

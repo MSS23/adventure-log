@@ -103,28 +103,20 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
           className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/55 to-transparent"
         />
 
-        {/* Content overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-4 z-10">
-          <h3 className="font-heading font-bold text-white text-base sm:text-lg leading-snug line-clamp-2 mb-1.5 [text-shadow:0_2px_6px_rgba(0,0,0,0.85)]">
+        {/* Content overlay — title + date only. No hover CTA: the whole card
+            is a link, and a reserved button row used to push the title up the
+            card until it collided with the top badges on small grid cells. */}
+        <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 z-10">
+          <h3 className="font-heading font-bold text-white text-sm sm:text-base leading-snug line-clamp-2 [text-shadow:0_2px_6px_rgba(0,0,0,0.85)]">
             {album.title}
           </h3>
 
           {date && (
-            <div className="flex items-center gap-1.5 text-white text-xs font-semibold [text-shadow:0_1px_4px_rgba(0,0,0,0.85)]">
+            <div className="mt-1 flex items-center gap-1.5 text-white/90 text-xs font-semibold [text-shadow:0_1px_4px_rgba(0,0,0,0.85)]">
               <Calendar className="h-3 w-3 shrink-0" />
               <span>{date}</span>
             </div>
           )}
-
-          {/* View button - appears on hover */}
-          <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <span className="inline-flex items-center px-4 py-2 rounded-full
-                            bg-white/15 border border-white/40
-                            text-white text-sm font-medium
-                            hover:bg-white/25 transition-colors">
-              View Album
-            </span>
-          </div>
         </div>
       </motion.div>
     </Link>

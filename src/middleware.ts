@@ -153,6 +153,18 @@ function isDataRequest(request: NextRequest): boolean {
     return false
   }
 
+  // A request that explicitly accepts HTML is a page navigation regardless of
+  // its fetch metadata. This matters for PWA users: Chromium recomputes the
+  // Sec-Fetch-* headers for requests re-issued by a service worker's
+  // fetch(event.request) pass-through (dest becomes 'empty'), so an
+  // SW-mediated navigation to a protected page would otherwise be
+  // misclassified as a data request and get raw JSON 401 instead of the
+  // /login redirect. Programmatic fetch()/XHR default to `Accept: */*` and
+  // never claim text/html, so this can't misroute real data requests.
+  if ((headers.get('accept') ?? '').includes('text/html')) {
+    return false
+  }
+
   const dest = headers.get('sec-fetch-dest')
   if (dest && dest !== 'document' && dest !== 'iframe') {
     return true

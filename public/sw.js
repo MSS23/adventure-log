@@ -220,6 +220,19 @@ async function handleNavigationRequest(request) {
     // Try network first
     const networkResponse = await fetch(request)
 
+    // Chromium recomputes Sec-Fetch-* metadata for fetches issued inside a
+    // service worker, so the server-side middleware can misclassify this
+    // navigation as a data request and answer a protected page with a JSON
+    // 401 instead of its usual 307→/login. Surface the redirect the user
+    // expects rather than rendering raw JSON.
+    if (networkResponse.status === 401 && request.mode === 'navigate') {
+      const url = new URL(request.url)
+      return Response.redirect(
+        `${url.origin}/login?redirectTo=${encodeURIComponent(url.pathname)}`,
+        302,
+      )
+    }
+
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE)
       cache.put(request, networkResponse.clone())

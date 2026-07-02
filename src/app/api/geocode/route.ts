@@ -147,6 +147,74 @@ function nominatimReverseUrl(lat: string, lon: string): string {
   )
 }
 
+// ── Photon (komoot) — keyless last-resort provider ──────────────────────────
+// Nominatim's public instance blocks shared datacenter egress IPs (Vercel
+// included), so without a Mapbox token production had NO working provider.
+// Photon is OSM-backed, keyless, and serves datacenter traffic; it stays last
+// in the chain so it only absorbs traffic when the primaries are down.
+
+interface PhotonFeature {
+  properties?: {
+    osm_id?: number
+    name?: string
+    city?: string
+    state?: string
+    country?: string
+    countrycode?: string
+    type?: string
+    osm_value?: string
+  }
+  geometry?: { coordinates?: [number, number] }
+}
+
+function normalizePhotonFeature(feature: PhotonFeature): NormalizedResult | null {
+  const p = feature.properties ?? {}
+  const [lon, lat] = feature.geometry?.coordinates ?? []
+  if (typeof lat !== 'number' || typeof lon !== 'number' || !p.name) return null
+  const display_name = [p.name, p.city, p.state, p.country]
+    .filter((part, i, arr) => part && arr.indexOf(part) === i)
+    .join(', ')
+  const country_code = p.countrycode?.toLowerCase()
+  return {
+    display_name,
+    lat: String(lat),
+    lon: String(lon),
+    place_id: String(p.osm_id ?? `${lat},${lon}`),
+    type: p.type || p.osm_value || 'place',
+    importance: 0.5,
+    ...(country_code ? { address: { country_code } } : {}),
+  }
+}
+
+async function photonSearch(query: string): Promise<NormalizedResult[]> {
+  const url =
+    `https://photon.komoot.io/api/?` +
+    new URLSearchParams({
+      q: query,
+      limit: '8',
+      lang: 'en',
+      // Same intent as the Mapbox `types` filter: places (countries, cities,
+      // towns, villages), not street addresses or POI noise.
+      osm_tag: 'place',
+    }).toString()
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`Photon search error: ${response.status}`)
+  const data = await response.json()
+  return (data.features ?? [])
+    .map(normalizePhotonFeature)
+    .filter((r: NormalizedResult | null): r is NormalizedResult => r !== null)
+}
+
+async function photonReverse(lat: string, lon: string): Promise<NormalizedResult | null> {
+  const url =
+    `https://photon.komoot.io/reverse?` +
+    new URLSearchParams({ lat, lon, lang: 'en' }).toString()
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`Photon reverse error: ${response.status}`)
+  const data = await response.json()
+  return data.features?.[0] ? normalizePhotonFeature(data.features[0]) : null
+}
+
 export async function GET(request: NextRequest) {
   // Rate limiting: 60 requests per minute for geocoding
   const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.geocode, keyPrefix: 'geocode' })
@@ -212,6 +280,21 @@ export async function GET(request: NextRequest) {
       isReverse ? nominatimReverseUrl(lat!, lon!) : nominatimSearchUrl(query!)
     )
     return NextResponse.json(data, { headers: cacheHeaders })
+  } catch (error) {
+    log.warn('Nominatim geocoding failed, falling back to Photon', {
+      component: 'GeocodeAPI',
+      action: isReverse ? 'reverse' : 'search',
+      error: error instanceof Error ? error.message : String(error),
+    })
+    // fall through to Photon
+  }
+
+  // Last resort: Photon — keyless and reachable from datacenter IPs.
+  try {
+    const data = isReverse
+      ? await photonReverse(lat!, lon!)
+      : await photonSearch(query!)
+    return NextResponse.json(data ?? (isReverse ? {} : []), { headers: cacheHeaders })
   } catch (error) {
     log.error(
       'All geocoding providers failed',

@@ -1,6 +1,47 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from '@next/bundle-analyzer';
 import { withSentryConfig } from '@sentry/nextjs';
+import { readFileSync, writeFileSync } from 'fs';
+import path from 'path';
+
+// --- PWA service-worker cache stamping ---------------------------------------
+// Returning PWA users only pick up a new deploy when `public/sw.js`'s BYTES
+// change — that's what triggers the reinstall (skipWaiting → immediate
+// activation) whose activate handler purges all old caches. Bumping
+// CACHE_VERSION used to be a manual per-deploy convention, which is exactly
+// the kind of step that gets forgotten.
+//
+// So on CI/Vercel builds we stamp CACHE_VERSION with the deploy's commit SHA:
+// every deploy self-invalidates, no human step. Local dev/builds are left
+// untouched (no VERCEL/CI env) so the working tree never gets dirtied.
+function stampServiceWorkerVersion(): void {
+  const onCI = Boolean(process.env.VERCEL || process.env.CI);
+  if (!onCI) return;
+
+  const sha =
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.GITHUB_SHA ||
+    // No SHA available (e.g. CLI deploy of an untracked tree) — a timestamp
+    // still guarantees the bytes change per build.
+    Date.now().toString(36);
+  const version = `v-${sha.slice(0, 12)}`;
+
+  const swPath = path.join(process.cwd(), 'public', 'sw.js');
+  try {
+    const src = readFileSync(swPath, 'utf8');
+    const stamped = src.replace(
+      /const CACHE_VERSION = '[^']*'/,
+      `const CACHE_VERSION = '${version}'`
+    );
+    if (stamped !== src) {
+      writeFileSync(swPath, stamped);
+      console.log(`[sw-stamp] service worker cache version → ${version}`);
+    }
+  } catch {
+    // public/sw.js missing — nothing to stamp (e.g. stripped mobile tree).
+  }
+}
+stampServiceWorkerVersion();
 
 // Check if building for mobile app.
 //

@@ -987,6 +987,14 @@ Both plugins must be added to package.json when that work starts.
 11. **Error tracking** service connected (Sentry recommended)
 12. **Monitoring** dashboards configured
 
+**PWA cache invalidation is automatic:** on CI/Vercel builds, `next.config.ts`
+stamps `public/sw.js`'s `CACHE_VERSION` with the commit SHA
+(`stampServiceWorkerVersion`), so every deploy changes the service worker's
+bytes → reinstall (skipWaiting) → all old caches purged for returning PWA
+users. Do NOT bump the checked-in `v-dev` value by hand; it's only the
+local-dev fallback. The stamp only skips a bare `next build` on a host with
+neither `VERCEL` nor `CI` set.
+
 ### Vercel
 
 **Configuration:** `vercel.json`

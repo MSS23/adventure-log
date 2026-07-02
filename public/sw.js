@@ -3,10 +3,13 @@
  * Provides offline functionality, caching, and background sync
  */
 
-// Bump this version on any deploy that must invalidate stale caches for
-// returning visitors. The activate handler deletes every cache whose name
-// doesn't match the current set, so changing the suffix purges old content.
-const CACHE_VERSION = 'v37'
+// AUTO-STAMPED ON DEPLOY: next.config.ts rewrites this line with the commit
+// SHA on CI/Vercel builds (see stampServiceWorkerVersion), so every deploy
+// invalidates stale caches for returning visitors automatically. The value
+// checked in here is only the local-dev fallback — no need to bump it by
+// hand. The activate handler deletes every cache whose name doesn't match
+// the current set, so any change to this string purges old content.
+const CACHE_VERSION = 'v-dev'
 const CACHE_NAME = `adventure-log-${CACHE_VERSION}`
 const STATIC_CACHE = `adventure-log-static-${CACHE_VERSION}`
 const DYNAMIC_CACHE = `adventure-log-dynamic-${CACHE_VERSION}`

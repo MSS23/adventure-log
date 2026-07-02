@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { TripPin, TripMember } from '@/types/trips'
+import { safeHttpUrl } from '@/lib/utils/input-validation'
 
 function createNumberedIcon(color: string, label: string) {
   const svg = `
@@ -98,9 +99,12 @@ export default function TripMap({ pins, members, selectedPinId, onSelectPin }: T
                     by {displayNameByUser.get(pin.user_id) || 'Unknown'}
                   </div>
                   {pin.note && <div className="mt-1 text-xs">{pin.note}</div>}
-                  {pin.source_url && (
+                  {/* Defense-in-depth: never render a non-http(s) scheme as a
+                      link, even if a bad URL made it into the DB — this popup
+                      also renders on the PUBLIC /t/[slug] share view. */}
+                  {safeHttpUrl(pin.source_url) && (
                     <a
-                      href={pin.source_url}
+                      href={safeHttpUrl(pin.source_url)!}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-blue-600 underline mt-1 block"

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getTripAccess } from '@/lib/trips/authorize'
 import { parsePlaceInput } from '@/lib/trips/parse-place'
+import { safeHttpUrl } from '@/lib/utils/input-validation'
 import { log } from '@/lib/utils/logger'
 
 export async function POST(
@@ -67,8 +68,12 @@ export async function POST(
         name,
         latitude: lat,
         longitude: lng,
-        address: body.address || null,
-        source_url: body.source_url || null,
+        address: typeof body.address === 'string' ? body.address.trim().slice(0, 500) || null : null,
+        // SECURITY: source_url is rendered as <a href> on the trip page AND
+        // the public /t/[slug] share view — reject non-http(s) schemes at the
+        // write boundary or a javascript: URL becomes stored XSS for every
+        // visitor who clicks the pin link.
+        source_url: safeHttpUrl(body.source_url),
       }
     } else {
       return NextResponse.json({ error: 'Missing input or coordinates' }, { status: 400 })

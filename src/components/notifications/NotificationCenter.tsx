@@ -60,12 +60,16 @@ export function NotificationCenter() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (user) {
-      fetchNotifications()
-      subscribeToNotifications()
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNotifications and subscribeToNotifications are stable functions defined below
-  }, [user])
+    if (!user?.id) return
+    fetchNotifications()
+    // WHY: subscribeToNotifications() returns a cleanup that removes the realtime
+    // channel. Returning it from the effect prevents channels stacking on every
+    // re-subscribe and leaking past logout. We depend on user?.id rather than the
+    // user object, whose identity changes on every token refresh and would
+    // otherwise tear down/re-create the channel needlessly.
+    return subscribeToNotifications()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchNotifications and subscribeToNotifications are defined below and only depend on user.id
+  }, [user?.id])
 
   const fetchNotifications = async () => {
     try {
@@ -145,18 +149,16 @@ export function NotificationCenter() {
         },
         (payload) => {
           const updatedNotification = payload.new as Notification
-          setNotifications(prev =>
-            prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
-          )
-
-          // Update unread count if read status changed
-          if (payload.old && payload.old.is_read !== updatedNotification.is_read) {
-            if (updatedNotification.is_read) {
-              setUnreadCount(prev => Math.max(0, prev - 1))
-            } else {
-              setUnreadCount(prev => prev + 1)
-            }
-          }
+          // WHY: payload.old only carries `id` (the table has no REPLICA IDENTITY
+          // FULL), so comparing payload.old.is_read was always true and the badge
+          // double-decremented after markAsRead's local decrement. Instead,
+          // recompute the count from the local list after applying the update —
+          // setting a derived value is idempotent, so it can't drift.
+          setNotifications(prev => {
+            const next = prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
+            setUnreadCount(next.filter(n => !n.is_read).length)
+            return next
+          })
         }
       )
       .on(
@@ -169,17 +171,24 @@ export function NotificationCenter() {
         },
         (payload) => {
           const deletedNotification = payload.old as Notification
-          setNotifications(prev => prev.filter(n => n.id !== deletedNotification.id))
-
-          if (!deletedNotification.is_read) {
-            setUnreadCount(prev => Math.max(0, prev - 1))
-          }
+          // WHY: payload.old lacks is_read (only `id` is replicated without
+          // REPLICA IDENTITY FULL), so `!deletedNotification.is_read` was always
+          // true and the badge drifted on every delete of a read notification.
+          // Recompute the count from the local list after removal instead.
+          setNotifications(prev => {
+            const next = prev.filter(n => n.id !== deletedNotification.id)
+            setUnreadCount(next.filter(n => !n.is_read).length)
+            return next
+          })
         }
       )
       .subscribe()
 
     return () => {
-      channel.unsubscribe()
+      // WHY: removeChannel (vs bare unsubscribe) also detaches the channel object
+      // from the singleton client, so channel instances don't accumulate across
+      // auth changes and remounts.
+      supabase.removeChannel(channel)
     }
   }
 

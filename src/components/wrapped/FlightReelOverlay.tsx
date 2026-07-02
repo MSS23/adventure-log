@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Plane, Calendar, MapPin } from 'lucide-react'
 import { getFlagEmoji } from '@/lib/utils/country'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 interface ReelLocation {
   lat: number
@@ -42,8 +43,8 @@ interface FlightReelOverlayProps {
 }
 
 function formatDate(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
+  const d = parseLocalDate(iso)
+  if (!d) return ''
   return d.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',

@@ -1,6 +1,7 @@
 import { Photo, Album } from '@/types/database';
 import JSZip from 'jszip';
 import { getPhotoUrl } from './photo-url';
+import { parseLocalDate } from './travel-date';
 import { log } from '@/lib/utils/logger';
 
 export interface ExportOptions {
@@ -109,9 +110,11 @@ function generateAlbumMetadata(album: Album, photos: Photo[]): string {
   }
 
   if (album.date_start) {
-    const start = new Date(album.date_start).toLocaleDateString();
-    const end = album.date_end ? new Date(album.date_end).toLocaleDateString() : null;
-    lines.push(`Dates: ${start}${end && end !== start ? ` - ${end}` : ''}`);
+    const start = parseLocalDate(album.date_start)?.toLocaleDateString();
+    const end = album.date_end ? parseLocalDate(album.date_end)?.toLocaleDateString() : null;
+    if (start) {
+      lines.push(`Dates: ${start}${end && end !== start ? ` - ${end}` : ''}`);
+    }
   }
 
   lines.push('');

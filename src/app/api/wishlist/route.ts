@@ -225,7 +225,10 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: userId,
         location_name: String(body.location_name).slice(0, 200),
-        country_code: body.country_code || null,
+        // Only a real ISO-2 code or nothing — unvalidated it's a free-text column.
+        country_code: typeof body.country_code === 'string' && /^[A-Za-z]{2}$/.test(body.country_code.trim())
+          ? body.country_code.trim().toUpperCase()
+          : null,
         latitude,
         longitude,
         notes: body.notes ? String(body.notes).slice(0, 2000) : null,

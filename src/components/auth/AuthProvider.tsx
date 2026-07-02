@@ -119,7 +119,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSupaUser(session?.user ?? null)
+      const next = session?.user ?? null
+      // TOKEN_REFRESHED/SIGNED_IN deliver a NEW user object (~hourly and on
+      // tab focus) even when nothing changed. Keep the previous reference so
+      // hooks keyed on the user object don't refetch and flash loading.
+      // Sign-out (next === null) always propagates.
+      setSupaUser((prev) =>
+        prev && next && prev.id === next.id && prev.email === next.email && prev.updated_at === next.updated_at
+          ? prev
+          : next,
+      )
       setAuthLoading(false)
     })
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -117,29 +117,36 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string, o
     if (!subscribe || (!albumId && !photoId && !storyId)) return
 
     const supabase = createClient()
+    const targetId = (albumId || photoId || storyId) as string
+    const targetType = albumId ? 'album' : photoId ? 'photo' : 'story'
 
-    // Build filter based on target
-    const filter = supabase
-      .channel(`likes_channel_${albumId || photoId || storyId}`)
+    // Topic must be unique PER HOOK INSTANCE: realtime-js leaves open topics
+    // on subscribe, so a shared `likes_channel_${targetId}` topic means the
+    // second mount (album page + photo gallery both subscribe) silently kills
+    // the first one's channel.
+    const channel = supabase
+      .channel(`likes_channel_${targetId}_${Math.random().toString(36).slice(2, 9)}`)
       .on('postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'likes',
-          filter: albumId
-            ? `target_type=eq.album,target_id=eq.${albumId}`
-            : photoId
-            ? `target_type=eq.photo,target_id=eq.${photoId}`
-            : `target_type=eq.story,target_id=eq.${storyId}`
+          // WHY: Supabase Realtime supports exactly ONE filter expression —
+          // a comma-joined "target_type=eq.x,target_id=eq.y" string matches
+          // nothing, so no events were ever delivered. Filter on target_id
+          // only and guard target_type inside the handler instead.
+          filter: `target_id=eq.${targetId}`
         },
         (payload) => {
           log.info('Real-time like update received', {
             event: payload.eventType,
-            targetId: albumId || photoId || storyId
+            targetId
           })
 
           if (payload.eventType === 'INSERT') {
             const newLike = payload.new as Like
+            // target_type guard replaces the second (unsupported) server-side filter.
+            if (newLike.target_type !== targetType) return
             setLikes(prev => {
               // Check if like already exists (prevent duplicates)
               if (prev.some(l => l.user_id === newLike.user_id)) {
@@ -152,25 +159,58 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string, o
               setIsLiked(true)
             }
           } else if (payload.eventType === 'DELETE') {
-            const deletedLike = payload.old as { user_id: string }
-            setLikes(prev => prev.filter(like => like.user_id !== deletedLike.user_id))
-            // Update isLiked if it's the current user's like
-            if (user && deletedLike.user_id === user.id) {
-              setIsLiked(false)
+            // WHY: with the table's default REPLICA IDENTITY, payload.old only
+            // contains the primary key — user_id/target_type are absent, so a
+            // surgical "remove by user_id" can never match. Drop the row by id
+            // if we know it, then refetch to reconcile count and liked state.
+            const deletedLike = payload.old as { id?: string }
+            if (deletedLike.id) {
+              setLikes(prev => prev.filter(like => like.id !== deletedLike.id))
+            }
+            if (fetchList) {
+              fetchLikes()
+            }
+            if (user) {
+              checkIfLiked()
             }
           }
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        // WHY: a silently failed subscription looks identical to "no likes yet";
+        // surface channel failures so broken live updates are diagnosable.
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          log.error(
+            'Likes realtime subscription failed',
+            { component: 'useLikes', action: 'subscribe', targetId, status },
+            err
+          )
+        }
+      })
 
     return () => {
-      supabase.removeChannel(filter)
+      supabase.removeChannel(channel)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is sufficient; full user object would cause unnecessary re-subscriptions
-  }, [albumId, photoId, storyId, user?.id, subscribe])
+  }, [albumId, photoId, storyId, user?.id, subscribe, fetchList])
 
-  const toggleLike = useCallback(async () => {
-    if (!user) return
+  // WHY: guards toggleLike against overlapping calls. A rapid double-tap used
+  // to fire two INSERTs — the second hit the unique index and its error path
+  // reverted the UI to "unliked" while the DB row existed, leaving the heart
+  // permanently out of sync (every later tap re-INSERTed and re-failed).
+  const toggleInFlightRef = useRef(false)
+
+  /**
+   * Toggles the like and resolves to the *settled* liked state (what the UI
+   * ends up showing after any error revert/reconcile). Callers that mirror
+   * the count elsewhere (e.g. the feed footer) can compare this against their
+   * optimistic guess and correct themselves.
+   */
+  const toggleLike = useCallback(async (): Promise<boolean> => {
+    if (!user) return isLiked
+    // Ignore taps while a toggle is still pending — see toggleInFlightRef.
+    if (toggleInFlightRef.current) return isLiked
+    toggleInFlightRef.current = true
 
     // Optimistic update - update UI immediately for instant feedback
     const previousIsLiked = isLiked
@@ -243,12 +283,34 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string, o
 
       // Don't refetch - trust the optimistic update
       // The UI is already showing the correct state
+      return !previousIsLiked
     } catch (error) {
+      // WHY: a 23505 unique violation on INSERT means the like already exists
+      // server-side (racing tap, other tab). The optimistic "liked" state is
+      // therefore CORRECT — reverting it would desync the UI from the DB.
+      const code =
+        error && typeof error === 'object' && 'code' in error
+          ? String((error as { code?: unknown }).code)
+          : ''
+      if (!previousIsLiked && code === '23505') {
+        setIsLiked(true)
+        log.info('Like insert hit unique constraint; reconciled to liked', {
+          albumId,
+          photoId,
+          storyId,
+          userId: user.id
+        })
+        return true
+      }
+
       // Revert optimistic update on error
       setIsLiked(previousIsLiked)
       // Restore previous likes array
       setLikes(previousLikes)
       log.error('Error toggling like', { albumId, photoId, storyId }, error)
+      return previousIsLiked
+    } finally {
+      toggleInFlightRef.current = false
     }
   }, [user, isLiked, likes, albumId, photoId, storyId])
 
@@ -323,26 +385,33 @@ export function useComments(albumId?: string, photoId?: string) {
     if (!albumId && !photoId) return
 
     const supabase = createClient()
+    const targetId = (albumId || photoId) as string
+    const targetType = albumId ? 'album' : 'photo'
 
+    // Unique per instance — same _leaveOpenTopic rationale as the likes channel.
     const channel = supabase
-      .channel(`comments_channel_${albumId || photoId}`)
+      .channel(`comments_channel_${targetId}_${Math.random().toString(36).slice(2, 9)}`)
       .on('postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'comments',
-          filter: albumId
-            ? `target_type=eq.album,target_id=eq.${albumId}`
-            : `target_type=eq.photo,target_id=eq.${photoId}`
+          // WHY: Supabase Realtime supports exactly ONE filter expression —
+          // the previous comma-joined string matched nothing, so comments
+          // never live-updated. Filter on target_id only and guard
+          // target_type inside the handler.
+          filter: `target_id=eq.${targetId}`
         },
         (payload) => {
           log.info('Real-time comment update received', {
             event: payload.eventType,
-            targetId: albumId || photoId
+            targetId
           })
 
           if (payload.eventType === 'INSERT') {
-            const inserted = payload.new as { id: string }
+            const inserted = payload.new as { id: string; target_type?: string }
+            // target_type guard replaces the second (unsupported) server-side filter.
+            if (inserted.target_type !== targetType) return
             // Fetch ONLY the new comment (with joined user data) and append it,
             // instead of refetching the entire list. Dedupe so our own
             // optimistic insert isn't duplicated.
@@ -377,12 +446,24 @@ export function useComments(albumId?: string, photoId?: string) {
               )
             })()
           } else if (payload.eventType === 'DELETE') {
+            // Deleting by primary key is safe without a target_type guard
+            // (ids are globally unique; a foreign id simply won't match).
             const deletedComment = payload.old as { id: string }
             setComments(prev => prev.filter(comment => comment.id !== deletedComment.id))
           }
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        // WHY: a silently failed subscription looks identical to "no new
+        // comments"; surface channel failures so they are diagnosable.
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          log.error(
+            'Comments realtime subscription failed',
+            { component: 'useComments', action: 'subscribe', targetId, status },
+            err
+          )
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)

@@ -13,6 +13,7 @@ import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import { formatDistanceKm } from '@/lib/utils/geoCalculations'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -482,7 +483,7 @@ export function PublicPassportContent({
                     </p>
                   )}
                   <p className="font-mono text-xs tracking-wide text-muted-foreground mt-1">
-                    {new Date(firstTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    {parseLocalDate(firstTrip.date)?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </p>
                 </div>
               )}
@@ -502,7 +503,7 @@ export function PublicPassportContent({
                     </p>
                   )}
                   <p className="font-mono text-xs tracking-wide text-muted-foreground mt-1">
-                    {new Date(latestTrip.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    {parseLocalDate(latestTrip.date)?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </p>
                 </div>
               )}

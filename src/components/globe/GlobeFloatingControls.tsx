@@ -1,6 +1,6 @@
 'use client'
 
-import { Route, Navigation, Loader2, MapPin as LocationIcon } from 'lucide-react'
+import { Route, Navigation, Loader2, MapPin as LocationIcon, Search, Play, Pause } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +17,13 @@ interface GlobeFloatingControlsProps {
   /** Only show the "my location" control on the viewer's own globe — a current
    *  location must never be exposed on another person's globe. */
   showLocationControl?: boolean
+  /** Search overlay toggle */
+  showSearch: boolean
+  setShowSearch: (show: boolean) => void
+  /** Journey flight animation — only shown when there are 2+ locations. */
+  showPlayControl?: boolean
+  isPlaying?: boolean
+  onPlayPause?: () => void
 }
 
 export function GlobeFloatingControls({
@@ -28,13 +35,50 @@ export function GlobeFloatingControls({
   permissionStatus,
   onLocationToggle,
   onClearLocation,
-  showLocationControl = true
+  showLocationControl = true,
+  showSearch,
+  setShowSearch,
+  showPlayControl = false,
+  isPlaying = false,
+  onPlayPause
 }: GlobeFloatingControlsProps) {
   return (
     <>
       {/* Floating Controls - Top Right Only */}
       <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
         <div className="flex items-center gap-1.5 backdrop-blur-xl bg-card/90 rounded-xl p-1.5 shadow-2xl border border-border">
+          {/* Play/Pause Journey — flight animation through 2+ locations. The
+              after:-inset-1 overlay extends the 36px button to a 44px touch
+              target without changing its visual size. */}
+          {showPlayControl && onPlayPause && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onPlayPause}
+              className={cn(
+                "relative h-9 w-9 p-0 rounded-lg transition-all after:absolute after:-inset-1 after:content-['']",
+                isPlaying ? 'bg-olive-500/30 text-olive-700' : 'text-foreground hover:bg-muted'
+              )}
+              title={isPlaying ? 'Pause journey' : 'Play journey'}
+              aria-label={isPlaying ? 'Pause journey animation' : 'Play journey animation'}
+            >
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
+          )}
+
+          {/* Search Toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSearch(!showSearch)}
+            className={cn("h-9 w-9 p-0 text-foreground hover:bg-muted rounded-lg transition-all", showSearch && 'bg-olive-500/30 text-olive-700')}
+            title="Search locations"
+            aria-label={showSearch ? 'Close location search' : 'Search locations'}
+            aria-pressed={showSearch}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+
           {/* Travel Routes Toggle */}
           <Button
             variant="ghost"

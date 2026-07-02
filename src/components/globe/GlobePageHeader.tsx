@@ -159,9 +159,11 @@ export function GlobePageHeader({
             {availableYears.length > 0 && !exploreMode && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" aria-label="Filter albums by year" className="hidden lg:inline-flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-white/[0.06] hover:bg-stone-200 dark:hover:bg-white/[0.1] text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97]">
+                  <button type="button" aria-label="Filter albums by year" className="inline-flex items-center gap-1 px-2 lg:gap-1.5 lg:px-3 h-8 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-white/[0.06] hover:bg-stone-200 dark:hover:bg-white/[0.1] text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97] flex-shrink-0">
                     <Calendar className="h-3.5 w-3.5" />
-                    <span>{selectedYear ? selectedYear : 'All years'}</span>
+                    {/* Compact label on mobile (icon + year), full label on lg+ */}
+                    <span className="lg:hidden tabular-nums">{selectedYear ? selectedYear : 'All'}</span>
+                    <span className="hidden lg:inline">{selectedYear ? selectedYear : 'All years'}</span>
                     <ChevronDown className="h-3 w-3 opacity-70" />
                   </button>
                 </DropdownMenuTrigger>

@@ -92,7 +92,14 @@ export function useActivityFeed() {
 
         const activities = data as ActivityFeedItemWithDetails[]
 
-        setActivities(prev => offset === 0 ? activities : [...prev, ...activities])
+        setActivities(prev => {
+          if (offset === 0) return activities
+          // WHY: pages are fetched by offset (.range), so activities inserted
+          // between fetches shift the window and a page can repeat the previous
+          // page's tail — drop ids we already hold to avoid duplicate entries.
+          const seen = new Set(prev.map(a => a.id))
+          return [...prev, ...activities.filter(a => !seen.has(a.id))]
+        })
 
         return activities
       } catch (err) {

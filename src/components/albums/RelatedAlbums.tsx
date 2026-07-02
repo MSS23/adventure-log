@@ -13,6 +13,7 @@ import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { MapPin, Calendar, ArrowRight, Camera } from 'lucide-react'
 import { AlbumFavoriteButton } from '@/components/ui/favorite-button'
 import { format } from 'date-fns'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 interface RelatedAlbumsProps {
   userId: string
@@ -178,7 +179,7 @@ export function RelatedAlbums({
                       {album.date_start && (
                         <div className="flex items-center gap-1.5 text-xs text-white/80">
                           <Calendar className="h-3 w-3 flex-shrink-0" />
-                          <span>{format(new Date(album.date_start), 'MMM yyyy')}</span>
+                          <span>{format(parseLocalDate(album.date_start)!, 'MMM yyyy')}</span>
                         </div>
                       )}
                     </div>
@@ -198,7 +199,7 @@ export function RelatedAlbums({
                   </h4>
                   {!album.location_name && album.date_start && (
                     <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                      {format(new Date(album.date_start), 'MMM d, yyyy')}
+                      {format(parseLocalDate(album.date_start)!, 'MMM d, yyyy')}
                     </p>
                   )}
                 </div>

@@ -282,9 +282,12 @@ export function useGlobeVisibility(
 
   // Cleanup on unmount - Comprehensive cleanup of all resources
   useEffect(() => {
-    const globe = globeRef.current
-
     return () => {
+      // WHY: read the ref at cleanup time — at mount, react-globe.gl hasn't
+      // assigned globeRef.current yet, so capturing it in the effect body
+      // always yields undefined and the disposal block below never runs.
+      const globe = globeRef.current
+
       if (disposedRef.current) {
         log.info('Cleanup already performed, skipping', { component: 'EnhancedGlobe' })
         return

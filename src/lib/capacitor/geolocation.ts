@@ -125,48 +125,52 @@ export async function getCurrentLocation(
 /**
  * Watch position with continuous updates
  */
-export function watchPosition(
+export async function watchPosition(
   callback: (position: LocationData) => void,
   options: {
     enableHighAccuracy?: boolean
     timeout?: number
     maximumAge?: number
   } = {}
-): string | null {
-  let watchId: string | null = null
-
-  Geolocation.watchPosition(
-    {
-      enableHighAccuracy: options.enableHighAccuracy ?? true,
-      timeout: options.timeout ?? 10000,
-      maximumAge: options.maximumAge ?? 5000
-    },
-    (position, err) => {
-      if (err) {
-        log.error('Error watching position', { error: err })
-        return
-      }
-
-      if (position) {
-        const locationData: LocationData = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          altitude: position.coords.altitude ?? undefined,
-          accuracy: position.coords.accuracy,
-          altitudeAccuracy: position.coords.altitudeAccuracy ?? undefined,
-          heading: position.coords.heading ?? undefined,
-          speed: position.coords.speed ?? undefined,
-          timestamp: position.timestamp
+): Promise<string | null> {
+  try {
+    // Geolocation.watchPosition resolves asynchronously — awaiting it is the
+    // only way to hand callers a real watch id they can pass to clearWatch
+    // (a sync return would always be null).
+    const watchId = await Geolocation.watchPosition(
+      {
+        enableHighAccuracy: options.enableHighAccuracy ?? true,
+        timeout: options.timeout ?? 10000,
+        maximumAge: options.maximumAge ?? 5000
+      },
+      (position, err) => {
+        if (err) {
+          log.error('Error watching position', { error: err })
+          return
         }
 
-        callback(locationData)
-      }
-    }
-  ).then(id => {
-    watchId = id
-  })
+        if (position) {
+          const locationData: LocationData = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            altitude: position.coords.altitude ?? undefined,
+            accuracy: position.coords.accuracy,
+            altitudeAccuracy: position.coords.altitudeAccuracy ?? undefined,
+            heading: position.coords.heading ?? undefined,
+            speed: position.coords.speed ?? undefined,
+            timestamp: position.timestamp
+          }
 
-  return watchId
+          callback(locationData)
+        }
+      }
+    )
+
+    return watchId
+  } catch (error) {
+    log.error('Error starting position watch', { error })
+    return null
+  }
 }
 
 /**

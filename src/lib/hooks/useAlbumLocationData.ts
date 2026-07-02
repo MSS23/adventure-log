@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
@@ -40,6 +40,9 @@ interface UseAlbumLocationDataReturn {
 
 export function useAlbumLocationData(): UseAlbumLocationDataReturn {
   const { user } = useAuth()
+  // WHY: stable per-instance id so concurrent uses of this hook don't collide on
+  // a shared realtime channel topic (a static name made instances interfere).
+  const instanceId = useId()
   const [stats, setStats] = useState<LocationDataStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -182,8 +185,10 @@ export function useAlbumLocationData(): UseAlbumLocationDataReturn {
   useEffect(() => {
     if (!user?.id) return
 
+    // WHY: include user id + per-instance id in the topic — a static channel name
+    // collides when multiple components mount this hook on the singleton client.
     const albumsSubscription = supabase
-      .channel('album-location-changes')
+      .channel(`album-location-changes:${user.id}:${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -206,9 +211,11 @@ export function useAlbumLocationData(): UseAlbumLocationDataReturn {
       .subscribe()
 
     return () => {
-      albumsSubscription.unsubscribe()
+      // WHY: removeChannel (vs bare unsubscribe) also detaches the channel object
+      // from the singleton client, so channels don't accumulate across remounts.
+      supabase.removeChannel(albumsSubscription)
     }
-  }, [user?.id, refreshData, supabase])
+  }, [user?.id, refreshData, supabase, instanceId])
 
   return {
     stats,

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { MapPin, Users, Loader2, Calendar, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getAvatarUrl } from '@/lib/utils/avatar'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import type { Trip, TripMember, TripPin } from '@/types/trips'
 
 const TripMap = dynamic(() => import('@/components/trips/TripMap'), {
@@ -38,16 +39,18 @@ export default function PublicTripView({ trip, members, pins }: Props) {
 
   const dateRange = useMemo(() => {
     if (!trip.start_date) return null
-    const start = new Date(trip.start_date).toLocaleDateString('en-US', {
+    const start = parseLocalDate(trip.start_date)?.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
     })
+    if (!start) return null
     if (!trip.end_date) return start
-    const end = new Date(trip.end_date).toLocaleDateString('en-US', {
+    const end = parseLocalDate(trip.end_date)?.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     })
+    if (!end) return start
     return `${start} – ${end}`
   }, [trip.start_date, trip.end_date])
 

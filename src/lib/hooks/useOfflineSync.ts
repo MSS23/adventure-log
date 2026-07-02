@@ -10,6 +10,31 @@ import { log } from '@/lib/utils/logger'
 import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 import type { UploadQueueItem } from '@/types/database'
 
+const OFFLINE_DB_NAME = 'AdventureLogOffline'
+const OFFLINE_DB_VERSION = 1
+const UPLOADS_STORE = 'uploads'
+
+// Shared opener: EVERY open path must register the same onupgradeneeded that
+// creates the 'uploads' store. Previously only the write path did — a read on
+// a fresh DB created it empty, db.transaction(['uploads']) then threw
+// synchronously inside onsuccess and the promise never settled, leaving
+// isSyncing stuck at true forever.
+function openOfflineDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(OFFLINE_DB_NAME, OFFLINE_DB_VERSION)
+
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(request.result)
+
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result
+      if (!db.objectStoreNames.contains(UPLOADS_STORE)) {
+        db.createObjectStore(UPLOADS_STORE, { keyPath: 'localId' })
+      }
+    }
+  })
+}
+
 interface QueueAlbumUpload {
   title: string
   description?: string
@@ -71,15 +96,13 @@ export function useOfflineSync() {
     localId: string,
     photos: Array<{ file: File; caption?: string; order_index: number }>
   ) => {
+    const db = await openOfflineDb()
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('AdventureLogOffline', 1)
-
-      request.onerror = () => reject(request.error)
-
-      request.onsuccess = () => {
-        const db = request.result
-        const transaction = db.transaction(['uploads'], 'readwrite')
-        const store = transaction.objectStore('uploads')
+      // db.transaction throws synchronously if the store is missing — reject
+      // instead of leaving the promise unsettled.
+      try {
+        const transaction = db.transaction([UPLOADS_STORE], 'readwrite')
+        const store = transaction.objectStore(UPLOADS_STORE)
 
         store.put({
           localId,
@@ -93,13 +116,8 @@ export function useOfflineSync() {
 
         transaction.oncomplete = () => resolve(true)
         transaction.onerror = () => reject(transaction.error)
-      }
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        if (!db.objectStoreNames.contains('uploads')) {
-          db.createObjectStore('uploads', { keyPath: 'localId' })
-        }
+      } catch (err) {
+        reject(err)
       }
     })
   }, [])
@@ -107,37 +125,37 @@ export function useOfflineSync() {
   const getFilesFromIndexedDB = useCallback(async (
     localId: string
   ): Promise<{ localId: string; photos: Array<{ file: File; caption?: string; order_index: number }>; timestamp: number } | undefined> => {
+    const db = await openOfflineDb()
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('AdventureLogOffline', 1)
-
-      request.onerror = () => reject(request.error)
-
-      request.onsuccess = () => {
-        const db = request.result
-        const transaction = db.transaction(['uploads'], 'readonly')
-        const store = transaction.objectStore('uploads')
+      // db.transaction throws synchronously if the store is missing; resolve
+      // as "no files" rather than hanging (or crashing) the sync loop.
+      try {
+        const transaction = db.transaction([UPLOADS_STORE], 'readonly')
+        const store = transaction.objectStore(UPLOADS_STORE)
         const getRequest = store.get(localId)
 
         getRequest.onsuccess = () => resolve(getRequest.result)
         getRequest.onerror = () => reject(getRequest.error)
+      } catch {
+        resolve(undefined)
       }
     })
   }, [])
 
   const deleteFromIndexedDB = useCallback(async (localId: string) => {
+    const db = await openOfflineDb()
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('AdventureLogOffline', 1)
-
-      request.onerror = () => reject(request.error)
-
-      request.onsuccess = () => {
-        const db = request.result
-        const transaction = db.transaction(['uploads'], 'readwrite')
-        const store = transaction.objectStore('uploads')
+      // db.transaction throws synchronously if the store is missing; nothing
+      // to delete in that case, so resolve gracefully instead of hanging.
+      try {
+        const transaction = db.transaction([UPLOADS_STORE], 'readwrite')
+        const store = transaction.objectStore(UPLOADS_STORE)
         const deleteRequest = store.delete(localId)
 
         deleteRequest.onsuccess = () => resolve(true)
         deleteRequest.onerror = () => reject(deleteRequest.error)
+      } catch {
+        resolve(true)
       }
     })
   }, [])

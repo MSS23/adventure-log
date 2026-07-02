@@ -47,6 +47,19 @@ export const visibilityOptions = [
   { value: 'private', label: 'Private', description: 'Only you' },
 ]
 
+// Local calendar "today" as YYYY-MM-DD for the default travel date.
+// toISOString() would give UTC "today", which is the wrong calendar day for
+// users in negative offsets in the evening (or positive offsets in the
+// morning). date_start/date_end are DATE columns, so the local day is what
+// the user means. (parseLocalDate in @/lib/utils/travel-date is the
+// read-side counterpart; no write-side formatter exists there yet.)
+function localTodayString(): string {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
+}
+
 function generateTitleFromLocation(location: LocationData): string {
   const now = new Date()
   const month = now.toLocaleString('en-US', { month: 'long' })
@@ -291,9 +304,13 @@ export function useAlbumCreation() {
   const removePhoto = (index: number) => {
     URL.revokeObjectURL(photos[index].preview)
     setPhotos(prev => prev.filter((_, i) => i !== index))
-    if (selectedCoverIndex >= photos.length - 1) {
-      setSelectedCoverIndex(Math.max(0, photos.length - 2))
-    }
+    // Removing a photo before the cover shifts every later index down by one;
+    // without remapping, the cover silently moves to the wrong photo.
+    setSelectedCoverIndex(prev => {
+      if (index < prev) return prev - 1
+      if (index === prev) return 0 // the cover itself was removed
+      return prev
+    })
   }
 
   // Manual fallback for auto-fill location
@@ -420,8 +437,12 @@ export function useAlbumCreation() {
       }
 
       // Upload photos if any
+      let failedPhotoCount = 0
       if (photos.length > 0) {
-        const uploadedPhotoPaths: string[] = []
+        // Keep each uploaded path paired with its ORIGINAL index: failures
+        // compact this array, so positions alone no longer match the cover
+        // index the user picked in the UI.
+        const uploadedPhotos: Array<{ path: string; originalIndex: number }> = []
 
         for (let i = 0; i < photos.length; i++) {
           const photo = photos[i]
@@ -440,27 +461,45 @@ export function useAlbumCreation() {
 
           if (uploadError) {
             log.error('Failed to upload photo', { error: uploadError, fileName })
+            failedPhotoCount++
             continue
           }
 
-          uploadedPhotoPaths.push(fileName)
-
-          await supabase.from('photos').insert({
+          const { error: photoInsertError } = await supabase.from('photos').insert({
             album_id: album.id,
             user_id: user.id,
             file_path: fileName,
             order_index: i,
             created_at: new Date().toISOString()
           })
+
+          // A failed insert means no photo row exists — treat it like a failed
+          // upload so the cover/favorites never reference a nonexistent record
+          // and the toast doesn't overcount.
+          if (photoInsertError) {
+            log.error('Failed to insert photo record', {
+              component: 'NewAlbumPage',
+              error: photoInsertError,
+              fileName
+            })
+            failedPhotoCount++
+            continue
+          }
+
+          uploadedPhotos.push({ path: fileName, originalIndex: i })
         }
 
-        if (uploadedPhotoPaths.length > 0) {
-          const coverPhotoIndex = Math.min(selectedCoverIndex, uploadedPhotoPaths.length - 1)
+        if (uploadedPhotos.length > 0) {
+          // Resolve the cover by the photo's original index; if the chosen
+          // cover failed to upload, fall back to the first surviving photo.
+          const coverEntry =
+            uploadedPhotos.find(p => p.originalIndex === selectedCoverIndex) ??
+            uploadedPhotos[0]
           await supabase
             .from('albums')
             .update({
-              cover_photo_url: uploadedPhotoPaths[coverPhotoIndex],
-              favorite_photo_urls: uploadedPhotoPaths.slice(0, 3),
+              cover_photo_url: coverEntry.path,
+              favorite_photo_urls: uploadedPhotos.slice(0, 3).map(p => p.path),
               cover_photo_position: coverPosition.position || 'center',
               cover_photo_x_offset: coverPosition.xOffset || 50,
               cover_photo_y_offset: coverPosition.yOffset || 50
@@ -557,6 +596,15 @@ export function useAlbumCreation() {
           duration: 'long',
           position: 'bottom'
         })
+      } else if (failedPhotoCount > 0) {
+        // Don't claim full success when some photos never made it — say
+        // exactly how many uploaded vs. failed.
+        const okCount = photos.length - failedPhotoCount
+        await Toast.show({
+          text: `Album created — ${okCount} of ${photos.length} photos uploaded, ${failedPhotoCount} failed.`,
+          duration: 'long',
+          position: 'bottom'
+        })
       } else {
         await Toast.show({
           text: mode === 'quick'
@@ -640,9 +688,9 @@ export function useAlbumCreation() {
       dateStart = `${selectedYear}-01-01`
       dateEnd = `${selectedYear}-12-31`
     } else {
-      const now = new Date().toISOString().split('T')[0]
-      dateStart = now
-      dateEnd = now
+      const today = localTodayString()
+      dateStart = today
+      dateEnd = today
     }
 
     await submitAlbum({

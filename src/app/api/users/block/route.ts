@@ -50,7 +50,10 @@ export async function POST(request: NextRequest) {
       .insert({
         blocker_id: userId,
         blocked_id,
-        reason: reason || null,
+        // Type/length-bound the free-text reason (storage-bloat guard).
+        reason: typeof reason === 'string' && reason.trim()
+          ? reason.trim().slice(0, 500)
+          : null,
       })
       .select()
       .single()

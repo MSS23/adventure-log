@@ -54,18 +54,22 @@ export async function syncOfflineData(): Promise<SyncStatus> {
     return syncStatus
   }
 
-  const online = await isOnline()
-  if (!online) {
-    log.warn('Device is offline, cannot sync')
-    return syncStatus
-  }
-
+  // Flip isSyncing BEFORE any await: two triggers (online event + Capacitor
+  // listener + manual tap) could otherwise both pass the check above while
+  // the first was still awaiting isOnline().
   syncStatus = {
     isSyncing: true,
     syncProgress: 0,
     totalItems: 0,
     syncedItems: 0,
     errors: []
+  }
+
+  const online = await isOnline()
+  if (!online) {
+    log.warn('Device is offline, cannot sync')
+    syncStatus.isSyncing = false
+    return syncStatus
   }
 
   try {
@@ -196,11 +200,21 @@ export async function syncOfflineData(): Promise<SyncStatus> {
   }
 }
 
+// Module-level flag so the global auto-sync listeners are registered once,
+// no matter how many components call setupAutoSync().
+let autoSyncInstalled = false
+
 /**
  * Setup automatic sync when connection is restored
  */
 export function setupAutoSync(): void {
   if (typeof window === 'undefined') return
+
+  // Install-once guard: OfflineIndicator calls this on every mount, which
+  // used to stack duplicate window + Capacitor listeners (each reconnect then
+  // triggered N syncs).
+  if (autoSyncInstalled) return
+  autoSyncInstalled = true
 
   // Listen for online event
   window.addEventListener('online', async () => {

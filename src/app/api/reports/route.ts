@@ -60,18 +60,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // target_id / reported_user_id must be UUID strings — reject anything else
-    // before it reaches the query (a non-string produces a malformed filter/500).
+    // target_id must be a UUID string — reject anything else before it
+    // reaches the query (a non-string produces a malformed filter/500).
     if (typeof target_id !== 'string' || !UUID_RE.test(target_id)) {
       return NextResponse.json({ error: 'Invalid target_id' }, { status: 400 })
     }
-    if (reported_user_id !== undefined && reported_user_id !== null &&
-        (typeof reported_user_id !== 'string' || !UUID_RE.test(reported_user_id))) {
-      return NextResponse.json({ error: 'Invalid reported_user_id' }, { status: 400 })
+
+    // Derive the reported user from the target SERVER-SIDE. The client-sent
+    // `reported_user_id` is deliberately ignored: trusting it let a reporter
+    // attribute someone else's content to an innocent user, planting false
+    // moderation-queue records against them. If RLS hides the target row
+    // from the reporter, we store null and moderators resolve it from the
+    // target itself.
+    void reported_user_id
+    let derivedReportedUserId: string | null = null
+    if (target_type === 'user') {
+      derivedReportedUserId = target_id
+    } else if (target_type === 'album') {
+      const { data } = await supabase.from('albums').select('user_id').eq('id', target_id).maybeSingle()
+      derivedReportedUserId = data?.user_id ?? null
+    } else if (target_type === 'photo') {
+      const { data } = await supabase.from('photos').select('user_id').eq('id', target_id).maybeSingle()
+      derivedReportedUserId = data?.user_id ?? null
+    } else if (target_type === 'comment') {
+      const { data } = await supabase.from('comments').select('user_id').eq('id', target_id).maybeSingle()
+      derivedReportedUserId = data?.user_id ?? null
     }
 
     // Cannot report yourself
-    if (reported_user_id === userId) {
+    if (derivedReportedUserId === userId) {
       return NextResponse.json({ error: 'Cannot report yourself' }, { status: 400 })
     }
 
@@ -107,7 +124,7 @@ export async function POST(request: NextRequest) {
       .from('reports')
       .insert({
         reporter_id: userId,
-        reported_user_id: reported_user_id || null,
+        reported_user_id: derivedReportedUserId,
         target_type,
         target_id,
         reason,

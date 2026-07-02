@@ -6,6 +6,7 @@ import type { GlobeMethods } from 'react-globe.gl'
 import { useTravelTimeline, type TravelLocation } from '@/lib/hooks/useTravelTimeline'
 import { useFlightAnimation } from '@/lib/hooks/useFlightAnimation'
 import { useCurrentLocation } from '@/lib/hooks/useCurrentLocation'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import type { CityPin, CityCluster } from '../CityPinSystem'
 import type { GlobeSearchResult } from '../GlobeSearch'
 import type { FlightPath } from '../types'
@@ -46,6 +47,9 @@ export function useGlobeState(options: UseGlobeStateOptions) {
   const [showAlbumModal, setShowAlbumModal] = useState(false)
   const [activeCityId, setActiveCityId] = useState<string | null>(null)
   const modalOpenRef = useRef(false)
+  // Respect the OS "Reduce motion" preference: never auto-rotate the globe and
+  // let consumers (EnhancedGlobe) render static arcs instead of animated ones.
+  const prefersReducedMotion = useReducedMotion()
   const [isAutoRotating, setIsAutoRotating] = useState(false)
   const [userInteracting, setUserInteracting] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
@@ -96,6 +100,20 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     clearLocation
   } = useCurrentLocation(false)
   const [showCurrentLocation, setShowCurrentLocation] = useState(false)
+  // Tracks an in-flight requestLocation() triggered by handleLocationToggle.
+  const locationRequestPendingRef = useRef(false)
+
+  // WHY: requestLocation() resolves before React commits the hook's state
+  // updates, so reading currentLocation/locationError right after the await
+  // sees stale closure values. React to the hook's fresh state instead: once
+  // the request settles (loading goes false), show the marker only on success.
+  useEffect(() => {
+    if (!locationRequestPendingRef.current || locationLoading) return
+    locationRequestPendingRef.current = false
+    if (currentLocation && !locationError) {
+      setShowCurrentLocation(true)
+    }
+  }, [locationLoading, currentLocation, locationError])
 
   // Auto-dismiss location errors after 8 seconds (except permission denied)
   useEffect(() => {
@@ -313,11 +331,12 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     setSelectedCluster(null)
     setCurrentLocationIndex(0)
     setIsJourneyPaused(false)
-    setIsAutoRotating(true)
+    // Don't claim we're rotating when reduced motion suppresses the loop
+    setIsAutoRotating(!prefersReducedMotion)
     if (globeRef.current) {
       animateCameraToPosition({ lat: 0, lng: 0, altitude: 3.5 }, 1500, 'easeInOutExpo')
     }
-  }, [reset, setActiveCityId, setSelectedCluster, setIsAutoRotating, animateCameraToPosition])
+  }, [reset, setActiveCityId, setSelectedCluster, setIsAutoRotating, animateCameraToPosition, prefersReducedMotion])
 
   // Manual progression controls
   const advanceToNextLocation = useCallback(() => {
@@ -641,9 +660,9 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     }
   }, [destinationCameraPosition, isPlaying, animateCameraToPosition])
 
-  // Auto-rotation functionality
+  // Auto-rotation functionality (skipped entirely for reduced-motion users)
   useEffect(() => {
-    if (!globeRef.current || !isAutoRotating || userInteracting) {
+    if (!globeRef.current || !isAutoRotating || userInteracting || prefersReducedMotion) {
       if (autoRotateRef.current) {
         cancelAnimationFrame(autoRotateRef.current as unknown as number)
         autoRotateRef.current = null
@@ -680,7 +699,7 @@ export function useGlobeState(options: UseGlobeStateOptions) {
         autoRotateRef.current = null
       }
     }
-  }, [isAutoRotating, userInteracting])
+  }, [isAutoRotating, userInteracting, prefersReducedMotion])
 
   // Modal state management - Pause rendering / interaction while a modal is open.
   //
@@ -878,12 +897,13 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     } else if (permissionStatus === 'denied') {
       return
     } else {
+      // Mark the request in-flight; the effect near useCurrentLocation() reads
+      // the outcome from fresh state (a stale locationError read here would
+      // show the marker on failure and hide it on a successful retry).
+      locationRequestPendingRef.current = true
       await requestLocation()
-      if (!locationError) {
-        setShowCurrentLocation(true)
-      }
     }
-  }, [showCurrentLocation, currentLocation, permissionStatus, requestLocation, locationError, clearLocation])
+  }, [showCurrentLocation, currentLocation, permissionStatus, requestLocation, clearLocation])
 
   return {
     // Refs
@@ -907,6 +927,7 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     setActiveCityId,
     isAutoRotating,
     setIsAutoRotating,
+    prefersReducedMotion,
     userInteracting,
     setUserInteracting,
     showSearch,

@@ -7,6 +7,7 @@ import { MapPin, Calendar, Camera } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 interface AlbumHeroProps {
   title: string
@@ -50,8 +51,9 @@ export function AlbumHero({
 
   const formatDateRange = () => {
     if (!dateStart) return null
-    const start = new Date(dateStart)
-    const end = dateEnd ? new Date(dateEnd) : null
+    const start = parseLocalDate(dateStart)
+    if (!start) return null
+    const end = dateEnd ? parseLocalDate(dateEnd) : null
 
     if (!end || start.getTime() === end.getTime()) {
       return format(start, 'MMMM d, yyyy')
@@ -255,10 +257,10 @@ export function AlbumHeroCompact({
               {locationName}
             </span>
           )}
-          {dateStart && (
+          {dateStart && parseLocalDate(dateStart) && (
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
-              {format(new Date(dateStart), 'MMM yyyy')}
+              {format(parseLocalDate(dateStart)!, 'MMM yyyy')}
             </span>
           )}
         </motion.div>

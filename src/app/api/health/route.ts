@@ -4,19 +4,19 @@ import { createClient } from '@/lib/supabase/server'
 interface HealthCheck {
   status: 'healthy' | 'degraded' | 'unhealthy'
   timestamp: string
-  version: string
+  version?: string
   platform: string
   checks: {
     database: boolean
     redis?: boolean
-    memory: {
+    memory?: {
       total: number
       used: number
       free: number
       percentage: number
     }
   }
-  uptime: number
+  uptime?: number
 }
 
 async function checkDatabase(): Promise<boolean> {
@@ -79,17 +79,26 @@ export async function GET(_request: NextRequest) {
 
   const responseTime = Date.now() - startTime
 
+  // This endpoint is public (middleware allowlist) for uptime monitors. In
+  // production, anonymous callers get only the status booleans — heap stats,
+  // process uptime, and version are runtime fingerprinting material (deploy
+  // timing, memory pressure, stack version) with no monitoring value beyond
+  // the status code itself. Dev/test keep the full payload for debugging.
+  const includeInternals = process.env.NODE_ENV !== 'production'
+
   const healthData: HealthCheck = {
     status,
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '1.1.0',
     platform: 'adventure-log',
     checks: {
       database: databaseHealthy,
       ...(process.env.UPSTASH_REDIS_REST_URL && { redis: redisHealthy }),
-      memory
+      ...(includeInternals && { memory }),
     },
-    uptime
+    ...(includeInternals && {
+      version: process.env.npm_package_version || '1.1.0',
+      uptime,
+    }),
   }
 
   const httpStatus = status === 'healthy' ? 200 : status === 'degraded' ? 200 : 503

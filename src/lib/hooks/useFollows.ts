@@ -374,8 +374,16 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
 
   // Update follow status for specific target user
   useEffect(() => {
-    if (targetUserId && user?.id) {
-      getFollowStatus(targetUserId).then(setFollowStatus)
+    if (!targetUserId || !user?.id) return
+
+    // Cancellation guard: without it a slow response for a previous
+    // targetUserId would render a stale status on the wrong profile.
+    let cancelled = false
+    getFollowStatus(targetUserId).then(status => {
+      if (!cancelled) setFollowStatus(status)
+    })
+    return () => {
+      cancelled = true
     }
   }, [targetUserId, user?.id, getFollowStatus])
 
@@ -393,8 +401,14 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
   useEffect(() => {
     if (!user?.id) return
 
+    // Topic must be unique PER HOOK INSTANCE: realtime-js "leaves open topics"
+    // on subscribe, so with the shared `follows-${user.id}` topic every newly
+    // mounted FollowButton silently killed the previous instance's channel
+    // (and the last unmount left the topic entirely) — live follow updates
+    // died unpredictably on any page with multiple follow buttons.
+    const instanceTopic = `follows-${user.id}-${Math.random().toString(36).slice(2, 9)}`
     const channel = supabase
-      .channel(`follows-${user.id}`)
+      .channel(instanceTopic)
       .on(
         'postgres_changes',
         {

@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayInitial } from '@/lib/utils/display-name'
 import { format } from 'date-fns'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import { formatCount } from '@/components/ui/animated-count'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -123,13 +124,14 @@ export function AlbumInfoSidebar({
   // Format date range
   const formatDateRange = () => {
     if (!album.date_start) return null
-    const startDate = album.date_start
-    const endDate = album.date_end
+    const startDate = parseLocalDate(album.date_start)
+    if (!startDate) return null
+    const endDate = album.date_end ? parseLocalDate(album.date_end) : null
 
-    if (endDate && startDate !== endDate) {
-      return `${format(new Date(startDate), 'MMM d')} - ${format(new Date(endDate), 'MMM d, yyyy')}`
+    if (endDate && album.date_start !== album.date_end) {
+      return `${format(startDate, 'MMM d')} - ${format(endDate, 'MMM d, yyyy')}`
     }
-    return format(new Date(startDate), 'MMM d, yyyy')
+    return format(startDate, 'MMM d, yyyy')
   }
 
   return (

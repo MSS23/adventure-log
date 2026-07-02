@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getFlagEmoji } from '@/lib/utils/country'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import { log } from '@/lib/utils/logger'
 import {
   MapPin,
@@ -70,7 +71,7 @@ export default function DashboardContent() {
   const { user } = useAuth()
   const userId = user?.id
 
-  const { data, isPending } = useQuery<DashboardData>({
+  const { data, isPending, isRefetching, refetch } = useQuery<DashboardData>({
     queryKey: ['dashboard', userId],
     enabled: !!userId,
     queryFn: async () => {
@@ -182,16 +183,30 @@ export default function DashboardContent() {
     return <DashboardLoading />
   }
 
-  // Profile not found → guide the user to complete setup.
+  // Profile not found → it's usually still being provisioned (AuthProvider /
+  // the signup trigger create it moments after first sign-in), so offer a
+  // refetch instead of a dead-end redirect.
   if (!profile) {
     return (
       <div className="mx-auto w-full max-w-2xl px-4 py-12">
         <div className="rounded-2xl border border-border bg-card p-8 text-center">
-          <p className="font-heading text-base md:text-lg font-semibold text-foreground">Profile not found</p>
-          <p className="mt-1 text-sm text-muted-foreground">Please complete your profile setup</p>
-          <Link href="/setup" className="mt-5 inline-block cursor-pointer">
-            <Button className="cursor-pointer">Complete Profile Setup</Button>
-          </Link>
+          <p className="font-heading text-base md:text-lg font-semibold text-foreground">Setting up your profile</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your profile is still being created — this usually resolves in a moment.
+          </p>
+          <Button
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            className="mt-5 cursor-pointer"
+          >
+            {isRefetching ? 'Checking…' : 'Try again'}
+          </Button>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Still not showing up?{' '}
+            <Link href="/settings" className="font-medium text-primary hover:underline">
+              Check your settings
+            </Link>
+          </p>
         </div>
       </div>
     )
@@ -402,10 +417,10 @@ export default function DashboardContent() {
                       <div className="mt-1 font-mono text-xs uppercase tracking-wide text-muted-foreground line-clamp-1">
                         {(album.location_name || 'Unknown').split(',')[0]}
                         {album.date_start &&
-                          ` · ${new Date(album.date_start).toLocaleDateString('en-US', {
+                          ` · ${parseLocalDate(album.date_start)?.toLocaleDateString('en-US', {
                             month: 'short',
                             year: 'numeric',
-                          })}`}
+                          }) ?? ''}`}
                         {album.photo_count ? ` · ${album.photo_count} photos` : ''}
                       </div>
                     </Link>

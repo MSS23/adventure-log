@@ -291,13 +291,13 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       let endDate: Date | null = null
 
       for (const item of timelineData) {
-        // Safe date parsing - prioritize travel date over upload date
+        // Safe date parsing - prioritize travel date over upload date.
+        // parseLocalDate treats DATE-only strings as LOCAL calendar dates —
+        // new Date("YYYY-MM-DD") parses UTC midnight, which shifted pin year
+        // labels/colors and flight-arc year bucketing a day (and at year
+        // boundaries a whole year) for every user west of UTC.
         const dateField = item.date_start || item.created_at
-        const visitDate = dateField ? new Date(dateField) : new Date()
-        // Check if the date is valid
-        if (isNaN(visitDate.getTime())) {
-          visitDate.setTime(new Date().getTime()) // Fallback to current date
-        }
+        const visitDate = parseLocalDate(dateField) ?? new Date()
 
         if (!startDate || visitDate < startDate) {
           startDate = visitDate
@@ -406,17 +406,10 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         errorType: err instanceof Error ? err.name : 'Unknown'
       }, toError(err))
 
-      // Return empty year data instead of throwing to prevent UI crashes
-      return {
-        year,
-        locations: [],
-        totalLocations: 0,
-        totalPhotos: 0,
-        countries: [],
-        totalDistance: 0,
-        startDate: null,
-        endDate: null
-      }
+      // WHY: return null (not empty-but-truthy data) so callers don't mark the
+      // year as loaded — a transient network error would otherwise leave the
+      // globe permanently empty for that year with no retry.
+      return null
     }
   }, [supabase, targetUserId, user?.id])
 
@@ -505,9 +498,12 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         )
       )
         .then(results => {
-          // Mark all years as loaded BEFORE updating state
-          results.forEach(({ year }) => {
-            loadedYearsRef.current.add(year)
+          // Mark years as loaded BEFORE updating state — but only those whose
+          // fetch succeeded (data !== null), so failed years can be retried.
+          results.forEach(({ year, data }) => {
+            if (data) {
+              loadedYearsRef.current.add(year)
+            }
           })
           // Use functional update to avoid stale state
           setYearData(prev => {

@@ -96,12 +96,28 @@ export async function clearQueue(): Promise<void> {
   notifyListeners()
 }
 
+// In-flight guard: the 'online' listener, the 2-min interval and manual taps
+// from the status pill can all fire at once — without this, concurrent runs
+// read the same queue and double-send every action.
+let inFlight: Promise<{ sent: number; failed: number }> | null = null
+
 export async function processQueue(): Promise<{ sent: number; failed: number }> {
+  if (inFlight) return inFlight
+  inFlight = processQueueInternal().finally(() => {
+    inFlight = null
+  })
+  return inFlight
+}
+
+async function processQueueInternal(): Promise<{ sent: number; failed: number }> {
   if (!isBrowser() || !navigator.onLine) return { sent: 0, failed: 0 }
   const queue = await readQueue()
   if (queue.length === 0) return { sent: 0, failed: 0 }
 
-  const remaining: QueuedAction[] = []
+  // Track outcomes by id instead of building a "remaining" snapshot: actions
+  // enqueued while this run is fetching must survive the final write.
+  const removedIds = new Set<string>() // sent OK, non-retryable 4xx, or out of retries
+  const retryIds = new Set<string>() // failed — keep with attempts + 1
   let sent = 0
   let failed = 0
 
@@ -114,29 +130,36 @@ export async function processQueue(): Promise<{ sent: number; failed: number }> 
       })
       if (res.ok) {
         sent++
+        removedIds.add(action.id)
       } else if (res.status === 401 || res.status === 403) {
-        // auth issue — keep for retry later
-        remaining.push({ ...action, attempts: action.attempts + 1 })
+        // auth issue — leave queued untouched (no attempts bump) so the action
+        // isn't dropped by the retry cap before the session comes back
         failed++
       } else if (res.status >= 500) {
-        // server error — retry
-        remaining.push({ ...action, attempts: action.attempts + 1 })
+        // server error — retry, but drop once the attempt budget is spent
+        // to avoid a forever-stuck queue
         failed++
+        if (action.attempts + 1 >= 5) removedIds.add(action.id)
+        else retryIds.add(action.id)
       } else {
         // 4xx client error — drop to avoid infinite retry
         failed++
+        removedIds.add(action.id)
       }
     } catch {
-      remaining.push({ ...action, attempts: action.attempts + 1 })
       failed++
-    }
-    // Drop after 5 attempts to avoid forever-stuck queue
-    if (remaining.length > 0 && remaining[remaining.length - 1].attempts >= 5) {
-      remaining.pop()
+      if (action.attempts + 1 >= 5) removedIds.add(action.id)
+      else retryIds.add(action.id)
     }
   }
 
-  await writeQueue(remaining)
+  // Re-read storage and remove ONLY the processed ids — overwriting with the
+  // pre-run snapshot silently deleted anything enqueued during processing.
+  const current = await readQueue()
+  const next = current
+    .filter((a) => !removedIds.has(a.id))
+    .map((a) => (retryIds.has(a.id) ? { ...a, attempts: a.attempts + 1 } : a))
+  await writeQueue(next)
   notifyListeners()
   return { sent, failed }
 }

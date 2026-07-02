@@ -71,6 +71,12 @@ const arcDashAnimateTimeAccessor = (d: object) => {
   return 3000 + speedFactor * 3000
 }
 
+// Stable accessor for prefers-reduced-motion: 0 disables the dash animation
+// (static arcs). Kept at module scope — selecting between this and the
+// animated accessor swaps identities only when the preference flips, never
+// per-render, so the arc layer isn't rebuilt.
+const arcDashAnimateTimeStaticAccessor = () => 0
+
 const arcDashInitialGapAccessor = (d: object) => {
   const path = d as FlightPath
   return (path.index * 0.37) % 1
@@ -129,6 +135,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     globeReady, setGlobeReady, selectedCluster, setSelectedCluster,
     showAlbumModal, setShowAlbumModal, setActiveCityId,
     isAutoRotating, setIsAutoRotating,
+    prefersReducedMotion,
     userInteracting, setUserInteracting,
     showSearch, setShowSearch,
     showStaticConnections, setShowStaticConnections, setArcsKey,
@@ -142,7 +149,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     effectiveSelectedYear, handleEffectiveYearChange, refreshData, getYearData,
     locations,
     isPlaying, currentFlightState, destinationCameraPosition,
-    handleYearChange, handleSearchResult,
+    handleYearChange, handlePlayPause, handleSearchResult,
     handleCityClick, handleClusterClick, handleLocationToggle,
     searchData, travelStats, getYearColor, cityPins, staticConnections,
   } = state
@@ -377,7 +384,27 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
           onLocationToggle={handleLocationToggle}
           onClearLocation={() => clearLocation()}
           showLocationControl={isOwnProfile}
+          showSearch={showSearch}
+          setShowSearch={setShowSearch}
+          showPlayControl={locations.length >= 2}
+          isPlaying={isPlaying}
+          onPlayPause={handlePlayPause}
         />
+
+        {/* Floating search overlay — lives inside the globe container so it is
+            reachable in embedded (hideHeader) mode too. z-40 sits above the
+            canvas and the z-30 floating controls; top-16 clears the controls
+            row on narrow screens. */}
+        {showSearch && (
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md">
+            <GlobeSearch
+              data={searchData}
+              onResultClick={handleSearchResult}
+              onClearSearch={() => setShowSearch(false)}
+              className="w-full"
+            />
+          </div>
+        )}
 
       {/* Error Message */}
       {timelineError && (
@@ -392,18 +419,6 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Search Bar - Only show when not embedded */}
-      {!hideHeader && showSearch && (
-        <div className="flex justify-center">
-          <GlobeSearch
-            data={searchData}
-            onResultClick={handleSearchResult}
-            onClearSearch={() => setShowSearch(false)}
-            className="w-full max-w-md"
-          />
-        </div>
       )}
 
       {/* Timeline Controls - Only show when not embedded */}
@@ -494,7 +509,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   arcStroke={arcStrokeAccessor}
                   arcDashLength={0.25}
                   arcDashGap={0.15}
-                  arcDashAnimateTime={arcDashAnimateTimeAccessor}
+                  arcDashAnimateTime={prefersReducedMotion ? arcDashAnimateTimeStaticAccessor : arcDashAnimateTimeAccessor}
                   arcDashInitialGap={arcDashInitialGapAccessor}
                   arcCurveResolution={performanceConfig.arcCurveResolution}
                   arcCircularResolution={performanceConfig.arcCircularResolution}
@@ -612,8 +627,9 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
         </div>
       </div>
 
-      {/* Additional Help */}
-      {showSearch && <GlobeSearchHelp />}
+      {/* Additional Help - Only in the non-embedded flow layout (in embedded
+          mode it would render as a flex sibling below the globe and shrink it) */}
+      {!hideHeader && showSearch && <GlobeSearchHelp />}
 
       {/* Album Image Modal */}
       <AlbumImageModal

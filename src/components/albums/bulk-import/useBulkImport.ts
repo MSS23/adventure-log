@@ -17,6 +17,17 @@ import {
   generateGroupId,
 } from './utils'
 
+// Format a Date as its LOCAL calendar day (YYYY-MM-DD). date_start/date_end
+// are Postgres DATE columns; toISOString() converts to UTC first, which can
+// shift the calendar day (e.g. an evening shot in a UTC- timezone lands on
+// the next day). parseLocalDate in @/lib/utils/travel-date is the read-side
+// counterpart of this write-side formatting.
+function toLocalDateString(d: Date): string {
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${month}-${day}`
+}
+
 const MAX_PHOTOS = 200
 const MAX_TOTAL_SIZE_BYTES = 500 * 1024 * 1024 // 500MB
 const ACCEPTED_TYPES = {
@@ -328,6 +339,11 @@ export function useBulkImport() {
           caption: `Imported ${group.photos.length} photos`,
           // Album privacy is stored in the `visibility` column (RLS reads it).
           visibility: 'private',
+          // The status column has no DB default; leaving it NULL makes the
+          // album fail both .eq('status','published') and .neq('status','draft')
+          // filters, hiding it from profile/passport/highlights/sitemap.
+          // Bulk-imported albums always have photos, so publish immediately.
+          status: 'published',
         }
 
         if (group.centerLat !== null && group.centerLng !== null) {
@@ -337,10 +353,10 @@ export function useBulkImport() {
         }
 
         if (group.dateStart) {
-          albumData.date_start = group.dateStart.toISOString()
+          albumData.date_start = toLocalDateString(group.dateStart)
         }
         if (group.dateEnd) {
-          albumData.date_end = group.dateEnd.toISOString()
+          albumData.date_end = toLocalDateString(group.dateEnd)
         }
 
         const { data: album, error: albumError } = await supabase

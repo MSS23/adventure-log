@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { log } from '@/lib/utils/logger'
 
 export interface DiscoverAlbum {
   id: string
@@ -32,15 +33,32 @@ export function useDiscoverFeed(userId: string | undefined) {
   const [offset, setOffset] = useState(0)
   const PAGE_SIZE = 20
 
+  // Monotonic id per fetch: a response only applies if it's still the latest
+  // request AND was issued for the userId currently rendered, so a slow stale
+  // response from a previous user can't overwrite the new user's feed.
+  const requestIdRef = useRef(0)
+  const inFlightRef = useRef(false)
+  const currentUserIdRef = useRef(userId)
+
   const fetchDiscover = useCallback(async (reset = false) => {
     if (!userId) {
       setLoading(false)
       return
     }
 
+    // `loading` is async state, so two loadMore calls in the same tick both
+    // pass the loading check and fetch the same offset. A synchronous ref
+    // guards reentrancy; resets supersede in-flight requests instead.
+    if (!reset && inFlightRef.current) return
+
+    const requestId = ++requestIdRef.current
+    const requestUserId = userId
+    inFlightRef.current = true
     setLoading(true)
     const currentOffset = reset ? 0 : offset
     const supabase = createClient()
+    const isCurrent = () =>
+      requestId === requestIdRef.current && requestUserId === currentUserIdRef.current
 
     try {
       const { data, error } = await supabase.rpc('get_discover_feed', {
@@ -65,7 +83,7 @@ export function useDiscoverFeed(userId: string | undefined) {
           .order('created_at', { ascending: false })
           .range(currentOffset, currentOffset + PAGE_SIZE - 1)
 
-        if (fallbackData) {
+        if (fallbackData && isCurrent()) {
           const mapped: DiscoverAlbum[] = fallbackData
             .filter(a => a.photos && a.photos.length > 0)
             .map(a => {
@@ -96,27 +114,52 @@ export function useDiscoverFeed(userId: string | undefined) {
           if (reset) {
             setAlbums(mapped)
           } else {
-            setAlbums(prev => [...prev, ...mapped])
+            // Dedupe on append — offset pagination can re-serve rows when
+            // content is inserted between pages.
+            setAlbums(prev => {
+              const seen = new Set(prev.map(a => a.id))
+              return [...prev, ...mapped.filter(a => !seen.has(a.id))]
+            })
           }
-          setHasMore(mapped.length === PAGE_SIZE)
-          setOffset(currentOffset + mapped.length)
+          // Advance by the RAW fetched count, not the photo-filtered count:
+          // filtering after .range() otherwise re-reads overlapping rows next
+          // page (duplicates) and flips hasMore off the first time a page
+          // contains any photo-less album (feed ends early).
+          setHasMore(fallbackData.length === PAGE_SIZE)
+          setOffset(currentOffset + fallbackData.length)
         }
         return
       }
+
+      if (!isCurrent()) return
 
       const results = (data || []) as DiscoverAlbum[]
 
       if (reset) {
         setAlbums(results)
       } else {
-        setAlbums(prev => [...prev, ...results])
+        setAlbums(prev => {
+          const seen = new Set(prev.map(a => a.id))
+          return [...prev, ...results.filter(a => !seen.has(a.id))]
+        })
       }
       setHasMore(results.length === PAGE_SIZE)
       setOffset(currentOffset + results.length)
-    } catch {
-      // Silent fail
+    } catch (err) {
+      if (isCurrent()) {
+        log.error('Discover feed fetch failed', {
+          component: 'useDiscoverFeed',
+          action: 'fetchDiscover',
+          userId: requestUserId
+        }, err instanceof Error ? err : new Error(String(err)))
+      }
     } finally {
-      setLoading(false)
+      // Only the latest request may release the guard/loading state —
+      // otherwise a stale response would unlock while a newer one runs.
+      if (isCurrent()) {
+        inFlightRef.current = false
+        setLoading(false)
+      }
     }
   }, [userId, offset])
 
@@ -132,6 +175,9 @@ export function useDiscoverFeed(userId: string | undefined) {
   }, [loading, hasMore, fetchDiscover])
 
   useEffect(() => {
+    // Record the active userId before fetching so responses issued for a
+    // previous user are dropped by isCurrent().
+    currentUserIdRef.current = userId
     fetchDiscover(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])

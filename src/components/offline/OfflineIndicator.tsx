@@ -8,6 +8,7 @@ import { WifiOff, Wifi, RefreshCw, Download, Database } from 'lucide-react'
 import { isOnline, syncOfflineData, setupAutoSync } from '@/lib/offline/sync'
 import { getOfflineStats } from '@/lib/offline/storage'
 import { Network } from '@capacitor/network'
+import type { PluginListenerHandle } from '@capacitor/core'
 import { cn } from '@/lib/utils'
 
 interface OfflineIndicatorProps {
@@ -39,21 +40,28 @@ export function OfflineIndicator({ showDetails = false, className }: OfflineIndi
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    // Capacitor network listener
+    // Capacitor network listener. addListener is async, so keep the handle
+    // where the synchronous effect cleanup can reach it — the previous code
+    // returned the cleanup inside .then(), which React never sees, leaking a
+    // listener per mount.
+    let networkListener: PluginListenerHandle | undefined
+    let cancelled = false
     Network.addListener('networkStatusChange', (status) => {
       setOnline(status.connected)
     }).then(listener => {
-      // Store listener for cleanup
-      return () => {
-        window.removeEventListener('online', handleOnline)
-        window.removeEventListener('offline', handleOffline)
+      if (cancelled) {
+        // Effect already cleaned up before the promise resolved
         listener.remove()
+        return
       }
+      networkListener = listener
     })
 
     return () => {
+      cancelled = true
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      networkListener?.remove()
     }
   }, [])
 

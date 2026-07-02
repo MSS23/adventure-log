@@ -34,18 +34,53 @@ export interface OfflineDataItem {
   [key: string]: unknown
 }
 
+export interface PWAEventCallbacks {
+  onInstallable?: () => void
+  onInstalled?: () => void
+  onOffline?: () => void
+  onOnline?: () => void
+  onUpdate?: (registration: ServiceWorkerRegistration) => void
+}
+
 export class PWAManager {
   private static instance: PWAManager
   private installPrompt: PWAInstallPrompt | null = null
   private registration: ServiceWorkerRegistration | null = null
   private initialized = false
-  private callbacks: {
-    onInstallable?: () => void
-    onInstalled?: () => void
-    onOffline?: () => void
-    onOnline?: () => void
-    onUpdate?: (registration: ServiceWorkerRegistration) => void
-  } = {}
+  // A Set of listeners per event (not a single slot): usePWA, useInstallPrompt
+  // and usePWAUpdate all register callbacks against this singleton, and with a
+  // single slot the last writer silently disconnected the others (e.g.
+  // UpdateNotification and InstallBanner never fired).
+  private listeners: {
+    [K in keyof PWAEventCallbacks]-?: Set<NonNullable<PWAEventCallbacks[K]>>
+  } = {
+    onInstallable: new Set(),
+    onInstalled: new Set(),
+    onOffline: new Set(),
+    onOnline: new Set(),
+    onUpdate: new Set()
+  }
+
+  private emit(event: 'onInstallable' | 'onInstalled' | 'onOffline' | 'onOnline'): void
+  private emit(event: 'onUpdate', registration: ServiceWorkerRegistration): void
+  private emit(event: keyof PWAEventCallbacks, registration?: ServiceWorkerRegistration) {
+    for (const listener of this.listeners[event]) {
+      try {
+        if (event === 'onUpdate') {
+          (listener as (r: ServiceWorkerRegistration) => void)(registration as ServiceWorkerRegistration)
+        } else {
+          (listener as () => void)()
+        }
+      } catch (error) {
+        // One broken listener must not stop the rest from being notified
+        log.error('PWA event listener failed', {
+          component: 'PWAManager',
+          action: 'emit',
+          event
+        }, error)
+      }
+    }
+  }
 
   static getInstance(): PWAManager {
     if (!this.instance) {
@@ -122,7 +157,7 @@ export class PWAManager {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
               // New update available
-              this.callbacks.onUpdate?.(registration)
+              this.emit('onUpdate', registration)
             }
           })
         }
@@ -167,7 +202,7 @@ export class PWAManager {
         action: 'install-prompt-available'
       })
 
-      this.callbacks.onInstallable?.()
+      this.emit('onInstallable')
     })
 
     // Detect if app is already installed
@@ -178,7 +213,7 @@ export class PWAManager {
       })
 
       this.installPrompt = null
-      this.callbacks.onInstalled?.()
+      this.emit('onInstalled')
     })
   }
 
@@ -189,14 +224,14 @@ export class PWAManager {
 
     const updateOnlineStatus = () => {
       if (navigator.onLine) {
-        this.callbacks.onOnline?.()
+        this.emit('onOnline')
         log.info('Connection restored', {
           component: 'PWAManager',
           action: 'online',
           platform: Platform.getPlatform()
         })
       } else {
-        this.callbacks.onOffline?.()
+        this.emit('onOffline')
         log.info('Connection lost', {
           component: 'PWAManager',
           action: 'offline',
@@ -213,14 +248,14 @@ export class PWAManager {
       import('@capacitor/network').then(({ Network }) => {
         Network.addListener('networkStatusChange', (status) => {
           if (status.connected) {
-            this.callbacks.onOnline?.()
+            this.emit('onOnline')
             log.info('Connection restored', {
               component: 'PWAManager',
               action: 'online',
               platform: Platform.getPlatform()
             })
           } else {
-            this.callbacks.onOffline?.()
+            this.emit('onOffline')
             log.info('Connection lost', {
               component: 'PWAManager',
               action: 'offline',
@@ -433,8 +468,25 @@ export class PWAManager {
     }
   }
 
-  setCallbacks(callbacks: typeof this.callbacks) {
-    this.callbacks = { ...this.callbacks, ...callbacks }
+  // Registers listeners additively (multiple hooks can subscribe to the same
+  // event) and returns an unsubscribe function so React effects can clean up
+  // on unmount instead of leaking stale setState callbacks.
+  setCallbacks(callbacks: PWAEventCallbacks): () => void {
+    const entries = Object.entries(callbacks) as Array<
+      [keyof PWAEventCallbacks, NonNullable<PWAEventCallbacks[keyof PWAEventCallbacks]>]
+    >
+    for (const [event, listener] of entries) {
+      if (listener) {
+        (this.listeners[event] as Set<typeof listener>).add(listener)
+      }
+    }
+    return () => {
+      for (const [event, listener] of entries) {
+        if (listener) {
+          (this.listeners[event] as Set<typeof listener>).delete(listener)
+        }
+      }
+    }
   }
 
   // Offline storage utilities (cross-platform)

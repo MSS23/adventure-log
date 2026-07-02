@@ -136,16 +136,49 @@ export default function WrappedPage() {
     setTimeout(() => setPhase('stats'), 1500)
   }, [])
 
+  // When viewing a specific year, the card API should render that year's
+  // stats — not all-time — so the shared/downloaded image matches the screen.
+  const cardYearQuery = mode === 'year' ? `&year=${currentYear}` : ''
+
   const handleShare = async () => {
     const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" — make yours free on Adventure Log:`
+    const shareTitle = `${displayName}'s ${label} Travel Wrapped`
     // Share a public landing surface, not this auth-gated /wrapped route —
     // recipients who tap the link should reach a page they can act on.
     const shareUrl =
       typeof window !== 'undefined' ? window.location.origin : 'https://adventurelog.com'
+
+    // Best effort: attach the travel-card PNG so the share carries the visual,
+    // not just text. Any failure here falls through to the text-only share.
+    if (user && navigator.share) {
+      let file: File | null = null
+      try {
+        const res = await apiFetch(`/api/travel-card?userId=${user.id}${cardYearQuery}`)
+        if (res.ok) {
+          const blob = await res.blob()
+          file = new File(
+            [blob],
+            `${displayName}-${label}-wrapped.png`.replace(/\s+/g, '-'),
+            { type: blob.type || 'image/png' },
+          )
+        }
+      } catch {
+        // Card fetch failed — silently fall back to the text-only share.
+      }
+      if (file && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: shareTitle, text: shareText })
+        } catch {
+          // User cancelled — don't immediately reopen a second share sheet.
+        }
+        return
+      }
+    }
+
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `${displayName}'s ${label} Travel Wrapped`,
+          title: shareTitle,
           text: shareText,
           url: shareUrl,
         })
@@ -174,7 +207,7 @@ export default function WrappedPage() {
   if (data.totalTrips === 0) {
     return (
       <div className="dark fixed inset-0 bg-black flex flex-col items-center justify-center text-white p-8">
-        <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
+        <div className="absolute top-[max(1rem,env(safe-area-inset-top))] right-[max(1rem,env(safe-area-inset-right))] z-50 flex items-center gap-1">
           <Link href="/feed" aria-label="Back to home">
             <Button
               variant="ghost"
@@ -228,8 +261,9 @@ export default function WrappedPage() {
 
   return (
     <div className="dark fixed inset-0 bg-black overflow-hidden">
-      {/* Home + close buttons */}
-      <div className="absolute top-4 right-4 z-50 flex items-center gap-1">
+      {/* Home + close buttons — max() keeps a 1rem floor while clearing
+          notches/Dynamic Island via the safe-area env insets */}
+      <div className="absolute top-[max(1rem,env(safe-area-inset-top))] right-[max(1rem,env(safe-area-inset-right))] z-50 flex items-center gap-1">
         <Link href="/feed" aria-label="Back to home">
           <Button
             variant="ghost"
@@ -251,7 +285,7 @@ export default function WrappedPage() {
       </div>
 
       {/* Mode toggle */}
-      <div className="absolute top-4 left-4 z-50">
+      <div className="absolute top-[max(1rem,env(safe-area-inset-top))] left-[max(1rem,env(safe-area-inset-left))] z-50">
         <div className="flex bg-white/10 backdrop-blur-sm rounded-full p-0.5">
           <button
             type="button"
@@ -404,8 +438,9 @@ export default function WrappedPage() {
               />
             </GlobeErrorBoundary>
 
-            {/* Flight progress bar */}
-            <div className="absolute top-16 left-4 right-4 z-30">
+            {/* Flight progress bar — sits 3rem below the top control row, so
+                offset from the same safe-area-aware baseline (1rem floor). */}
+            <div className="absolute top-[calc(max(1rem,env(safe-area-inset-top))+3rem)] left-[max(1rem,env(safe-area-inset-left))] right-[max(1rem,env(safe-area-inset-right))] z-30">
               <div className="h-1.5 bg-white/15 rounded-full overflow-hidden shadow-sm">
                 <motion.div
                   className="h-full bg-gradient-to-r from-olive-500 to-olive-400 rounded-full"
@@ -426,8 +461,9 @@ export default function WrappedPage() {
               progress={flightProgress}
             />
 
-            {/* Floating stats that appear as animation progresses */}
-            <div className="absolute bottom-8 left-4 right-4 z-30">
+            {/* Floating stats that appear as animation progresses — 1rem above
+                the safe-area-aware bottom baseline (2rem floor, was bottom-8) */}
+            <div className="absolute bottom-[calc(max(1rem,env(safe-area-inset-bottom))+1rem)] left-[max(1rem,env(safe-area-inset-left))] right-[max(1rem,env(safe-area-inset-right))] z-30">
               <motion.div
                 className="flex justify-center gap-3 sm:gap-6"
                 initial={{ opacity: 0, y: 30 }}
@@ -456,7 +492,7 @@ export default function WrappedPage() {
             </div>
 
             {/* Skip button */}
-            <div className="absolute bottom-4 right-4 z-30">
+            <div className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-30">
               <Button
                 onClick={() => setPhase('stats')}
                 variant="ghost"
@@ -697,7 +733,7 @@ export default function WrappedPage() {
                       // here, ?download=1 + header server-side).
                       const safeName = `${displayName}-${label}-wrapped.png`.replace(/\s+/g, '-')
                       try {
-                        const res = await apiFetch(`/api/travel-card?userId=${user.id}&download=1`)
+                        const res = await apiFetch(`/api/travel-card?userId=${user.id}&download=1${cardYearQuery}`)
                         if (!res.ok) throw new Error(`HTTP ${res.status}`)
                         const blob = await res.blob()
                         const objectUrl = URL.createObjectURL(blob)

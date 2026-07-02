@@ -16,13 +16,25 @@ import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/button'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 
+// Friendly messages for error codes set by the auth callbacks:
+// `/auth/callback` redirects here with ?error=auth when the email link code
+// exchange fails; `/sso-callback` uses ?error=oauth when the OAuth PKCE
+// exchange fails.
+const CALLBACK_ERROR_MESSAGES: Record<string, string> = {
+  auth: 'Your sign-in link was invalid or has expired. Please sign in again.',
+  oauth: 'We couldn’t complete sign-in with your provider. Please try again.',
+}
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(() => {
+    const code = searchParams.get('error')
+    return code ? (CALLBACK_ERROR_MESSAGES[code] ?? null) : null
+  })
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {

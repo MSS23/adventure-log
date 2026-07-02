@@ -4,7 +4,7 @@
  * Unified camera interface for taking photos and selecting from gallery
  */
 
-import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera'
+import { Camera, CameraResultType, CameraSource, Photo, CameraPermissionType } from '@capacitor/camera'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Toast } from '@capacitor/toast'
 import { Capacitor } from '@capacitor/core'
@@ -37,35 +37,45 @@ export function isNativeApp(): boolean {
 }
 
 /**
- * Check camera permissions
+ * Check camera permissions for a single capability.
+ *
+ * Per-capability on purpose: requiring BOTH camera AND photos would block
+ * selectFromGallery on a camera-only denial and takePhoto on a photos-only
+ * denial. 'limited' (iOS partial photo access) is enough to pick photos.
  */
-export async function checkCameraPermissions(): Promise<boolean> {
+export async function checkCameraPermissions(
+  permission: CameraPermissionType = 'camera'
+): Promise<boolean> {
   if (!isNativeApp()) {
     return true // Web doesn't need special permissions
   }
 
   try {
     const permissions = await Camera.checkPermissions()
-    return permissions.camera === 'granted' && permissions.photos === 'granted'
+    const state = permissions[permission]
+    return state === 'granted' || state === 'limited'
   } catch (error) {
-    log.error('Error checking camera permissions', { error })
+    log.error('Error checking camera permissions', { error, permission })
     return false
   }
 }
 
 /**
- * Request camera permissions
+ * Request camera permissions for a single capability (see checkCameraPermissions).
  */
-export async function requestCameraPermissions(): Promise<boolean> {
+export async function requestCameraPermissions(
+  permission: CameraPermissionType = 'camera'
+): Promise<boolean> {
   if (!isNativeApp()) {
     return true
   }
 
   try {
-    const permissions = await Camera.requestPermissions()
-    return permissions.camera === 'granted' && permissions.photos === 'granted'
+    const permissions = await Camera.requestPermissions({ permissions: [permission] })
+    const state = permissions[permission]
+    return state === 'granted' || state === 'limited'
   } catch (error) {
-    log.error('Error requesting camera permissions', { error })
+    log.error('Error requesting camera permissions', { error, permission })
     return false
   }
 }
@@ -74,10 +84,11 @@ export async function requestCameraPermissions(): Promise<boolean> {
  * Take a photo with the camera
  */
 export async function takePhoto(options: CameraOptions = {}): Promise<File | null> {
-  const hasPermission = await checkCameraPermissions()
+  // Only the camera capability is needed here — a photos denial must not block it.
+  const hasPermission = await checkCameraPermissions('camera')
 
   if (!hasPermission) {
-    const granted = await requestCameraPermissions()
+    const granted = await requestCameraPermissions('camera')
     if (!granted) {
       await Toast.show({
         text: 'Camera permission is required to take photos',
@@ -119,10 +130,11 @@ export async function selectFromGallery(
   options: CameraOptions = {},
   multiple: boolean = false
 ): Promise<File[]> {
-  const hasPermission = await checkCameraPermissions()
+  // Only the photos capability is needed here — a camera denial must not block it.
+  const hasPermission = await checkCameraPermissions('photos')
 
   if (!hasPermission) {
-    const granted = await requestCameraPermissions()
+    const granted = await requestCameraPermissions('photos')
     if (!granted) {
       await Toast.show({
         text: 'Gallery access permission is required',

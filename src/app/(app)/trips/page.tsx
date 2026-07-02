@@ -17,6 +17,7 @@ import {
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import type { Trip } from '@/types/trips'
 
 interface TripListItem extends Trip {
@@ -331,7 +332,7 @@ export default function TripsPage() {
                 {trip.start_date && (
                   <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider">
                     <Calendar className="h-3 w-3" />
-                    {new Date(trip.start_date).toLocaleDateString('en-US', {
+                    {parseLocalDate(trip.start_date)?.toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                     })}

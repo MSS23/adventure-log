@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { parseLocalDate } from "@/lib/utils/travel-date"
 
 // Helper to get today's date at midnight (to allow today's date)
 const getTodayMidnight = () => {
@@ -25,16 +26,22 @@ export const albumSchema = z.object({
 }).refine((data) => {
   // Validate that end date is not before start date
   if (data.start_date && data.end_date) {
-    return new Date(data.start_date) <= new Date(data.end_date)
+    const startDate = parseLocalDate(data.start_date)
+    const endDate = parseLocalDate(data.end_date)
+    if (!startDate || !endDate) return true
+    return startDate <= endDate
   }
   return true
 }, {
   message: "End date must be after or equal to start date",
   path: ["end_date"]
 }).refine((data) => {
-  // Validate that start date is not in the future
+  // Validate that start date is not in the future.
+  // parseLocalDate treats "YYYY-MM-DD" as LOCAL midnight — a UTC-midnight
+  // parse would let users west of UTC save tomorrow's date.
   if (data.start_date) {
-    const startDate = new Date(data.start_date)
+    const startDate = parseLocalDate(data.start_date)
+    if (!startDate) return true
     const today = getTodayMidnight()
     return startDate <= today
   }
@@ -45,7 +52,8 @@ export const albumSchema = z.object({
 }).refine((data) => {
   // Validate that end date is not in the future
   if (data.end_date) {
-    const endDate = new Date(data.end_date)
+    const endDate = parseLocalDate(data.end_date)
+    if (!endDate) return true
     const today = getTodayMidnight()
     return endDate <= today
   }

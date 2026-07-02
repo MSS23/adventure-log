@@ -27,7 +27,11 @@ export async function PATCH(
     // Build update object with only allowed fields
     const updates: Record<string, unknown> = {}
 
-    if (body.notes !== undefined) updates.notes = body.notes
+    // Type/length-validate free-text fields like the POST route does — PATCH
+    // must not be an unvalidated side door into the same columns.
+    if (body.notes !== undefined) {
+      updates.notes = body.notes ? String(body.notes).slice(0, 2000) : null
+    }
     if (body.priority !== undefined) {
       if (!['low', 'medium', 'high'].includes(body.priority)) {
         return NextResponse.json(
@@ -37,7 +41,17 @@ export async function PATCH(
       }
       updates.priority = body.priority
     }
-    if (body.completed_at !== undefined) updates.completed_at = body.completed_at
+    if (body.completed_at !== undefined) {
+      if (body.completed_at === null) {
+        updates.completed_at = null
+      } else {
+        const completed = new Date(body.completed_at)
+        if (Number.isNaN(completed.getTime())) {
+          return NextResponse.json({ error: 'Invalid completed_at date' }, { status: 400 })
+        }
+        updates.completed_at = completed.toISOString()
+      }
+    }
     if (body.location_name !== undefined) {
       const name = String(body.location_name).trim().slice(0, 200)
       if (!name) {
@@ -45,7 +59,17 @@ export async function PATCH(
       }
       updates.location_name = name
     }
-    if (body.country_code !== undefined) updates.country_code = body.country_code
+    if (body.country_code !== undefined) {
+      if (body.country_code === null) {
+        updates.country_code = null
+      } else {
+        const code = String(body.country_code).trim().toUpperCase()
+        if (!/^[A-Z]{2}$/.test(code)) {
+          return NextResponse.json({ error: 'Invalid country_code' }, { status: 400 })
+        }
+        updates.country_code = code
+      }
+    }
     if (body.latitude !== undefined) {
       const lat = Number(body.latitude)
       if (!Number.isFinite(lat) || lat < -90 || lat > 90) {

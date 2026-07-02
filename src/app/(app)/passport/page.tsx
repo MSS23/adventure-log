@@ -17,6 +17,7 @@ import { StreakBadge } from '@/components/profile/StreakBadge'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
 import { getCountryName } from '@/lib/utils/country'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import { CONTINENT_EMOJI, type Continent } from '@/lib/utils/continents'
 import { useTravelPassport } from '@/lib/hooks/useTravelPassport'
 
@@ -46,8 +47,8 @@ function buildJourneyStatements(d: {
   // 1. Time span
   if (d.firstTrip && d.latestTrip && d.firstTrip.date !== d.latestTrip.date) {
     const years =
-      new Date(d.latestTrip.date).getFullYear() -
-      new Date(d.firstTrip.date).getFullYear()
+      (parseLocalDate(d.latestTrip.date)?.getFullYear() ?? 0) -
+      (parseLocalDate(d.firstTrip.date)?.getFullYear() ?? 0)
     if (years >= 1) {
       out.push(
         `Across ${years} ${years === 1 ? 'year' : 'years'} of travel — from ${d.firstTrip.location} to ${d.latestTrip.location}.`
@@ -117,7 +118,8 @@ function buildJourneyStatements(d: {
   // 6. Most recent country
   if (d.latestTrip) {
     const monthsAgo = Math.floor(
-      (Date.now() - new Date(d.latestTrip.date).getTime()) / (1000 * 60 * 60 * 24 * 30)
+      (Date.now() - (parseLocalDate(d.latestTrip.date)?.getTime() ?? Date.now())) /
+        (1000 * 60 * 60 * 24 * 30)
     )
     if (monthsAgo === 0) {
       out.push(`Most recent stamp: ${d.latestTrip.location} — still fresh in the camera roll.`)
@@ -479,7 +481,7 @@ export default function TravelPassportPage() {
             name: getCountryName(code),
             rotation: rotations[i % rotations.length],
             dateLabel: date
-              ? new Date(date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase()
+              ? parseLocalDate(date)?.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase() ?? ''
               : '',
           }
         })
@@ -634,7 +636,7 @@ export default function TravelPassportPage() {
                         className="font-mono text-[11px] tracking-wide mt-0.5"
                         style={{ color: 'var(--color-muted-warm)' }}
                       >
-                        {new Date(data.firstTrip.date).toLocaleDateString('en-US', {
+                        {parseLocalDate(data.firstTrip.date)?.toLocaleDateString('en-US', {
                           month: 'long',
                           year: 'numeric',
                         })}
@@ -665,7 +667,7 @@ export default function TravelPassportPage() {
                         className="font-mono text-[11px] tracking-wide mt-0.5"
                         style={{ color: 'var(--color-muted-warm)' }}
                       >
-                        {new Date(data.latestTrip.date).toLocaleDateString('en-US', {
+                        {parseLocalDate(data.latestTrip.date)?.toLocaleDateString('en-US', {
                           month: 'long',
                           year: 'numeric',
                         })}

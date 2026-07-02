@@ -39,6 +39,7 @@ import { YouWereHereBadge } from '@/components/albums/YouWereHereBadge'
 import { AlbumQualityNudges } from '@/components/albums/AlbumQualityNudges'
 import { FavoriteAlbumToggle } from '@/components/albums/FavoriteAlbumToggle'
 import { placeSlug } from '@/lib/utils/places'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 export default function AlbumDetailPage() {
   const params = useParams()
@@ -225,6 +226,10 @@ export default function AlbumDetailPage() {
   useEffect(() => {
     if (!params.id) return
 
+    // WHY: track the visibility-change redirect timer so unmount cancels it —
+    // otherwise a stray router.push('/feed') fires after the user navigated away.
+    let redirectTimeout: ReturnType<typeof setTimeout> | undefined
+
     const channel = supabase
       .channel(`album-${params.id}`)
       .on(
@@ -249,9 +254,12 @@ export default function AlbumDetailPage() {
                 description: 'This album is now private. Redirecting...'
               })
               setIsPrivateContent(true)
-              setTimeout(() => router.push('/feed'), 2000)
+              redirectTimeout = setTimeout(() => router.push('/feed'), 2000)
             } else {
-              setAlbum(updatedAlbum)
+              // WHY: payload.new is the bare albums row — replacing state with
+              // it would wipe the joined `user` relation fetchAlbumData merged
+              // in (breaking the owner byline). Merge into the previous album.
+              setAlbum(prev => prev ? { ...prev, ...updatedAlbum, user: prev.user } : prev)
               toast.info('Album updated')
             }
           }
@@ -260,6 +268,7 @@ export default function AlbumDetailPage() {
       .subscribe()
 
     return () => {
+      if (redirectTimeout) clearTimeout(redirectTimeout)
       supabase.removeChannel(channel)
     }
   }, [params.id, user?.id, router, supabase])
@@ -534,7 +543,13 @@ export default function AlbumDetailPage() {
     const dateStr = album.date_start
     if (!dateStr) return null
     try {
-      return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      // WHY: date_start is a plain DATE string ("YYYY-MM-DD"); new Date()
+      // parses it as UTC midnight, which renders a day early for viewers west
+      // of UTC. parseLocalDate builds the date in the local timezone instead.
+      const parsed = parseLocalDate(dateStr)
+      return parsed
+        ? parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : null
     } catch { return null }
   }
 
@@ -689,9 +704,11 @@ export default function AlbumDetailPage() {
                 {album.date_start && album.date_end && album.date_start !== album.date_end && (
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-primary" />
-                    {new Date(album.date_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {/* WHY: parse DATE strings via parseLocalDate — new Date()
+                        treats them as UTC midnight and shifts a day west of UTC */}
+                    {parseLocalDate(album.date_start)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     {' - '}
-                    {new Date(album.date_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {parseLocalDate(album.date_end)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 )}
                 {photos.length > 0 && (

@@ -67,7 +67,9 @@
   --card-foreground: #0C1014;
   --popover: #FFFFFF;
   --popover-foreground: #0C1014;
-  --primary: #059669;
+  /* WCAG AA: #059669 was 3.77:1 on white; #047857 (emerald-700) hits 5.48:1
+     while staying inside the brand's emerald ramp. Dark mode already passes. */
+  --primary: #047857;
   --primary-foreground: #FFFFFF;
   --secondary: #EEF2F6;
   --secondary-foreground: #0C1014;

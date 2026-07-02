@@ -76,8 +76,10 @@ export function PhotoCarousel({
     // Show animation immediately for better UX
     setShowHeartAnimation(true)
 
-    // Use the same toggleLike function as LikeButton for perfect sync
-    toggleLike()
+    // Use the same toggleLike function as LikeButton for perfect sync.
+    // toggleLike resolves to the settled liked state; no count is mirrored
+    // here, so fire-and-forget is fine (errors are handled inside the hook).
+    void toggleLike()
 
     // Call parent handler if provided
     onDoubleTap?.()

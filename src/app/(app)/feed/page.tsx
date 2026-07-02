@@ -82,8 +82,18 @@ async function fetchFeedPage(
       photos(id, file_path, caption, taken_at)
     `
     )
+    // WHY: order embedded photos by display_order first (created_at as
+    // tiebreaker) to match the album page — otherwise a user's manual photo
+    // reordering never shows up in feed carousels.
+    .order('display_order', { ascending: true, referencedTable: 'photos' })
     .order('created_at', { ascending: true, referencedTable: 'photos' })
     .limit(10, { referencedTable: 'photos' })
+    // WHY: RLS only enforces visibility, not publish state — without this,
+    // photo-less DRAFT albums surface in the feed as empty "No photos" cards.
+    // Legacy albums can have NULL status (see the m17 discover-feed hedge
+    // `status IS NULL OR status = 'published'`), and a bare .neq('status',
+    // 'draft') would exclude those NULL rows in SQL, so keep them explicitly.
+    .or('status.is.null,status.neq.draft')
     .order('created_at', { ascending: false })
     .range(pageParam * PAGE_SIZE, pageParam * PAGE_SIZE + PAGE_SIZE - 1)
 
@@ -211,7 +221,20 @@ export default function FeedPage() {
       lastPage.length === PAGE_SIZE ? allPages.length : undefined,
   })
 
-  const albums = useMemo<FeedAlbum[]>(() => data?.pages.flat() ?? [], [data])
+  const albums = useMemo<FeedAlbum[]>(() => {
+    // WHY: pages are fetched by offset (.range), so albums inserted between
+    // fetches shift the window and page N+1 can repeat page N's tail. Keep the
+    // first occurrence per id to avoid duplicate posts / duplicate React keys.
+    const seen = new Set<string>()
+    const unique: FeedAlbum[] = []
+    for (const album of data?.pages.flat() ?? []) {
+      if (!seen.has(album.id)) {
+        seen.add(album.id)
+        unique.push(album)
+      }
+    }
+    return unique
+  }, [data])
   const loading = isLoading
   const loadError = isError
   const hasMore = !!hasNextPage

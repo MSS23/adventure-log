@@ -24,6 +24,7 @@ import {
   Sparkles
 } from 'lucide-react'
 import type { SearchFilters as SearchFiltersType } from './useSearchState'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 interface SearchFiltersProps {
   filters: SearchFiltersType
@@ -218,7 +219,7 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
               <div className="flex flex-wrap gap-2 mt-2">
                 {filters.dateRange.from && (
                   <Badge variant="secondary" className="gap-1">
-                    From: {new Date(filters.dateRange.from).toLocaleDateString()}
+                    From: {parseLocalDate(filters.dateRange.from)?.toLocaleDateString()}
                     <button
                       type="button"
                       aria-label="Remove from-date filter"
@@ -231,7 +232,7 @@ export function SearchFiltersPanel({ filters, updateFilter, removeLocationFilter
                 )}
                 {filters.dateRange.to && (
                   <Badge variant="secondary" className="gap-1">
-                    To: {new Date(filters.dateRange.to).toLocaleDateString()}
+                    To: {parseLocalDate(filters.dateRange.to)?.toLocaleDateString()}
                     <button
                       type="button"
                       aria-label="Remove to-date filter"

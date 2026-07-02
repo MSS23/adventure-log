@@ -5,7 +5,7 @@
 // session immediately (email confirmation disabled) we push to `/dashboard`;
 // otherwise we show a "check your email" confirmation message.
 
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { safeInternalPath } from '@/lib/utils/safe-redirect'
@@ -42,11 +42,48 @@ function SignupForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [checkEmail, setCheckEmail] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
+  const [resendMessage, setResendMessage] = useState<string | null>(null)
+  const [resendError, setResendError] = useState<string | null>(null)
 
   // Adventure Log is 18+. Derive age from the self-declared DOB to drive the
   // under-18 block; the value is also stored server-side for an audit record.
   const age = dob ? calculateAge(dob) : null
   const isUnderAge = age !== null && age < MIN_AGE
+
+  // Tick the resend cooldown down once per second while it's active.
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const timer = setInterval(() => setResendCooldown((s) => s - 1), 1000)
+    return () => clearInterval(timer)
+  }, [resendCooldown])
+
+  const handleResend = async () => {
+    setResendMessage(null)
+    setResendError(null)
+    setResending(true)
+
+    try {
+      const supabase = createClient()
+      const { error: resendAuthError } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+      })
+
+      if (resendAuthError) {
+        setResendError(resendAuthError.message)
+        return
+      }
+
+      setResendMessage('Confirmation email sent — it may take a minute to arrive.')
+      setResendCooldown(60)
+    } catch (err) {
+      setResendError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    } finally {
+      setResending(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -148,6 +185,36 @@ function SignupForm() {
             </span>
             . Click the link to activate your account.
           </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Don&apos;t see it? Check your spam folder.
+          </p>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleResend}
+            disabled={resending || resendCooldown > 0}
+            className="mt-5 w-full"
+          >
+            {resending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {resendCooldown > 0
+              ? `Resend available in ${resendCooldown}s`
+              : resending
+                ? 'Resending…'
+                : 'Resend confirmation email'}
+          </Button>
+
+          {resendMessage && (
+            <p role="status" className="mt-3 text-sm text-primary">
+              {resendMessage}
+            </p>
+          )}
+          {resendError && (
+            <p role="alert" className="mt-3 text-sm text-destructive">
+              {resendError}
+            </p>
+          )}
+
           <Link
             href="/login"
             className="mt-6 inline-block text-sm font-medium text-primary hover:underline"

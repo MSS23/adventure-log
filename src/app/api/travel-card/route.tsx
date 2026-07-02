@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
 import { getFlagEmoji } from '@/lib/utils/country'
 import { computeTravelStats } from '@/lib/utils/travel-stats'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 export const runtime = 'nodejs'
 
@@ -19,6 +20,18 @@ export async function GET(request: NextRequest) {
 
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
+  }
+
+  // Optional ?year= renders a year-scoped card (e.g. for "2026 Wrapped"
+  // shares) instead of the default all-time stats.
+  const yearParam = searchParams.get('year')
+  let year: number | null = null
+  if (yearParam !== null) {
+    const parsed = Number(yearParam)
+    if (!Number.isInteger(parsed) || parsed < 2000 || parsed > 2100) {
+      return NextResponse.json({ error: 'Invalid year' }, { status: 400 })
+    }
+    year = parsed
   }
 
   try {
@@ -52,7 +65,12 @@ export async function GET(request: NextRequest) {
       .eq('visibility', 'public')
       .neq('status', 'draft')
 
-    const allAlbums = albums || []
+    // Year filter mirrors useWrappedData exactly: bucket by the travel year of
+    // date_start (falling back to created_at), parsed as a LOCAL calendar date
+    // so "YYYY-MM-DD" values don't roll back a year in timezones behind UTC.
+    const allAlbums = (albums || []).filter(
+      a => year === null || parseLocalDate(a.date_start || a.created_at)?.getFullYear() === year
+    )
 
     // Count photos scoped to the SAME public, non-draft albums shown on the
     // card. Counting by user_id alone would include photos from private/draft
@@ -139,7 +157,7 @@ export async function GET(request: NextRequest) {
                     {displayName}
                   </div>
                   <div style={{ fontSize: '15px', color: 'rgba(205,224,168,0.92)', lineHeight: 1.4 }}>
-                    @{user.username} &middot; Travel Passport
+                    @{user.username} &middot; Travel Passport{year !== null ? ` · ${year} Wrapped` : ''}
                   </div>
                 </div>
               </div>

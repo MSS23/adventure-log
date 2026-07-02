@@ -45,39 +45,40 @@ export function usePWA() {
   const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
+    // Register callbacks synchronously so the effect cleanup can unsubscribe;
+    // setCallbacks is additive (Set-based), so this no longer clobbers the
+    // listeners registered by useInstallPrompt/usePWAUpdate.
+    const unsubscribe = pwaManager.setCallbacks({
+      onInstallable: () => {
+        setStatus(prev => ({
+          ...prev,
+          isInstallable: true,
+          capabilities: pwaManager.getCapabilities()
+        }))
+      },
+      onInstalled: () => {
+        setStatus(prev => ({
+          ...prev,
+          isInstalled: true,
+          isInstallable: false,
+          capabilities: pwaManager.getCapabilities()
+        }))
+      },
+      onOnline: () => {
+        setStatus(prev => ({ ...prev, isOnline: true }))
+      },
+      onOffline: () => {
+        setStatus(prev => ({ ...prev, isOnline: false }))
+      },
+      onUpdate: () => {
+        setStatus(prev => ({ ...prev, hasUpdate: true }))
+      }
+    })
+
     const initializePWA = async () => {
-      if (isInitialized) return
-
       try {
+        // pwaManager.initialize() is idempotent, so re-mounts are safe
         await pwaManager.initialize()
-
-        // Set up callbacks
-        pwaManager.setCallbacks({
-          onInstallable: () => {
-            setStatus(prev => ({
-              ...prev,
-              isInstallable: true,
-              capabilities: pwaManager.getCapabilities()
-            }))
-          },
-          onInstalled: () => {
-            setStatus(prev => ({
-              ...prev,
-              isInstalled: true,
-              isInstallable: false,
-              capabilities: pwaManager.getCapabilities()
-            }))
-          },
-          onOnline: () => {
-            setStatus(prev => ({ ...prev, isOnline: true }))
-          },
-          onOffline: () => {
-            setStatus(prev => ({ ...prev, isOnline: false }))
-          },
-          onUpdate: () => {
-            setStatus(prev => ({ ...prev, hasUpdate: true }))
-          }
-        })
 
         setStatus(prev => ({
           ...prev,
@@ -99,7 +100,9 @@ export function usePWA() {
     }
 
     initializePWA()
-  }, [isInitialized])
+
+    return unsubscribe
+  }, [])
 
   const updateServiceWorker = useCallback(async () => {
     const success = await pwaManager.updateServiceWorker()
@@ -137,7 +140,9 @@ export function useInstallPrompt() {
   })
 
   useEffect(() => {
-    pwaManager.setCallbacks({
+    // setCallbacks is additive — unsubscribe on unmount to avoid leaking
+    // setState calls into an unmounted component.
+    const unsubscribe = pwaManager.setCallbacks({
       onInstallable: () => {
         setState(prev => ({ ...prev, canInstall: true }))
       },
@@ -157,6 +162,8 @@ export function useInstallPrompt() {
       ...prev,
       canInstall: capabilities.isInstallable
     }))
+
+    return unsubscribe
   }, [])
 
   const showInstallPrompt = useCallback(() => {
@@ -299,11 +306,15 @@ export function usePWAUpdate() {
   const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
-    pwaManager.setCallbacks({
+    // setCallbacks is additive — unsubscribe on unmount so this listener does
+    // not accumulate across re-mounts.
+    const unsubscribe = pwaManager.setCallbacks({
       onUpdate: () => {
         setUpdateAvailable(true)
       }
     })
+
+    return unsubscribe
   }, [])
 
   const applyUpdate = useCallback(async () => {

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Camera, MapPin, Calendar, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface AlbumPreviewProps {
@@ -76,7 +77,8 @@ export function AlbumPreview({
   // Format date
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return null
-    const date = new Date(dateString)
+    const date = parseLocalDate(dateString)
+    if (!date) return null
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   }
 

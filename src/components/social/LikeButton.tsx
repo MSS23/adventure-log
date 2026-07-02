@@ -22,6 +22,10 @@ interface LikeButtonProps {
    * own like count (e.g. the feed footer, which shows a server-provided
    * `likes_count`) keep that number in sync optimistically — the button itself
    * only owns the heart when `showCount` is false.
+   *
+   * If the toggle settles on a different state than the optimistic guess
+   * (e.g. the request failed and was reverted), this fires a second time with
+   * the settled state so the parent count can correct itself.
    */
   onToggle?: (nextLiked: boolean) => void
 }
@@ -61,8 +65,17 @@ export function LikeButton({
     // Let a parent-owned count update optimistically, in lockstep with the heart.
     onToggle?.(nextLiked)
 
-    // Fire and forget - optimistic update makes it instant
-    toggleLike()
+    // Optimistic update makes the heart instant, but the parent count must
+    // follow the *settled* state: if the toggle fails (hook reverts) or the
+    // tap was ignored (a toggle was already in flight), the optimistic
+    // onToggle above left the count off by one — emit the settled state so
+    // the parent can correct itself. WHY: without this, a failed like left
+    // the feed count permanently +1.
+    void toggleLike().then((settledLiked) => {
+      if (settledLiked !== nextLiked) {
+        onToggle?.(settledLiked)
+      }
+    })
   }
 
   const _sizes = {

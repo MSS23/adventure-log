@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { log } from '@/lib/utils/logger'
+import { sanitizeText } from '@/lib/utils/input-validation'
 
 const CATEGORIES = ['see', 'eat', 'do', 'stay', 'other']
 
@@ -29,13 +30,25 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       updates.category = body.category
     }
     if ('notes' in body) {
-      updates.notes = body.notes ? String(body.notes).slice(0, 2000) : null
+      // Sanitize like the POST route does — PATCH must not be the unsanitized
+      // side door for the same column.
+      updates.notes = body.notes ? sanitizeText(String(body.notes)).slice(0, 2000) : null
     }
     if ('visited_at' in body) {
-      updates.visited_at = body.visited_at ? new Date(body.visited_at).toISOString() : null
+      if (body.visited_at) {
+        const visited = new Date(body.visited_at)
+        // Invalid dates throw RangeError in toISOString(), surfacing as an
+        // opaque 500 — validate and answer 400 instead.
+        if (Number.isNaN(visited.getTime())) {
+          return NextResponse.json({ error: 'Invalid visited_at date' }, { status: 400 })
+        }
+        updates.visited_at = visited.toISOString()
+      } else {
+        updates.visited_at = null
+      }
     }
     if (typeof body.place_name === 'string' && body.place_name.trim()) {
-      updates.place_name = body.place_name.trim().slice(0, 200)
+      updates.place_name = sanitizeText(body.place_name.trim()).slice(0, 200)
     }
 
     if (Object.keys(updates).length === 0) {

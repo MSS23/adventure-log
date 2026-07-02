@@ -117,6 +117,26 @@ export function useFlightAnimation(
   const animationEngineRef = useRef<FlightAnimationEngine | null>(null)
   const animationFrameRef = useRef<number | undefined>(undefined)
 
+  // WHY: the engine is constructed exactly once (initializeEngine guards on the
+  // ref), so its callbacks must read through refs — otherwise they'd capture the
+  // first render's empty `locations`, the initial camera-follow flag, and the
+  // initial onSegmentComplete forever.
+  const locationsRef = useRef<TravelLocation[]>(locations)
+  const cameraFollowRef = useRef(cameraFollowEnabled)
+  const onSegmentCompleteRef = useRef(onSegmentComplete)
+
+  useEffect(() => {
+    locationsRef.current = locations
+  }, [locations])
+
+  useEffect(() => {
+    cameraFollowRef.current = cameraFollowEnabled
+  }, [cameraFollowEnabled])
+
+  useEffect(() => {
+    onSegmentCompleteRef.current = onSegmentComplete
+  }, [onSegmentComplete])
+
   /**
    * Initialize flight animation engine
    */
@@ -141,13 +161,14 @@ export function useFlightAnimation(
       },
       // Camera update callback
       (position) => {
-        if (cameraFollowEnabled) {
+        // Read through the ref — see WHY note above the refs.
+        if (cameraFollowRef.current) {
           setCameraPosition(position)
         }
       },
       // Segment complete callback
       (segment) => {
-        const location = locations.find(loc => loc.id === segment.id)
+        const location = locationsRef.current.find(loc => loc.id === segment.id)
         if (location) {
           // Set destination camera position to focus on the completed destination
           setDestinationCameraPosition({
@@ -155,11 +176,11 @@ export function useFlightAnimation(
             lng: location.longitude,
             altitude: 1.5
           })
-          onSegmentComplete?.(location)
+          onSegmentCompleteRef.current?.(location)
         }
       }
     )
-  }, [cameraFollowEnabled, locations, onSegmentComplete])
+  }, [])
 
   /**
    * Generate flight paths from locations
@@ -233,6 +254,9 @@ export function useFlightAnimation(
    */
   const setLocations = useCallback(async (newLocations: TravelLocation[]) => {
     setLocationsState(newLocations)
+    // Sync the ref immediately: auto-play can start the engine below, before
+    // React commits the state update that the locationsRef effect watches.
+    locationsRef.current = newLocations
     await generateFlightPaths(newLocations)
 
     // Initialize engine if not already done

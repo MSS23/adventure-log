@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
+import { parseLocalDate } from '@/lib/utils/travel-date';
 import { cn } from '@/lib/utils';
 import { log } from '@/lib/utils/logger';
 
@@ -288,7 +289,7 @@ export function GlobalSearch() {
                       {result.date && (
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {new Date(result.date).toLocaleDateString()}
+                          {parseLocalDate(result.date)?.toLocaleDateString()}
                         </span>
                       )}
                     </div>

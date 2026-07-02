@@ -49,6 +49,16 @@ import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPosition
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { deletePhoto as deletePhotoAction } from '../actions'
 
+// Local calendar "today" as YYYY-MM-DD for date-input max attributes.
+// toISOString() would give UTC "today", which blocks/allows the wrong day for
+// users in negative offsets in the evening (or positive offsets in the morning).
+function localTodayString(): string {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
+}
+
 interface LocationData {
   latitude: number
   longitude: number
@@ -201,13 +211,27 @@ export default function EditAlbumPage() {
     }
 
     // Update local state
-    setPhotos(prev => {
-      const deletedPhoto = prev.find(p => p.id === photoId)
-      if (deletedPhoto && (deletedPhoto.file_path === selectedCoverPhoto || deletedPhoto.storage_path === selectedCoverPhoto)) {
-        setSelectedCoverPhoto(null)
+    const deletedPhoto = photos.find(p => p.id === photoId)
+    setPhotos(prev => prev.filter(p => p.id !== photoId))
+
+    if (deletedPhoto && (deletedPhoto.file_path === selectedCoverPhoto || deletedPhoto.storage_path === selectedCoverPhoto)) {
+      // The server action already promoted the next photo to cover in the DB.
+      // Setting local state to null here would make Save write
+      // cover_photo_url: null, clobbering that promotion — so refetch the
+      // promoted cover and mirror it locally instead.
+      const { data: refreshedAlbum } = await supabase
+        .from('albums')
+        .select('cover_photo_url')
+        .eq('id', albumId)
+        .single()
+
+      if (refreshedAlbum) {
+        setSelectedCoverPhoto(refreshedAlbum.cover_photo_url || null)
+        // The saved crop belonged to the deleted image; reset it for the
+        // promoted cover (same behavior as picking a new cover manually).
+        setCoverPosition({ position: 'center', xOffset: 50, yOffset: 50 })
       }
-      return prev.filter(p => p.id !== photoId)
-    })
+    }
 
     toast.success('Photo deleted successfully')
   }
@@ -556,7 +580,7 @@ export default function EditAlbumPage() {
                   id="start_date"
                   type="date"
                   {...register('start_date')}
-                  max={new Date().toISOString().split('T')[0]}
+                  max={localTodayString()}
                   className={errors.start_date ? 'border-destructive' : ''}
                 />
                 {errors.start_date && (
@@ -570,7 +594,7 @@ export default function EditAlbumPage() {
                   id="end_date"
                   type="date"
                   {...register('end_date')}
-                  max={new Date().toISOString().split('T')[0]}
+                  max={localTodayString()}
                   className={errors.end_date ? 'border-destructive' : ''}
                 />
                 {errors.end_date && (

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimitAsync, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
 
 export async function GET() {
@@ -17,6 +18,13 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Same limiter + key as /api/users/block — this endpoint performs the same
+  // mutation, so without it clients could sidestep the moderation rate limit.
+  const rateLimitResult = await rateLimitAsync(request, { ...rateLimitConfigs.moderation, keyPrefix: 'block-user' })
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult.reset)
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const userId = user?.id

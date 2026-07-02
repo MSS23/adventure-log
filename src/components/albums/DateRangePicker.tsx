@@ -24,7 +24,11 @@ export function DateRangePicker({
   startDateError,
   endDateError
 }: DateRangePickerProps) {
-  const maxDate = new Date().toISOString().split('T')[0]
+  // Local calendar "today" — toISOString() would give UTC "today", which is
+  // one day off for users in negative offsets in the evening (or positive
+  // offsets in the morning), wrongly blocking or allowing dates in the picker.
+  const now = new Date()
+  const maxDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
   return (
     <div>

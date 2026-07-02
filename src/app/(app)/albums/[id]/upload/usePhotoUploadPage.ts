@@ -246,6 +246,7 @@ export function usePhotoUploadPage() {
 
     setIsUploading(true)
     let uploadedCount = 0
+    let failedCount = 0
     let skippedDuplicates = 0
     const totalPhotos = photos.filter(p => !p.uploaded && !p.isDuplicate).length
 
@@ -344,6 +345,10 @@ export function usePhotoUploadPage() {
           error
         })
 
+        // Track failures locally — the photos state update below is async, so
+        // counting p.error entries right after the loop would miss them.
+        failedCount++
+
         setPhotos(prev =>
           prev.map(p =>
             p.id === photo.id
@@ -360,8 +365,22 @@ export function usePhotoUploadPage() {
 
     setIsUploading(false)
 
-    // Update album status and cover
-    if (album.status === 'draft') {
+    // Nothing uploaded and at least one failure: don't publish, don't navigate.
+    // Staying on the page keeps the per-photo error state visible so the user
+    // can fix the problem and retry; navigating would silently discard it.
+    if (uploadedCount === 0 && failedCount > 0) {
+      await Toast.show({
+        text: `All ${failedCount} upload${failedCount !== 1 ? 's' : ''} failed. Check the errors below and try again.`,
+        duration: 'long',
+        position: 'bottom'
+      })
+      return
+    }
+
+    // Update album status and cover. Only publish a draft when at least one
+    // photo actually made it up — publishing on zero successes would surface
+    // an empty album across the app.
+    if (album.status === 'draft' && uploadedCount > 0) {
       const updates: { status: string; cover_photo_url?: string } = {
         status: 'published'
       }
@@ -389,7 +408,17 @@ export function usePhotoUploadPage() {
         .eq('id', album.id)
     }
 
-    let message = `Successfully uploaded ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''}!`
+    // Reflect partial failures honestly ("3 of 5 uploaded — 2 failed") instead
+    // of an unconditional success message.
+    let message: string
+    if (failedCount > 0) {
+      message = `${uploadedCount} of ${uploadedCount + failedCount} photos uploaded — ${failedCount} failed`
+    } else if (uploadedCount === 0) {
+      // Only duplicates were selected; nothing new was uploaded.
+      message = 'No new photos uploaded'
+    } else {
+      message = `Successfully uploaded ${uploadedCount} photo${uploadedCount !== 1 ? 's' : ''}!`
+    }
     if (skippedDuplicates > 0) {
       message += ` (${skippedDuplicates} duplicate${skippedDuplicates !== 1 ? 's' : ''} skipped)`
     }

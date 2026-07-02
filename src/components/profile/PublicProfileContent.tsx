@@ -25,12 +25,14 @@ import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getFlagEmoji } from '@/lib/utils/country'
 import { getDisplayInitial } from '@/lib/utils/display-name'
 import { formatDistanceKm } from '@/lib/utils/geoCalculations'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 import Image from 'next/image'
 import Link from 'next/link'
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return ''
-  const d = new Date(dateStr)
+  const d = parseLocalDate(dateStr)
+  if (!d) return ''
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 

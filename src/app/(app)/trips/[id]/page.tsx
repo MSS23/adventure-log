@@ -33,6 +33,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
+import { safeHttpUrl } from '@/lib/utils/input-validation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
@@ -612,9 +613,10 @@ export default function TripDetailPage() {
                           <span className="text-xs text-muted-foreground">
                             {getDisplayName(member?.user?.display_name, member?.user?.username)}
                           </span>
-                          {pin.source_url && (
+                          {/* Defense-in-depth: only http(s) URLs render as links */}
+                          {safeHttpUrl(pin.source_url) && (
                             <a
-                              href={pin.source_url}
+                              href={safeHttpUrl(pin.source_url)!}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}

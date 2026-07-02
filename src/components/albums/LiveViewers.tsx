@@ -17,6 +17,10 @@ export function LiveViewers({ albumId, userId }: LiveViewersProps) {
     if (!albumId) return
 
     const supabase = createClient()
+    // WHY: the subscribe callback fires asynchronously, so without this flag a
+    // fast unmount would still track() presence on a channel we just removed,
+    // leaving a ghost viewer registered after the component is gone.
+    let cancelled = false
     const channel = supabase.channel(`album-viewers:${albumId}`, {
       config: { presence: { key: userId || `anon-${Math.random().toString(36).slice(2)}` } },
     })
@@ -28,12 +32,13 @@ export function LiveViewers({ albumId, userId }: LiveViewersProps) {
         setViewerCount(count)
       })
       .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
+        if (status === 'SUBSCRIBED' && !cancelled) {
           await channel.track({ user_id: userId, joined_at: new Date().toISOString() })
         }
       })
 
     return () => {
+      cancelled = true
       supabase.removeChannel(channel)
     }
   }, [albumId, userId])

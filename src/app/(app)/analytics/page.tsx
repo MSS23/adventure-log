@@ -77,6 +77,15 @@ function AnimatedCounter({ value, duration = 1 }: { value: number; duration?: nu
 // ---------------------------------------------------------------------------
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+// Build a YYYY-MM-DD key from a Date's LOCAL calendar components.
+// (`toISOString()` converts to UTC first, which shifts the key to the previous
+// day for any viewer west of UTC.)
+function toLocalDateKey(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${m}-${day}`
+}
+
 function TravelHeatmap({ data, year }: { data: Record<string, number>; year: number }) {
   const CELL = 11  // cell size in px
   const GAP = 3    // gap between cells
@@ -88,7 +97,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
     const firstDayOffset = (startDate.getDay() + 6) % 7
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0]
+      const dateStr = toLocalDateKey(d)
       const dayOfWeek = (d.getDay() + 6) % 7
       const dayOfYear = Math.floor((d.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
       result.push({
@@ -128,7 +137,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
     const labels: { month: string; weekIdx: number }[] = []
     let lastMonth = -1
     for (const cell of cells) {
-      const m = new Date(cell.date).getMonth()
+      const m = parseLocalDate(cell.date)?.getMonth() ?? 0
       if (m !== lastMonth) {
         labels.push({ month: MONTH_LABELS[m], weekIdx: cell.week })
         lastMonth = m
@@ -206,7 +215,7 @@ function TravelHeatmap({ data, year }: { data: Record<string, number>; year: num
                         getColor(cell.count)
                       )}
                       style={{ width: CELL, height: CELL }}
-                      title={`${new Date(cell.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${cell.count} ${cell.count === 1 ? 'activity' : 'activities'}`}
+                      title={`${parseLocalDate(cell.date)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${cell.count} ${cell.count === 1 ? 'activity' : 'activities'}`}
                     />
                   )
                 })}
@@ -349,18 +358,19 @@ export default function AnalyticsPage() {
       // Heatmap data
       const heatmapData: Record<string, number> = {}
       albums?.forEach(album => {
-        if (album.date_start) {
-          const start = new Date(album.date_start)
-          const end = album.date_end ? new Date(album.date_end) : start
+        const start = parseLocalDate(album.date_start)
+        if (start) {
+          const end = (album.date_end ? parseLocalDate(album.date_end) : null) ?? start
           for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            const key = d.toISOString().split('T')[0]
+            const key = toLocalDateKey(d)
             heatmapData[key] = (heatmapData[key] || 0) + 1
           }
         }
       })
       photos?.forEach(p => {
         const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
-        if (date) { const key = new Date(date).toISOString().split('T')[0]; heatmapData[key] = (heatmapData[key] || 0) + 1 }
+        const parsed = parseLocalDate(date)
+        if (parsed) { const key = toLocalDateKey(parsed); heatmapData[key] = (heatmapData[key] || 0) + 1 }
       })
 
       // Photos by month
@@ -369,7 +379,8 @@ export default function AnalyticsPage() {
       monthNames.forEach(m => (monthCount[m] = 0))
       photos?.forEach(p => {
         const date = albumDateMap[p.album_id] || p.taken_at || p.created_at
-        if (date) { const m = monthNames[new Date(date).getMonth()]; monthCount[m] = (monthCount[m] || 0) + 1 }
+        const parsedMonth = parseLocalDate(date)?.getMonth()
+        if (parsedMonth !== undefined) { const m = monthNames[parsedMonth]; monthCount[m] = (monthCount[m] || 0) + 1 }
       })
 
       const result: TravelStats = {

@@ -9,6 +9,7 @@ import { UserLink, UserAvatarLink } from '@/components/social/UserLink'
 import { LikeButton } from '@/components/social/LikeButton'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { useHaptics } from '@/lib/hooks/useHaptics'
+import { useFavorites } from '@/lib/hooks/useFavorites'
 import { formatTravelDate } from '@/lib/utils/travel-date'
 import { formatLocationLabel, getFlagEmoji } from '@/lib/utils/country'
 import { cn } from '@/lib/utils'
@@ -89,7 +90,16 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
     avatar_url: undefined,
   }
   const { triggerLight, triggerDoubleTap } = useHaptics()
-  const [isBookmarked, setIsBookmarked] = useState(false)
+  // WHY: the bookmark used to be pure local useState — it was never persisted
+  // and silently reset on unmount. Wire it to the existing favorites system
+  // (same store the /saved page reads via target_type='album'), so a bookmark
+  // from the feed actually shows up under Saved. The hook is optimistic with
+  // rollback, so the icon still flips instantly.
+  const { isFavorited, toggleFavorite } = useFavorites({
+    targetType: 'album',
+    targetId: album.id,
+  })
+  const isBookmarked = isFavorited(album.id, 'album')
   const [showShareToast, setShowShareToast] = useState(false)
   // Local, optimistic like count: the footer shows a server-provided count, so
   // it must move the instant the user taps the heart (the LikeButton reports
@@ -135,7 +145,12 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
 
   const handleBookmark = () => {
     triggerDoubleTap()
-    setIsBookmarked(!isBookmarked)
+    // The hook applies the change optimistically and rolls back + logs on
+    // failure; swallow the rethrow to avoid an unhandled rejection.
+    toggleFavorite(album.id, 'album', {
+      title: album.title,
+      photo_url: album.cover_image_url,
+    }).catch(() => {})
   }
 
   return (

@@ -314,7 +314,7 @@ export function PhotoPreviewGrid({
                                     onRemovePhoto(photo.id)
                                   }}
                                   aria-label="Remove photo"
-                                  className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out cursor-pointer hover:scale-110 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                                  className="absolute top-2 right-2 flex items-center justify-center bg-black/70 hover:bg-black text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100 pointer-coarse:p-0 pointer-coarse:h-9 pointer-coarse:w-9 pointer-coarse:after:content-[''] pointer-coarse:after:absolute pointer-coarse:after:-inset-1 transition-all duration-200 ease-out cursor-pointer hover:scale-110 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                                 >
                                   <X className="h-4 w-4" />
                                 </button>

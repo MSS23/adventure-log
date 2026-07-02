@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { MapPin, ArrowRight } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
+import { parseLocalDate } from '@/lib/utils/travel-date'
 
 interface Match {
   album_id: string
@@ -60,10 +61,10 @@ export function YouWereHereBadge({ albumId, ownerUserId, currentUserId }: Props)
   if (loading || !match) return null
 
   const dateLabel = match.date_start
-    ? new Date(match.date_start).toLocaleDateString('en-US', {
+    ? parseLocalDate(match.date_start)?.toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric',
-      })
+      }) ?? ''
     : ''
 
   return (

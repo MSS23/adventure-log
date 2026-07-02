@@ -351,8 +351,9 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
         onClick={onClose}
       />
 
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/50 to-transparent">
+      {/* Header — gradient runs to the very top edge; padding clears the
+          notch/Dynamic Island via max(1rem, safe-area inset) */}
+      <div className="absolute top-0 left-0 right-0 z-10 p-4 pt-[max(1rem,env(safe-area-inset-top))] bg-gradient-to-b from-black/50 to-transparent">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 text-white">
             <span className="text-sm">
@@ -495,8 +496,9 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
         )}
       </motion.div>
 
-      {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 p-4 bg-gradient-to-t from-black/50 to-transparent">
+      {/* Bottom Controls — padding clears the iOS home indicator via
+          max(1rem, safe-area inset) */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black/50 to-transparent">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>

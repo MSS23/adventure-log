@@ -73,7 +73,9 @@ export default function UploadPhotosPage() {
         </div>
         <Button
           onClick={uploadPhotos}
-          disabled={isUploading || photos.length === 0 || photos.every(p => p.uploaded)}
+          // Also disable while hashing/EXIF extraction is running: uploading
+          // mid-processing would store file_hash as null and skip dedupe.
+          disabled={isUploading || isProcessing || photos.length === 0 || photos.every(p => p.uploaded)}
           variant="coral"
           className="cursor-pointer font-semibold px-5"
           size="sm"
@@ -82,6 +84,11 @@ export default function UploadPhotosPage() {
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               Uploading...
+            </>
+          ) : isProcessing ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Processing...
             </>
           ) : (
             <>

@@ -176,13 +176,21 @@ export function LocationDropdown({
         `/api/geocode?` + new URLSearchParams({ q: searchQuery }).toString()
       )
 
-      if (!response.ok) throw new Error('Search failed')
+      if (!response.ok) {
+        // Surface the server's message when it has one (e.g. "temporarily
+        // unavailable, try again") — "check your connection" is misleading
+        // when the failure is upstream geocoding, not the user's network.
+        const body = await response.json().catch(() => null)
+        throw new Error(body?.error || 'Search failed')
+      }
 
       const data: LocationResult[] = await response.json()
       setResults(data)
     } catch (err) {
       handleNetworkError(err, { component: 'LocationDropdown', action: 'search' }, 'location search')
-      setError('Search failed. Check your connection.')
+      setError(err instanceof Error && err.message !== 'Search failed'
+        ? err.message
+        : 'Search failed. Check your connection.')
       setResults([])
     } finally {
       setIsSearching(false)

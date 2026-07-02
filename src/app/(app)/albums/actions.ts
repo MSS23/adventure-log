@@ -126,7 +126,12 @@ export async function createAlbumWithPhotos(
         // Album privacy is stored in the `visibility` column (which RLS reads).
         // The request field is named `privacy`; map it onto `visibility`.
         visibility: validatedAlbumInput.privacy,
-        country_code: validatedAlbumInput.country_code || null
+        country_code: validatedAlbumInput.country_code || null,
+        // The status column has no DB default; a NULL status fails both
+        // .eq('status','published') and .neq('status','draft') filters used
+        // across the app, making the album invisible. This action requires
+        // at least one photo, so the album is publishable immediately.
+        status: 'published'
       })
       .select('*')
       .single()

@@ -100,6 +100,8 @@ const MOBILE_REMOVE_PATTERNS = [
   'src/app/(app)/albums/[id]/page.tsx',
   'src/app/(app)/albums/[id]/edit/page.tsx',
   'src/app/(app)/albums/[id]/upload/page.tsx',
+  'src/app/(app)/blend/[username]/page.tsx',
+  'src/app/(app)/places/[slug]/page.tsx',
   'src/app/(app)/profile/[userId]/page.tsx',
   'src/app/(app)/trips/[id]/page.tsx',
   'src/app/(embed)/embed/[username]/page.tsx',
@@ -374,21 +376,15 @@ function restore(journal) {
 
 function runNextBuild() {
   return new Promise((resolveP, rejectP) => {
-    // On Windows, .cmd shims require shell:true to spawn correctly. On *nix
-    // we can spawn the binary directly. Pin to the project-local next binary
-    // (./node_modules/.bin/next) so we don't depend on PATH lookup of npx.
-    const isWindows = process.platform === 'win32'
-    const nextBin = join(
-      ROOT,
-      'node_modules',
-      '.bin',
-      isWindows ? 'next.cmd' : 'next',
-    )
-    const child = spawn(nextBin, ['build'], {
+    // Invoke Next's JS entrypoint with the current Node binary instead of the
+    // .bin/next.cmd shim: shell:true routes through cmd.exe, which parses
+    // unquoted `&` in the project path (e.g. "Projects & Code") as a command
+    // separator and breaks the spawn. Direct node invocation needs no shell.
+    const nextBin = join(ROOT, 'node_modules', 'next', 'dist', 'bin', 'next')
+    const child = spawn(process.execPath, [nextBin, 'build'], {
       cwd: ROOT,
       stdio: 'inherit',
       env: { ...process.env, MOBILE_BUILD: 'true' },
-      shell: isWindows,
     })
     child.on('exit', (code, signal) => {
       if (code === 0) resolveP()

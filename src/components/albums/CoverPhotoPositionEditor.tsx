@@ -159,7 +159,9 @@ export function CoverPhotoPositionEditor({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-4 sm:p-6">
+      {/* sm: prefix preserves the base mobile gutter; dvh (not vh) so mobile
+          browser chrome can't clip the bottom of the editor. */}
+      <DialogContent className="sm:max-w-4xl max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="space-y-2 sm:space-y-3">
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl md:text-2xl">
             <Maximize2 className="h-5 w-5 sm:h-6 sm:w-6 text-olive-600" />

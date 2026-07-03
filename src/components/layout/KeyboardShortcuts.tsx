@@ -90,7 +90,9 @@ export function KeyboardShortcuts() {
 
       {/* Shortcuts Dialog */}
       <Dialog open={showHelp} onOpenChange={setShowHelp}>
-        <DialogContent className="max-w-2xl">
+        {/* sm: prefix keeps the base mobile gutter clamp — a bare max-w-2xl
+            deletes it via tailwind-merge and goes edge-to-edge on phones. */}
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Command className="h-5 w-5" />

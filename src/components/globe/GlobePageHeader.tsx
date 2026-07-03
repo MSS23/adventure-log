@@ -1,6 +1,6 @@
 'use client'
 
-import { MapPin, Plus, Globe2, Calendar, ChevronDown, Route, Star, StarOff, Compass, Users } from 'lucide-react'
+import { MapPin, Plus, Globe2, Calendar, ChevronDown, Route, Star, StarOff, Compass, Users, Map as MapIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
@@ -122,6 +122,16 @@ export function GlobePageHeader({
                   <Compass className="h-4 w-4" />
                   <span className="hidden lg:inline">Explore</span>
                 </button>
+                {/* 2D map sibling view — replaces its old bottom-nav tab so
+                    the tab bar stays at five. */}
+                <Link
+                  href="/map"
+                  aria-label="Open the 2D map"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 h-8 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97] text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                >
+                  <MapIcon className="h-4 w-4" />
+                  <span className="hidden lg:inline">Map</span>
+                </Link>
               </div>
             )}
 

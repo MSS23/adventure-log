@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { Home, Globe, BookOpen, User, MapPinned, Compass, Map } from 'lucide-react'
+import { Home, Globe, BookOpen, User, Compass } from 'lucide-react'
 import { motion, MotionConfig } from 'framer-motion'
 
 interface NavItem {
@@ -12,12 +12,13 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
 }
 
+// Five tabs, per platform convention — every extra tab dilutes the core loop.
+// Places lives inside Explore; Map is one tap from the Globe header (both
+// remain in the desktop sidebar).
 const navItems: NavItem[] = [
   { name: 'Feed', href: '/feed', icon: Home },
   { name: 'Explore', href: '/explore', icon: Compass },
-  { name: 'Places', href: '/places', icon: MapPinned },
   { name: 'Globe', href: '/globe', icon: Globe },
-  { name: 'Map', href: '/map', icon: Map },
   { name: 'Albums', href: '/albums', icon: BookOpen },
   { name: 'You', href: '/profile', icon: User },
 ]

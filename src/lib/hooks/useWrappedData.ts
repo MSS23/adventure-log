@@ -113,6 +113,10 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
         .from('albums')
         .select('id, title, location_name, country_code, date_start, created_at, cover_photo_url, latitude, longitude, photos(id, file_path)')
         .eq('user_id', userId)
+        // RLS enforces visibility (matters when this hook renders a FRIEND's
+        // wrapped), but not publish state — exclude drafts explicitly, keeping
+        // legacy NULL-status rows (same hedge as the feed query).
+        .or('status.is.null,status.neq.draft')
         .order('created_at', { ascending: true })
 
       if (cancelled) return

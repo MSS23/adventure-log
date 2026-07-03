@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Download, X, Smartphone, Globe, Share, PlusSquare, Check } from 'lucide-react'
 import { useInstallPrompt } from '@/lib/hooks/usePWA'
+import { useConsent } from '@/lib/hooks/useConsent'
 import { isNativePlatform } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { transitions } from '@/lib/animations/spring-configs'
@@ -65,6 +66,7 @@ function ConfettiParticle({ index, color }: { index: number; color: string }) {
 export function InstallBanner() {
   const { canInstall, isInstalling, install } = useInstallPrompt()
   const { isIOSSafari, isStandalone } = useIOSDetection()
+  const { needsDecision } = useConsent()
   const [showBanner, setShowBanner] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [showIOSInstructions, setShowIOSInstructions] = useState(false)
@@ -74,11 +76,15 @@ export function InstallBanner() {
   // Show banner for iOS Safari or when canInstall is true.
   // Never inside the Capacitor app: "install this app" messaging is wrong
   // there, and the UA-based iOS-Safari detection can misfire in a WKWebView.
+  // Never while the cookie-consent banner is awaiting a decision: two stacked
+  // bottom banners on a first visit is exactly the "too much on screen"
+  // pileup — consent goes first, install waits its turn.
   const shouldShowBanner = useMemo(() => {
     if (isNativePlatform()) return false
     if (isStandalone) return false // Already installed
+    if (needsDecision) return false // Consent banner is on screen
     return canInstall || isIOSSafari
-  }, [canInstall, isIOSSafari, isStandalone])
+  }, [canInstall, isIOSSafari, isStandalone, needsDecision])
 
   useEffect(() => {
     // Check if user has dismissed recently

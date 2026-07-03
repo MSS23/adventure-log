@@ -714,7 +714,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
 
       {/* Suggest route dialog */}
       <Dialog open={suggestOpen} onOpenChange={setSuggestOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Suggested day-by-day plan</DialogTitle>
           </DialogHeader>

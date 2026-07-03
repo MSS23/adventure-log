@@ -70,7 +70,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
         aria-label="Invite friends"
         className="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50"
       >
-        <div className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md sm:mx-4 shadow-lg overflow-hidden border border-border animate-in slide-in-from-bottom sm:zoom-in-95 fade-in duration-300 max-h-[92vh] overflow-y-auto">
+        <div className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md sm:mx-4 shadow-lg overflow-hidden border border-border animate-in slide-in-from-bottom sm:zoom-in-95 fade-in duration-300 max-h-[92dvh] overflow-y-auto">
           {/* Header */}
           <div className="relative bg-primary px-6 py-8 text-primary-foreground">
             <button

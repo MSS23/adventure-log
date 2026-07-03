@@ -132,8 +132,11 @@ export function SyncProgressToast() {
   return (
     <AnimatePresence>
       {showToast && syncState !== 'idle' && (
+        /* bottom-36: UpdateNotification owns bottom-20 in the same corner —
+           sit a full card-height above it so simultaneous visibility stacks
+           instead of overlapping. */
         <motion.div
-          className="fixed bottom-24 right-4 z-50 max-w-xs w-full"
+          className="fixed bottom-36 md:bottom-20 right-4 z-50 max-w-xs w-full"
           initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: 50, scale: 0.9 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: 50, scale: 0.9 }}

@@ -15,8 +15,9 @@
 
 import { useMemo, useState } from 'react'
 import nextDynamic from 'next/dynamic'
+import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
-import { LocateFixed, Loader2, AlertTriangle } from 'lucide-react'
+import { LocateFixed, Loader2, AlertTriangle, Globe as GlobeIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -288,19 +289,29 @@ export default function MapPage() {
             Friends&apos; travels, your plans, and saved places — all in one view.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleLocate}
-          disabled={locating}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {locating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <LocateFixed className="h-4 w-4" />
-          )}
-          My location
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Sibling 3D view — mirrors the Map link in the globe's header. */}
+          <Link
+            href="/globe"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <GlobeIcon className="h-4 w-4" />
+            Globe
+          </Link>
+          <button
+            type="button"
+            onClick={handleLocate}
+            disabled={locating}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {locating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LocateFixed className="h-4 w-4" />
+            )}
+            My location
+          </button>
+        </div>
       </div>
 
       {/* Layer toggles */}

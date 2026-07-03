@@ -321,13 +321,22 @@ export function WrappedGlobe({
       // it drifts across long great-circle routes. Hold the last heading on
       // final approach, where the bearing math degenerates.
       if (easedT < 0.99) plane.bearing = gcBearing(pos, end)
+      // Cinematic breathing: peaks at cruise (t=0.5), zero at the endpoints —
+      // the camera pulls out for geographic context mid-flight and dives back
+      // in for the landing, while the plane grows slightly at cruise so it
+      // doesn't shrink into the zoomed-out frame. Reads as takeoff → cruise →
+      // final approach instead of a flat point-to-point slide.
+      const breathe = Math.sin(Math.PI * easedT)
       if (plane.el) {
-        plane.el.style.transform = `translate(-50%, -50%) rotate(${plane.bearing}deg)`
+        plane.el.style.transform = `translate(-50%, -50%) rotate(${plane.bearing}deg) scale(${(1 + 0.35 * breathe).toFixed(3)})`
       }
       setPlaneFrame((f) => f + 1)
 
       // Chase cam: keep the plane centered so the journey reads point-to-point.
-      globeRef.current?.pointOfView({ lat: pos.lat, lng: pos.lng, altitude: camAlt }, 0)
+      globeRef.current?.pointOfView(
+        { lat: pos.lat, lng: pos.lng, altitude: camAlt * (1 + 0.3 * breathe) },
+        0
+      )
 
       // Smooth overall progress; swap the destination card on final approach.
       onProgress?.(

@@ -141,7 +141,7 @@ export function ReviewPlacesModal({ result, open, onClose, onSave }: ReviewPlace
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{headerCopy.title}</DialogTitle>
           {/* Always render a description so Radix has an aria-describedby target.

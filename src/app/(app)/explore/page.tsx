@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, ChevronRight } from 'lucide-react'
+import { Search, X, ChevronRight, MapPinned } from 'lucide-react'
 import { FriendsMapSection } from '@/components/explore/FriendsMapSection'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
@@ -68,9 +68,21 @@ export default function ExplorePage() {
           Where the world{' '}
           <em className="italic font-normal text-accent">is going.</em>
         </h1>
-        <p className="text-sm text-muted-foreground max-w-xl">
-          Destinations, journeys, and fellow adventurers.
-        </p>
+        <div className="flex items-center justify-between gap-3 max-w-xl">
+          <p className="text-sm text-muted-foreground">
+            Destinations, journeys, and fellow adventurers.
+          </p>
+          {/* Places moved out of the bottom tab bar (5-tab limit) — this is
+              its mobile entry point now. */}
+          <Link
+            href="/places"
+            className="inline-flex items-center gap-1 shrink-0 text-sm font-medium text-primary hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+          >
+            <MapPinned className="h-4 w-4" />
+            Places
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </header>
 
       {/* Search pill */}

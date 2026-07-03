@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback, useMemo, Component, type ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useCallback, useEffect, useMemo, Suspense, Component, type ReactNode } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -9,6 +9,8 @@ import { useWrappedData } from '@/lib/hooks/useWrappedData'
 import { FlightReelOverlay } from '@/components/wrapped/FlightReelOverlay'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
+import { createClient } from '@/lib/supabase/client'
+import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getFlagEmoji } from '@/lib/utils/country'
 import {
   Share2,
@@ -75,28 +77,129 @@ const WrappedGlobe = dynamic(
 
 type Phase = 'intro' | 'globe' | 'stats'
 
+interface FriendProfile {
+  id: string
+  username: string | null
+  display_name: string | null
+  avatar_url: string | null
+}
+
+/**
+ * /wrapped          — your own Wrapped.
+ * /wrapped?u=<name> — a friend's Wrapped: same reel + stats, powered by the
+ * same hook with THEIR user id. Supabase RLS scopes their albums to what you
+ * are allowed to see (public / friends-visible), and the hook drops drafts.
+ */
 export default function WrappedPage() {
+  // useSearchParams needs a Suspense boundary for static prerender.
+  return (
+    <Suspense
+      fallback={
+        <div className="dark fixed inset-0 bg-black flex items-center justify-center">
+          <Loader2 className="h-8 w-8 text-olive-400 animate-spin" />
+        </div>
+      }
+    >
+      <WrappedExperience />
+    </Suspense>
+  )
+}
+
+function WrappedExperience() {
   const router = useRouter()
   const { user, profile } = useAuth()
+  const searchParams = useSearchParams()
   const currentYear = new Date().getFullYear()
   const [mode, setMode] = useState<'year' | 'all'>('year')
-  const data = useWrappedData(user?.id, mode === 'all' ? 'all' : currentYear)
+
+  // ── Whose Wrapped is this? ────────────────────────────────────────────
+  const friendUsername = searchParams.get('u')
+  const viewingFriend = !!friendUsername && friendUsername !== profile?.username
+  const [friend, setFriend] = useState<FriendProfile | null>(null)
+  const [friendStatus, setFriendStatus] = useState<'idle' | 'loading' | 'ready' | 'notfound'>('idle')
+
+  useEffect(() => {
+    if (!viewingFriend) {
+      setFriend(null)
+      setFriendStatus('idle')
+      return
+    }
+    let cancelled = false
+    setFriend(null)
+    setFriendStatus('loading')
+    ;(async () => {
+      const supabase = createClient()
+      const { data: row } = await supabase
+        .from('users')
+        .select('id, username, display_name, avatar_url')
+        .eq('username', friendUsername)
+        .maybeSingle()
+      if (cancelled) return
+      if (row) {
+        setFriend(row as FriendProfile)
+        setFriendStatus('ready')
+      } else {
+        setFriendStatus('notfound')
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [viewingFriend, friendUsername])
+
+  // People you follow — powers the "watch a friend's Wrapped" strip on the
+  // intro screen. Two-step query (ids, then profiles) keeps it FK-name-proof.
+  const [friendsList, setFriendsList] = useState<FriendProfile[]>([])
+  useEffect(() => {
+    if (!user?.id) return
+    let cancelled = false
+    ;(async () => {
+      const supabase = createClient()
+      const { data: follows } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', user.id)
+        .eq('status', 'accepted')
+        .limit(20)
+      const ids = (follows || []).map((f) => f.following_id)
+      if (ids.length === 0 || cancelled) return
+      const { data: rows } = await supabase
+        .from('users')
+        .select('id, username, display_name, avatar_url')
+        .in('id', ids)
+        .limit(20)
+      if (!cancelled && rows) {
+        setFriendsList((rows as FriendProfile[]).filter((f) => !!f.username))
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id])
+
+  const targetUserId = viewingFriend ? friend?.id : user?.id
+  const data = useWrappedData(targetUserId, mode === 'all' ? 'all' : currentYear)
   // The hook fetches albums once and derives the selected view in memory, so
   // it also knows whether the account has *any* trips all-time. If both this
   // year and all-time are empty, there's no point sending the user to an
   // equally-empty All-Time screen — just point them at creating an album.
   const allTimeEmpty = !data.loading && !data.hasAnyTrips
 
-  // Pin click: jump into the album on the globe, so user can dive deeper
+  // Pin click: your own pins deep-link into your globe; a friend's pins open
+  // the album itself (their globe view isn't yours to fly).
   const handlePinClick = useCallback(
     (loc: { albumId?: string; lat: number; lng: number }) => {
+      if (viewingFriend) {
+        if (loc.albumId) router.push(`/albums/${loc.albumId}`)
+        return
+      }
       if (loc.albumId) {
         router.push(`/globe?album=${loc.albumId}`)
       } else {
         router.push(`/globe?lat=${loc.lat}&lng=${loc.lng}`)
       }
     },
-    [router]
+    [router, viewingFriend]
   )
   const [phase, setPhase] = useState<Phase>('intro')
   const [flightProgress, setFlightProgress] = useState(0)
@@ -105,8 +208,18 @@ export default function WrappedPage() {
   // -1 = before the first arc; 0..n-1 = arriving at locations[n+1].
   const [segmentIndex, setSegmentIndex] = useState(-1)
 
-  const displayName =
-    profile?.display_name || profile?.username || 'Traveler'
+  // Restart the experience whenever the subject changes (own ↔ friend).
+  useEffect(() => {
+    setPhase('intro')
+    setFlightProgress(0)
+    setSegmentIndex(-1)
+    setMode('year')
+  }, [friendUsername])
+
+  const displayName = viewingFriend
+    ? friend?.display_name || friend?.username || 'Traveler'
+    : profile?.display_name || profile?.username || 'Traveler'
+  const firstName = displayName.split(' ')[0]
   const label = mode === 'all' ? 'All-Time' : String(data.year)
 
   const globeLocations = useMemo(() => data.locations, [data.locations])
@@ -191,13 +304,35 @@ export default function WrappedPage() {
     }
   }
 
+  // Friend handle doesn't exist — dead share links / typos land here.
+  if (viewingFriend && friendStatus === 'notfound') {
+    return (
+      <div className="dark fixed inset-0 bg-black flex flex-col items-center justify-center text-white p-8">
+        <Plane className="h-16 w-16 text-olive-400/70 mb-6" />
+        <h1 className="text-3xl font-bold mb-3">Traveler not found</h1>
+        <p className="text-white/75 text-center mb-6 max-w-md">
+          We couldn&apos;t find @{friendUsername}. They may have changed their username.
+        </p>
+        <Button
+          onClick={() => router.push('/wrapped')}
+          size="lg"
+          className="cursor-pointer px-8 focus-visible:ring-offset-black"
+        >
+          Watch your Wrapped
+        </Button>
+      </div>
+    )
+  }
+
   // Loading
   if (data.loading) {
     return (
       <div className="dark fixed inset-0 bg-black flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 text-olive-400 animate-spin mx-auto mb-4" />
-          <p className="text-white/60 text-sm">Loading your journey...</p>
+          <p className="text-white/60 text-sm">
+            {viewingFriend ? `Loading ${displayName}'s journey...` : 'Loading your journey...'}
+          </p>
         </div>
       </div>
     )
@@ -252,16 +387,20 @@ export default function WrappedPage() {
         </div>
         <Plane className="h-16 w-16 text-olive-400 mb-6" />
         <h1 className="text-3xl font-bold mb-3">
-          {allTimeEmpty
-            ? 'No Adventures Yet'
-            : mode === 'all'
-              ? 'No Trips Yet'
-              : `No Trips in ${currentYear}`}
+          {viewingFriend
+            ? `Nothing to show ${mode === 'all' ? 'yet' : `for ${currentYear}`}`
+            : allTimeEmpty
+              ? 'No Adventures Yet'
+              : mode === 'all'
+                ? 'No Trips Yet'
+                : `No Trips in ${currentYear}`}
         </h1>
         <p className="text-white/75 text-center mb-6 max-w-md">
-          {allTimeEmpty
-            ? 'Create your first album — add a few photos and a location — to unlock your Travel Wrapped.'
-            : 'Start logging your adventures to see your travel wrapped!'}
+          {viewingFriend
+            ? `${displayName} has no trips you can see ${mode === 'all' ? '' : 'this year '}— they may not have logged any, or their albums are private.`
+            : allTimeEmpty
+              ? 'Create your first album — add a few photos and a location — to unlock your Travel Wrapped.'
+              : 'Start logging your adventures to see your travel wrapped!'}
         </p>
         {/* Only offer the All-Time detour when it actually has something to show. */}
         {mode === 'year' && !allTimeEmpty && (
@@ -273,11 +412,21 @@ export default function WrappedPage() {
             View All-Time Wrapped
           </Button>
         )}
-        <Link href="/albums/new">
-          <Button size="lg" className="cursor-pointer px-8 focus-visible:ring-offset-black">
-            Create Your First Album
+        {viewingFriend ? (
+          <Button
+            onClick={() => router.push('/wrapped')}
+            size="lg"
+            className="cursor-pointer px-8 focus-visible:ring-offset-black"
+          >
+            Watch your Wrapped
           </Button>
-        </Link>
+        ) : (
+          <Link href="/albums/new">
+            <Button size="lg" className="cursor-pointer px-8 focus-visible:ring-offset-black">
+              Create Your First Album
+            </Button>
+          </Link>
+        )}
       </div>
     )
   }
@@ -370,7 +519,13 @@ export default function WrappedPage() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                {mode === 'all' ? 'Your' : `Your ${data.year}`}
+                {viewingFriend
+                  ? mode === 'all'
+                    ? `${firstName}'s`
+                    : `${firstName}'s ${data.year}`
+                  : mode === 'all'
+                    ? 'Your'
+                    : `Your ${data.year}`}
               </motion.h1>
               <motion.h2
                 className="text-2xl md:text-3xl font-light tracking-wide text-white/85 mb-2"
@@ -386,7 +541,7 @@ export default function WrappedPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                {displayName}
+                {viewingFriend ? `@${friend?.username ?? ''}` : displayName}
                 {mode === 'all' && data.yearsActive > 0 && (
                   <span className="ml-2">
                     &middot; {data.yearsActive}{' '}
@@ -406,7 +561,7 @@ export default function WrappedPage() {
                   className="cursor-pointer px-10 py-6 text-lg rounded-full gap-2 focus-visible:ring-offset-black"
                 >
                   <Plane className="h-5 w-5" />
-                  Watch Your Journey
+                  {viewingFriend ? `Watch ${firstName}'s Journey` : 'Watch Your Journey'}
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </motion.div>
@@ -424,6 +579,60 @@ export default function WrappedPage() {
                 <span className="text-white/25" aria-hidden>&middot;</span>
                 <span><span className="font-semibold text-white">{data.totalDistanceKm.toLocaleString()}</span> km</span>
               </motion.div>
+
+              {/* Friends strip — jump into a friend's Wrapped. On a friend's
+                  intro it becomes a "back to yours" affordance instead. */}
+              {viewingFriend ? (
+                <motion.div
+                  className="mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5 }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => router.push('/wrapped')}
+                    className="cursor-pointer text-sm text-white/60 hover:text-white underline underline-offset-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm"
+                  >
+                    ← Back to your Wrapped
+                  </button>
+                </motion.div>
+              ) : (
+                friendsList.length > 0 && (
+                  <motion.div
+                    className="mt-10 max-w-md mx-auto"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.5 }}
+                  >
+                    <p className="al-eyebrow !text-white/55 mb-3">
+                      Watch a friend&apos;s Wrapped
+                    </p>
+                    <div className="flex gap-3 justify-center overflow-x-auto px-2 pb-1">
+                      {friendsList.slice(0, 8).map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => router.push(`/wrapped?u=${f.username}`)}
+                          className="cursor-pointer group flex flex-col items-center gap-1.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-400 rounded-xl p-1"
+                          aria-label={`Watch ${f.display_name || f.username}'s Wrapped`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element -- tiny avatar, next/image adds no value */}
+                          <img
+                            src={getAvatarUrl(f.avatar_url, f.username || undefined)}
+                            alt=""
+                            className="h-12 w-12 rounded-full object-cover border-2 border-white/20 group-hover:border-olive-400 transition-colors"
+                            loading="lazy"
+                          />
+                          <span className="text-[11px] text-white/60 group-hover:text-white max-w-[3.5rem] truncate transition-colors">
+                            {f.display_name?.split(' ')[0] || f.username}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )
+              )}
             </div>
           </motion.div>
         )}
@@ -683,7 +892,11 @@ export default function WrappedPage() {
                       <motion.button
                         key={album.id}
                         type="button"
-                        onClick={() => router.push(`/globe?album=${album.id}`)}
+                        onClick={() =>
+                          router.push(
+                            viewingFriend ? `/albums/${album.id}` : `/globe?album=${album.id}`
+                          )
+                        }
                         className="cursor-pointer group relative aspect-[4/5] rounded-xl overflow-hidden border border-white/15 shadow-lg shadow-black/30 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-400 active:scale-[0.97] transition-transform duration-200"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -732,18 +945,29 @@ export default function WrappedPage() {
                   transition={{ delay: 1.3, type: 'spring', stiffness: 260, damping: 18 }}
                   className="w-full sm:w-auto"
                 >
-                  <Button
-                    onClick={handleShare}
-                    size="lg"
-                    className="al-btn-coral cursor-pointer w-full sm:w-auto text-white font-semibold px-10 py-6 text-base rounded-full gap-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                  >
-                    <Share2 className="h-5 w-5" />
-                    Share My Wrapped
-                  </Button>
+                  {viewingFriend ? (
+                    <Button
+                      onClick={() => router.push('/wrapped')}
+                      size="lg"
+                      className="al-btn-coral cursor-pointer w-full sm:w-auto text-white font-semibold px-10 py-6 text-base rounded-full gap-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    >
+                      <Plane className="h-5 w-5" />
+                      Watch Your Wrapped
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleShare}
+                      size="lg"
+                      className="al-btn-coral cursor-pointer w-full sm:w-auto text-white font-semibold px-10 py-6 text-base rounded-full gap-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                    >
+                      <Share2 className="h-5 w-5" />
+                      Share My Wrapped
+                    </Button>
+                  )}
                 </motion.div>
 
                 <div className="flex gap-3 flex-wrap justify-center">
-                {user && (
+                {!viewingFriend && user && (
                   <Button
                     onClick={async () => {
                       // Fetch as a blob and trigger an Object-URL download.

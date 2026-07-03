@@ -277,7 +277,7 @@ export function CreateRecommendationModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto bg-[color:var(--color-ivory)] dark:bg-[#211B12]">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-[color:var(--color-ivory)] dark:bg-[#211B12]">
         <DialogHeader>
           <DialogTitle>Recommend a place</DialogTitle>
           <DialogDescription>

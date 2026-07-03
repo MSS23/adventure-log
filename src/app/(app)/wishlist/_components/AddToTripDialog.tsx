@@ -142,7 +142,7 @@ export function AddToTripDialog({ place, open, onClose }: AddToTripDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add to a trip</DialogTitle>
           <DialogDescription className="flex items-center gap-1.5">

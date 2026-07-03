@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { apiFetch } from '@/lib/api/client'
 import { log } from '@/lib/utils/logger'
 
 export type CollaboratorRole = 'contributor' | 'editor' | 'viewer' | 'tagged'
@@ -93,7 +94,7 @@ export function useCollaborativeAlbum(albumId: string | undefined) {
       // Go through the server route so the invite AND the in-app notification
       // to the invitee are created together (the notification needs the
       // service-role client to write another user's row).
-      const res = await fetch(`/api/albums/${albumId}/collaborators`, {
+      const res = await apiFetch(`/api/albums/${albumId}/collaborators`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, role }),

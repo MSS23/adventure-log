@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { getWebOrigin } from '@/lib/utils/native-routes'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -212,7 +213,9 @@ export default function TravelPassportPage() {
   // share URL when the account actually has a username.
   const shareUrl = useMemo(() => {
     if (typeof window === 'undefined' || !profile?.username) return ''
-    return `${window.location.origin}/u/${profile.username}/passport?connect=true`
+    // getWebOrigin(): on native, window.location.origin is capacitor://localhost
+    // — a QR/share link encoding that would be unopenable on other devices.
+    return `${getWebOrigin()}/u/${profile.username}/passport?connect=true`
   }, [profile?.username])
 
   const handleShare = useCallback(async () => {

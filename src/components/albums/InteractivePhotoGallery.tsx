@@ -305,7 +305,7 @@ export function InteractivePhotoGallery({
               "flex items-center justify-center",
               "text-foreground hover:text-primary",
               "border border-border",
-              "opacity-0 group-hover:opacity-100",
+              "opacity-60 md:opacity-0 md:group-hover:opacity-100",
               "transition-all duration-300"
             )}
             whileHover={{ scale: 1.1, x: -2 }}
@@ -322,7 +322,7 @@ export function InteractivePhotoGallery({
               "flex items-center justify-center",
               "text-foreground hover:text-primary",
               "border border-border",
-              "opacity-0 group-hover:opacity-100",
+              "opacity-60 md:opacity-0 md:group-hover:opacity-100",
               "transition-all duration-300"
             )}
             whileHover={{ scale: 1.1, x: 2 }}

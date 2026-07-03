@@ -78,27 +78,46 @@ export function apiUrl(path: string): string {
 
 /**
  * Drop-in replacement for `fetch('/api/...', init)` that resolves the URL via
- * `apiUrl()` and, on Capacitor native, defaults `credentials: 'include'` so
- * the WebView ships the Supabase session cookie cross-origin to the deployed
- * web API.
+ * `apiUrl()` and, on Capacitor native, authenticates the cross-origin request
+ * with the on-device Supabase session.
  *
- * The cross-origin cookie behaviour requires the deployed API to:
- *   1. Send `Access-Control-Allow-Credentials: true`
- *   2. Echo back the WebView origin in `Access-Control-Allow-Origin` (cannot
- *      be `*` when credentials are included).
- *   3. Set its session cookie with `SameSite=None; Secure`.
- * Configure these on the deployed web app. If you see 401s on mobile that work
- * on web, the cross-origin cookie setup is the first thing to check.
+ * The WebView origin (capacitor://localhost / https://localhost) has no
+ * cookies for the deployed web origin, so cookie auth cannot work. Instead we
+ * attach the session as headers:
+ *   - `Authorization: Bearer <access_token>`
+ *   - `X-Refresh-Token: <refresh_token>` (lets the server refresh an expired
+ *     access token instead of failing the request)
  *
- * Callers can override `credentials` via `init` — we only set the default.
+ * The server side of this contract lives in:
+ *   - `src/lib/supabase/server.ts` — synthesizes a Supabase session from
+ *     these headers when no auth cookie is present, so every existing
+ *     route handler's `supabase.auth.getUser()` works unchanged.
+ *   - `src/middleware.ts` — CORS for the native origins, preflight handling,
+ *     bearer pass-through in the auth gate, CSRF exemption.
+ *
+ * If you see 401s on mobile that work on web, check those two files first.
  */
-export function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   const url = apiUrl(path)
   if (!isNativePlatform()) return fetch(url, init)
 
-  const merged: RequestInit = {
-    credentials: 'include',
-    ...init,
+  const headers = new Headers(init?.headers)
+  if (!headers.has('Authorization')) {
+    try {
+      // Dynamic import keeps the supabase client out of this tiny module's
+      // dependency graph on web and avoids any import-cycle risk.
+      const { createClient } = await import('@/lib/supabase/client')
+      const { data: { session } } = await createClient().auth.getSession()
+      if (session?.access_token) {
+        headers.set('Authorization', `Bearer ${session.access_token}`)
+        if (session.refresh_token) {
+          headers.set('X-Refresh-Token', session.refresh_token)
+        }
+      }
+    } catch {
+      // No session — let the request proceed unauthenticated (public routes).
+    }
   }
-  return fetch(url, merged)
+
+  return fetch(url, { ...init, headers })
 }

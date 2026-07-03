@@ -14,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { UserNav } from '@/components/layout/UserNav'
 import { useBulkImport } from './bulk-import/useBulkImport'
+import { localizePath } from '@/lib/utils/native-routes'
 import { DropZone } from './bulk-import/DropZone'
 import { PhotoGroupList } from './bulk-import/PhotoGroupList'
 import { formatFileSize } from './bulk-import/utils'
@@ -276,7 +277,7 @@ export function BulkPhotoImport() {
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   {createdAlbumIds.length > 0 && (
                     <Button
-                      onClick={() => router.push(`/albums/${createdAlbumIds[0]}`)}
+                      onClick={() => router.push(localizePath(`/albums/${createdAlbumIds[0]}`))}
                       className="cursor-pointer"
                     >
                       <ArrowRight className="h-4 w-4 mr-2" />

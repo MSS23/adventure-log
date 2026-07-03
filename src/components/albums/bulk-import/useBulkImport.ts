@@ -9,6 +9,7 @@ import { log } from '@/lib/utils/logger'
 import { extractPhotoExif } from '@/lib/utils/exif-extraction'
 import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 import { uploadPhotoFile } from '@/lib/api/upload'
+import { apiFetch } from '@/lib/api/client'
 import type { ProcessedPhoto, PhotoGroup, Stage } from './types'
 import {
   groupPhotosByTrip,
@@ -155,7 +156,7 @@ export function useBulkImport() {
       }
 
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `/api/geocode?reverse=true&lat=${group.centerLat}&lon=${group.centerLng}`
         )
         if (res.ok) {

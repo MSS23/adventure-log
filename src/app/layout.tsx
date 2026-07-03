@@ -12,6 +12,8 @@ import { initializeEnvironmentValidation } from "@/lib/utils/environment-validat
 import { AnalyticsConsent } from "@/components/legal/AnalyticsConsent";
 import { ThemedToaster } from "@/components/ui/ThemedToaster";
 import { GlobalMotionConfig } from "@/components/providers/GlobalMotionConfig";
+import { NativeNavigationAdapter } from "@/components/capacitor/NativeNavigationAdapter";
+import { NativeAppShell } from "@/components/capacitor/NativeAppShell";
 
 // Validate environment variables at build/startup time
 if (typeof window === 'undefined') {
@@ -148,12 +150,13 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  // App-like behaviour: disable browser pinch/double-tap zoom across the app so
-  // the UI never zooms accidentally on mobile / PWA. The 3D globe has its own
-  // in-canvas zoom (Three.js OrbitControls), which is unaffected by this — so
-  // effectively the globe remains the only zoomable surface.
-  maximumScale: 1,
-  userScalable: false,
+  // Pinch zoom stays enabled (WCAG 1.4.4; this is a photo app — users must be
+  // able to zoom photos). Accidental double-tap zoom on controls is prevented
+  // by `touch-action: manipulation` on interactive elements instead of a
+  // blanket zoom lockout. The 3D globe's in-canvas zoom (OrbitControls) calls
+  // preventDefault on its gestures, so it is unaffected.
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: 'cover',
   colorScheme: 'light dark',
   themeColor: [
@@ -206,6 +209,8 @@ export default function RootLayout({
                   <ToastProvider>
                     <ConditionalAuthProvider>
                       <ServiceWorkerRegistration />
+                      <NativeNavigationAdapter />
+                      <NativeAppShell />
                       <main id="main-content">{children}</main>
                       <AnalyticsConsent />
                     </ConditionalAuthProvider>

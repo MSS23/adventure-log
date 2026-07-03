@@ -17,6 +17,7 @@ import { type Season, convertYearSeasonToDateRange } from '@/components/albums/Y
 import { sanitizeText, validateImageFile } from '@/lib/utils/input-validation'
 import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 import { takePhoto, selectFromGallery } from '@/lib/capacitor/camera'
+import { localizePath } from '@/lib/utils/native-routes'
 
 const albumSchema = z.object({
   title: z.string()
@@ -615,7 +616,7 @@ export function useAlbumCreation() {
         })
       }
 
-      router.push(`/albums/${album.id}?created=true`)
+      router.push(localizePath(`/albums/${album.id}?created=true`))
     } catch (err) {
       log.error('Failed to create album', {
         component: 'NewAlbumPage',

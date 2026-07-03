@@ -10,7 +10,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'
-import { checkAchievements } from '@/app/actions/achievements'
+import { checkAchievementsUniversal as checkAchievements } from '@/lib/achievements/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import type { NewlyEarnedAchievement } from '@/lib/services/achievement-service'

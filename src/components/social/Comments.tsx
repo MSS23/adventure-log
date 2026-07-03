@@ -217,7 +217,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                           variant="ghost"
                           size="sm"
                           aria-label="Delete comment"
-                          className="h-7 w-7 shrink-0 p-0 text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                          className="h-7 w-7 shrink-0 p-0 text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                           onClick={() => handleDelete(comment.id)}
                           disabled={loading}
                         >
@@ -233,7 +233,7 @@ export function Comments({ albumId, photoId, className }: CommentsProps) {
                           username={commentUser?.username || 'user'}
                           targetType="comment"
                           targetId={comment.id}
-                          className="shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                          className="shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                         />
                       )}
                     </motion.div>

@@ -60,7 +60,7 @@ export default function PublicLayout({
       )}
 
       {/* Main content area */}
-      <main className="pb-28 md:pb-8 min-h-[calc(100vh-4rem)] main-content-mobile">
+      <main className="pb-28 md:pb-8 min-h-[calc(100dvh-4rem)] main-content-mobile">
         <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 lg:px-8 xl:px-12">
           {children}
         </div>

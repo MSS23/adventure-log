@@ -50,20 +50,17 @@ const config: CapacitorConfig = {
       splashImmersive: true,
     },
     Keyboard: {
-      resize: 'body',
-      style: 'dark',
+      // 'native' = resize the WebView itself (Android adjustResize). The app
+      // shell is h-[100dvh], so shrinking the viewport lifts bottom-anchored
+      // inputs and the tab bar above the keyboard.
+      resize: 'native',
       resizeOnFullScreen: true,
     },
-    // The App plugin (when installed via `npm i @capacitor/app`) emits the
-    // `appUrlOpen` event whenever the OS hands a deep link to our app — this
-    // is how an OAuth callback would re-enter the app after the user signs
-    // in via the system browser. The custom URL scheme below must be
-    // registered in Info.plist (iOS) and AndroidManifest.xml (Android).
-    App: {
-      // No runtime config keys, but listing the plugin here documents the
-      // dependency. The actual scheme registration happens natively.
-      launchUrl: `${OAUTH_REDIRECT_SCHEME}://`,
-    },
+    // The App plugin emits the `appUrlOpen` event whenever the OS hands a
+    // deep link to our app (scheme: OAUTH_REDIRECT_SCHEME, registered in
+    // Info.plist / AndroidManifest.xml). NativeAppShell also uses it for the
+    // Android hardware back button.
+    App: {},
   },
   android: {
     allowMixedContent: true,

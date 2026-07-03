@@ -232,7 +232,7 @@ export function PhotoCarousel({
               e.preventDefault()
               scrollPrev()
             }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/65 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)]"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/65 hover:bg-black/70 text-white flex items-center justify-center opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)]"
             aria-label="Previous photo"
           >
             <ChevronLeft className="h-4 w-4 text-white" />
@@ -254,7 +254,7 @@ export function PhotoCarousel({
               e.preventDefault()
               scrollNext()
             }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/65 hover:bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)]"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-8 md:h-8 rounded-full bg-black/65 hover:bg-black/70 text-white flex items-center justify-center opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--color-olive-50)]"
             aria-label="Next photo"
           >
             <ChevronRight className="h-4 w-4 text-white" />

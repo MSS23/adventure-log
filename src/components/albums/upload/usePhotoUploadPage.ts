@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -9,6 +9,7 @@ import { log } from '@/lib/utils/logger'
 import { extractPhotoExif, type ExifData } from '@/lib/utils/exif-extraction'
 import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 import { uploadPhotoFile } from '@/lib/api/upload'
+import { localizePath } from '@/lib/utils/native-routes'
 import { hashFile } from '@/lib/utils/file-hash'
 import { Toast } from '@capacitor/toast'
 import type { Album, Photo } from '@/types/database'
@@ -29,10 +30,8 @@ export interface PhotoUpload {
   progress: number
 }
 
-export function usePhotoUploadPage() {
+export function usePhotoUploadPage(albumId: string) {
   const router = useRouter()
-  const params = useParams()
-  const albumId = params.id as string
   const { user } = useAuth()
   const supabase = createClient()
 
@@ -75,7 +74,7 @@ export function usePhotoUploadPage() {
           duration: 'short',
           position: 'bottom'
         })
-        router.push(`/albums/${albumId}`)
+        router.push(localizePath(`/albums/${albumId}`))
         return
       }
 
@@ -429,7 +428,7 @@ export function usePhotoUploadPage() {
       position: 'bottom'
     })
 
-    router.push(`/albums/${album.id}`)
+    router.push(localizePath(`/albums/${album.id}`))
   }
 
   // Sort and filter photos

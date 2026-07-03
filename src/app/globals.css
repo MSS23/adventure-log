@@ -209,6 +209,10 @@
 
   html {
     font-size: 16px;
+    /* Keep text size stable when mobile browsers/WebViews rotate or "boost"
+       text — layout owns type scale, not the UA. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -219,6 +223,9 @@
     line-height: 1.6;
     font-feature-settings: "kern" 1, "liga" 1;
     letter-spacing: -0.011em;
+    /* Suppress the default grey/blue flash on every tap (Android WebView /
+       iOS Safari); interactive states are conveyed by our own active styles. */
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Text selection */

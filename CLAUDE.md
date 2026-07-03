@@ -915,15 +915,24 @@ storage adapter in `src/lib/supabase/client.ts`) — direct Supabase queries
 from the mobile UI authenticate with the stored access token, no cookies
 involved.
 
-Calls to our own `/api/*` on the deployed web origin are a different story:
-those route handlers authenticate via the cookie-based server client
-(`@supabase/ssr`), so for them to see a session the deployed API must:
-1. Send `Access-Control-Allow-Credentials: true`
-2. Echo the WebView origin in `Access-Control-Allow-Origin` (cannot be `*`)
-3. Have a session cookie set with `SameSite=None; Secure`
+Calls to our own `/api/*` on the deployed web origin use **bearer headers,
+not cookies** (the WebView origin has no cookie jar for the web origin):
 
-Symptoms of a misconfiguration: 401 on every mobile `/api/*` call, even when
-the same call works on web and direct Supabase queries work on mobile.
+1. `apiFetch()` (`src/lib/api/client.ts`) attaches
+   `Authorization: Bearer <access_token>` + `X-Refresh-Token` from the
+   on-device session on every native request.
+2. `src/lib/supabase/server.ts` synthesizes the `@supabase/ssr` session
+   cookie from those headers when no auth cookie is present, so every route
+   handler's `supabase.auth.getUser()` and RLS-scoped queries work unchanged.
+3. `src/middleware.ts` handles CORS for the native origins
+   (`capacitor://localhost`, `https://localhost`, ...): OPTIONS preflight,
+   CORS headers on all API responses (including 401/429), bearer
+   pass-through in the auth gate, and CSRF exemption for native origins.
+
+Symptoms if this breaks: 401 (or opaque CORS network errors) on every mobile
+`/api/*` call, even when the same call works on web and direct Supabase
+queries work on mobile. Note the server pieces (2, 3) run on the DEPLOYED
+web app — mobile API auth only works against a deployment that includes them.
 
 ### What does NOT work in mobile builds
 
@@ -935,22 +944,39 @@ the same call works on web and direct Supabase queries work on mobile.
 | `next/og` ImageResponse | Edge runtime | Pre-render or host on the web target |
 | `headers()`, `cookies()` from `next/headers` (server) | Need a server | Use the Capacitor `Preferences` plugin |
 
-**Pages that are currently EXCLUDED from the mobile bundle** (will 404 in the
-WebView until refactored to client-only):
+**Dynamic routes and their static twins.** Dynamic segments still can't be
+statically exported, so the `[id]`/`[username]`/`[slug]` routes are excluded
+from the bundle — but every detail view now has a static, query-param twin
+that ships on mobile. The page bodies live in shared components; the dynamic
+route and the twin are both thin wrappers:
 
-| Page | Why excluded | Follow-up |
-|------|--------------|-----------|
-| `/dashboard`, `/wishlist`, `/saved`, `/countries`, `/profile` | Server components calling `auth()` | Refactor to `'use client'` + `useUser()` + `apiFetch()` |
-| `/albums/[id]`, `/albums/[id]/edit`, `/albums/[id]/upload` | Dynamic routes (no `generateStaticParams`) | Wrap in server-component shell with `generateStaticParams() => []` |
-| `/profile/[userId]`, `/trips/[id]` | Same | Same |
-| `/u/[username]`, `/u/[username]/passport`, `/t/[slug]` | Same (public dynamic) | Same |
-| `/embed/[username]`, `/albums/shared/[token]`, `/albums/[id]/public` | Same | Same |
-| `/sign-in/[[...sign-in]]`, `/sign-up/[[...sign-up]]` | Legacy redirect shims on optional catch-all segments (not static-exportable) | Mobile links straight to `/login` / `/signup` |
-| `/login` (server-component redirect) | Reads `searchParams` server-side | Mobile doesn't need this back-compat redirect |
+| Web route (canonical) | Native twin (in bundle) | Shared component |
+|------|------|------|
+| `/albums/[id]` | `/albums/view?id=` | `AlbumDetailView` |
+| `/albums/[id]/edit` | `/albums/edit?id=` | `AlbumEditView` |
+| `/albums/[id]/upload` | `/albums/upload?id=` | `UploadPhotosView` |
+| `/profile/[userId]`, `/u/[username]` | `/profile/view?u=` | `UserProfileView` |
+| `/trips/[id]` | `/trips/view?id=` | `TripDetailView` |
+| `/places/[slug]` | `/places/view?slug=` | `LocationFeedView` |
+| `/blend/[username]` | `/blend/view?u=` | `BlendContent` |
+| `/u/[username]/passport` | `/passport/view?u=` | `PublicPassportContent` |
 
-UI that links to any of these should branch on `isNativePlatform()` and
-either disable the affordance or open the URL in the system browser via
-`@capacitor/browser`.
+Navigation stays canonical in code (`<Link href={'/albums/' + id}>` is
+correct everywhere): on native, `NativeNavigationAdapter` (mounted in the
+root layout) intercepts anchor clicks and rewrites them to the twin, and
+programmatic `router.push`/`window.location` calls must go through
+`localizePath()` from `src/lib/utils/native-routes.ts`. Share/QR URLs must
+use `getWebOrigin()` (never `window.location.origin`, which is
+`capacitor://localhost` on native).
+
+**When adding a new dynamic route:** add it to `MOBILE_REMOVE_PATTERNS` in
+`scripts/mobile-build.mjs`, create a static twin page, and add the mapping in
+`src/lib/utils/native-routes.ts`.
+
+Still web-only (the adapter opens them in the system browser on native):
+`/embed/*`, `/t/[slug]`, `/albums/shared/[token]`, `/albums/[id]/public`.
+Also excluded: `/sign-in`/`/sign-up` legacy redirect shims (mobile links
+straight to `/login`/`/signup`).
 
 ### Capacitor plugins in use
 

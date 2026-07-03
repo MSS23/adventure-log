@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { Globe, Users } from 'lucide-react'
 import { log } from '@/lib/utils/logger'
+import { localizePath } from '@/lib/utils/native-routes'
 import { WORLD_DOTS } from './world-map-dots'
 
 // Softer, more professional color palette
@@ -147,11 +148,11 @@ export function FriendsMapSection() {
   const hoveredAlbum = useMemo(() => albums.find(a => a.id === hoveredPin), [albums, hoveredPin])
 
   const handlePinClick = useCallback((albumId: string) => {
-    router.push(`/albums/${albumId}`)
+    router.push(localizePath(`/albums/${albumId}`))
   }, [router])
 
   const handleFriendClick = useCallback((friendId: string) => {
-    router.push(`/profile/${friendId}`)
+    router.push(localizePath(`/profile/${friendId}`))
   }, [router])
 
   if (isLoading) {

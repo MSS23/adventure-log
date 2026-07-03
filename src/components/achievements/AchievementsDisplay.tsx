@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, Globe, Camera, Users, Flame, Lock, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getMyAchievementProgress } from '@/app/actions/achievements'
+import { getMyAchievementProgressUniversal as getMyAchievementProgress } from '@/lib/achievements/client'
 import type { AchievementProgress } from '@/lib/services/achievement-service'
 import { log } from '@/lib/utils/logger'
 

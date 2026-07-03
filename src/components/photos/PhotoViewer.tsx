@@ -10,7 +10,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  Heart,
   Share,
   MapPin,
   Calendar,
@@ -24,6 +23,7 @@ import { PhotoWeatherContext } from '@/components/weather/PhotoWeatherContext'
 import { motion, AnimatePresence, PanInfo, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { savePhotoToGallery } from '@/lib/capacitor/camera'
 
 interface PhotoViewerProps {
   photos: Photo[]
@@ -135,6 +135,44 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
       transition: { duration: 0.4, ease: "easeInOut" }
     })
   }, [scale, x, y, controls])
+
+  const handleSharePhoto = useCallback(async () => {
+    const photo = photos[currentIndex]
+    const url = photo?.file_path ? getPhotoUrl(photo.file_path) : null
+    if (!url) return
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: photo.caption || 'Photo', url })
+      } else {
+        await navigator.clipboard.writeText(url)
+      }
+    } catch {
+      // User cancelled the share sheet — nothing to do.
+    }
+  }, [photos, currentIndex])
+
+  const handleDownloadPhoto = useCallback(async () => {
+    const photo = photos[currentIndex]
+    const url = photo?.file_path ? getPhotoUrl(photo.file_path) : null
+    if (!url) return
+    try {
+      // Fetch → data URL so the save works both as a web download (anchor
+      // with a cross-origin href navigates instead of downloading) and as a
+      // native Filesystem write (savePhotoToGallery handles both platforms).
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = () => reject(reader.error)
+        reader.readAsDataURL(blob)
+      })
+      const ext = blob.type.split('/')[1]?.split('+')[0] || 'jpg'
+      await savePhotoToGallery(dataUrl, `adventure-log-${photo.id}.${ext}`)
+    } catch {
+      // Network failure — the button simply does nothing rather than crash.
+    }
+  }, [photos, currentIndex])
 
   // Gesture handlers
   const handleDragStart = useCallback(() => {
@@ -567,14 +605,8 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/20"
-            >
-              <Heart className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
+              aria-label="Share photo"
+              onClick={handleSharePhoto}
             >
               <Share className="h-4 w-4" />
             </Button>
@@ -583,6 +615,8 @@ export function PhotoViewer({ photos, initialPhotoId, isOpen, onClose, onPhotoCh
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/20"
+              aria-label="Download photo"
+              onClick={handleDownloadPhoto}
             >
               <Download className="h-4 w-4" />
             </Button>

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
 import { decodeQrFromImageData, extractPassportConnectPath } from '@/lib/utils/qr-decode'
+import { localizePath } from '@/lib/utils/native-routes'
 import { log } from '@/lib/utils/logger'
 
 /** Max dimension (px) we downscale frames to before QR decoding, for performance. */
@@ -112,7 +113,7 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
           component: 'PassportScanner',
           action: 'navigate',
         })
-        router.push(path)
+        router.push(localizePath(path))
         onClose()
       } else {
         // A QR was found but it isn't an Adventure Log passport.

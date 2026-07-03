@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import type { PhotoUpload } from '@/app/(app)/albums/[id]/upload/usePhotoUploadPage'
+import type { PhotoUpload } from '@/components/albums/upload/usePhotoUploadPage'
 
 interface PhotoPreviewGridProps {
   photos: PhotoUpload[]

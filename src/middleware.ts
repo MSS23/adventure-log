@@ -208,11 +208,65 @@ function dataRequestUnauthorized(): NextResponse {
 }
 
 // ============================================
+// CORS for the Capacitor app
+// ============================================
+// The native WebView calls /api/* cross-origin from one of these origins
+// (Android default is https://localhost, iOS is capacitor://localhost). It
+// authenticates via Authorization/X-Refresh-Token headers (see
+// src/lib/supabase/server.ts), which makes every such request preflighted.
+// CORS headers must also ride on error responses (401/403/429) — without
+// them the WebView sees an opaque network error instead of the status.
+const NATIVE_APP_ORIGINS = new Set([
+  'capacitor://localhost',
+  'ionic://localhost',
+  'https://localhost',
+  'http://localhost',
+])
+
+function nativeCorsOrigin(request: NextRequest): string | null {
+  const origin = request.headers.get('origin')
+  return origin && NATIVE_APP_ORIGINS.has(origin) ? origin : null
+}
+
+function applyNativeCors(response: NextResponse, origin: string): NextResponse {
+  response.headers.set('Access-Control-Allow-Origin', origin)
+  response.headers.set('Access-Control-Allow-Credentials', 'true')
+  response.headers.set(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+  )
+  response.headers.set(
+    'Access-Control-Allow-Headers',
+    'Authorization, X-Refresh-Token, Content-Type, X-Requested-With',
+  )
+  response.headers.set('Access-Control-Max-Age', '86400')
+  response.headers.append('Vary', 'Origin')
+  return response
+}
+
+// ============================================
 // Middleware
 // ============================================
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request })
   const pathname = request.nextUrl.pathname
+
+  // ----------------------------------------------------------------
+  // Capacitor app CORS (native origins only)
+  // ----------------------------------------------------------------
+  const corsOrigin = pathname.startsWith('/api/') ? nativeCorsOrigin(request) : null
+
+  // Preflight: answer before auth/rate limiting — OPTIONS carries no
+  // credentials and must succeed for the real request to ever be sent.
+  if (corsOrigin && request.method === 'OPTIONS') {
+    return applyNativeCors(new NextResponse(null, { status: 204 }), corsOrigin)
+  }
+  // Every non-preflight API response (success or error) gets CORS headers so
+  // the WebView can actually read it.
+  const withCors = <T extends NextResponse>(res: T): T => {
+    if (corsOrigin) applyNativeCors(res, corsOrigin)
+    return res
+  }
 
   // Refresh the Supabase session (sets cookies on `response`) and read the user.
   const supabase = createServerClient(
@@ -259,12 +313,22 @@ export async function middleware(request: NextRequest) {
   const isApiRoute = pathname.startsWith('/api/')
   const apiIsPublic = isApiRoute && isPublicApiPath(pathname)
 
+  // Native (Capacitor) callers authenticate via Authorization bearer headers,
+  // not cookies — the middleware client above can't see them. Let the request
+  // through to the route handler, whose own `supabase.auth.getUser()`
+  // validates the token (see src/lib/supabase/server.ts). An invalid token
+  // still yields the handler's 401; this only skips the cookie-based gate.
+  const hasBearerAuth =
+    isApiRoute && (request.headers.get('authorization')?.startsWith('Bearer ') ?? false)
+
   // ----------------------------------------------------------------
   // Auth gate
   // ----------------------------------------------------------------
   if (isApiRoute && !apiIsPublic) {
     // Protected API: never redirect — return JSON 401.
-    if (!user && !authIsTransientFailure) return dataRequestUnauthorized()
+    if (!user && !authIsTransientFailure && !hasBearerAuth) {
+      return withCors(dataRequestUnauthorized())
+    }
   } else if (!isApiRoute && isProtectedPage(pathname)) {
     if (!user && !authIsTransientFailure) {
       if (isDataRequest(request)) {
@@ -321,16 +385,18 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!allowed) {
-      return NextResponse.json(
-        { error: 'Too many requests. Please try again later.' },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': String(Math.ceil(rateConfig.windowMs / 1000)),
-            'X-RateLimit-Limit': String(rateConfig.limit),
-            'X-RateLimit-Remaining': '0',
+      return withCors(
+        NextResponse.json(
+          { error: 'Too many requests. Please try again later.' },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': String(Math.ceil(rateConfig.windowMs / 1000)),
+              'X-RateLimit-Limit': String(rateConfig.limit),
+              'X-RateLimit-Remaining': '0',
+            },
           },
-        },
+        ),
       )
     }
 
@@ -363,7 +429,11 @@ export async function middleware(request: NextRequest) {
   if (
     ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method) &&
     isApiRoute &&
-    !CSRF_EXEMPT_WEBHOOKS.has(pathname)
+    !CSRF_EXEMPT_WEBHOOKS.has(pathname) &&
+    // The Capacitor app is a trusted first-party caller with a non-web origin.
+    // CSRF targets ambient cookie credentials; native requests authenticate
+    // via explicit bearer headers, which a cross-site attacker cannot forge.
+    !corsOrigin
   ) {
     const origin = request.headers.get('origin')
     const host = request.headers.get('host')
@@ -381,7 +451,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return response
+  return withCors(response)
 }
 
 export const config = {

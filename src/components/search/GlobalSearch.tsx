@@ -21,6 +21,7 @@ import { getPhotoUrl } from '@/lib/utils/photo-url';
 import { parseLocalDate } from '@/lib/utils/travel-date';
 import { cn } from '@/lib/utils';
 import { log } from '@/lib/utils/logger';
+import { localizePath } from '@/lib/utils/native-routes';
 
 interface SearchResult {
   type: 'album' | 'photo';
@@ -137,9 +138,9 @@ export function GlobalSearch() {
 
   const handleSelect = (result: SearchResult) => {
     if (result.type === 'album') {
-      router.push(`/albums/${result.id}`);
+      router.push(localizePath(`/albums/${result.id}`));
     } else if (result.type === 'photo' && result.albumId) {
-      router.push(`/albums/${result.albumId}?photo=${result.id}`);
+      router.push(localizePath(`/albums/${result.albumId}?photo=${result.id}`));
     }
 
     // Clear search

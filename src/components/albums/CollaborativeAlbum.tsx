@@ -17,6 +17,7 @@ import {
   Send
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { apiFetch } from '@/lib/api/client'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { log } from '@/lib/utils/logger'
@@ -101,7 +102,7 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
       // The server route resolves the user by username/email, verifies album
       // ownership, creates the invite, and notifies the invitee — all in one
       // authorized step.
-      const res = await fetch(`/api/albums/${albumId}/collaborators`, {
+      const res = await apiFetch(`/api/albums/${albumId}/collaborators`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, role: 'editor' }),

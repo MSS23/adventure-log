@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Download, X, Smartphone, Globe, Share, PlusSquare, Check } from 'lucide-react'
 import { useInstallPrompt } from '@/lib/hooks/usePWA'
+import { isNativePlatform } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { transitions } from '@/lib/animations/spring-configs'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
@@ -70,8 +71,11 @@ export function InstallBanner() {
   const [showCelebration, setShowCelebration] = useState(false)
   const prefersReducedMotion = useReducedMotion()
 
-  // Show banner for iOS Safari or when canInstall is true
+  // Show banner for iOS Safari or when canInstall is true.
+  // Never inside the Capacitor app: "install this app" messaging is wrong
+  // there, and the UA-based iOS-Safari detection can misfire in a WKWebView.
   const shouldShowBanner = useMemo(() => {
+    if (isNativePlatform()) return false
     if (isStandalone) return false // Already installed
     return canInstall || isIOSSafari
   }, [canInstall, isIOSSafari, isStandalone])

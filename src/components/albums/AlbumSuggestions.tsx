@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { getPhotoUrl } from '@/lib/utils/photo-url';
 import { generateAlbumSuggestions, filterExistingAlbums, type AlbumSuggestion } from '@/lib/ai/album-suggestions';
 import { log } from '@/lib/utils/logger';
+import { localizePath } from '@/lib/utils/native-routes';
 import { Toast } from '@capacitor/toast';
 
 export function AlbumSuggestions() {
@@ -123,7 +124,7 @@ export function AlbumSuggestions() {
       setSuggestions(suggestions.filter(s => s.id !== suggestion.id));
 
       // Navigate to album
-      router.push(`/albums/${album.id}`);
+      router.push(localizePath(`/albums/${album.id}`));
     } catch (error) {
       log.error('Failed to create album from suggestion', { component: 'AlbumSuggestions' }, error as Error);
       await Toast.show({

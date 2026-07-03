@@ -88,14 +88,25 @@ const MOBILE_REMOVE_PATTERNS = [
   // ────────────────────────────────────────────────────────────────────
   // Dynamic page routes — `output: 'export'` requires every dynamic page
   // to declare `generateStaticParams()`, but our pages are `'use client'`
-  // and can't host that export. Wrapping each in a server-component shell
-  // is the proper fix and is tracked as a follow-up. For now, the mobile
-  // shell omits these detail views; UI that links to them should branch on
-  // `isNativePlatform()` and either open in the system browser via
-  // `@capacitor/browser` or show a "Open on Web" prompt.
+  // and can't host that export, so they stay excluded from the bundle.
   //
-  // KNOWN MISSING ON MOBILE: album detail/edit/upload, profile detail,
-  // trip detail, embeds, public album/trip/user pages, share token pages.
+  // Each detail view now has a STATIC query-param twin that DOES ship
+  // (the page bodies were extracted into shared components):
+  //   /albums/[id]          → /albums/view?id=      (AlbumDetailView)
+  //   /albums/[id]/edit     → /albums/edit?id=      (AlbumEditView)
+  //   /albums/[id]/upload   → /albums/upload?id=    (UploadPhotosView)
+  //   /profile/[userId]     → /profile/view?u=      (UserProfileView)
+  //   /trips/[id]           → /trips/view?id=       (TripDetailView)
+  //   /places/[slug]        → /places/view?slug=    (LocationFeedView)
+  //   /blend/[username]     → /blend/view?u=        (BlendContent)
+  //   /u/[username]/passport → /passport/view?u=    (PublicPassportContent)
+  // On native, NativeNavigationAdapter rewrites <a> clicks to the twins and
+  // programmatic navigations go through localizePath() — see
+  // src/lib/utils/native-routes.ts. When adding a NEW dynamic route, add it
+  // here AND give it a twin + mapping there.
+  //
+  // Still web-only (opened in the system browser on native): /embed/*,
+  // /t/[slug], /albums/shared/[token], /albums/[id]/public.
   // ────────────────────────────────────────────────────────────────────
   'src/app/(app)/albums/[id]/page.tsx',
   'src/app/(app)/albums/[id]/edit/page.tsx',

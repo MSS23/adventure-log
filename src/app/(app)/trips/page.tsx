@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Map as MapIcon, Loader2, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,7 @@ import {
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
+import { localizePath } from '@/lib/utils/native-routes'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 import type { Trip } from '@/types/trips'
 
@@ -39,6 +41,7 @@ class TripsNotProvisionedError extends Error {
 
 export default function TripsPage() {
   const { user } = useAuth()
+  const router = useRouter()
   const queryClient = useQueryClient()
   const [creating, setCreating] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -151,7 +154,7 @@ export default function TripsPage() {
       setStartDate('')
       setEndDate('')
       await queryClient.invalidateQueries({ queryKey: ['trips', user?.id] })
-      if (data.trip?.id) window.location.href = `/trips/${data.trip.id}`
+      if (data.trip?.id) router.push(localizePath(`/trips/${data.trip.id}`))
     } catch (error) {
       log.error('Failed to create trip', { component: 'TripsPage', action: 'create' }, error as Error)
       setCreateError('Network error — please try again.')

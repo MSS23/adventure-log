@@ -12,6 +12,7 @@ import {
   Book,
   Star,
   Bookmark,
+  Map as MapIcon,
   Users as UsersIcon,
   UserPlus,
 } from 'lucide-react'
@@ -174,6 +175,7 @@ export default function ProfileContent({
         <div className="flex flex-wrap gap-2">
           <QuietLink href="/wishlist" icon={<Star className="h-3.5 w-3.5" />} label="Wishlist" />
           <QuietLink href="/saved" icon={<Bookmark className="h-3.5 w-3.5" />} label="Saved" />
+          <QuietLink href="/trips" icon={<MapIcon className="h-3.5 w-3.5" />} label="Trips" />
           <QuietLink href="/analytics" icon={<BarChart3 className="h-3.5 w-3.5" />} label="Analytics" />
           <QuietLink href="/travel-twins" icon={<UsersIcon className="h-3.5 w-3.5" />} label="Travel Twins" />
           <button

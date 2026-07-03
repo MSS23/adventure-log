@@ -14,7 +14,7 @@
  */
 export function safeInternalPath(
   candidate: string | null | undefined,
-  fallback = '/dashboard'
+  fallback = '/feed'
 ): string {
   if (!candidate) return fallback
   // Must be rooted at the app.

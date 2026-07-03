@@ -149,3 +149,20 @@ export function getWebOrigin(): string {
   }
   return typeof window !== 'undefined' ? window.location.origin : ''
 }
+
+/**
+ * Attach the sharer's referral handle to an outbound share URL. Anyone who
+ * signs up after following the link auto-follows the sharer (and vice versa)
+ * via ReferralHandler + the claim_referral RPC. Safe no-op when the username
+ * is missing.
+ */
+export function withRef(url: string, username?: string | null): string {
+  if (!username) return url
+  try {
+    const u = new URL(url)
+    u.searchParams.set('ref', username)
+    return u.toString()
+  } catch {
+    return url
+  }
+}

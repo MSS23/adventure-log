@@ -140,7 +140,7 @@ export function AlbumDetailsForm({
                   helperText={
                     suggestedTitle && !currentTitle
                       ? `Suggestion: "${suggestedTitle}" (leave empty to use)`
-                      : "Give your adventure a memorable name"
+                      : "Give your album a memorable name"
                   }
                 />
 
@@ -164,7 +164,7 @@ export function AlbumDetailsForm({
                   {...register('description')}
                   error={errors.description?.message}
                   maxLength={500}
-                  helperText="A short summary of your adventure"
+                  helperText="A short summary of your album"
                 />
 
                 {/* Memories & Stories */}

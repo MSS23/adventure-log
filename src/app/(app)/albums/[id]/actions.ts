@@ -10,7 +10,7 @@ import { log } from '@/lib/utils/logger'
 function revalidateAlbumPaths(albumId?: string) {
   if (albumId) revalidatePath(`/albums/${albumId}`)
   revalidatePath('/albums')
-  revalidatePath('/dashboard')
+  revalidatePath('/feed')
   revalidatePath('/globe')
   revalidatePath('/feed')
   revalidatePath('/profile')

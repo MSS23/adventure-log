@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Loader2, Compass, Users } from 'lucide-react'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { createClient } from '@/lib/supabase/client'
@@ -14,6 +14,11 @@ import { SuggestedUsersRow } from '@/components/feed/SuggestedUsersRow'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { useSuggestedUsers } from '@/app/(app)/feed/useFeedPageData'
 import { MemoryLaneCard } from '@/components/memories/MemoryLaneCard'
+import { FirstRunGuide } from '@/components/feed/FirstRunGuide'
+import { ClaimHandleCard } from '@/components/feed/ClaimHandleCard'
+import { CollaborationInvites } from '@/components/albums/CollaborationInvites'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
+import { useIntersectionObserver } from '@/lib/hooks/useIntersectionObserver'
 import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
@@ -240,6 +245,34 @@ export default function FeedPage() {
   const hasMore = !!hasNextPage
   const loadingMore = isFetchingNextPage
 
+  // First-run: Feed is the home surface (Dashboard is gone), so the
+  // brand-new-account guide lives here. One cheap count query decides it.
+  const { data: myAlbumCount } = useQuery({
+    queryKey: ['my-album-count', user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('albums')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user!.id)
+      return count ?? 0
+    },
+  })
+  const isFirstRun = myAlbumCount === 0
+
+  // Infinite scroll: a sentinel above the "Load more" fallback button fetches
+  // the next page as it approaches the viewport — the button remains for
+  // reduced-motion/failed-observer cases.
+  const { ref: sentinelRef, isIntersecting } = useIntersectionObserver<HTMLDivElement>({
+    rootMargin: '600px',
+    triggerOnce: false,
+  })
+  useEffect(() => {
+    if (isIntersecting && hasMore && !loadingMore) {
+      fetchNextPage()
+    }
+  }, [isIntersecting, hasMore, loadingMore, fetchNextPage])
+
   if (!user) {
     return (
       <div className="flex-1 flex items-center justify-center p-6">
@@ -249,12 +282,22 @@ export default function FeedPage() {
   }
 
   return (
+    <PullToRefresh onRefresh={async () => { await refetch() }}>
     <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 py-6 md:py-8">
       {/* Editorial header — daily dispatch line + clean heading on its own row */}
       <header className="mb-4 space-y-1">
         <p className="al-eyebrow">{dailyDispatch}</p>
         <h1 className="al-display text-3xl md:text-4xl">Travel Memories</h1>
       </header>
+
+      {/* New email accounts carry a machine handle — offer the fix in place */}
+      <ClaimHandleCard />
+
+      {/* Pending collaborative-album invites (moved from the old dashboard) */}
+      <CollaborationInvites />
+
+      {/* Brand-new account: explain the loop before showing an empty feed */}
+      {isFirstRun && <FirstRunGuide />}
 
       {/* Feed mode toggle — its own clear tab bar, not crammed by the title */}
       <nav
@@ -383,28 +426,33 @@ export default function FeedPage() {
           ))}
 
           {hasMore && (
-            <div className="flex justify-center py-8">
-              <Button
-                variant="outline"
-                size="pill"
-                onClick={() => fetchNextPage()}
-                disabled={loadingMore}
-                className="px-6"
-              >
-                {loadingMore ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  'Load more'
-                )}
-              </Button>
-            </div>
+            <>
+              {/* Auto-load sentinel — fires ~600px before it's visible */}
+              <div ref={sentinelRef} aria-hidden className="h-px" />
+              <div className="flex justify-center py-8">
+                <Button
+                  variant="outline"
+                  size="pill"
+                  onClick={() => fetchNextPage()}
+                  disabled={loadingMore}
+                  className="px-6"
+                >
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Load more'
+                  )}
+                </Button>
+              </div>
+            </>
           )}
         </div>
       )}
     </div>
+    </PullToRefresh>
   )
 }
 
@@ -415,8 +463,8 @@ function EmptyState({ mode }: { mode: FeedMode }) {
     return (
       <EnhancedEmptyState
         icon={<Users className="h-6 w-6" strokeWidth={1.6} />}
-        title="Your field is quiet"
-        description="Follow a few travelers to fill your feed — every adventure they log shows up here."
+        title="Your feed is empty"
+        description="Follow a few travelers to fill it — every album they post shows up here."
         action={{ label: 'Find people to follow', onClick: () => router.push('/explore') }}
         secondaryAction={{ label: 'Create album', onClick: () => router.push('/albums/new') }}
       />

@@ -42,7 +42,10 @@ const config: CapacitorConfig = {
     },
     SplashScreen: {
       launchShowDuration: 2000,
-      launchAutoHide: true,
+      // The app hides the splash itself once the WebView has mounted
+      // (SplashScreen.hide() in NativeAppShell) so the launch screen never
+      // disappears before first paint.
+      launchAutoHide: false,
       // App is light-only — match the app background (--background / themeColor
       // #F7F9FB) so launch doesn't flash dark before the WebView paints.
       backgroundColor: '#F7F9FB',

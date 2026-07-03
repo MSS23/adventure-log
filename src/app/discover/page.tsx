@@ -277,7 +277,7 @@ export default function DiscoverPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="mt-4 text-xs text-white/70"
             >
-              Free forever for personal travel logs · No credit card
+              Free to start · No credit card
             </motion.p>
           </motion.div>
 

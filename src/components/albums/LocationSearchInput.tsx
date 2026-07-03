@@ -14,6 +14,8 @@ interface LocationSearchInputProps {
   showAutoFillButton?: boolean
   onAutoFill?: () => void
   isAutoFilling?: boolean
+  /** Show the dropdown's built-in (web-only) current-location button. */
+  allowCurrentLocation?: boolean
 }
 
 export function LocationSearchInput({
@@ -24,7 +26,8 @@ export function LocationSearchInput({
   required = false,
   showAutoFillButton = false,
   onAutoFill,
-  isAutoFilling = false
+  isAutoFilling = false,
+  allowCurrentLocation = true
 }: LocationSearchInputProps) {
   return (
     <div>
@@ -51,7 +54,7 @@ export function LocationSearchInput({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        allowCurrentLocation={true}
+        allowCurrentLocation={allowCurrentLocation}
         showPopularDestinations={true}
       />
 

@@ -267,7 +267,7 @@ export default function TravelPassportPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24 pt-4 sm:pt-8">
       {/* Editorial header — shared Back + Home navigation */}
-      <PageHeader eyebrow="Document" title="Passport" className="mb-6" />
+      <PageHeader title="Passport" className="mb-6" />
 
       {/* ── Leather passport book ── */}
       <motion.div

@@ -229,7 +229,7 @@ export default function ActivityPage() {
         <header className="space-y-1">
           <p className="al-eyebrow">Inbox</p>
           <h1 className="al-display text-3xl md:text-4xl flex items-center gap-3">
-            Activity
+            Notifications
             {unreadCount > 0 && (
               <span className="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full bg-accent text-accent-foreground text-[11px] font-bold">
                 {unreadCount}

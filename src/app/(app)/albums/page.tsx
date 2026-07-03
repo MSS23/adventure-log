@@ -363,7 +363,7 @@ function AlbumsPageContent() {
                 className="cursor-pointer"
               >
                 <Images className="h-4 w-4 mr-1" />
-                Organize
+                Manage photos
               </Button>
             </Link>
           )}
@@ -755,7 +755,7 @@ function AlbumsPageContent() {
                               `is_favorite` is undefined pre-migration => hidden) */}
                           {!isViewingOtherUser && album.is_favorite && (
                             <div className="absolute top-2 right-2">
-                              <div className="bg-black/55 backdrop-blur-sm rounded-full p-1 sm:p-1.5 drop-shadow-sm" title="Favourite">
+                              <div className="bg-black/55 backdrop-blur-sm rounded-full p-1 sm:p-1.5 drop-shadow-sm" title="Highlighted">
                                 <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400 fill-current" />
                               </div>
                             </div>

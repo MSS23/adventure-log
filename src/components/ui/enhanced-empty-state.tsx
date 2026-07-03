@@ -151,7 +151,7 @@ export function NoAlbumsEmptyState({
   return (
     <EnhancedEmptyState
       icon={<Camera className="h-6 w-6" />}
-      title="No Adventures Yet"
+      title="No albums yet"
       description="Start documenting your travels by creating your first album."
       action={{ label: 'Create Album', onClick: onCreateAlbum }}
     />

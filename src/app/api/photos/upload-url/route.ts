@@ -30,6 +30,10 @@ const EXT_BY_MIME: Record<string, string> = {
   'image/gif': 'gif',
 }
 
+// Pro gate: photos per album. Free = 30, Pro = 4× (120).
+const FREE_ALBUM_PHOTO_CAP = 30
+const PRO_ALBUM_PHOTO_CAP = 120
+
 export async function POST(request: NextRequest) {
   // Rate limit per IP (50/hr) before doing any work
   const rl = await rateLimitAsync(request, { ...rateLimitConfigs.upload, keyPrefix: 'photo-upload-url' })
@@ -75,6 +79,49 @@ export async function POST(request: NextRequest) {
 
   if (albumError || !album || album.user_id !== user.id) {
     return NextResponse.json({ error: 'Album not found' }, { status: 404 })
+  }
+
+  // ── Pro gate: per-album photo cap (30 free / 120 pro) ─────────────────────
+  const { data: planRow, error: planError } = await supabase
+    .from('users')
+    .select('plan')
+    .eq('id', user.id)
+    .single()
+
+  // Tolerate the plan column not existing yet (migration 69 not applied):
+  // Postgres 42703 = undefined_column → treat the user as free.
+  const plan = planError ? 'free' : (planRow?.plan ?? 'free')
+  if (planError && planError.code !== '42703') {
+    log.warn('Could not read user plan, treating as free', {
+      component: 'api/photos/upload-url',
+      action: 'plan-check',
+      userId: user.id,
+    })
+  }
+
+  const { count: photoCount, error: countError } = await supabase
+    .from('photos')
+    .select('id', { count: 'exact', head: true })
+    .eq('album_id', albumId)
+
+  // Fail open on count errors — never block uploads because of a bad query.
+  if (!countError && photoCount !== null) {
+    if (plan !== 'pro' && photoCount >= FREE_ALBUM_PHOTO_CAP) {
+      return NextResponse.json(
+        {
+          error: `Free plan albums hold up to ${FREE_ALBUM_PHOTO_CAP} photos — upgrade to Pro for 4× the capacity`,
+          code: 'UPGRADE_REQUIRED',
+          upgradeUrl: '/pro',
+        },
+        { status: 402 }
+      )
+    }
+    if (plan === 'pro' && photoCount >= PRO_ALBUM_PHOTO_CAP) {
+      return NextResponse.json(
+        { error: `Albums hold up to ${PRO_ALBUM_PHOTO_CAP} photos — start a new album for the rest of the trip.` },
+        { status: 400 }
+      )
+    }
   }
 
   // Server-controlled path: <userId>/<albumId>/<unique>.<ext>

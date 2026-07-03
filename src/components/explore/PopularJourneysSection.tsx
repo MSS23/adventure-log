@@ -134,10 +134,10 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
           <MapPin className="h-6 w-6" />
         </div>
-        <p className="font-heading text-lg font-semibold text-foreground">No journeys yet</p>
-        <p className="mt-1 text-sm text-muted-foreground">Be the first to share your adventure!</p>
+        <p className="font-heading text-lg font-semibold text-foreground">No albums yet</p>
+        <p className="mt-1 text-sm text-muted-foreground">Be the first to share an album!</p>
         <Button asChild className="mt-5">
-          <Link href="/albums/new">Share your first journey</Link>
+          <Link href="/albums/new">Share your first album</Link>
         </Button>
       </div>
     )

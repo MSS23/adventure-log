@@ -103,7 +103,6 @@ export default function TravelTwinsPage() {
     <div className="max-w-5xl mx-auto px-4 py-6">
       <PageHeader
         className="mb-8"
-        eyebrow="Discover · Your Constellation"
         title="Travel Twins"
         subtitle="Travelers whose destinations overlap with yours. Discover the places they’ve been that you haven’t."
       />

@@ -18,6 +18,7 @@ import Image from 'next/image'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { MutualTravelPanel } from './MutualTravelPanel'
@@ -158,21 +159,23 @@ export function PublicPassportContent({
       })
   }, [searchParams, currentUser, user.id])
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
+  // Canonical public passport URL on the web origin. This component also
+  // renders inside the APK (/passport/view twin) where window.location.href
+  // is capacitor://localhost — a dead link for anyone it's shared with.
+  // ?ref= credits the passport owner so signups auto-follow them.
+  const shareUrl = withRef(`${getWebOrigin()}/u/${user.username}/passport`, user.username)
 
   const handleCopy = async () => {
-    const url = typeof window !== 'undefined' ? window.location.href : ''
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(shareUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handleShare = async () => {
-    const url = typeof window !== 'undefined' ? window.location.href : ''
     const text = `Check out ${displayName}'s travel profile on Adventure Log!`
     try {
       if (navigator.share) {
-        await navigator.share({ title: `${displayName}'s Travel Profile`, text, url })
+        await navigator.share({ title: `${displayName}'s Travel Profile`, text, url: shareUrl })
       } else {
         await handleCopy()
       }

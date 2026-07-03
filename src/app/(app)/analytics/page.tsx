@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { isPro } from '@/lib/utils/plan'
 import { haversineKm } from '@/lib/utils/geoCalculations'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 import { createClient } from '@/lib/supabase/client'
@@ -277,7 +278,7 @@ function SectionTitle({ icon: Icon, children }: { icon: React.ElementType; child
 // ---------------------------------------------------------------------------
 export default function AnalyticsPage() {
   const router = useRouter()
-  const { user, authLoading, profileLoading } = useAuth()
+  const { user, profile, authLoading, profileLoading } = useAuth()
   const supabase = createClient()
   const [heatmapYear, setHeatmapYear] = useState(new Date().getFullYear())
   const prefersReducedMotion = useReducedMotion()
@@ -467,9 +468,38 @@ export default function AnalyticsPage() {
   const maxCountryCount = Math.max(...stats.topDestinations.map(d => d.count), 1)
   const worldPercentage = Math.round((stats.totalCountries / 195) * 100 * 10) / 10
 
+  // Pro gate: analytics ("Travel Insights") is a Pro feature. The real page
+  // stays mounted (data fetched above) so the blurred preview shows real
+  // shapes, but free users can't read or interact with it.
+  const locked = !isPro(profile)
+
   return (
     <ErrorBoundary>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6">
+      <div className="relative">
+      {locked && (
+        <div className="absolute inset-0 z-20 backdrop-blur bg-background/60">
+          <div className="sticky top-1/4 flex justify-center px-4">
+            <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-lg">
+              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="h-6 w-6" />
+              </div>
+              <h2 className="font-heading text-lg font-semibold text-foreground mb-1">
+                Travel Insights is a Pro feature
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Deep stats, heatmaps, and year-by-year charts — $29/year.
+              </p>
+              <Button onClick={() => router.push('/pro')} className="w-full cursor-pointer">
+                See Adventure Log Pro
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div
+        className={cn('max-w-5xl mx-auto px-4 sm:px-6 pb-24 md:pb-8 pt-4 sm:pt-6', locked && 'pointer-events-none select-none')}
+        aria-hidden={locked || undefined}
+      >
         {/* Page Header */}
         <PageHeader
           className="mb-6"
@@ -677,6 +707,7 @@ export default function AnalyticsPage() {
             </div>
           </Section>
         </div>
+      </div>
       </div>
     </ErrorBoundary>
   )

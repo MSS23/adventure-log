@@ -143,7 +143,7 @@ export function AlbumSocialShare({
   if (variant === 'vertical') {
     return (
       <div className={cn("space-y-3", className)}>
-        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3">Share this journey</h3>
+        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3">Share this album</h3>
 
         <div className="grid grid-cols-2 gap-2">
           {shareLinks.map((link) => (

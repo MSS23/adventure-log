@@ -344,7 +344,7 @@ export async function middleware(request: NextRequest) {
   // Signed-in users shouldn't sit on the auth pages.
   if (user && (pathname === '/login' || pathname === '/signup')) {
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/dashboard'
+    redirectUrl.pathname = '/feed'
     redirectUrl.search = ''
     return NextResponse.redirect(redirectUrl)
   }

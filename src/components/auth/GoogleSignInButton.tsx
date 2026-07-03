@@ -36,7 +36,7 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 interface GoogleSignInButtonProps {
-  /** Safe internal path to land on after sign-in. Defaults to /dashboard. */
+  /** Safe internal path to land on after sign-in. Defaults to /feed. */
   next?: string | null
   /** Disable the button (e.g. until consent is given on the signup page). */
   disabled?: boolean
@@ -51,7 +51,7 @@ export function GoogleSignInButton({ next, disabled = false }: GoogleSignInButto
     setLoading(true)
     try {
       const supabase = createClient()
-      const safeNext = safeInternalPath(next, '/dashboard')
+      const safeNext = safeInternalPath(next, '/feed')
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

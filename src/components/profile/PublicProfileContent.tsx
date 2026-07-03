@@ -25,6 +25,7 @@ import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getFlagEmoji } from '@/lib/utils/country'
 import { getDisplayInitial } from '@/lib/utils/display-name'
 import { formatDistanceKm } from '@/lib/utils/geoCalculations'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -80,12 +81,12 @@ export function PublicProfileContent({
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedEmbed, setCopiedEmbed] = useState(false)
 
-  const profileUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/u/${user.username}`
-      : `/u/${user.username}`
+  // getWebOrigin (not window.location.origin — capacitor://localhost in the
+  // APK); ?ref= credits the profile owner, so signups from a shared profile
+  // auto-follow them.
+  const profileUrl = withRef(`${getWebOrigin()}/u/${user.username}`, user.username)
 
-  const embedCode = `<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/embed/${user.username}" width="100%" height="500" style="border:none;border-radius:12px;" title="${displayName}'s Travel Map"></iframe>`
+  const embedCode = `<iframe src="${getWebOrigin()}/embed/${user.username}" width="100%" height="500" style="border:none;border-radius:12px;" title="${displayName}'s Travel Map"></iframe>`
 
   const copyToClipboard = async (text: string, type: 'url' | 'embed') => {
     try {

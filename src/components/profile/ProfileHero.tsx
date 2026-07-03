@@ -8,9 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
-import { Settings, Pencil } from 'lucide-react'
+import { Settings, Pencil, Share2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { AnimatedCounter } from '@/components/ui/animated-count'
 import { FollowButton } from '@/components/social/FollowButton'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 
 interface ProfileHeroProps {
   profile: User
@@ -29,6 +31,35 @@ export function ProfileHero({
   const displayName = getDisplayName(profile.display_name, profile.username)
   const username = profile.username || 'anonymous'
   const initials = getDisplayInitial(profile.display_name, profile.username)
+
+  // Share the public profile URL (web origin + referral handle) via the native
+  // share sheet when available, otherwise copy to clipboard with a toast.
+  const handleShare = async () => {
+    if (!profile.username) return
+    const url = withRef(`${getWebOrigin()}/u/${profile.username}`, profile.username)
+    const title = `${displayName} on Adventure Log`
+
+    const copyToClipboard = async () => {
+      try {
+        await navigator.clipboard.writeText(url)
+        toast.success('Profile link copied')
+      } catch {
+        toast.error('Could not copy profile link')
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title, url })
+      } catch (err) {
+        // User dismissing the share sheet is not an error.
+        if (err instanceof Error && err.name === 'AbortError') return
+        await copyToClipboard()
+      }
+    } else {
+      await copyToClipboard()
+    }
+  }
 
   return (
     <div className="relative px-4 sm:px-6">
@@ -97,6 +128,17 @@ export function ProfileHero({
                         Edit profile
                       </Button>
                     </Link>
+                    {profile.username && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleShare}
+                        aria-label="Share profile"
+                        className="rounded-full h-11 w-11"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Link href="/settings" aria-label="Settings">
                       <Button
                         variant="ghost"

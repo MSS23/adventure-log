@@ -255,8 +255,7 @@ export default function OrganizePage() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="al-eyebrow mb-0.5">Curate</p>
-              <h1 className="al-display text-2xl md:text-3xl">Organizer</h1>
+              <h1 className="al-display text-2xl md:text-3xl">Manage photos</h1>
             </div>
 
             <div className="flex items-center gap-2">

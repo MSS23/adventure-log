@@ -225,7 +225,7 @@ export default function SettingsPage() {
         stories,
         following,
         followers,
-        savedPlaces,
+        wishlist,
         trips,
       ] = await Promise.allSettled([
         supabase.from('users').select('*').eq('id', uid).maybeSingle().then(r => r.data),
@@ -236,7 +236,8 @@ export default function SettingsPage() {
         rows('stories', 'user_id'),
         rows('follows', 'follower_id'),
         rows('follows', 'following_id'),
-        rows('saved_places', 'user_id'),
+        // saved_places merged into wishlist_items (migration 67)
+        rows('wishlist_items', 'user_id'),
         rows('trips', 'user_id'),
       ])
 
@@ -262,7 +263,7 @@ export default function SettingsPage() {
         stories: settled(stories, []),
         following: settled(following, []),
         followers: settled(followers, []),
-        saved_places: settled(savedPlaces, []),
+        wishlist: settled(wishlist, []),
         trips: settled(trips, []),
       }
 

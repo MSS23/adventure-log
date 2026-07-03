@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input'
 import { Loader2, Plus, Check, MapPin, Luggage } from 'lucide-react'
 import { toast } from 'sonner'
 import { apiFetch } from '@/lib/api/client'
-import type { SavedPlace } from '@/lib/hooks/useSavedPlaces'
 
 interface TripSummary {
   id: string
@@ -23,8 +22,19 @@ interface TripSummary {
   my_role: 'owner' | 'editor' | 'viewer'
 }
 
+/** Minimal shape needed to pin a place on a trip — any wishlist item fits. */
+export interface TripAddablePlace {
+  place_name: string
+  latitude: number
+  longitude: number
+  location_name?: string | null
+  source_url?: string | null
+  category?: string | null
+  notes?: string | null
+}
+
 interface AddToTripDialogProps {
-  place: SavedPlace | null
+  place: TripAddablePlace | null
   open: boolean
   onClose: () => void
 }

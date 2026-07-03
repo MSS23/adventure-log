@@ -23,7 +23,7 @@ import { sanitizeText } from '@/lib/utils/input-validation'
 function revalidateAlbumPaths(albumId?: string) {
   if (albumId) revalidatePath(`/albums/${albumId}`)
   revalidatePath('/albums')
-  revalidatePath('/dashboard')
+  revalidatePath('/feed')
   revalidatePath('/globe')
   revalidatePath('/feed')
   revalidatePath('/profile')

@@ -55,7 +55,7 @@ export function FavoriteAlbumToggle({
 
       if (error) throw error
 
-      toast.success(next ? 'Added to favourites' : 'Removed from favourites', {
+      toast.success(next ? 'Added to highlights' : 'Removed from highlights', {
         duration: 2000,
         position: 'bottom-center',
       })
@@ -77,8 +77,8 @@ export function FavoriteAlbumToggle({
 
       toast.error(
         columnMissing
-          ? 'Favourites aren’t available yet'
-          : 'Failed to update favourite',
+          ? 'Highlights aren’t available yet'
+          : 'Failed to update highlight',
         { duration: 3000, position: 'bottom-center' },
       )
     } finally {
@@ -90,8 +90,8 @@ export function FavoriteAlbumToggle({
     <button
       type="button"
       aria-pressed={isFavorite}
-      aria-label={isFavorite ? 'Remove album from favourites' : 'Mark album as favourite'}
-      title={isFavorite ? 'Favourited' : 'Mark as favourite'}
+      aria-label={isFavorite ? 'Remove album from highlights' : 'Highlight this album'}
+      title={isFavorite ? 'Highlighted' : 'Highlight this album'}
       onClick={handleToggle}
       disabled={pending}
       className={cn(

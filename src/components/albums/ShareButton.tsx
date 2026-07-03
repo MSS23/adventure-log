@@ -6,6 +6,8 @@ import { Share2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Toast } from '@capacitor/toast'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 
 interface ShareButtonProps {
   albumId: string
@@ -20,17 +22,26 @@ interface ShareButtonProps {
  * available — which on mobile/PWA is the system share UI — and falls back to
  * copying the link with a toast on platforms without it. The previous
  * white drop-down ("quick share") popup was removed in favour of this.
+ *
+ * The link is always the PUBLIC album viewer on the web origin (never
+ * window.location.href, which is capacitor://localhost inside the APK and an
+ * auth-walled /albums/{id} on web) and carries the sharer's ?ref= handle so
+ * signups from the link auto-follow them.
  */
 export function ShareButton({
-  albumId: _albumId,
+  albumId,
   albumTitle,
   shareUrl,
   variant = 'default',
   className,
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false)
+  const { profile } = useAuth()
 
-  const currentUrl = shareUrl || (typeof window !== 'undefined' ? window.location.href : '')
+  const currentUrl = withRef(
+    shareUrl || `${getWebOrigin()}/albums/${albumId}/public`,
+    profile?.username
+  )
 
   const copyLink = async () => {
     try {

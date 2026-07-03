@@ -56,7 +56,7 @@ export default function NewAlbumPage() {
         className="mb-6 md:mb-8"
       >
         <p className="al-eyebrow mb-2">New entry</p>
-        <h1 className="al-display text-3xl md:text-4xl">Create an adventure</h1>
+        <h1 className="al-display text-3xl md:text-4xl">Create an album</h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
           Share your journey with the world — or keep it just for you.
         </p>

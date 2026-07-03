@@ -84,5 +84,24 @@ export function NativeAppShell() {
     })()
   }, [])
 
+  // Splash screen — launchAutoHide is false in capacitor.config.ts so the
+  // native splash stays up until the WebView has actually mounted React;
+  // hide it here on first render instead of after a blind timeout.
+  useEffect(() => {
+    if (!isNativePlatform()) return
+
+    ;(async () => {
+      try {
+        const { SplashScreen } = await import('@capacitor/splash-screen')
+        await SplashScreen.hide()
+      } catch (err) {
+        log.error('Failed to hide native splash screen', {
+          component: 'NativeAppShell',
+          action: 'splashScreen',
+        }, err instanceof Error ? err : new Error(String(err)))
+      }
+    })()
+  }, [])
+
   return null
 }

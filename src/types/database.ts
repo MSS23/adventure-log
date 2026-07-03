@@ -19,6 +19,9 @@ export interface User {
   // Self-declared date of birth recorded at signup for the 18+ age gate
   // (migration 60). Optional so older rows / pre-migration builds typecheck.
   date_of_birth?: string | null;
+  // Billing tier: 'free' | 'pro' (migration 69). Flipped manually/by webhook.
+  // Optional so pre-migration rows and builds typecheck; treat missing as 'free'.
+  plan?: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -10,6 +10,8 @@ import { LikeButton } from '@/components/social/LikeButton'
 import { PhotoCarousel } from '@/components/feed/PhotoCarousel'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { useFavorites } from '@/lib/hooks/useFavorites'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 import { formatTravelDate } from '@/lib/utils/travel-date'
 import { formatLocationLabel, getFlagEmoji } from '@/lib/utils/country'
 import { cn } from '@/lib/utils'
@@ -95,6 +97,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
   // (same store the /saved page reads via target_type='album'), so a bookmark
   // from the feed actually shows up under Saved. The hook is optimistic with
   // rollback, so the icon still flips instantly.
+  const { profile } = useAuth()
   const { isFavorited, toggleFavorite } = useFavorites({
     targetType: 'album',
     targetId: album.id,
@@ -126,18 +129,25 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
 
   const handleShare = async () => {
     triggerLight()
+    // Public album viewer on the web origin — window.location.origin is
+    // capacitor://localhost in the APK (dead link) and /albums/{id} is
+    // auth-walled. ?ref= makes signups from this share auto-follow the sharer.
+    const shareUrl = withRef(
+      `${getWebOrigin()}/albums/${album.id}/public`,
+      profile?.username
+    )
     if (navigator.share) {
       try {
         await navigator.share({
           title: album.title,
           text: `Check out ${user.display_name}'s journey: ${album.title}`,
-          url: `${window.location.origin}/albums/${album.id}`,
+          url: shareUrl,
         })
       } catch {
         /* user cancelled */
       }
     } else {
-      await navigator.clipboard.writeText(`${window.location.origin}/albums/${album.id}`)
+      await navigator.clipboard.writeText(shareUrl)
       setShowShareToast(true)
       setTimeout(() => setShowShareToast(false), 2000)
     }

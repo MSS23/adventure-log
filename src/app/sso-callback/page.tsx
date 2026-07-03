@@ -27,7 +27,7 @@ export default function SSOCallbackPage() {
           router.replace('/login?error=oauth')
           return
         }
-        router.replace('/dashboard')
+        router.replace('/feed')
       } catch {
         if (!cancelled) router.replace('/login?error=oauth')
       }

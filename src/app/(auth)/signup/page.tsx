@@ -9,26 +9,13 @@ import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { safeInternalPath } from '@/lib/utils/safe-redirect'
-import { Loader2, MailCheck, Globe, Lock } from 'lucide-react'
+import { Loader2, MailCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/button'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { calculateAge, MIN_AGE } from '@/lib/utils/age'
-
-type AccountVisibility = 'public' | 'private'
-
-const VISIBILITY_OPTIONS: {
-  value: AccountVisibility
-  label: string
-  desc: string
-  icon: typeof Globe
-}[] = [
-  { value: 'public', label: 'Public', desc: 'Anyone can find & follow you', icon: Globe },
-  { value: 'private', label: 'Private', desc: 'Only people you approve', icon: Lock },
-]
 
 function SignupForm() {
   const router = useRouter()
@@ -36,7 +23,6 @@ function SignupForm() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [visibility, setVisibility] = useState<AccountVisibility>('public')
   const [dob, setDob] = useState('')
   const [ageConfirmed, setAgeConfirmed] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -112,17 +98,13 @@ function SignupForm() {
         email,
         password,
         options: {
-          // The chosen account visibility is the user's own preference (the same
-          // value they can later edit in Settings), not an authorization grant,
-          // so carrying it in client-writable user_metadata is fine. The
-          // create_profile_on_signup trigger reads `privacy_level` when it
-          // provisions the public.users row (migration 54), validating it and
-          // falling back to 'public'.
+          // Account visibility defaults to 'public' server-side (the
+          // create_profile_on_signup trigger falls back to it) and is
+          // editable in Settings — no picker at signup.
           //
           // We record the self-declared DOB and age/terms acceptance for an
           // auditable record that the user attested to being 18+ (GDPR Art. 7).
           data: {
-            privacy_level: visibility,
             date_of_birth: dob,
             age_confirmed: true,
             terms_accepted_at: new Date().toISOString(),
@@ -138,23 +120,7 @@ function SignupForm() {
       // If a session was returned, email confirmation is disabled and the user
       // is signed in immediately — send them straight into the app.
       if (data.session) {
-        // Best-effort: apply the chosen visibility directly too, so it takes
-        // effect even where the migration-54 trigger isn't deployed yet. The
-        // trigger/Settings remain the source of truth; failures here are
-        // non-fatal (provisioning race or RLS) since the metadata still carries
-        // the choice.
-        if (visibility !== 'public') {
-          try {
-            await supabase
-              .from('users')
-              .update({ privacy_level: visibility })
-              .eq('id', data.session.user.id)
-          } catch {
-            // ignore — trigger metadata covers this case
-          }
-        }
-
-        const target = safeInternalPath(searchParams.get('redirectTo'), '/dashboard')
+        const target = safeInternalPath(searchParams.get('redirectTo'), '/feed')
         router.push(target)
         return
       }
@@ -237,7 +203,22 @@ function SignupForm() {
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="mt-6">
+          <GoogleSignInButton next={searchParams.get('redirectTo')} />
+        </div>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-card px-2 text-xs uppercase tracking-wide text-muted-foreground">
+              or
+            </span>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label
               htmlFor="email"
@@ -300,41 +281,6 @@ function SignupForm() {
             )}
           </div>
 
-          <fieldset className="space-y-1.5">
-            <legend className="block text-sm font-medium text-foreground">
-              Account visibility
-            </legend>
-            <div className="grid grid-cols-2 gap-2">
-              {VISIBILITY_OPTIONS.map((opt) => {
-                const Icon = opt.icon
-                const selected = visibility === opt.value
-                return (
-                  <button
-                    type="button"
-                    key={opt.value}
-                    onClick={() => setVisibility(opt.value)}
-                    aria-pressed={selected}
-                    className={cn(
-                      'flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                      selected
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:bg-muted/50',
-                    )}
-                  >
-                    <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                      <Icon className="h-4 w-4" strokeWidth={1.8} />
-                      {opt.label}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{opt.desc}</span>
-                  </button>
-                )
-              })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              You can change this anytime in Settings.
-            </p>
-          </fieldset>
-
           <div className="flex items-start gap-2.5">
             <input
               id="age-consent"
@@ -369,32 +315,6 @@ function SignupForm() {
             {loading ? 'Creating account…' : 'Sign up'}
           </Button>
         </form>
-
-        <div className="relative my-5">
-          <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <span className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center">
-            <span className="bg-card px-2 text-xs uppercase tracking-wide text-muted-foreground">
-              or
-            </span>
-          </div>
-        </div>
-
-        <GoogleSignInButton
-          next={searchParams.get('redirectTo')}
-          disabled={!ageConfirmed || age === null || isUnderAge}
-        />
-        {(age === null || isUnderAge) && (
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            Continuing with Google requires confirming a date of birth of {MIN_AGE} or older above.
-          </p>
-        )}
-        {age !== null && !isUnderAge && !ageConfirmed && (
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            Confirm the age &amp; terms checkbox above to continue with Google.
-          </p>
-        )}
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{' '}

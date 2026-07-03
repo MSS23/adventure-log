@@ -54,7 +54,7 @@ function LoginForm() {
         return
       }
 
-      const target = safeInternalPath(searchParams.get('redirectTo'), '/dashboard')
+      const target = safeInternalPath(searchParams.get('redirectTo'), '/feed')
       router.push(target)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')

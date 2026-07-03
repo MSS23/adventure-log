@@ -25,7 +25,7 @@ import { useFavorites } from '@/lib/hooks/useFavorites'
 import { ShareButton } from '@/components/albums/ShareButton'
 import { isPWAInstalled } from '@/lib/utils/pwa'
 import { isNativePlatform } from '@/lib/api/client'
-import { localizePath, getWebOrigin } from '@/lib/utils/native-routes'
+import { localizePath, getWebOrigin, withRef } from '@/lib/utils/native-routes'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
@@ -45,7 +45,7 @@ import { parseLocalDate } from '@/lib/utils/travel-date'
 export function AlbumDetailView({ albumId }: { albumId: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const [album, setAlbum] = useState<Album | null>(null)
   const [photos, setPhotos] = useState<Photo[]>([])
   const [loading, setLoading] = useState(true)
@@ -574,15 +574,33 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground">Album created!</p>
-                    <p className="text-xs text-muted-foreground">Share it with friends and fellow travelers</p>
+                    <p className="text-xs text-muted-foreground">Your globe just got a new pin</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  {/* The core wow — the globe lighting up — is the PRIMARY
+                      action of this moment; sharing is secondary. */}
+                  {album?.latitude && album?.longitude && (
+                    <Button
+                      size="sm"
+                      className="rounded-lg h-8 px-3 text-xs gap-1.5"
+                      onClick={handleGlobeClick}
+                    >
+                      <Globe className="h-3 w-3" />
+                      See it on your globe
+                    </Button>
+                  )}
                   <Button
                     size="sm"
+                    variant="outline"
                     className="rounded-lg h-8 px-3 text-xs gap-1.5"
                     onClick={async () => {
-                      const url = `${getWebOrigin()}/albums/${album.id}`
+                      // Public viewer + referral handle — the auth-walled
+                      // /albums/{id} route bounced recipients to /login.
+                      const url = withRef(
+                        `${getWebOrigin()}/albums/${album.id}/public`,
+                        profile?.username
+                      )
                       if (navigator.share) {
                         try {
                           await navigator.share({ title: album?.title, url })
@@ -909,13 +927,13 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
               <Camera className="h-6 w-6" />
             </div>
-            <p className="al-eyebrow mb-2">{isOwner ? 'New adventure' : 'Album'}</p>
+            <p className="al-eyebrow mb-2">{isOwner ? 'New album' : 'Album'}</p>
             <h3 className="font-heading text-lg font-semibold text-foreground">
-              {isOwner ? 'Start Your Journey' : 'No photos yet'}
+              {isOwner ? 'Start your album' : 'No photos yet'}
             </h3>
             <p className="mt-1 max-w-sm text-sm text-muted-foreground leading-relaxed">
               {isOwner
-                ? 'Upload your first photo to bring this adventure to life.'
+                ? 'Upload your first photo to bring this album to life.'
                 : "This album doesn't have any photos yet."}
             </p>
             {isOwner && (
@@ -999,7 +1017,7 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                   }
                   className="!p-0"
                 />
-                <span className="text-[10px] font-medium text-muted-foreground">Favourite</span>
+                <span className="text-[10px] font-medium text-muted-foreground">Highlight</span>
               </div>
             )}
           </div>

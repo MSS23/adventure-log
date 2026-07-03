@@ -146,7 +146,7 @@ export default function ExplorePage() {
             >
               <SectionHeader
                 eyebrow="Rising"
-                title="Popular journeys"
+                title="Popular albums"
                 href="/explore/journeys"
               />
               <PopularJourneysSection limit={3} />

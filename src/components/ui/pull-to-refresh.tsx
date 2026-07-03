@@ -4,6 +4,15 @@ import { useState, useCallback, useRef } from 'react'
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import { RefreshCw, ArrowDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { getAppScrollTop } from '@/lib/utils/app-scroll'
+
+/** Top-of-page check that understands the locked app shell: page scrolling
+ *  happens in #app-scroll (see (app)/layout.tsx), not in this component's own
+ *  container — reading only containerRef.scrollTop made the pull trigger from
+ *  anywhere on the page. */
+function effectiveScrollTop(container: HTMLDivElement | null): number {
+  return Math.max(container?.scrollTop || 0, getAppScrollTop())
+}
 
 interface PullToRefreshProps {
   children: React.ReactNode
@@ -40,8 +49,7 @@ export function PullToRefresh({
     if (disabled || state === 'refreshing') return
 
     // Only trigger if scrolled to top
-    const scrollTop = containerRef.current?.scrollTop || 0
-    if (scrollTop > 0) return
+    if (effectiveScrollTop(containerRef.current) > 0) return
 
     startY.current = e.touches[0].clientY
     setState('idle')
@@ -51,8 +59,7 @@ export function PullToRefresh({
     if (disabled || state === 'refreshing') return
     if (!startY.current) return
 
-    const scrollTop = containerRef.current?.scrollTop || 0
-    if (scrollTop > 0) {
+    if (effectiveScrollTop(containerRef.current) > 0) {
       startY.current = 0
       pullDistance.set(0)
       return

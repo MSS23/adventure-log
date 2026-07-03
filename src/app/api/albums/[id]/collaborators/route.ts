@@ -145,7 +145,7 @@ export async function POST(
         message: isTag
           ? `${inviterName} tagged you in "${album.title}"`
           : `${inviterName} invited you to collaborate on "${album.title}"`,
-        link: isTag ? `/albums/${albumId}` : '/dashboard',
+        link: isTag ? `/albums/${albumId}` : '/feed',
         metadata: { album_id: albumId, collaborator_id: collaborator!.id },
       }
 

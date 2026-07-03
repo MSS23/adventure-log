@@ -12,6 +12,7 @@ import { apiFetch } from '@/lib/api/client'
 import { createClient } from '@/lib/supabase/client'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getFlagEmoji } from '@/lib/utils/country'
+import { getWebOrigin } from '@/lib/utils/native-routes'
 import {
   Share2,
   Download,
@@ -257,9 +258,16 @@ function WrappedExperience() {
     const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" — make yours free on Adventure Log:`
     const shareTitle = `${displayName}'s ${label} Travel Wrapped`
     // Share a public landing surface, not this auth-gated /wrapped route —
-    // recipients who tap the link should reach a page they can act on.
-    const shareUrl =
-      typeof window !== 'undefined' ? window.location.origin : 'https://adventure-log-azure.vercel.app'
+    // recipients who tap the link should reach a page they can act on. The
+    // ref param makes anyone who signs up from this share auto-follow you
+    // (ReferralHandler + claim_referral).
+    // Land recipients on the sharer's PUBLIC profile (their map, stats, and
+    // albums with signup CTAs) — not the generic marketing page. getWebOrigin
+    // so APK shares never leak capacitor://localhost.
+    const origin = getWebOrigin() || 'https://adventure-log-azure.vercel.app'
+    const shareUrl = profile?.username
+      ? `${origin}/u/${profile.username}?ref=${profile.username}`
+      : origin
 
     // Best effort: attach the travel-card PNG so the share carries the visual,
     // not just text. Any failure here falls through to the text-only share.
@@ -280,7 +288,7 @@ function WrappedExperience() {
       }
       if (file && navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: shareTitle, text: shareText })
+          await navigator.share({ files: [file], title: shareTitle, text: `${shareText} ${shareUrl}` })
         } catch {
           // User cancelled — don't immediately reopen a second share sheet.
         }

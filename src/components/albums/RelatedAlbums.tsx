@@ -224,7 +224,7 @@ export function RelatedAlbums({
             href={`/profile/${userId}`}
             className="inline-flex items-center gap-2 text-[color:var(--color-forest)] hover:text-[color:var(--color-forest-deep)] font-medium group/link"
           >
-            <span>See all adventures</span>
+            <span>See all albums</span>
             <ArrowRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
           </Link>
         </motion.div>

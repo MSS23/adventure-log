@@ -9,7 +9,7 @@ import { Leaderboard } from '@/components/leaderboard/Leaderboard'
 export const dynamic = 'force-dynamic'
 
 export default function LeaderboardPage() {
-  const [selectedMetric, setSelectedMetric] = useState<'score' | 'albums' | 'countries' | 'photos' | 'followers'>('score')
+  const [selectedMetric, setSelectedMetric] = useState<'score' | 'albums' | 'countries' | 'photos' | 'followers'>('countries')
 
   return (
     <div className="min-h-screen bg-background">

@@ -76,7 +76,7 @@ const FEATURES = [
   {
     icon: Film,
     title: 'Flyover Videos',
-    desc: 'Export cinematic flyovers of your travels to share on social media.',
+    desc: 'Cinematic flyover reels — watch your year in motion on the globe.',
   },
   {
     icon: Upload,
@@ -119,7 +119,7 @@ export default function HomePage() {
   // app, which boots into `/` (index.html) on every launch. Send them to the
   // dashboard. Logged-out visitors and crawlers see the landing unchanged.
   useEffect(() => {
-    if (!authLoading && user) router.replace('/dashboard')
+    if (!authLoading && user) router.replace('/feed')
   }, [authLoading, user, router])
 
   useEffect(() => {
@@ -325,7 +325,7 @@ export default function HomePage() {
               { value: '195', label: 'Countries' },
               { value: '3D', label: 'Globe' },
               { value: '∞', label: 'Memories' },
-              { value: 'Free', label: 'Forever' },
+              { value: 'Free', label: 'To start' },
             ].map(stat => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-olive-400 tracking-tight">{stat.value}</div>
@@ -347,7 +347,7 @@ export default function HomePage() {
                 Not just another travel app
               </h2>
               <p className="text-base text-stone-400 max-w-prose mx-auto leading-relaxed">
-                A 3D globe of everywhere you&apos;ve been. Cinematic flyover videos to share.
+                A 3D globe of everywhere you&apos;ve been. Cinematic flyover reels of your year in motion.
                 Your travel identity, beautifully captured. Nothing else does this.
               </p>
             </div>
@@ -477,7 +477,7 @@ export default function HomePage() {
               <br />adventures today
             </h2>
             <p className="text-base text-stone-400 mb-10 max-w-prose mx-auto leading-relaxed">
-              Free forever. No ads. Your travel story deserves better than a flat map.
+              Free to start. No ads. Your travel story deserves better than a flat map.
             </p>
             <Link href="/signup">
               <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-10 h-14 text-lg rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">

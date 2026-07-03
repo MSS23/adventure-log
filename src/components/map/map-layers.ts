@@ -8,7 +8,7 @@
  * build.
  */
 
-export type MapLayerKind = 'friends' | 'trips' | 'wishlist' | 'saved'
+export type MapLayerKind = 'friends' | 'trips' | 'wishlist'
 
 export interface ExploreMapPin {
   id: string
@@ -32,9 +32,9 @@ export interface FlyTarget {
   ts: number
 }
 
+// 'saved' layer removed in migration 67 — saved places ARE wishlist items now.
 export const LAYER_META: Record<MapLayerKind, { label: string; color: string; glyph: string }> = {
   friends: { label: 'Friends', color: '#3D6B35', glyph: '👥' },
   trips: { label: 'Trips', color: '#2563EB', glyph: '🧳' },
   wishlist: { label: 'Wishlist', color: '#D97706', glyph: '⭐' },
-  saved: { label: 'Saved', color: '#DC2626', glyph: '📌' },
 }

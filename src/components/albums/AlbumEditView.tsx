@@ -528,7 +528,7 @@ export function AlbumEditView({ albumId }: { albumId: string }) {
                 id="description"
                 {...register('description')}
                 className={errors.description ? 'border-destructive' : ''}
-                placeholder="Describe your adventure..."
+                placeholder="Describe your album..."
                 rows={4}
               />
               {errors.description && (
@@ -546,7 +546,7 @@ export function AlbumEditView({ albumId }: { albumId: string }) {
               Location & Dates
             </CardTitle>
             <CardDescription>
-              Add location and date information for your adventure
+              Add location and date information for your album
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

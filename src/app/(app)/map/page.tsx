@@ -5,7 +5,8 @@
  *   · Friends — album locations from people you follow (public/friends posts)
  *   · Trips   — every stop pinned in your trip plans
  *   · Wishlist — bucket-list destinations
- *   · Saved   — places saved from TikTok / Google Maps links
+ *   (Wishlist includes places saved from TikTok / Google Maps links —
+ *   they're the same table since migration 67.)
  * plus a "locate me" button that works on web and in the native app.
  *
  * Static route on purpose: it ships in the Capacitor bundle as-is. All API
@@ -74,17 +75,9 @@ interface WishlistItemRow {
   longitude: number | null
   priority: 'low' | 'medium' | 'high' | null
   completed_at: string | null
-}
-
-interface SavedPlaceRow {
-  id: string
-  place_name: string
-  location_name: string | null
-  latitude: number | null
-  longitude: number | null
-  category: string | null
-  source_platform: string | null
-  source_url: string | null
+  // Link-import fields (migration 67 — merged from saved_places)
+  source_platform?: string | null
+  source_url?: string | null
 }
 
 const PLATFORM_LABEL: Record<string, string> = {
@@ -112,7 +105,6 @@ export default function MapPage() {
     friends: true,
     trips: true,
     wishlist: true,
-    saved: true,
   })
   const [me, setMe] = useState<{ latitude: number; longitude: number } | null>(null)
   const [flyTarget, setFlyTarget] = useState<FlyTarget | null>(null)
@@ -195,7 +187,7 @@ export default function MapPage() {
     },
   })
 
-  // ── Wishlist: bucket-list destinations ──────────────────────────────────
+  // ── Wishlist: bucket-list destinations + places saved from links ────────
   const wishlistQuery = useQuery<ExploreMapPin[]>({
     queryKey: ['map-wishlist', userId],
     enabled: !!userId,
@@ -211,31 +203,12 @@ export default function MapPage() {
         title: w.location_name,
         subtitle: w.completed_at
           ? 'Wishlist · visited ✓'
-          : `Wishlist${w.priority ? ` · ${w.priority} priority` : ''}`,
+          : w.source_platform && w.source_platform !== 'manual'
+            ? `Saved from ${PLATFORM_LABEL[w.source_platform] || 'a link'}`
+            : `Wishlist${w.priority ? ` · ${w.priority} priority` : ''}`,
         href: '/wishlist',
         hrefLabel: 'Open wishlist',
-      }))
-    },
-  })
-
-  // ── Saved: places captured from TikTok / Google Maps links ──────────────
-  const savedQuery = useQuery<ExploreMapPin[]>({
-    queryKey: ['map-saved', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const res = await apiFetch('/api/saved-places')
-      if (!res.ok) throw new Error(`Saved places API ${res.status}`)
-      const { items } = (await res.json()) as { items: SavedPlaceRow[] }
-      return (items || []).filter(hasCoords).map((s) => ({
-        id: s.id,
-        kind: 'saved' as const,
-        latitude: s.latitude!,
-        longitude: s.longitude!,
-        title: s.place_name,
-        subtitle: `Saved from ${PLATFORM_LABEL[s.source_platform || 'other'] || 'a link'}${
-          s.location_name ? ` · ${s.location_name}` : ''
-        }`,
-        externalUrl: s.source_url,
+        externalUrl: w.source_url ?? null,
       }))
     },
   })
@@ -244,7 +217,6 @@ export default function MapPage() {
     friends: friendsQuery,
     trips: tripsQuery,
     wishlist: wishlistQuery,
-    saved: savedQuery,
   }
 
   const pins = useMemo<ExploreMapPin[]>(
@@ -253,7 +225,7 @@ export default function MapPage() {
         enabled[kind] ? layerQueries[kind].data ?? [] : []
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [enabled, friendsQuery.data, tripsQuery.data, wishlistQuery.data, savedQuery.data]
+    [enabled, friendsQuery.data, tripsQuery.data, wishlistQuery.data]
   )
 
   const anyLoading = Object.values(layerQueries).some((q) => q.isPending)

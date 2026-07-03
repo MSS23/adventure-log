@@ -1,8 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Zap, ChevronRight } from 'lucide-react'
+import { Zap, ChevronRight, LocateFixed, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { getCurrentLocation } from '@/lib/capacitor/geolocation'
+import { apiFetch } from '@/lib/api/client'
+import { Button } from '@/components/ui/button'
 import { LocationSearchInput } from '@/components/albums/LocationSearchInput'
 import { YearSeasonSelector, type Season } from '@/components/albums/YearSeasonSelector'
 import { FloatingTextarea } from '@/components/ui/floating-input'
@@ -78,6 +83,45 @@ export function QuickPostMode({
 }: QuickPostModeProps) {
   const { register: registerQuick, handleSubmit: handleSubmitQuick, formState: { errors: quickErrors }, watch: watchQuick, setValue: setValueQuick } = quickForm
 
+  const [isLocating, setIsLocating] = useState(false)
+
+  // One-tap GPS: Capacitor geolocation (web + native, permissions/toasts
+  // handled inside), reverse-geocode via our proxy, then fill the picked
+  // location exactly like a search selection would.
+  const handleUseCurrentLocation = async () => {
+    if (isLocating) return
+    setIsLocating(true)
+    try {
+      const position = await getCurrentLocation()
+      // Permission denied / lookup failure already surfaced a toast inside
+      // getCurrentLocation — nothing more to do.
+      if (!position) return
+
+      const params = new URLSearchParams({
+        reverse: 'true',
+        lat: position.latitude.toString(),
+        lon: position.longitude.toString(),
+      })
+      const response = await apiFetch(`/api/geocode?${params.toString()}`)
+      const data = response.ok ? await response.json() : null
+
+      onSetAlbumLocation({
+        latitude: position.latitude,
+        longitude: position.longitude,
+        display_name:
+          data?.display_name ||
+          `${position.latitude.toFixed(4)}, ${position.longitude.toFixed(4)}`,
+        place_id: data?.place_id ? String(data.place_id) : undefined,
+        country_code: data?.address?.country_code?.toUpperCase() || undefined,
+      })
+      onSetLocationAutoExtracted(false)
+    } catch {
+      toast.error("Couldn't determine your location. Try searching instead.")
+    } finally {
+      setIsLocating(false)
+    }
+  }
+
   return (
     <motion.div
       key="quick"
@@ -114,20 +158,41 @@ export function QuickPostMode({
           {/* Where & When */}
           <Card>
             <CardContent className="space-y-5">
-              {/* Where */}
-              <LocationSearchInput
-                value={albumLocation}
-                onChange={(loc) => {
-                  onSetAlbumLocation(loc)
-                  onSetLocationAutoExtracted(false)
-                }}
-                placeholder="Where did you go?"
-                label="Where"
-                required
-                showAutoFillButton={photos.length > 0 && !albumLocation}
-                onAutoFill={onAutoFill}
-                isAutoFilling={isExtractingLocation}
-              />
+              {/* Where — search input + one-tap GPS button */}
+              <div className="flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <LocationSearchInput
+                    value={albumLocation}
+                    onChange={(loc) => {
+                      onSetAlbumLocation(loc)
+                      onSetLocationAutoExtracted(false)
+                    }}
+                    placeholder="Where did you go?"
+                    label="Where"
+                    required
+                    showAutoFillButton={photos.length > 0 && !albumLocation}
+                    onAutoFill={onAutoFill}
+                    isAutoFilling={isExtractingLocation}
+                    allowCurrentLocation={false}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleUseCurrentLocation}
+                  disabled={isLocating || isSubmitting}
+                  title="Use current location"
+                  aria-label="Use current location"
+                  className="mt-7 h-11 w-11 shrink-0"
+                >
+                  {isLocating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <LocateFixed className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
 
               {/* When */}
               <YearSeasonSelector

@@ -339,7 +339,7 @@ export default function SavedContent() {
           title="Saved"
           subtitle={
             <>
-              {savedAlbums.length} album{savedAlbums.length !== 1 ? 's' : ''} saved
+              Albums you bookmarked · {savedAlbums.length}
               {viewMode === 'collections' && ` · ${collections.length} collection${collections.length !== 1 ? 's' : ''}`}
             </>
           }

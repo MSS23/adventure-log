@@ -105,7 +105,7 @@ export default async function Image() {
           }}
         >
           <span style={{ fontSize: '14px', color: 'rgba(153,177,105,0.4)', display: 'flex' }}>
-            Free forever · No ads
+            Free to start · No ads
           </span>
         </div>
       </div>

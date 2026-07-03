@@ -50,7 +50,7 @@ describe('Empty State Components', () => {
     it('should render title and description', () => {
       render(<NoAlbumsEmptyState />)
 
-      expect(screen.getByText('No Adventures Yet')).toBeInTheDocument()
+      expect(screen.getByText('No albums yet')).toBeInTheDocument()
       expect(screen.getByText(/Start documenting your travels/)).toBeInTheDocument()
     })
 

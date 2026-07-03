@@ -27,7 +27,7 @@ import type {
   PlaceCandidate,
   PlaceCategory,
   AddPlaceParams,
-} from '@/lib/hooks/useSavedPlaces'
+} from '@/lib/links/place-types'
 
 interface ReviewPlacesModalProps {
   result: ExtractResult | null

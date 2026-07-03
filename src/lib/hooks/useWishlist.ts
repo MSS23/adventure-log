@@ -27,6 +27,13 @@ export interface WishlistItem {
   checklist: ChecklistItem[] | null
   created_at: string
   completed_at: string | null
+  // Link-import fields (migration 67, ex-saved_places). All optional — plain
+  // bucket-list destinations don't set them.
+  city?: string | null
+  category?: 'see' | 'eat' | 'do' | 'stay' | 'other' | null
+  source_platform?: 'manual' | 'tiktok' | 'google_maps' | 'instagram' | 'other' | null
+  source_url?: string | null
+  thumbnail_url?: string | null
 }
 
 export interface TravelPartner {
@@ -44,6 +51,11 @@ interface AddItemParams {
   notes?: string | null
   priority?: 'low' | 'medium' | 'high'
   source?: 'manual' | 'from_album' | 'shared'
+  city?: string | null
+  category?: 'see' | 'eat' | 'do' | 'stay' | 'other' | null
+  source_platform?: 'manual' | 'tiktok' | 'google_maps' | 'instagram' | 'other' | null
+  source_url?: string | null
+  thumbnail_url?: string | null
 }
 
 interface UpdateItemParams {

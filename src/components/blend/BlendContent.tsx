@@ -658,7 +658,7 @@ function FavouritesCard({
           fill="currentColor"
         />
         <p className="font-heading font-semibold text-sm text-foreground">
-          {self ? 'Your' : `${person.name}'s`} favourite trips
+          {self ? 'Your' : `${person.name}'s`} favourite albums
         </p>
       </div>
       {person.favourites.length > 0 ? (

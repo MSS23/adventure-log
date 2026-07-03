@@ -1,12 +1,14 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Calendar, Check, Pencil, Trash2, ArrowUpRight, ListChecks } from 'lucide-react'
+import { Calendar, Check, Pencil, Trash2, ArrowUpRight, ListChecks, ExternalLink, Luggage } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { countryCodeToFlag } from '@/lib/countries'
+import { safeHttpUrl } from '@/lib/utils/input-validation'
 import type { WishlistItem } from '@/lib/hooks/useWishlist'
 import { priorityOf } from './constants'
+import { categoryConfig, platformLabel } from './savedPlacesConfig'
 
 interface WishlistCardProps {
   item: WishlistItem
@@ -14,13 +16,17 @@ interface WishlistCardProps {
   onMarkCompleted: (id: string) => void
   onEdit: (item: WishlistItem) => void
   onRemove: (id: string) => void
+  onAddToTrip?: (item: WishlistItem) => void
 }
 
-export function WishlistCard({ item, index, onMarkCompleted, onEdit, onRemove }: WishlistCardProps) {
+export function WishlistCard({ item, index, onMarkCompleted, onEdit, onRemove, onAddToTrip }: WishlistCardProps) {
   const priority = priorityOf(item.priority)
   const completed = Boolean(item.completed_at)
   const checklist = item.checklist ?? []
   const checklistDone = checklist.filter((c) => c.done).length
+  // Link-import extras (ex-saved_places) — render only when present.
+  const category = item.category ? categoryConfig[item.category] : null
+  const sourceHref = safeHttpUrl(item.source_url ?? undefined)
 
   return (
     <motion.div
@@ -44,6 +50,15 @@ export function WishlistCard({ item, index, onMarkCompleted, onEdit, onRemove }:
             : 'hover:border-primary/30 hover:shadow-[var(--shadow-hover)] hover:-translate-y-0.5'
         )}
       >
+        {item.thumbnail_url && (
+          // eslint-disable-next-line @next/next/no-img-element -- external TikTok CDN host, avoid next/image domain config
+          <img
+            src={item.thumbnail_url}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="w-full h-28 object-cover rounded-t-2xl"
+          />
+        )}
         <div className="p-5">
           {/* Top row: location + priority */}
           <div className="flex items-start justify-between gap-3 mb-3">
@@ -85,13 +100,32 @@ export function WishlistCard({ item, index, onMarkCompleted, onEdit, onRemove }:
             </span>
           </div>
 
-          {/* Source badge */}
-          {item.source === 'shared' && item.shared_by?.username && (
-            <div className="mb-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                <ArrowUpRight className="h-3 w-3" />
-                Suggested by @{item.shared_by.username}
-              </span>
+          {/* Badges: category, link source, partner attribution */}
+          {(category || sourceHref || (item.source === 'shared' && item.shared_by?.username)) && (
+            <div className="mb-3 flex flex-wrap items-center gap-1.5">
+              {category && (
+                <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium', category.badge)}>
+                  <category.icon className="h-3 w-3" />
+                  {category.label}
+                </span>
+              )}
+              {sourceHref && item.source_platform && (
+                <a
+                  href={sourceHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  {platformLabel[item.source_platform]}
+                </a>
+              )}
+              {item.source === 'shared' && item.shared_by?.username && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                  <ArrowUpRight className="h-3 w-3" />
+                  Suggested by @{item.shared_by.username}
+                </span>
+              )}
             </div>
           )}
 
@@ -116,6 +150,18 @@ export function WishlistCard({ item, index, onMarkCompleted, onEdit, onRemove }:
               })}
             </span>
             <div className="flex items-center gap-1">
+              {onAddToTrip && !completed && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onAddToTrip(item)}
+                  className="h-9 w-9 min-w-[44px] min-h-[44px] p-0 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 cursor-pointer"
+                  title="Add to a trip"
+                  aria-label={`Add ${item.location_name} to a trip`}
+                >
+                  <Luggage className="h-4 w-4" />
+                </Button>
+              )}
               {!completed && (
                 <Button
                   variant="ghost"

@@ -18,7 +18,6 @@ import {
   Star,
   MapPin,
   MapPinned,
-  LayoutDashboard,
   MessageSquarePlus,
 } from 'lucide-react'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
@@ -48,14 +47,13 @@ const browseNavItems: NavItem[] = [
 // "Yours" — everything about the signed-in traveler: their overview, maps,
 // albums, trips, and personal collections.
 const yoursNavItems: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Your Globe', href: '/globe', icon: Globe },
   { name: 'Your Map', href: '/map', icon: MapPinned },
   { name: 'Your Albums', href: '/albums', icon: BookOpen },
   { name: 'Your Trips', href: '/trips', icon: MapIcon },
   { name: 'Saved', href: '/saved', icon: Bookmark },
   { name: 'Wishlist', href: '/wishlist', icon: Star },
-  { name: 'Countries', href: '/countries', icon: MapPin },
+  { name: 'Passport', href: '/passport', icon: MapPin },
 ]
 
 const bottomNavItems: NavItem[] = [

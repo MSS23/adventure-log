@@ -1,5 +1,5 @@
 import { Eye, Utensils, Ticket, BedDouble, MapPin, type LucideIcon } from 'lucide-react'
-import type { PlaceCategory, SourcePlatform } from '@/lib/hooks/useSavedPlaces'
+import type { PlaceCategory, SourcePlatform } from '@/lib/links/place-types'
 
 export const categoryConfig: Record<PlaceCategory, { label: string; icon: LucideIcon; badge: string }> = {
   see: {

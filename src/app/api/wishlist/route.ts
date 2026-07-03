@@ -57,6 +57,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { log } from '@/lib/utils/logger'
+import { safeHttpUrl } from '@/lib/utils/input-validation'
 
 async function checkMutualFollow(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -220,6 +221,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Link-import fields (migration 67, ex-saved_places). All optional.
+    const category = ['see', 'eat', 'do', 'stay', 'other'].includes(body.category)
+      ? body.category
+      : null
+    const sourcePlatform = ['manual', 'tiktok', 'google_maps', 'instagram', 'other'].includes(body.source_platform)
+      ? body.source_platform
+      : null
+    const sourceUrl = safeHttpUrl(body.source_url) ?? null
+    const thumbnailUrl = safeHttpUrl(body.thumbnail_url) ?? null
+    const city = typeof body.city === 'string' && body.city.trim()
+      ? body.city.trim().slice(0, 120)
+      : null
+
     const { data, error } = await supabase
       .from('wishlist_items')
       .insert({
@@ -234,6 +248,11 @@ export async function POST(request: NextRequest) {
         notes: body.notes ? String(body.notes).slice(0, 2000) : null,
         priority,
         source,
+        city,
+        category,
+        source_platform: sourcePlatform,
+        source_url: sourceUrl,
+        thumbnail_url: thumbnailUrl,
         // Attribution ("suggested by …") is only ever set server-side by the
         // /api/wishlist/suggest route after a mutual-follow check. Never trust a
         // client-supplied shared_by_user_id here — it would let a user fake a

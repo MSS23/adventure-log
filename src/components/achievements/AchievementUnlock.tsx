@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Share2, Trophy, MapPin, Camera, Users, Globe, Star, Flame, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHaptics } from '@/lib/hooks/useHaptics'
+import { getWebOrigin } from '@/lib/utils/native-routes'
 import { ConfettiCelebration } from '@/components/animations/ConfettiCelebration'
 import { Button } from '@/components/ui/button'
 
@@ -154,13 +155,13 @@ export function AchievementUnlock({
       return
     }
 
-    // Default share behavior
+    // Default share behavior — web origin, never the capacitor:// WebView origin.
     if (navigator.share) {
       try {
         await navigator.share({
           title: `I unlocked "${achievement.title}"!`,
           text: achievement.description,
-          url: window.location.origin,
+          url: getWebOrigin(),
         })
       } catch {
         // User cancelled

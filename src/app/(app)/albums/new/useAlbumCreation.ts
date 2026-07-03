@@ -609,7 +609,7 @@ export function useAlbumCreation() {
       } else {
         await Toast.show({
           text: mode === 'quick'
-            ? `Posted! Your adventure is now live.`
+            ? `Posted! Your album is now live.`
             : `Album "${opts.title}" created with ${photos.length} photo${photos.length > 1 ? 's' : ''}!`,
           duration: 'long',
           position: 'bottom'

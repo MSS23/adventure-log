@@ -5,6 +5,7 @@ import { X, Mail, MessageSquare, Copy, Share2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 
 interface InviteFriendsDialogProps {
   isOpen: boolean
@@ -15,8 +16,11 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
   const { profile } = useAuth()
   const [copied, setCopied] = useState(false)
 
+  // getWebOrigin, not window.location.origin — inside the APK the latter is
+  // capacitor://localhost, which produced invite links nobody could open.
   const inviteUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}?ref=${profile?.username || 'friend'}`
+    ? withRef(getWebOrigin() || window.location.origin, profile?.username || undefined) ||
+      `${getWebOrigin()}`
     : ''
 
   const inviteMessage = `Join me on Adventure Log! 🌍✈️\n\nI'm using Adventure Log to track my travels and share adventures. Come check it out:\n\n${inviteUrl}\n\nLet's explore the world together!`

@@ -26,6 +26,7 @@ import { ShareButton } from '@/components/albums/ShareButton'
 import { isPWAInstalled } from '@/lib/utils/pwa'
 import { isNativePlatform } from '@/lib/api/client'
 import { localizePath, getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
@@ -601,6 +602,7 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                         `${getWebOrigin()}/albums/${album.id}/public`,
                         profile?.username
                       )
+                      trackGrowthEvent('share_link_created', { meta: { surface: 'album_share_prompt' } })
                       if (navigator.share) {
                         try {
                           await navigator.share({ title: album?.title, url })

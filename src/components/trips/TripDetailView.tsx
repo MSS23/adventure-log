@@ -38,7 +38,8 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
-import { localizePath, getWebOrigin } from '@/lib/utils/native-routes'
+import { localizePath, getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import { MEMBER_COLOR_PALETTE, type Trip, type TripMember, type TripPin } from '@/types/trips'
 import { cn } from '@/lib/utils'
 
@@ -52,7 +53,7 @@ const TripMap = dynamic(() => import('@/components/trips/TripMap'), {
 })
 
 export function TripDetailView({ tripId }: { tripId: string }) {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const router = useRouter()
 
   const [trip, setTrip] = useState<Trip | null>(null)
@@ -246,8 +247,10 @@ export function TripDetailView({ tripId }: { tripId: string }) {
 
   const handleCopyShareLink = async () => {
     if (!trip?.share_slug) return
-    const url = `${getWebOrigin()}/t/${trip.share_slug}`
+    // ?ref= so signups from a shared trip auto-follow the sharer.
+    const url = withRef(`${getWebOrigin()}/t/${trip.share_slug}`, profile?.username)
     await navigator.clipboard.writeText(url)
+    trackGrowthEvent('share_link_created', { meta: { surface: 'trip_share' } })
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -695,7 +698,7 @@ export function TripDetailView({ tripId }: { tripId: string }) {
               <div className="flex items-center gap-2">
                 <Input
                   readOnly
-                  value={`${getWebOrigin()}/t/${trip.share_slug}`}
+                  value={withRef(`${getWebOrigin()}/t/${trip.share_slug}`, profile?.username)}
                   className="font-mono text-xs"
                 />
                 <Button size="sm" variant="outline" onClick={handleCopyShareLink}>

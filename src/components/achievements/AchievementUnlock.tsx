@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Share2, Trophy, MapPin, Camera, Users, Globe, Star, Flame, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useHaptics } from '@/lib/hooks/useHaptics'
-import { getWebOrigin } from '@/lib/utils/native-routes'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import { ConfettiCelebration } from '@/components/animations/ConfettiCelebration'
 import { Button } from '@/components/ui/button'
 
@@ -119,6 +121,7 @@ export function AchievementUnlock({
   autoClose = 5000,
 }: AchievementUnlockProps) {
   const { triggerAchievement, triggerCelebrate } = useHaptics()
+  const { profile } = useAuth()
   const [showConfetti, setShowConfetti] = useState(false)
 
   const rarity = achievement.rarity || 'common'
@@ -155,19 +158,21 @@ export function AchievementUnlock({
       return
     }
 
-    // Default share behavior — web origin, never the capacitor:// WebView origin.
+    // Default share behavior — web origin, never the capacitor:// WebView
+    // origin. ?ref= so signups from the brag auto-follow the sharer.
     if (navigator.share) {
       try {
         await navigator.share({
           title: `I unlocked "${achievement.title}"!`,
           text: achievement.description,
-          url: getWebOrigin(),
+          url: withRef(getWebOrigin(), profile?.username),
         })
+        trackGrowthEvent('share_link_created', { meta: { surface: 'achievement_share' } })
       } catch {
         // User cancelled
       }
     }
-  }, [achievement, onShare])
+  }, [achievement, onShare, profile?.username])
 
   return (
     <AnimatePresence>

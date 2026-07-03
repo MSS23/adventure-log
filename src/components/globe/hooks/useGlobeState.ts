@@ -764,10 +764,13 @@ export function useGlobeState(options: UseGlobeStateOptions) {
 
     setIsAutoRotating(false)
 
+    // 2.2 keeps the destination centered with continental context — the old
+    // 0.8 was a near-ground close-up that read as "zoomed in too much" right
+    // as the album card opened over it (worst on phone screens).
     animateCameraToPosition({
       lat: initialLat,
       lng: initialLng,
-      altitude: 0.8
+      altitude: 2.2
     }, 2500, 'easeInOutCubic')
 
     setTimeout(() => {

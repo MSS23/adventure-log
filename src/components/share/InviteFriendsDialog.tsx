@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 
 interface InviteFriendsDialogProps {
   isOpen: boolean
@@ -25,8 +26,12 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
 
   const inviteMessage = `Join me on Adventure Log! 🌍✈️\n\nI'm using Adventure Log to track my travels and share adventures. Come check it out:\n\n${inviteUrl}\n\nLet's explore the world together!`
 
+  const trackInvite = () =>
+    trackGrowthEvent('share_link_created', { meta: { surface: 'invite_dialog' } })
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(inviteUrl)
+    trackInvite()
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -34,11 +39,13 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
   const handleShareEmail = () => {
     const subject = 'Join me on Adventure Log!'
     const body = inviteMessage
+    trackInvite()
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
   const handleShareSMS = () => {
     const smsBody = inviteMessage
+    trackInvite()
     window.location.href = `sms:?body=${encodeURIComponent(smsBody)}`
   }
 
@@ -50,6 +57,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
           text: inviteMessage,
           url: inviteUrl
         })
+        trackInvite()
       } catch (err) {
         // User cancelled or error occurred
         log.error('Share failed', { component: 'InviteFriendsDialog', action: 'native-share' }, err as Error)

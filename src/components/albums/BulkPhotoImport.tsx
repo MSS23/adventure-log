@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft,
   ArrowRight,
+  Globe2,
   Loader2,
   Upload,
   CheckCircle,
@@ -267,7 +268,9 @@ export function BulkPhotoImport() {
                   <CheckCircle className="h-8 w-8 text-primary" />
                 </div>
                 <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
-                  Import Complete
+                  {groups.some(g => g.centerLat !== null)
+                    ? 'Your globe just lit up'
+                    : 'Import Complete'}
                 </h2>
                 <p className="text-sm text-muted-foreground mb-6">
                   {createdAlbumIds.length} album{createdAlbumIds.length !== 1 ? 's' : ''} created
@@ -275,8 +278,17 @@ export function BulkPhotoImport() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {/* The payoff moment: send them to their pinned globe first. */}
+                  <Button
+                    onClick={() => router.push(localizePath('/globe'))}
+                    className="cursor-pointer"
+                  >
+                    <Globe2 className="h-4 w-4 mr-2" />
+                    See Your Globe
+                  </Button>
                   {createdAlbumIds.length > 0 && (
                     <Button
+                      variant="outline"
                       onClick={() => router.push(localizePath(`/albums/${createdAlbumIds[0]}`))}
                       className="cursor-pointer"
                     >
@@ -284,13 +296,6 @@ export function BulkPhotoImport() {
                       View First Album
                     </Button>
                   )}
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push('/profile')}
-                    className="cursor-pointer"
-                  >
-                    Go to Dashboard
-                  </Button>
                   <Button
                     variant="outline"
                     className="cursor-pointer"

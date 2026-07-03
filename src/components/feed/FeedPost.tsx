@@ -12,6 +12,7 @@ import { useHaptics } from '@/lib/hooks/useHaptics'
 import { useFavorites } from '@/lib/hooks/useFavorites'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import { formatTravelDate } from '@/lib/utils/travel-date'
 import { formatLocationLabel, getFlagEmoji } from '@/lib/utils/country'
 import { cn } from '@/lib/utils'
@@ -136,6 +137,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
       `${getWebOrigin()}/albums/${album.id}/public`,
       profile?.username
     )
+    trackGrowthEvent('share_link_created', { meta: { surface: 'feed_post' } })
     if (navigator.share) {
       try {
         await navigator.share({

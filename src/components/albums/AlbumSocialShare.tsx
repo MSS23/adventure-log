@@ -15,6 +15,9 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Toast } from '@capacitor/toast'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { withRef } from '@/lib/utils/native-routes'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 
 interface AlbumSocialShareProps {
   url: string
@@ -25,7 +28,7 @@ interface AlbumSocialShareProps {
 }
 
 export function AlbumSocialShare({
-  url,
+  url: rawUrl,
   title,
   description,
   className,
@@ -34,6 +37,15 @@ export function AlbumSocialShare({
   const [copied, setCopied] = useState(false)
   const [showQR, setShowQR] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const { profile } = useAuth()
+
+  // Every outbound link carries the sharer's referral handle. This component
+  // also renders on public pages for anonymous visitors, where withRef is a
+  // no-op (no username to credit).
+  const url = withRef(rawUrl, profile?.username)
+
+  const trackShare = () =>
+    trackGrowthEvent('share_link_created', { meta: { surface: 'album_social_share' } })
 
   useEffect(() => {
     if (showQR && !qrDataUrl) {
@@ -58,6 +70,7 @@ export function AlbumSocialShare({
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(url)
+      trackShare()
       setCopied(true)
       await Toast.show({ text: 'Link copied!', duration: 'short' })
       setTimeout(() => setCopied(false), 2000)
@@ -74,6 +87,7 @@ export function AlbumSocialShare({
           text: description || `Check out "${title}" on Adventure Log!`,
           url
         })
+        trackShare()
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           handleCopyLink()
@@ -152,6 +166,7 @@ export function AlbumSocialShare({
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={trackShare}
               className={cn(
                 "flex items-center gap-2 p-3 rounded-xl transition-all",
                 link.bgColor,
@@ -260,6 +275,7 @@ export function AlbumSocialShare({
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={trackShare}
             className={cn(
               "p-2 rounded-full transition-all",
               link.bgColor,

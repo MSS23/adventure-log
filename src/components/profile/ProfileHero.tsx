@@ -13,6 +13,8 @@ import { toast } from 'sonner'
 import { AnimatedCounter } from '@/components/ui/animated-count'
 import { FollowButton } from '@/components/social/FollowButton'
 import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { FoundingExplorerBadge } from '@/components/profile/FoundingExplorerBadge'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 
 interface ProfileHeroProps {
   profile: User
@@ -38,6 +40,7 @@ export function ProfileHero({
     if (!profile.username) return
     const url = withRef(`${getWebOrigin()}/u/${profile.username}`, profile.username)
     const title = `${displayName} on Adventure Log`
+    trackGrowthEvent('share_link_created', { meta: { surface: 'profile_hero' } })
 
     const copyToClipboard = async () => {
       try {
@@ -110,8 +113,9 @@ export function ProfileHero({
                 <h1 className="al-display text-2xl sm:text-3xl">
                   {displayName}
                 </h1>
-                <p className="font-mono text-[11px] tracking-wider text-muted-foreground mt-1">
+                <p className="font-mono text-[11px] tracking-wider text-muted-foreground mt-1 flex items-center gap-2">
                   @{username}
+                  <FoundingExplorerBadge createdAt={profile.created_at} />
                 </p>
               </div>
 

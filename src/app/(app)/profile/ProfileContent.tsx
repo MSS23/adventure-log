@@ -66,8 +66,28 @@ export default function ProfileContent({
   const [, setCountryCodes] = useState<string[]>(initialCountryCodes)
   const [travelStats, setTravelStats] = useState(initialTravelStats)
   const [showInvite, setShowInvite] = useState(false)
+  const [referralCount, setReferralCount] = useState(0)
   const fetchingRef = useRef(false)
   const supabase = createClient()
+
+  // "Friends joined from your shares" — count of users whose referred_by is
+  // this user (stamped by claim_referral, migration 71). SECURITY DEFINER
+  // RPC returns only the caller's own count; any failure (migration not
+  // applied yet) just leaves the stat hidden.
+  useEffect(() => {
+    if (!userId) return
+    let cancelled = false
+    supabase
+      .rpc('count_referrals', { _user_id: userId })
+      .then(({ data, error }) => {
+        if (cancelled || error) return
+        const n = typeof data === 'number' ? data : Number(data)
+        if (Number.isFinite(n)) setReferralCount(n)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [userId, supabase])
 
   // Refetch keys off the server-provided userId (the user this page renders),
   // never the client auth context — so the stats can't drift to another user.
@@ -154,6 +174,16 @@ export default function ProfileContent({
             <p className="al-stat-value text-2xl sm:text-3xl mt-1">{albums.length}</p>
           </div>
         </div>
+
+        {/* Quiet referral stat — only shows once at least one share converted */}
+        {referralCount > 0 && (
+          <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+            <UserPlus className="h-3.5 w-3.5 text-primary" />
+            {referralCount === 1
+              ? '1 friend joined from your shares'
+              : `${referralCount} friends joined from your shares`}
+          </p>
+        )}
 
         {/* Two things the user reaches for most — Passport & Wrapped */}
         <div className="grid grid-cols-2 gap-3">

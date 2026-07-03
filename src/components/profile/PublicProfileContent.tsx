@@ -26,6 +26,8 @@ import { getFlagEmoji } from '@/lib/utils/country'
 import { getDisplayInitial } from '@/lib/utils/display-name'
 import { formatDistanceKm } from '@/lib/utils/geoCalculations'
 import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { FoundingExplorerBadge } from '@/components/profile/FoundingExplorerBadge'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -56,6 +58,9 @@ interface PublicUser {
   bio: string | null
   avatar_url: string | null
   privacy_level: string | null
+  // Optional so callers that don't select it still typecheck; the founding
+  // badge simply doesn't render without it.
+  created_at?: string | null
 }
 
 interface PublicProfileContentProps {
@@ -92,6 +97,9 @@ export function PublicProfileContent({
     try {
       await navigator.clipboard.writeText(text)
       if (type === 'url') {
+        trackGrowthEvent('share_link_created', { meta: { surface: 'public_profile' } })
+      }
+      if (type === 'url') {
         setCopiedUrl(true)
         setTimeout(() => setCopiedUrl(false), 2000)
       } else {
@@ -115,6 +123,7 @@ export function PublicProfileContent({
     if (typeof navigator !== 'undefined' && 'share' in navigator) {
       try {
         await navigator.share(shareData)
+        trackGrowthEvent('share_link_created', { meta: { surface: 'public_profile' } })
         return
       } catch {
         // User cancelled or share unavailable — fall through to copy.
@@ -175,7 +184,10 @@ export function PublicProfileContent({
             <h1 className="font-heading text-4xl md:text-5xl font-semibold tracking-tight text-white mb-2">
               {displayName}
             </h1>
-            <p className="text-white/85 text-lg mb-4">@{user.username}</p>
+            <p className="text-white/85 text-lg mb-4 flex items-center justify-center gap-2">
+              @{user.username}
+              <FoundingExplorerBadge createdAt={user.created_at} />
+            </p>
             {user.bio && (
               <p className="text-white/90 max-w-prose mx-auto text-lg leading-relaxed">
                 {user.bio}

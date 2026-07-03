@@ -1,18 +1,20 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo, Suspense, Component, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef, Suspense, Component, type ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useWrappedData } from '@/lib/hooks/useWrappedData'
 import { FlightReelOverlay } from '@/components/wrapped/FlightReelOverlay'
+import { useWrappedVideoExport } from '@/components/wrapped/useWrappedVideoExport'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
 import { createClient } from '@/lib/supabase/client'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getFlagEmoji } from '@/lib/utils/country'
-import { getWebOrigin } from '@/lib/utils/native-routes'
+import { buildWrappedShareUrl } from '@/lib/utils/wrapped-share-url'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import {
   Share2,
   Download,
@@ -28,6 +30,7 @@ import {
   RotateCcw,
   Calendar,
   Home,
+  Video,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -209,13 +212,67 @@ function WrappedExperience() {
   // -1 = before the first arc; 0..n-1 = arriving at locations[n+1].
   const [segmentIndex, setSegmentIndex] = useState(-1)
 
+  // ── Flyover video export ──────────────────────────────────────────────
+  // Recorder + compositor + share/download live in the hook; the recorder
+  // util itself is dynamically imported so it never weighs down a normal
+  // Wrapped view. exportRun doubles as the flag for "this globe run is a
+  // recording" AND the globe's mount key (a fresh mount restarts the flight
+  // from the beginning and rebuilds the renderer with preserveDrawingBuffer,
+  // which the compositor needs to read WebGL pixels).
+  const {
+    supported: videoSupported,
+    status: videoStatus,
+    begin: beginVideo,
+    finish: finishVideo,
+    cancel: cancelVideo,
+  } = useWrappedVideoExport({ year: mode === 'all' ? 'all' : currentYear })
+  const [exportRun, setExportRun] = useState(0)
+  // Ref twin of "exportRun > 0" so stable callbacks (globe complete/canvas
+  // ready) can read it without changing identity mid-flight — WrappedGlobe
+  // restarts its segment effect when those callback props change.
+  const exportingRef = useRef(false)
+
+  // The animation is explicitly user-initiated (they tapped Export), so it
+  // runs even under prefers-reduced-motion — no gating here on purpose.
+  const startVideoExport = useCallback(() => {
+    exportingRef.current = true
+    setExportRun((n) => n + 1)
+    setFlightProgress(0)
+    setSegmentIndex(-1)
+    setPhase('globe')
+  }, [])
+
+  const abandonVideoExport = useCallback(() => {
+    if (!exportingRef.current) return
+    exportingRef.current = false
+    cancelVideo()
+    setExportRun(0)
+  }, [cancelVideo])
+
+  const handleGlobeCanvasReady = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      if (!exportingRef.current) return
+      void beginVideo(canvas).then((started) => {
+        if (!started && exportingRef.current) {
+          // Couldn't start the recorder — let the flight play as a normal
+          // replay instead of stranding the user.
+          exportingRef.current = false
+          setExportRun(0)
+          toast.error("Video export isn't supported on this device.")
+        }
+      })
+    },
+    [beginVideo]
+  )
+
   // Restart the experience whenever the subject changes (own ↔ friend).
   useEffect(() => {
+    abandonVideoExport()
     setPhase('intro')
     setFlightProgress(0)
     setSegmentIndex(-1)
     setMode('year')
-  }, [friendUsername])
+  }, [friendUsername, abandonVideoExport])
 
   const displayName = viewingFriend
     ? friend?.display_name || friend?.username || 'Traveler'
@@ -226,6 +283,7 @@ function WrappedExperience() {
   const globeLocations = useMemo(() => data.locations, [data.locations])
 
   const switchMode = (newMode: 'year' | 'all') => {
+    abandonVideoExport()
     setMode(newMode)
     setPhase('intro')
     setFlightProgress(0)
@@ -247,8 +305,17 @@ function WrappedExperience() {
   }, [])
 
   const handleGlobeComplete = useCallback(() => {
-    setTimeout(() => setPhase('stats'), 1500)
-  }, [])
+    // 1.5s hold on the finale wide shot — also recorded, so the exported
+    // video ends on the full route map instead of a hard cut.
+    setTimeout(async () => {
+      if (exportingRef.current) {
+        exportingRef.current = false
+        await finishVideo()
+        setExportRun(0)
+      }
+      setPhase('stats')
+    }, 1500)
+  }, [finishVideo])
 
   // When viewing a specific year, the card API should render that year's
   // stats — not all-time — so the shared/downloaded image matches the screen.
@@ -258,16 +325,15 @@ function WrappedExperience() {
     const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" — make yours free on Adventure Log:`
     const shareTitle = `${displayName}'s ${label} Travel Wrapped`
     // Share a public landing surface, not this auth-gated /wrapped route —
-    // recipients who tap the link should reach a page they can act on. The
-    // ref param makes anyone who signs up from this share auto-follow you
+    // recipients land on /wrapped/share?u=…&year=… where they can WATCH the
+    // Wrapped (globe + stats) anonymously and hit a signup CTA. The ref
+    // param makes anyone who signs up from this share auto-follow you
     // (ReferralHandler + claim_referral).
-    // Land recipients on the sharer's PUBLIC profile (their map, stats, and
-    // albums with signup CTAs) — not the generic marketing page. getWebOrigin
-    // so APK shares never leak capacitor://localhost.
-    const origin = getWebOrigin() || 'https://adventure-log-azure.vercel.app'
-    const shareUrl = profile?.username
-      ? `${origin}/u/${profile.username}?ref=${profile.username}`
-      : origin
+    const shareUrl = buildWrappedShareUrl(
+      profile?.username,
+      mode === 'all' ? 'all' : currentYear
+    )
+    trackGrowthEvent('share_link_created', { meta: { surface: 'wrapped' } })
 
     // Best effort: attach the travel-card PNG so the share carries the visual,
     // not just text. Any failure here falls through to the text-only share.
@@ -670,13 +736,33 @@ function WrappedExperience() {
               }
             >
               <WrappedGlobe
+                key={exportRun > 0 ? `export-${exportRun}` : 'play'}
                 locations={globeLocations}
                 animate={true}
                 onProgress={handleGlobeProgress}
                 onAnimationComplete={handleGlobeComplete}
                 onPinClick={handlePinClick}
+                onCanvasReady={exportRun > 0 ? handleGlobeCanvasReady : undefined}
+                preserveDrawingBuffer={exportRun > 0}
+                interactive={exportRun === 0}
               />
             </GlobeErrorBoundary>
+
+            {/* Recording indicator — only during an export run */}
+            {exportRun > 0 && (
+              <div className="absolute top-[calc(max(1rem,env(safe-area-inset-top))+4.25rem)] left-1/2 -translate-x-1/2 z-30">
+                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 shadow-lg shadow-black/30">
+                  {videoStatus === 'saving' ? (
+                    <Loader2 className="h-3 w-3 text-olive-400 animate-spin" aria-hidden />
+                  ) : (
+                    <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" aria-hidden />
+                  )}
+                  <span className="text-white/85 text-xs font-medium">
+                    {videoStatus === 'saving' ? 'Saving your video…' : 'Recording your journey…'}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Flight progress bar — sits 3rem below the top control row, so
                 offset from the same safe-area-aware baseline (1rem floor). */}
@@ -731,15 +817,20 @@ function WrappedExperience() {
               </motion.div>
             </div>
 
-            {/* Skip button */}
+            {/* Skip button — becomes a cancel during an export run (skipping
+                mid-recording would produce a truncated video, so cancel
+                discards the footage instead) */}
             <div className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-30">
               <Button
-                onClick={() => setPhase('stats')}
+                onClick={() => {
+                  abandonVideoExport()
+                  setPhase('stats')
+                }}
                 variant="ghost"
                 size="sm"
                 className="cursor-pointer text-white/70 hover:text-white text-xs transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-olive-500 min-h-[44px] min-w-[44px]"
               >
-                Skip
+                {exportRun > 0 ? 'Cancel' : 'Skip'}
               </Button>
             </div>
           </motion.div>
@@ -975,6 +1066,24 @@ function WrappedExperience() {
                 </motion.div>
 
                 <div className="flex gap-3 flex-wrap justify-center">
+                {/* Flyover video export — own view only, and only when the
+                    browser can actually record a canvas (Safari/older
+                    WebViews hide it) and there's a flight to record. */}
+                {!viewingFriend && user && videoSupported && globeLocations.length >= 2 && (
+                  <Button
+                    onClick={startVideoExport}
+                    disabled={videoStatus !== 'idle'}
+                    variant="outline"
+                    className="cursor-pointer border-white/30 text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                  >
+                    {videoStatus !== 'idle' ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Video className="h-4 w-4 mr-2" />
+                    )}
+                    Export Video
+                  </Button>
+                )}
                 {!viewingFriend && user && (
                   <Button
                     onClick={async () => {

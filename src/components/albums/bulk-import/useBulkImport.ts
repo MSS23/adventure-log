@@ -10,6 +10,7 @@ import { extractPhotoExif } from '@/lib/utils/exif-extraction'
 import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 import { uploadPhotoFile } from '@/lib/api/upload'
 import { apiFetch } from '@/lib/api/client'
+import { trackGrowthEvent, trackFirstPinIfPending } from '@/lib/utils/growth-events'
 import type { ProcessedPhoto, PhotoGroup, Stage } from './types'
 import {
   groupPhotosByTrip,
@@ -165,6 +166,15 @@ export function useBulkImport() {
             ? data.display_name.split(',').slice(0, 3).join(',').trim()
             : 'Unknown location'
 
+          // All geocode providers normalize to address.country_code (ISO-2,
+          // lowercase). Albums need country_code for the Countries tab, so
+          // capture it here and persist it at album-insert time.
+          const rawCountryCode = data.address?.country_code
+          const countryCode =
+            typeof rawCountryCode === 'string' && /^[a-zA-Z]{2}$/.test(rawCountryCode.trim())
+              ? rawCountryCode.trim().toUpperCase()
+              : null
+
           // Generate a nice album name
           const city = data.address?.city || data.address?.town || data.address?.village || ''
           const country = data.address?.country || ''
@@ -188,6 +198,7 @@ export function useBulkImport() {
           updatedGroups[i] = {
             ...group,
             locationName,
+            countryCode,
             name: group.name || albumName,
           }
         } else {
@@ -205,8 +216,11 @@ export function useBulkImport() {
         }
       }
 
-      // Add a small delay between geocode requests to be respectful to the API
-      await new Promise(resolve => setTimeout(resolve, 1100))
+      // Add a small delay between geocode requests to be respectful to the
+      // API — but not after the last group (single-trip imports shouldn't pay it).
+      if (i < updatedGroups.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1100))
+      }
     }
 
     setGroups(updatedGroups)
@@ -301,6 +315,7 @@ export function useBulkImport() {
         dateStart: range.start,
         dateEnd: range.end,
         locationName: g1.locationName,
+        countryCode: g1.countryCode ?? g2.countryCode ?? null,
         expanded: true,
       }
 
@@ -326,6 +341,7 @@ export function useBulkImport() {
 
     const totalPhotos = groups.reduce((sum, g) => sum + g.photos.length, 0)
     let uploadedCount = 0
+    let anyGeoAlbumCreated = false
     const albumIds: string[] = []
 
     for (const group of groups) {
@@ -347,10 +363,14 @@ export function useBulkImport() {
           status: 'published',
         }
 
-        if (group.centerLat !== null && group.centerLng !== null) {
+        const hasGeo = group.centerLat !== null && group.centerLng !== null
+        if (hasGeo) {
           albumData.latitude = group.centerLat
           albumData.longitude = group.centerLng
           albumData.location_name = group.locationName
+          if (group.countryCode) {
+            albumData.country_code = group.countryCode
+          }
         }
 
         if (group.dateStart) {
@@ -375,6 +395,10 @@ export function useBulkImport() {
         }
 
         albumIds.push(album.id)
+        trackGrowthEvent('album_created', { meta: { via: 'import', hasGeo } })
+        if (hasGeo) {
+          anyGeoAlbumCreated = true
+        }
 
         // Upload photos
         for (let i = 0; i < group.photos.length; i++) {
@@ -471,6 +495,11 @@ export function useBulkImport() {
         })
         setError(err instanceof Error ? err.message : 'Upload failed')
       }
+    }
+
+    // First pin = first album with coordinates; measures signup → pinned globe.
+    if (anyGeoAlbumCreated) {
+      trackFirstPinIfPending()
     }
 
     setCreatedAlbumIds(albumIds)

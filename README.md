@@ -350,6 +350,9 @@ NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-token
 - **[Development Progress](DEVELOPMENT_PROGRESS.md)** - Current development status
 - **[Future Roadmap](FUTURE_ROADMAP.md)** - Planned features and enhancements
 
+### Growth docs
+- **[Growth Playbook](docs/growth/PLAYBOOK.md)** - Growth thesis, 90-day plan, and operator guides (Play Store, domain/email, launches, outreach, ASO)
+
 ## 🤝 Contributing
 
 1. Fork the repository

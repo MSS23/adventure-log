@@ -16,6 +16,7 @@ import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/button'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 import { calculateAge, MIN_AGE } from '@/lib/utils/age'
+import { markFirstPinStart } from '@/lib/utils/growth-events'
 
 function SignupForm() {
   const router = useRouter()
@@ -116,6 +117,12 @@ function SignupForm() {
         setError(authError.message)
         return
       }
+
+      // Start the time-to-first-pin clock at signup completion. localStorage
+      // survives the email-confirmation round trip on this device, and the
+      // pending key is consumed by trackFirstPinIfPending() when the first
+      // geolocated album is created.
+      markFirstPinStart()
 
       // If a session was returned, email confirmation is disabled and the user
       // is signed in immediately — send them straight into the app.

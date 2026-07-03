@@ -57,6 +57,20 @@ interface WrappedGlobeProps {
   onProgress?: (progress: number, segmentIndex: number) => void
   onPinClick?: (location: WrappedLocation) => void
   className?: string
+  /**
+   * Called with the WebGL canvas once the globe is ready — used by the video
+   * export to feed the canvas into a captureStream compositor.
+   */
+  onCanvasReady?: (canvas: HTMLCanvasElement) => void
+  /**
+   * Keep the WebGL drawing buffer readable after compositing. Required while
+   * the video export drawImage()s this canvas from its own rAF loop; left off
+   * otherwise (it costs memory/perf). Construction-time only — remount the
+   * globe (new key) to change it.
+   */
+  preserveDrawingBuffer?: boolean
+  /** Disable pointer input (a drag mid-export would ruin the chase cam). */
+  interactive?: boolean
 }
 
 /* ───────────────────────────────────────────────────────────────────────
@@ -82,6 +96,9 @@ export function WrappedGlobe({
   onProgress,
   onPinClick,
   className = '',
+  onCanvasReady,
+  preserveDrawingBuffer = false,
+  interactive = true,
 }: WrappedGlobeProps) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [globeReady, setGlobeReady] = useState(false)
@@ -236,6 +253,14 @@ export function WrappedGlobe({
       controls.autoRotateSpeed = 0.3
     }
   }, [globeReady, sortedLocations, animate])
+
+  // Surface the WebGL canvas to the parent once the globe is live (the ref
+  // itself is internal; the canvas is the only thing the export needs).
+  useEffect(() => {
+    if (!globeReady || !onCanvasReady) return
+    const canvas = containerRef.current?.querySelector('canvas')
+    if (canvas) onCanvasReady(canvas)
+  }, [globeReady, onCanvasReady])
 
   const flyTo = useCallback(
     (lat: number, lng: number, altitude: number, duration: number) => {
@@ -526,9 +551,9 @@ export function WrappedGlobe({
           atmosphereAltitude={0.12}
           showAtmosphere={true}
           // Settings
-          enablePointerInteraction={true}
+          enablePointerInteraction={interactive}
           animateIn={true}
-          rendererConfig={{ antialias: true, alpha: true }}
+          rendererConfig={{ antialias: true, alpha: true, preserveDrawingBuffer }}
         />
       )}
 

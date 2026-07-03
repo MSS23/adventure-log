@@ -5,16 +5,50 @@
  * that page was retired (Feed is the home surface now): explain the core loop
  * in one glance, give one obvious primary action, and offer a few
  * low-friction starting points.
+ *
+ * The primary action is bulk photo import (EXIF GPS → auto-grouped, pinned
+ * albums) because it is the fastest route from empty account to a pinned
+ * globe; manual album creation is the secondary path.
  */
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Camera, Globe as GlobeIcon, Share2, MapPin, Calendar } from 'lucide-react'
+import { Camera, Globe as GlobeIcon, Share2, MapPin, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { MotionList, MotionItem, MotionReveal } from '@/components/animations/MotionList'
 import { MotionCard } from '@/components/ui/card'
+import { log } from '@/lib/utils/logger'
+
+// Dismissal is device-local: the guide auto-retires once the first album
+// exists, so a persistent flag is only needed for "stop showing me this".
+const DISMISS_KEY = 'al_first_run_guide_dismissed'
 
 export function FirstRunGuide() {
+  const [dismissed, setDismissed] = useState(false)
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(DISMISS_KEY) === '1') {
+        setDismissed(true)
+      }
+    } catch {
+      // Storage unavailable (private mode etc.) — just show the guide.
+    }
+  }, [])
+
+  const handleDismiss = () => {
+    setDismissed(true)
+    try {
+      localStorage.setItem(DISMISS_KEY, '1')
+    } catch {
+      // Non-fatal; the guide will reappear next session.
+    }
+    log.userAction('dismissed-first-run-guide', undefined, { component: 'FirstRunGuide' })
+  }
+
+  if (dismissed) return null
+
   const loop = [
     {
       icon: <Camera className="h-5 w-5" strokeWidth={1.8} />,
@@ -44,13 +78,25 @@ export function FirstRunGuide() {
       {/* Core-loop explainer */}
       <section aria-labelledby="how-it-works-heading" className="space-y-4">
         <MotionReveal>
-          <p className="al-eyebrow mb-0.5">How Adventure Log works</p>
-          <h3 id="how-it-works-heading" className="al-display text-xl md:text-2xl">
-            Three steps to your map of the world
-          </h3>
-          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Turn your travels into a living atlas. It starts with a single album.
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="al-eyebrow mb-0.5">How Adventure Log works</p>
+              <h3 id="how-it-works-heading" className="al-display text-xl md:text-2xl">
+                Three steps to your map of the world
+              </h3>
+              <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+                Turn your travels into a living atlas. It starts with a single album.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleDismiss}
+              aria-label="Dismiss guide"
+              className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <X className="h-4 w-4" strokeWidth={1.8} />
+            </button>
+          </div>
         </MotionReveal>
         <MotionList className="grid grid-cols-1 sm:grid-cols-3 gap-4" stagger={0.06}>
           {loop.map((step, i) => (
@@ -85,16 +131,28 @@ export function FirstRunGuide() {
           >
             <MapPin className="h-6 w-6" strokeWidth={1.8} />
           </motion.div>
-          <h3 className="al-display text-xl md:text-2xl">Drop your first pin</h3>
+          <h3 className="al-display text-xl md:text-2xl">
+            Add your travels — watch your globe light up
+          </h3>
           <p className="mx-auto mt-1 mb-5 max-w-md text-sm text-muted-foreground">
-            Your world map is empty right now. Create one album and watch it come alive.
+            Pick a batch of trip photos. We read the location and dates, group
+            them into albums, and pin each one on your globe — in about a minute.
           </p>
           <Button variant="coral" asChild>
-            <Link href="/albums/new">
-              <Calendar className="h-4 w-4" strokeWidth={1.8} />
-              Create your first album
+            <Link href="/albums/import">
+              <Camera className="h-4 w-4" strokeWidth={1.8} />
+              Import photos to your globe
             </Link>
           </Button>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Prefer to start from scratch?{' '}
+            <Link
+              href="/albums/new"
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Create an album manually
+            </Link>
+          </p>
 
           {/* Low-friction starting points */}
           <div className="mt-6">

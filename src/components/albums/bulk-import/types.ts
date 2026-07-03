@@ -20,6 +20,8 @@ export interface PhotoGroup {
   dateStart: Date | null
   dateEnd: Date | null
   locationName: string
+  /** ISO-2 uppercase (e.g. 'FR') from reverse geocoding; albums need it for the Countries tab. */
+  countryCode?: string | null
   expanded: boolean
 }
 

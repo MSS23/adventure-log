@@ -19,6 +19,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
 import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { MutualTravelPanel } from './MutualTravelPanel'
@@ -167,6 +168,7 @@ export function PublicPassportContent({
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl)
+    trackGrowthEvent('share_link_created', { meta: { surface: 'public_passport' } })
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -176,6 +178,7 @@ export function PublicPassportContent({
     try {
       if (navigator.share) {
         await navigator.share({ title: `${displayName}'s Travel Profile`, text, url: shareUrl })
+        trackGrowthEvent('share_link_created', { meta: { surface: 'public_passport' } })
       } else {
         await handleCopy()
       }

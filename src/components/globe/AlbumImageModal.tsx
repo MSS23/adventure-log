@@ -307,7 +307,7 @@ export function AlbumImageModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 24, opacity: 0 }}
             transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-            className="md:hidden absolute bottom-[100px] left-1/2 -translate-x-1/2 z-[60] w-[92%] max-w-[420px] rounded-2xl overflow-hidden"
+            className="md:hidden absolute bottom-[96px] left-1/2 -translate-x-1/2 z-[60] w-[88%] max-w-[360px] rounded-2xl overflow-hidden"
             style={{
               background: 'var(--card)',
               border: '1px solid var(--color-line-warm)',
@@ -317,14 +317,14 @@ export function AlbumImageModal({
             role="dialog"
             aria-label={`Album preview — ${isMultiCity ? `${cluster.cities.length} cities` : primaryCity.name}`}
           >
-            <div className="flex items-center gap-2.5 p-2.5 pr-3">
+            <div className="flex items-center gap-2 p-2 pr-2.5">
               {/* Cover thumbnail — tap straight to album (single-city) */}
               <Link
                 href={isMultiCity ? '#' : `/albums/${primaryCity.id}`}
                 onClick={(e) => {
                   if (isMultiCity) e.preventDefault()
                 }}
-                className="relative w-[60px] h-[60px] rounded-xl overflow-hidden flex-shrink-0"
+                className="relative w-[46px] h-[46px] rounded-lg overflow-hidden flex-shrink-0"
                 style={{ background: 'var(--color-ivory-alt)' }}
               >
                 {currentPhoto && getPhotoSrc(currentPhoto.file_path) ? (
@@ -332,29 +332,23 @@ export function AlbumImageModal({
                     src={getPhotoSrc(currentPhoto.file_path)}
                     alt=""
                     fill
-                    sizes="60px"
+                    sizes="46px"
                     className="object-cover"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">
                     <Camera
-                      className="h-5 w-5"
+                      className="h-4 w-4"
                       style={{ color: 'var(--color-muted-warm)' }}
                     />
                   </div>
                 )}
-                <div
-                  className="absolute top-1 left-1 flex items-center justify-center w-4 h-4 rounded-full"
-                  style={{ background: 'var(--color-coral)' }}
-                >
-                  <MapPin className="h-2 w-2 text-white" strokeWidth={2.5} />
-                </div>
               </Link>
 
               {/* Title + inline meta */}
               <div className="flex-1 min-w-0">
                 <h2
-                  className="font-heading text-[15px] font-semibold truncate leading-tight"
+                  className="font-heading text-[14px] font-semibold truncate leading-tight"
                   style={{
                     color: 'var(--color-ink)',
                     letterSpacing: '-0.01em',
@@ -365,7 +359,7 @@ export function AlbumImageModal({
                     : primaryCity.name}
                 </h2>
                 <div
-                  className="flex items-center gap-2.5 mt-1 font-mono text-[10px] tracking-wide"
+                  className="flex items-center gap-2 mt-0.5 font-mono text-[10px] tracking-wide"
                   style={{ color: 'var(--color-muted-warm)' }}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -391,14 +385,14 @@ export function AlbumImageModal({
               {!isMultiCity && (
                 <Link
                   href={`/albums/${primaryCity.id}`}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold flex-shrink-0 whitespace-nowrap active:scale-[0.97] transition-transform"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold flex-shrink-0 whitespace-nowrap active:scale-[0.97] transition-transform"
                   style={{
                     background: 'var(--color-coral)',
                     color: '#fff',
                     boxShadow: '0 4px 14px rgba(226,85,58,0.3)',
                   }}
                 >
-                  View Album
+                  View
                   <ExternalLink className="h-3 w-3" />
                 </Link>
               )}
@@ -406,7 +400,7 @@ export function AlbumImageModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-[0.97] transition-transform min-w-[40px] min-h-[40px] flex items-center justify-center"
+                className="p-1 rounded-lg flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-[0.97] transition-transform min-w-[36px] min-h-[36px] flex items-center justify-center"
                 style={{ color: 'var(--color-muted-warm)' }}
                 aria-label="Close"
               >

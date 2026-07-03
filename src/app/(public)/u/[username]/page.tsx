@@ -103,7 +103,7 @@ export default async function PublicProfilePage({
   // Fetch user profile
   const { data: user } = await supabase
     .from('users')
-    .select('id, username, display_name, bio, avatar_url, privacy_level')
+    .select('id, username, display_name, bio, avatar_url, privacy_level, created_at')
     .eq('username', username)
     .single()
 

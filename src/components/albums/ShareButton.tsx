@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { Toast } from '@capacitor/toast'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 
 interface ShareButtonProps {
   albumId: string
@@ -55,6 +56,7 @@ export function ShareButton({
   }
 
   const handleShare = async () => {
+    trackGrowthEvent('share_link_created', { meta: { surface: 'album_share_button' } })
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({

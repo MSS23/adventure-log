@@ -22,6 +22,9 @@ export interface User {
   // Billing tier: 'free' | 'pro' (migration 69). Flipped manually/by webhook.
   // Optional so pre-migration rows and builds typecheck; treat missing as 'free'.
   plan?: string | null;
+  // Referral attribution (migration 71): id of the user whose ?ref= link this
+  // account signed up through. First-touch, stamped once by claim_referral.
+  referred_by?: string | null;
   created_at: string;
   updated_at: string;
 }

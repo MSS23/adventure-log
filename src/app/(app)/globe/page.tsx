@@ -229,11 +229,6 @@ function GlobePageContent() {
         })()}
       </div>
 
-      {/* Mobile Bottom Navigation Hint */}
-      {isOwnProfile && albums.length === 0 && (
-        <GlobeMobileEmptyHint />
-      )}
-
     </div>
   )
 }
@@ -255,15 +250,21 @@ function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExpl
         <div className="w-14 h-14 rounded-2xl bg-olive-900/40 flex items-center justify-center mx-auto mb-3">
           <Globe2 className="h-7 w-7 text-olive-400" />
         </div>
-        <h3 className="text-lg font-bold text-foreground mb-2">Your globe is empty</h3>
+        <h3 className="text-lg font-bold text-foreground mb-2">Add your travels — watch your globe light up</h3>
         <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-          Create your first album to see it pinned here. Upload photos with GPS data and watch your travels come to life.
+          Import a batch of trip photos and we&apos;ll read their locations, group them into albums, and pin each one right here.
         </p>
         <div className="flex flex-col gap-2">
-          <Link href="/albums/new">
+          <Link href="/albums/import">
             <Button className="w-full bg-olive-600 hover:bg-olive-700 text-white rounded-xl h-10 gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200">
+              <Camera className="h-4 w-4" />
+              Import Photos
+            </Button>
+          </Link>
+          <Link href="/albums/new">
+            <Button variant="outline" className="w-full rounded-xl h-10 gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200">
               <Plus className="h-4 w-4" />
-              Create First Album
+              Create Album Manually
             </Button>
           </Link>
           <button
@@ -279,35 +280,9 @@ function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExpl
   )
 }
 
-function GlobeMobileEmptyHint() {
-  return (
-    <div className="md:hidden fixed bottom-20 left-4 right-4 bg-white dark:bg-[#111111] rounded-2xl shadow-xl border border-stone-200 dark:border-white/[0.06] p-5 z-30">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-9 h-9 rounded-full bg-olive-100 dark:bg-olive-900/30 flex items-center justify-center flex-shrink-0">
-          <Globe2 className="h-4.5 w-4.5 text-olive-600 dark:text-olive-400" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">Light up your globe</p>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Add your first trip to see it pinned here</p>
-        </div>
-      </div>
-      <div className="flex gap-2">
-        <Link href="/albums/import" className="flex-1">
-          <Button className="w-full gap-1.5 bg-olive-500 hover:bg-olive-600 text-white text-xs h-9 cursor-pointer active:scale-[0.97] transition-all duration-200">
-            <Camera className="h-3.5 w-3.5" />
-            Import Photos
-          </Button>
-        </Link>
-        <Link href="/albums/new" className="flex-1">
-          <Button variant="outline" className="w-full gap-1.5 text-xs h-9 border-stone-300 dark:border-stone-700 cursor-pointer active:scale-[0.97] transition-all duration-200">
-            <Plus className="h-3.5 w-3.5" />
-            Create Album
-          </Button>
-        </Link>
-      </div>
-    </div>
-  )
-}
+// NOTE: the old GlobeMobileEmptyHint (a second bottom card duplicating the
+// centered CTA's actions with slightly different styling) was removed — on an
+// empty mobile globe two near-identical dialogs stacked at once.
 
 export default function GlobePage() {
   return (

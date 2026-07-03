@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { getWebOrigin } from '@/lib/utils/native-routes'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
+import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -215,10 +216,17 @@ export default function TravelPassportPage() {
     if (typeof window === 'undefined' || !profile?.username) return ''
     // getWebOrigin(): on native, window.location.origin is capacitor://localhost
     // — a QR/share link encoding that would be unopenable on other devices.
-    return `${getWebOrigin()}/u/${profile.username}/passport?connect=true`
+    // withRef: the scanner only validates the pathname (and re-forces
+    // connect=true itself), so the extra ref param is QR-safe, and anyone who
+    // follows the link in a browser and signs up auto-follows the owner.
+    return withRef(
+      `${getWebOrigin()}/u/${profile.username}/passport?connect=true`,
+      profile.username
+    )
   }, [profile?.username])
 
   const handleShare = useCallback(async () => {
+    trackGrowthEvent('share_link_created', { meta: { surface: 'passport_qr' } })
     if (navigator.share) {
       try {
         await navigator.share({
@@ -236,6 +244,7 @@ export default function TravelPassportPage() {
 
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(shareUrl)
+    trackGrowthEvent('share_link_created', { meta: { surface: 'passport_qr' } })
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }, [shareUrl])

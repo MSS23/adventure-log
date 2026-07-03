@@ -124,7 +124,16 @@ const PROTECTED_PAGE_PREFIXES = [
   '/travel-twins',
 ]
 
+// Public share surfaces that live UNDER protected prefixes. '/albums' is
+// auth-gated, but an album's public share page and token-shared albums must
+// stay reachable logged-out — that's the whole point of sharing them.
+const PUBLIC_PAGE_PATTERNS = [
+  /^\/albums\/[^/]+\/public$/,
+  /^\/albums\/shared\//,
+]
+
 function isProtectedPage(pathname: string): boolean {
+  if (PUBLIC_PAGE_PATTERNS.some((re) => re.test(pathname))) return false
   return PROTECTED_PAGE_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   )
@@ -227,7 +236,25 @@ export async function middleware(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser()
+
+  // A getUser() failure with session cookies present is a transient Supabase
+  // problem (network blip, 5xx, statement timeout), not a logged-out user —
+  // AuthApiError with status 401/403 is the genuine invalid/expired-session
+  // case. Bouncing a logged-in user to /login on a blip logs them out
+  // mid-session; let the request through instead and rely on the page's own
+  // client-side auth gate (ProtectedRoute) / the API route's own auth check.
+  const hasSessionCookies = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('auth-token'))
+  const authIsTransientFailure =
+    !user &&
+    !!authError &&
+    hasSessionCookies &&
+    authError.status !== 400 &&
+    authError.status !== 401 &&
+    authError.status !== 403
 
   const isApiRoute = pathname.startsWith('/api/')
   const apiIsPublic = isApiRoute && isPublicApiPath(pathname)
@@ -237,9 +264,9 @@ export async function middleware(request: NextRequest) {
   // ----------------------------------------------------------------
   if (isApiRoute && !apiIsPublic) {
     // Protected API: never redirect — return JSON 401.
-    if (!user) return dataRequestUnauthorized()
+    if (!user && !authIsTransientFailure) return dataRequestUnauthorized()
   } else if (!isApiRoute && isProtectedPage(pathname)) {
-    if (!user) {
+    if (!user && !authIsTransientFailure) {
       if (isDataRequest(request)) {
         return dataRequestUnauthorized()
       }

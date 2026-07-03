@@ -202,7 +202,9 @@ export function WalkthroughTour({
   }, [])
 
   const endTour = useCallback(
-    (completed: boolean) => {
+    // `_completed` is retained for call-site clarity (endTour(true|false)) but
+    // no longer branches — any exit now persists completion (see below).
+    (_completed: boolean) => {
       // Remove highlight from previous element
       if (prevElRef.current) {
         prevElRef.current.style.position = ''
@@ -213,9 +215,11 @@ export function WalkthroughTour({
       setIsActive(false)
       setTargetRect(null)
       setTooltipPos(null)
-      if (completed) {
-        markTourCompleted(tourId)
-      }
+      // Persist on ANY exit, not just "finished all steps". Skipping (X / Esc /
+      // Skip tour / overlay click) calls endTour(false); without recording it,
+      // the auto-start guard re-opened the tour on every single page visit.
+      // Seeing it once — however you leave — counts as seen.
+      markTourCompleted(tourId)
       onComplete?.()
     },
     [tourId, onComplete]

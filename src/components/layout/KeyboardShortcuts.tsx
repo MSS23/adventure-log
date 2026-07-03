@@ -75,11 +75,13 @@ export function KeyboardShortcuts() {
 
   return (
     <>
-      {/* Help Button - Bottom Left */}
+      {/* Help Button — bottom-RIGHT. Was bottom-left, directly on top of the
+          sidebar footer's theme toggle (the fixed left rail is ~260px wide, so
+          left-6 lands inside it and swallowed clicks meant for the toggle). */}
       <button
         type="button"
         onClick={() => setShowHelp(true)}
-        className="hidden lg:flex fixed bottom-6 left-6 z-40 h-11 w-11 rounded-full bg-[color:var(--color-ink)] hover:bg-[color:var(--color-ink-soft)] text-[color:var(--color-ivory)] shadow-lg items-center justify-center transition-all duration-200 ease-out hover:scale-110 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="hidden lg:flex fixed bottom-6 right-6 z-40 h-11 w-11 rounded-full bg-[color:var(--color-ink)] hover:bg-[color:var(--color-ink-soft)] text-[color:var(--color-ivory)] shadow-lg items-center justify-center transition-all duration-200 ease-out hover:scale-110 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label="Keyboard Shortcuts"
         title="Keyboard Shortcuts (?)"
       >

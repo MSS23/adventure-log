@@ -240,9 +240,14 @@ export function useGlobePageData() {
 
   const albums = albumsQuery.data?.albums ?? EMPTY_ALBUMS
   const stats = albumsQuery.data?.stats ?? EMPTY_STATS
-  const isOwnProfile = albumsQuery.data?.isOwnProfile ?? false
+  // Derive ownership synchronously from the URL, not from the pending query.
+  // /globe with no ?user= is always the signed-in user's own globe; keying off
+  // the query left isOwnProfile=false during load, which rendered the header
+  // as "undefined's Globe" (profileUser null) with a zero-state on every load.
+  const isOwnProfile = albumsQuery.data?.isOwnProfile ?? (!userId || userId === user?.id)
   const isPrivateAccount = albumsQuery.data?.isPrivateAccount ?? false
   const profileUser = albumsQuery.data?.profileUser ?? null
+  const isProfileLoading = albumsQuery.isPending
 
   // Calculate total distance from album coordinates
   const totalDistance = useMemo(() => calculateTotalDistance(albums), [albums])
@@ -540,6 +545,7 @@ export function useGlobePageData() {
     isOwnProfile,
     isPrivateAccount,
     profileUser,
+    isProfileLoading,
     followStatus,
 
     // Friends

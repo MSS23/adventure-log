@@ -30,10 +30,14 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  // The globe page has its own "+" add button in the header and a full-width
-  // album filmstrip docked to the bottom; the global FAB would both duplicate
-  // that action and cover the filmstrip, so hide it there.
-  const hideFab = pathname?.startsWith('/globe')
+  // Hide the global "+" FAB where it would duplicate or collide with a page's
+  // own bottom-docked controls:
+  //  - /globe: has its own header "+" and a bottom album filmstrip.
+  //  - /albums/[id]: has its own upload "+" and a mobile bottom action bar
+  //    (favourite/save/comment) that the FAB was overlapping and clipping.
+  const hideFab =
+    pathname?.startsWith('/globe') ||
+    /^\/albums\/[^/]+$/.test(pathname ?? '')
 
   // Locked app shell: the scroll region is an inner element, not the window.
   // On every route change, reset it to the top so each page opens at its start

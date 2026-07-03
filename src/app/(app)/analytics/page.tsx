@@ -289,9 +289,12 @@ export default function AnalyticsPage() {
     queryFn: async () => {
       const userId = user!.id
 
+      // No photos(...) embed: the standalone photos query below supplies every
+      // downstream value, and the nested embed was what pushed this query past
+      // Supabase's statement timeout (HTTP 500 / code 57014) on load.
       const { data: albums, error: albumsError } = await supabase
         .from('albums')
-        .select('id, title, location_name, country_code, latitude, longitude, date_start, date_end, created_at, photos(id, taken_at, created_at)')
+        .select('id, title, location_name, country_code, latitude, longitude, date_start, date_end, created_at')
         .eq('user_id', userId)
         .order('date_start', { ascending: true })
 
@@ -557,7 +560,10 @@ export default function AnalyticsPage() {
           {/* Photos by Month */}
           <Section delay={0.2}>
             <SectionTitle icon={Camera}>Photos by Month</SectionTitle>
-            <div className="flex items-end justify-between gap-1 h-[140px]">
+            {/* No items-end: columns must stretch to this fixed height so each
+                bar's percentage height resolves against it (items-end collapses
+                the column to content height and the bars vanish). */}
+            <div className="flex justify-between gap-1 h-[140px]">
               {stats.photosByMonth.map((m) => {
                 const heightPct = maxMonthCount > 0 ? (m.count / maxMonthCount) * 100 : 0
                 return (
@@ -604,7 +610,8 @@ export default function AnalyticsPage() {
           {/* Photos by Year */}
           <Section className="lg:col-span-2" delay={0.25}>
             <SectionTitle icon={TrendingUp}>Photos by Year</SectionTitle>
-            <div className="flex items-end justify-between gap-3 h-[180px]">
+            {/* No items-end — see Photos by Month note above. */}
+            <div className="flex justify-between gap-3 h-[180px]">
               {stats.photosByYear.map((yearData) => {
                 const heightPct = maxPhotoCount > 0 ? (yearData.count / maxPhotoCount) * 100 : 0
                 const isHighest = yearData.count === maxPhotoCount && yearData.count > 0

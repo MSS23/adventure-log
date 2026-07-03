@@ -146,21 +146,31 @@ export function useTravelPassport() {
     ;(async () => {
       try {
         const supabase = createClient()
-        const { data: albums } = await supabase
-          .from('albums')
-          .select('id, title, location_name, country_code, latitude, longitude, date_start, created_at, cover_photo_url')
-          .eq('user_id', user.id)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-          .neq('status', 'draft')
-          .order('date_start', { ascending: true, nullsFirst: false })
-
-        const { count: photoCount } = await supabase
-          .from('photos')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
+        // Run both queries concurrently — they were sequential awaits, so a
+        // slow photo-count HEAD stacked on top of the albums query and made
+        // every visit hang ~15s on the spinner.
+        const [albumsRes, photoRes] = await Promise.all([
+          supabase
+            .from('albums')
+            .select('id, title, location_name, country_code, latitude, longitude, date_start, created_at, cover_photo_url')
+            .eq('user_id', user.id)
+            .not('latitude', 'is', null)
+            .not('longitude', 'is', null)
+            .neq('status', 'draft')
+            .order('date_start', { ascending: true, nullsFirst: false }),
+          supabase
+            .from('photos')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id),
+        ])
 
         if (cancelled) return
+
+        // A failed albums query must not masquerade as an empty passport —
+        // surface it so the UI can show an error/retry instead of "no stamps".
+        if (albumsRes.error) throw albumsRes.error
+        const albums = albumsRes.data
+        const photoCount = photoRes.count
 
         const validAlbums = (albums || []) as PassportAlbum[]
 

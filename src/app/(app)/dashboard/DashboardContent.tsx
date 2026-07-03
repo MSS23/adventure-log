@@ -285,7 +285,7 @@ export default function DashboardContent() {
             />
 
             <div className="relative z-10 flex flex-col h-full min-h-[260px]">
-              <span className="al-badge !bg-white/20 !text-white !border-white/30 backdrop-blur-md">
+              <span className="al-badge self-start !bg-white/20 !text-white !border-white/30 backdrop-blur-md">
                 <GlobeIcon className="h-3 w-3" strokeWidth={2} />
                 Your atlas
               </span>
@@ -294,7 +294,7 @@ export default function DashboardContent() {
                 {stats.countries} countries · {stats.cities} cities · {stats.albums} albums
               </div>
               <h2
-                className="font-heading text-[40px] md:text-[52px] font-semibold mt-2 leading-[0.98]"
+                className="font-heading text-[40px] md:text-[52px] font-semibold mt-2 leading-[0.98] text-white"
                 style={{ letterSpacing: '-0.02em', textShadow: '0 2px 28px rgba(0,0,0,0.30)' }}
               >
                 Your world,

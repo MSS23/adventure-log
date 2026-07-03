@@ -14,6 +14,11 @@ import { cn } from '@/lib/utils'
  * wrapper retries a capped number of times with a cache-busting query param,
  * and only after exhausting them shows a small "image unavailable" placeholder
  * instead of a blank tile.
+ *
+ * It also treats a *degenerate* image — one that loads HTTP 200 but is a 1×1
+ * placeholder pixel — as broken. Such images "succeed" (no error event) yet
+ * render as a stretched blank/solid tile, which reads as "image not loading."
+ * Showing the placeholder instead is clearer than a smeared pixel.
  */
 interface RetryableImageProps extends Omit<ImageProps, 'onError' | 'src'> {
   src: string
@@ -40,6 +45,19 @@ export function RetryableImage({
       return c + 1
     })
   }, [maxRetries])
+
+  // A real cover is never 1×1. Supabase/seed placeholders and some broken
+  // uploads land as a 1×1 JPEG that loads fine but looks empty — surface the
+  // fallback rather than a stretched pixel.
+  const handleLoad = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget
+      if (img.naturalWidth <= 1 && img.naturalHeight <= 1) {
+        setFailed(true)
+      }
+    },
+    [],
+  )
 
   if (failed) {
     return (
@@ -68,6 +86,7 @@ export function RetryableImage({
       alt={alt}
       className={className}
       onError={handleError}
+      onLoad={handleLoad}
     />
   )
 }

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { motion } from 'framer-motion'
+import { RetryableImage } from '@/components/ui/retryable-image'
 import { createClient } from '@/lib/supabase/client'
 import { Album } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -196,7 +196,7 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
               <Link href={`/albums/${album.id}`} className="block relative aspect-[4/3] overflow-hidden bg-muted">
                 {coverUrl ? (
                   <>
-                    <Image
+                    <RetryableImage
                       src={coverUrl}
                       alt={album.title}
                       fill

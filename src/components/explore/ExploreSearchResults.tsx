@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, MapPin } from 'lucide-react'
-import Image from 'next/image'
+import { RetryableImage } from '@/components/ui/retryable-image'
 import Link from 'next/link'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getAvatarUrl } from '@/lib/utils/avatar'
@@ -213,7 +213,7 @@ export function ExploreSearchResults({ query }: ExploreSearchResultsProps) {
                     <div className="relative aspect-[4/3] bg-muted">
                       {album.cover_photo_url ? (
                         <>
-                          <Image
+                          <RetryableImage
                             src={album.cover_photo_url.startsWith('http') ? album.cover_photo_url : (getPhotoUrl(album.cover_photo_url) || '')}
                             alt={album.title}
                             fill

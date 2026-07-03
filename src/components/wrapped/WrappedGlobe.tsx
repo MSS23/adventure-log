@@ -219,6 +219,27 @@ export function WrappedGlobe({
     []
   )
 
+  // Landmasses as vector outlines on the black sphere — crisp at any zoom
+  // (unlike the old raster texture) and they keep the flyover geographically
+  // readable: coastlines still slide under the plane. Geometry-only Natural
+  // Earth 110m from our own public/ dir, so it ships in the mobile bundle.
+  const [countries, setCountries] = useState<object[]>([])
+  useEffect(() => {
+    if (!mounted) return
+    let cancelled = false
+    fetch('/countries-110m.geojson')
+      .then((r) => r.json())
+      .then((geo: { features: object[] }) => {
+        if (!cancelled && Array.isArray(geo?.features)) setCountries(geo.features)
+      })
+      .catch(() => {
+        /* outlines are decorative — the flyover works without them */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [mounted])
+
   // In-scene flight objects (plane mesh + trail tube), owned by the setup
   // effect below and driven imperatively from the flight rAF loop.
   const flightSceneRef = useRef<FlightSceneObjects | null>(null)
@@ -786,6 +807,13 @@ export function WrappedGlobe({
   const labelText = useCallback((d: object) => (d as { text: string }).text, [])
   const labelColor = useCallback(() => 'rgba(255,233,223,0.95)', [])
 
+  // Country outlines: a whisper of warm land fill so continents read as
+  // shapes, plus a soft coastline stroke. Deliberately dim — the orange
+  // story layer (arcs/trail/pins) must stay the brightest thing on the globe.
+  const polygonCapColor = useCallback(() => 'rgba(255,183,140,0.06)', [])
+  const polygonSideColor = useCallback(() => 'rgba(0,0,0,0)', [])
+  const polygonStrokeColor = useCallback(() => 'rgba(255,209,180,0.32)', [])
+
   const showGlobe = mounted && dimensions.width > 0 && dimensions.height > 0
 
   return (
@@ -800,15 +828,22 @@ export function WrappedGlobe({
           width={dimensions.width}
           height={dimensions.height}
           // Deliberately textureless: the low-res earth imagery read as poor
-          // render quality, so the globe is now a matte black sphere (see
-          // globeMaterial above) and the orange arcs, trail, pins and labels
-          // carry the whole story. The warm atmosphere rim keeps the Wrapped
-          // sunset branding and defines the planet's edge against the stars.
+          // render quality, so the globe is a matte black sphere (see
+          // globeMaterial above) with vector country outlines (polygons layer
+          // below) keeping the geography readable. The warm atmosphere rim
+          // keeps the Wrapped sunset branding and defines the planet's edge.
           globeImageUrl={null}
           globeMaterial={globeMaterial}
           backgroundImageUrl="/night-sky.png"
           backgroundColor="rgba(0,0,0,0)"
           onGlobeReady={() => setGlobeReady(true)}
+          // Country outlines (see the countries fetch above)
+          polygonsData={countries}
+          polygonCapColor={polygonCapColor}
+          polygonSideColor={polygonSideColor}
+          polygonStrokeColor={polygonStrokeColor}
+          polygonAltitude={0.005}
+          polygonsTransitionDuration={0}
           // Points
           pointsData={pointsData}
           pointAltitude={0.02}

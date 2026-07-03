@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import * as THREE from 'three'
 import type { GlobeMethods } from 'react-globe.gl'
 import { gcInterpolate, gcBearing, easeInOutCubic } from '@/lib/utils/geoCalculations'
 
@@ -34,21 +35,96 @@ interface FlightArc {
 }
 
 /**
- * State of the airplane HTML marker that flies along the active arc.
- * Held in a ref and MUTATED in place every animation frame — three-globe
- * diffs htmlElementsData by object identity, so keeping the same object
- * means the DOM element is created once and only repositioned afterwards
- * (instead of being torn down and rebuilt 60 times a second).
+ * The airplane + live trail are real THREE objects inside the globe's WebGL
+ * scene, NOT DOM overlays. This matters twice over: the video export records
+ * the canvas (a DOM plane simply never appeared in exported videos), and an
+ * in-scene mesh tracks the camera perfectly with no HTML reprojection lag.
+ * Both are managed imperatively from the flight rAF loop — zero React
+ * re-renders per frame.
  */
-interface PlaneDatum {
-  lat: number
-  lng: number
-  altitude: number
-  /** Compass bearing in degrees (0 = north). Used to rotate the SVG. */
-  bearing: number
-  /** Cached DOM node so the rAF loop can rotate it directly. */
-  el?: HTMLDivElement
+interface FlightSceneObjects {
+  plane: THREE.Group
+  trail: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>
 }
+
+/** Stylized paper plane, nose along +Z, up +Y (so up.copy(normal) +
+ *  lookAt(ahead) orients it tangent to the globe, and rotateZ banks it). */
+function buildPlaneMesh(): THREE.Group {
+  const g = new THREE.Group()
+  const bodyMat = new THREE.MeshLambertMaterial({ color: 0xff6b35, side: THREE.DoubleSide })
+  const wingMat = new THREE.MeshLambertMaterial({ color: 0xffe3d6, side: THREE.DoubleSide })
+
+  const fuselage = new THREE.Mesh(new THREE.ConeGeometry(0.55, 4.4, 6), bodyMat)
+  fuselage.rotation.x = Math.PI / 2 // cone points +Y by default → nose +Z
+  g.add(fuselage)
+
+  const wingGeom = new THREE.BufferGeometry()
+  wingGeom.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute([0, 0, 1.5, -3.2, 0, -1.7, 0, 0, -0.8], 3)
+  )
+  wingGeom.computeVertexNormals()
+  const rightGeom = wingGeom.clone()
+  rightGeom.scale(-1, 1, 1)
+  rightGeom.computeVertexNormals()
+  g.add(new THREE.Mesh(wingGeom, wingMat), new THREE.Mesh(rightGeom, wingMat))
+
+  const finGeom = new THREE.BufferGeometry()
+  finGeom.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute([0, 0, -0.9, 0, 1.2, -2.0, 0, 0, -2.0], 3)
+  )
+  finGeom.computeVertexNormals()
+  g.add(new THREE.Mesh(finGeom, bodyMat))
+
+  return g
+}
+
+function disposeObject(obj: THREE.Object3D) {
+  obj.traverse((child) => {
+    const mesh = child as THREE.Mesh
+    if (mesh.geometry) mesh.geometry.dispose()
+    const mat = mesh.material as THREE.Material | THREE.Material[] | undefined
+    if (Array.isArray(mat)) mat.forEach((m) => m.dispose())
+    else mat?.dispose()
+  })
+}
+
+/** Camera framing that covers every visited location: unit-vector centroid
+ *  + max angular spread → lat/lng/altitude for the finale wide shot. */
+function frameAllLocations(locations: WrappedLocation[]): { lat: number; lng: number; altitude: number } {
+  if (locations.length === 0) return { lat: 20, lng: 0, altitude: 2.5 }
+  const rad = Math.PI / 180
+  const sum = new THREE.Vector3()
+  const vecs = locations.map((l) => {
+    const v = new THREE.Vector3(
+      Math.cos(l.lat * rad) * Math.cos(l.lng * rad),
+      Math.sin(l.lat * rad),
+      Math.cos(l.lat * rad) * Math.sin(l.lng * rad)
+    )
+    sum.add(v)
+    return v
+  })
+  if (sum.lengthSq() < 1e-6) return { lat: 20, lng: 0, altitude: 2.8 } // antipodal degenerate
+  const centroid = sum.normalize()
+  let maxAngle = 0
+  for (const v of vecs) maxAngle = Math.max(maxAngle, centroid.angleTo(v))
+  return {
+    lat: Math.asin(centroid.y) / rad,
+    lng: Math.atan2(centroid.z, centroid.x) / rad,
+    altitude: Math.min(3.4, Math.max(1.7, 1.15 + maxAngle * 1.9)),
+  }
+}
+
+/** Sampling density of the live trail tube (and its drawRange step). */
+const TRAIL_SEGMENTS = 128
+const TRAIL_RADIAL = 8
+/** Tube radius in globe units — matched to the stamped arc stroke below so
+ *  the landing swap (live trail → arcs layer) doesn't visibly change width
+ *  (three-globe arcStroke is a diameter in angular degrees; 1.5° ≈ 2.6u). */
+const TRAIL_RADIUS = 1.3
+/** Base plane size in globe units (globe radius = 100). */
+const PLANE_SCALE = 1.9
 
 interface WrappedGlobeProps {
   locations: WrappedLocation[]
@@ -108,12 +184,20 @@ export function WrappedGlobe({
   const [mounted, setMounted] = useState(false)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
 
-  // Plane marker — single mutable datum (see PlaneDatum docs). planeFrame
-  // is a render counter: -1 = hidden, each increment hands three-globe a
-  // fresh array wrapping the SAME object so it repositions without
-  // recreating the element.
-  const planeRef = useRef<PlaneDatum>({ lat: 0, lng: 0, altitude: 0, bearing: 0 })
-  const [planeFrame, setPlaneFrame] = useState(-1)
+  // In-scene flight objects (plane mesh + trail tube), owned by the setup
+  // effect below and driven imperatively from the flight rAF loop.
+  const flightSceneRef = useRef<FlightSceneObjects | null>(null)
+  // Banking state persists across frames within a segment.
+  const rollRef = useRef(0)
+  const lastBearingRef = useRef<number | null>(null)
+
+  // In-canvas city labels (three-globe renders these as sprites, so they are
+  // part of the recorded video — unlike the page's DOM overlays).
+  const [flightLabels, setFlightLabels] = useState<Array<{ lat: number; lng: number; text: string }>>([])
+  const destLabelShownRef = useRef(false)
+
+  // One-shot expanding ring fired at each landing.
+  const [burstRing, setBurstRing] = useState<{ lat: number; lng: number; maxR: number; propagationSpeed: number; repeatPeriod: number } | null>(null)
 
   // Client-only mount
   useEffect(() => {
@@ -209,18 +293,23 @@ export function WrappedGlobe({
     }))
   }, [sortedLocations, revealedArcs, animate])
 
-  // Rings around current/latest destination
+  // Rings: steady pulse on the latest destination + a one-shot wide burst
+  // right at each landing (arrival emphasis).
   const ringsData = useMemo(() => {
-    if (pointsData.length === 0) return []
-    const latest = pointsData[pointsData.length - 1]
-    return [{
-      lat: latest.lat,
-      lng: latest.lng,
-      maxR: 4,
-      propagationSpeed: 2,
-      repeatPeriod: 1000,
-    }]
-  }, [pointsData])
+    const rings: Array<{ lat: number; lng: number; maxR: number; propagationSpeed: number; repeatPeriod: number }> = []
+    if (pointsData.length > 0) {
+      const latest = pointsData[pointsData.length - 1]
+      rings.push({
+        lat: latest.lat,
+        lng: latest.lng,
+        maxR: 4,
+        propagationSpeed: 2,
+        repeatPeriod: 1000,
+      })
+    }
+    if (burstRing) rings.push(burstRing)
+    return rings
+  }, [pointsData, burstRing])
 
   // Visible arcs
   const visibleArcs = useMemo(() => {
@@ -262,6 +351,37 @@ export function WrappedGlobe({
     if (canvas) onCanvasReady(canvas)
   }, [globeReady, onCanvasReady])
 
+  // Mount the in-scene flight objects (animated globes only). The plane and
+  // trail live directly in the globe's THREE scene so they render into the
+  // canvas — and therefore into exported videos.
+  useEffect(() => {
+    if (!globeReady || !animate) return
+    const globe = globeRef.current
+    if (!globe) return
+    const scene = globe.scene()
+
+    const plane = buildPlaneMesh()
+    plane.visible = false
+    scene.add(plane)
+
+    const trail = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({ color: 0xffb27a, transparent: true, opacity: 0.95 })
+    )
+    trail.visible = false
+    scene.add(trail)
+
+    flightSceneRef.current = { plane, trail }
+
+    return () => {
+      flightSceneRef.current = null
+      scene.remove(plane)
+      scene.remove(trail)
+      disposeObject(plane)
+      disposeObject(trail)
+    }
+  }, [globeReady, animate])
+
   const flyTo = useCallback(
     (lat: number, lng: number, altitude: number, duration: number) => {
       if (!globeRef.current) return
@@ -296,9 +416,10 @@ export function WrappedGlobe({
   }, [animate, globeReady, arcs.length])
 
   // Handle one flight segment: settle the camera on the departure point with
-  // the plane parked, take off, chase the plane along the great circle with
-  // the camera locked on it, land, stamp the route + destination pin, pause,
-  // then advance to the next segment (or pull out for the finale).
+  // the plane parked, take off, chase the plane along the great circle while
+  // the trail paints itself underneath, land (ring burst + camera push-in +
+  // destination label), pause, then advance — or pull out to a finale wide
+  // shot framed around everywhere the user actually went.
   useEffect(() => {
     if (currentSegment < 0 || currentSegment >= arcs.length) return
 
@@ -310,56 +431,128 @@ export function WrappedGlobe({
     // hops, pulled out for long hauls so there's geographic context.
     const camAlt = Math.max(peak + 0.6, Math.min(2.2, arc.distance / 40))
 
+    const globe = globeRef.current
+    const scene3 = flightSceneRef.current
+
     // Phase 1 — fly the camera to the departure point.
     const settleMs = currentSegment === 0 ? 1400 : 600
     flyTo(start.lat, start.lng, camAlt, settleMs)
 
-    // Park the plane on the tarmac, nose pointed at the destination.
-    const plane = planeRef.current
-    plane.lat = start.lat
-    plane.lng = start.lng
-    plane.altitude = 0.01
-    plane.bearing = gcBearing(start, end)
-    if (plane.el) {
-      plane.el.style.transform = `translate(-50%, -50%) rotate(${plane.bearing}deg)`
-    }
-    setPlaneFrame((f) => Math.max(0, f + 1))
+    // Origin label; the destination's appears on final approach.
+    const originName = sortedLocations[currentSegment]?.name?.split(',')[0]
+    const destName = sortedLocations[currentSegment + 1]?.name?.split(',')[0]
+    destLabelShownRef.current = false
+    if (originName) setFlightLabels([{ lat: start.lat, lng: start.lng, text: originName }])
 
-    // Scale timing based on number of arcs — shorter per-segment for many locations
-    const segmentDuration = arcs.length > 10 ? 2200 : arcs.length > 5 ? 3000 : 3800
+    // Pre-sample the whole flight path once: the SAME points drive the trail
+    // tube (revealed via drawRange, no per-frame geometry work) and the
+    // plane's position/orientation lookups.
+    const pathPoints: THREE.Vector3[] = []
+    if (globe && scene3) {
+      for (let i = 0; i <= TRAIL_SEGMENTS; i++) {
+        const t = i / TRAIL_SEGMENTS
+        const p = gcInterpolate(start, end, t)
+        const c = globe.getCoords(p.lat, p.lng, arcAltitude(t, peak))
+        pathPoints.push(new THREE.Vector3(c.x, c.y, c.z))
+      }
+      const tube = new THREE.TubeGeometry(
+        new THREE.CatmullRomCurve3(pathPoints),
+        TRAIL_SEGMENTS,
+        TRAIL_RADIUS,
+        TRAIL_RADIAL,
+        false
+      )
+      tube.setDrawRange(0, 0)
+      scene3.trail.geometry.dispose()
+      scene3.trail.geometry = tube
+      scene3.trail.visible = true
+
+      // Park the plane on the tarmac, nose pointed down the route.
+      scene3.plane.position.copy(pathPoints[0])
+      scene3.plane.up.copy(pathPoints[0].clone().normalize())
+      scene3.plane.lookAt(pathPoints[1])
+      scene3.plane.scale.setScalar(PLANE_SCALE)
+      scene3.plane.visible = true
+      rollRef.current = 0
+      lastBearingRef.current = null
+    }
+
+    // Pace by hop length (a Paris→Rome puddle-jump shouldn't take as long as
+    // Tokyo→LA), compressed when the year has many stops.
+    const paceScale = arcs.length > 10 ? 0.6 : arcs.length > 6 ? 0.8 : 1
+    const segmentDuration = Math.min(4200, Math.max(1500, 1300 + arc.distance * 24)) * paceScale
 
     let raf = 0
     let startTime = 0
     let advanceTimer: ReturnType<typeof setTimeout> | undefined
     let hideTimer: ReturnType<typeof setTimeout> | undefined
+    let burstTimer: ReturnType<typeof setTimeout> | undefined
 
     const tick = (now: number) => {
       if (!startTime) startTime = now
       const linearT = Math.min(1, (now - startTime) / segmentDuration)
       const easedT = easeInOutCubic(linearT)
       const pos = gcInterpolate(start, end, easedT)
-
-      plane.lat = pos.lat
-      plane.lng = pos.lng
-      plane.altitude = arcAltitude(easedT, peak)
-      // Bearing toward the destination from where the plane actually is —
-      // it drifts across long great-circle routes. Hold the last heading on
-      // final approach, where the bearing math degenerates.
-      if (easedT < 0.99) plane.bearing = gcBearing(pos, end)
       // Cinematic breathing: peaks at cruise (t=0.5), zero at the endpoints —
       // the camera pulls out for geographic context mid-flight and dives back
       // in for the landing, while the plane grows slightly at cruise so it
       // doesn't shrink into the zoomed-out frame. Reads as takeoff → cruise →
       // final approach instead of a flat point-to-point slide.
       const breathe = Math.sin(Math.PI * easedT)
-      if (plane.el) {
-        plane.el.style.transform = `translate(-50%, -50%) rotate(${plane.bearing}deg) scale(${(1 + 0.35 * breathe).toFixed(3)})`
-      }
-      setPlaneFrame((f) => f + 1)
 
-      // Chase cam: keep the plane centered so the journey reads point-to-point.
-      globeRef.current?.pointOfView(
-        { lat: pos.lat, lng: pos.lng, altitude: camAlt * (1 + 0.3 * breathe) },
+      if (globe && scene3) {
+        // Plane: position on the arc, oriented at a point just ahead of it,
+        // banked into heading changes.
+        const alt = arcAltitude(easedT, peak)
+        const c = globe.getCoords(pos.lat, pos.lng, alt)
+        scene3.plane.position.set(c.x, c.y, c.z)
+
+        const aheadT = Math.min(1, easedT + 0.03)
+        const aheadPos = gcInterpolate(start, end, aheadT)
+        const ahead = globe.getCoords(aheadPos.lat, aheadPos.lng, arcAltitude(aheadT, peak))
+        scene3.plane.up.copy(new THREE.Vector3(c.x, c.y, c.z).normalize())
+        scene3.plane.lookAt(ahead.x, ahead.y, ahead.z)
+
+        const bearingNow = gcBearing(pos, end)
+        if (lastBearingRef.current !== null && easedT < 0.98) {
+          let dB = bearingNow - lastBearingRef.current
+          if (dB > 180) dB -= 360
+          else if (dB < -180) dB += 360
+          const targetRoll = Math.max(-0.55, Math.min(0.55, dB * 6))
+          rollRef.current += (targetRoll - rollRef.current) * 0.12
+        } else {
+          rollRef.current *= 0.85
+        }
+        lastBearingRef.current = bearingNow
+        scene3.plane.rotateZ(rollRef.current)
+
+        scene3.plane.scale.setScalar(PLANE_SCALE * (1 + 0.35 * breathe))
+
+        // Trail paints itself under the plane (drawRange over the tube's
+        // index buffer: TRAIL_RADIAL * 6 indices per tubular segment).
+        const revealed = Math.floor(easedT * TRAIL_SEGMENTS)
+        scene3.trail.geometry.setDrawRange(0, revealed * TRAIL_RADIAL * 6)
+      }
+
+      // Destination label fades in on final approach — in-canvas, so it's in
+      // the exported video too.
+      if (!destLabelShownRef.current && easedT >= 0.55 && destName) {
+        destLabelShownRef.current = true
+        setFlightLabels(
+          originName
+            ? [
+                { lat: start.lat, lng: start.lng, text: originName },
+                { lat: end.lat, lng: end.lng, text: destName },
+              ]
+            : [{ lat: end.lat, lng: end.lng, text: destName }]
+        )
+      }
+
+      // Chase cam with a slight lead toward the destination, so the frame
+      // reads "going somewhere" instead of a dot pinned to the center.
+      const camPos = gcInterpolate(start, end, Math.min(1, easedT + 0.05))
+      globe?.pointOfView(
+        { lat: camPos.lat, lng: camPos.lng, altitude: camAlt * (1 + 0.3 * breathe) },
         0
       )
 
@@ -374,12 +567,19 @@ export function WrappedGlobe({
         return
       }
 
-      // Landed — park the plane, stamp the flown route + destination pin.
-      plane.lat = end.lat
-      plane.lng = end.lng
-      plane.altitude = 0.01
-      setPlaneFrame((f) => f + 1)
+      // Landed — park the plane on the destination, retire the live trail
+      // (the stamped arc takes over), pop the arrival ring, push the camera
+      // in on the new pin.
+      if (globe && scene3) {
+        const endCoord = globe.getCoords(end.lat, end.lng, 0.015)
+        scene3.plane.position.set(endCoord.x, endCoord.y, endCoord.z)
+        scene3.plane.scale.setScalar(PLANE_SCALE)
+        scene3.trail.visible = false
+      }
       setRevealedArcs(currentSegment + 1)
+      setBurstRing({ lat: end.lat, lng: end.lng, maxR: 9, propagationSpeed: 7, repeatPeriod: 3000 })
+      burstTimer = setTimeout(() => setBurstRing(null), 1200)
+      flyTo(end.lat, end.lng, Math.max(0.95, camAlt * 0.78), 650)
       onProgress?.((currentSegment + 1) / arcs.length, currentSegment)
 
       // Brief pause on the destination, then move on.
@@ -387,12 +587,22 @@ export function WrappedGlobe({
         if (currentSegment < arcs.length - 1) {
           setCurrentSegment((prev) => prev + 1)
         } else {
-          // Finale: pull out to a wide shot with every route visible and
-          // hand the globe back to its idle auto-rotation.
-          flyTo(20, 0, 2.5, 2000)
+          // Finale: pull out to a wide shot framed around the year's actual
+          // footprint and hand the globe back to its idle auto-rotation.
+          const frame = frameAllLocations(sortedLocations)
+          flyTo(frame.lat, frame.lng, frame.altitude, 2600)
           const controls = globeRef.current?.controls()
           if (controls) controls.autoRotate = true
-          hideTimer = setTimeout(() => setPlaneFrame(-1), 1500)
+          // Every stop labeled on the wide shot (skipped for busy years).
+          setFlightLabels(
+            sortedLocations.length <= 12
+              ? sortedLocations.map((l) => ({ lat: l.lat, lng: l.lng, text: l.name.split(',')[0] }))
+              : []
+          )
+          hideTimer = setTimeout(() => {
+            const s3 = flightSceneRef.current
+            if (s3) s3.plane.visible = false
+          }, 1500)
           onAnimationComplete?.()
         }
       }, 1000)
@@ -408,19 +618,13 @@ export function WrappedGlobe({
       clearTimeout(takeoffTimer)
       clearTimeout(advanceTimer)
       clearTimeout(hideTimer)
+      clearTimeout(burstTimer)
     }
-  }, [currentSegment, arcs, flyTo, onAnimationComplete, onProgress])
-
-  /** Same object every frame, fresh array so three-globe picks up the move. */
-  const planeData = useMemo(
-    () => (planeFrame >= 0 ? [planeRef.current] : []),
-    [planeFrame]
-  )
+  }, [currentSegment, arcs, sortedLocations, flyTo, onAnimationComplete, onProgress])
 
   /* ── Stable accessors ──────────────────────────────────────────────────
-   * The rAF loop re-renders this component every frame. Inline lambdas
-   * would change identity each render and make react-globe.gl re-style
-   * every arc/point/element 60 times a second — memoize them all. */
+   * Inline lambdas would change identity on re-render and make
+   * react-globe.gl re-style every arc/point/label — memoize them all. */
 
   const pointLabel = useCallback((d: object) => {
     const p = d as { name: string }
@@ -432,7 +636,7 @@ export function WrappedGlobe({
       const arc = d as FlightArc
       const isLatest = arc.index === revealedArcs - 1
       if (isLatest) return ['#ff6b35', '#ffb088'] // Bright for newest arc
-      return ['rgba(255,107,53,0.4)', 'rgba(255,159,107,0.2)'] // Dimmed for older
+      return ['rgba(255,107,53,0.6)', 'rgba(255,159,107,0.4)'] // Receded but readable on the day texture
     },
     [revealedArcs]
   )
@@ -440,7 +644,9 @@ export function WrappedGlobe({
   const arcStroke = useCallback(
     (d: object) => {
       const arc = d as FlightArc
-      return arc.index === revealedArcs - 1 ? 3 : 1.5
+      // Latest matches the live trail's width (see TRAIL_RADIUS) so the
+      // landing handoff between the two is seamless.
+      return arc.index === revealedArcs - 1 ? 1.5 : 1.0
     },
     [revealedArcs]
   )
@@ -450,42 +656,10 @@ export function WrappedGlobe({
     return 0.12 + Math.min(arc.distance / 120, 1) * 0.3
   }, [])
 
-  // Created ONCE per mount (three-globe rebuilds all elements whenever this
-  // prop changes identity). Caches the node on the datum so the rAF loop can
-  // rotate it without a DOM rebuild.
-  const planeHtmlElement = useCallback((d: object) => {
-    const p = d as PlaneDatum
-    const wrap = document.createElement('div')
-    // Inline style only — this element is created outside React,
-    // and Tailwind classes here would not get processed.
-    wrap.style.cssText = `
-      pointer-events: none;
-      transform: translate(-50%, -50%) rotate(${p.bearing}deg);
-      transform-origin: center;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.55));
-      will-change: transform;
-    `
-    // Lucide-style "Plane" SVG, oriented north (so rotate by bearing
-    // points it where it's going).
-    wrap.innerHTML = `
-      <svg
-        width="36"
-        height="36"
-        viewBox="0 0 24 24"
-        fill="#ff6b35"
-        stroke="#ffffff"
-        stroke-width="0.9"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-        style="display:block"
-      >
-        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
-      </svg>
-    `
-    p.el = wrap
-    return wrap
-  }, [])
+  const labelLat = useCallback((d: object) => (d as { lat: number }).lat, [])
+  const labelLng = useCallback((d: object) => (d as { lng: number }).lng, [])
+  const labelText = useCallback((d: object) => (d as { text: string }).text, [])
+  const labelColor = useCallback(() => 'rgba(255,233,223,0.95)', [])
 
   const showGlobe = mounted && dimensions.width > 0 && dimensions.height > 0
 
@@ -500,7 +674,11 @@ export function WrappedGlobe({
           ref={globeRef}
           width={dimensions.width}
           height={dimensions.height}
-          globeImageUrl="/earth-dark.jpg"
+          // Day texture: the flyover is a travel story — the viewer should
+          // SEE the coastlines and countries sliding under the plane (the old
+          // night texture rendered as a near-black sphere in exported videos).
+          // The warm atmosphere rim keeps the Wrapped sunset branding.
+          globeImageUrl="/earth-texture.jpg"
           bumpImageUrl="/earth-topology.png"
           backgroundImageUrl="/night-sky.png"
           backgroundColor="rgba(0,0,0,0)"
@@ -535,17 +713,18 @@ export function WrappedGlobe({
           ringMaxRadius="maxR"
           ringPropagationSpeed="propagationSpeed"
           ringRepeatPeriod="repeatPeriod"
-          // Airplane HTML marker — flies along the great-circle arc of the
-          // current segment with bearing-correct rotation, chased by the
-          // camera. htmlTransitionDuration MUST be 0: the default (1000ms)
-          // tweens every position update, which made the plane permanently
-          // lag a full second behind where the animation put it.
-          htmlElementsData={planeData}
-          htmlLat="lat"
-          htmlLng="lng"
-          htmlAltitude="altitude"
-          htmlTransitionDuration={0}
-          htmlElement={planeHtmlElement}
+          // City labels — three-globe sprites, so they live INSIDE the WebGL
+          // canvas and appear in exported videos (the airplane + live trail
+          // are direct scene objects managed by the flight effect above).
+          labelsData={flightLabels}
+          labelLat={labelLat}
+          labelLng={labelLng}
+          labelText={labelText}
+          labelColor={labelColor}
+          labelSize={1.3}
+          labelDotRadius={0.45}
+          labelAltitude={0.015}
+          labelResolution={2}
           // Atmosphere
           atmosphereColor="#ff6b35"
           atmosphereAltitude={0.12}

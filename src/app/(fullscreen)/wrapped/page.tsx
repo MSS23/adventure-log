@@ -203,6 +203,29 @@ export default function WrappedPage() {
     )
   }
 
+  // Load failed — offer a retry instead of a misleading "No Adventures Yet".
+  if (data.error) {
+    return (
+      <div className="dark fixed inset-0 bg-black flex flex-col items-center justify-center text-white p-8">
+        <Plane className="h-16 w-16 text-olive-400/70 mb-6" />
+        <h1 className="text-3xl font-bold mb-3">Couldn’t load your Wrapped</h1>
+        <p className="text-white/75 text-center mb-6 max-w-md">
+          We couldn’t reach the server. Your adventures are safe — give it another try.
+        </p>
+        <div className="flex items-center gap-3">
+          <Button onClick={() => data.retry()} size="lg" className="cursor-pointer px-8 focus-visible:ring-offset-black">
+            Try again
+          </Button>
+          <Link href="/profile">
+            <Button variant="outline" size="lg" className="cursor-pointer border-white/30 text-white hover:bg-white/10">
+              Back to profile
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   // No trips
   if (data.totalTrips === 0) {
     return (

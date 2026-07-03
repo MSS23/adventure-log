@@ -248,6 +248,8 @@ export function useGlobePageData() {
   const isPrivateAccount = albumsQuery.data?.isPrivateAccount ?? false
   const profileUser = albumsQuery.data?.profileUser ?? null
   const isProfileLoading = albumsQuery.isPending
+  const isDataError = albumsQuery.isError
+  const refetchGlobeData = albumsQuery.refetch
 
   // Calculate total distance from album coordinates
   const totalDistance = useMemo(() => calculateTotalDistance(albums), [albums])
@@ -546,6 +548,8 @@ export function useGlobePageData() {
     isPrivateAccount,
     profileUser,
     isProfileLoading,
+    isDataError,
+    refetchGlobeData,
     followStatus,
 
     // Friends

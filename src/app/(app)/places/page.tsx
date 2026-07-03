@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { MapPin, Globe, Users, User as UserIcon, Layers, Camera } from 'lucide-react'
 import { usePlaces, type PlacesScope } from '@/lib/hooks/usePlaces'
 import { FriendsNearby } from '@/components/places/FriendsNearby'
+import { ErrorRetryState } from '@/components/ui/error-retry-state'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getFlagEmoji, getCityName } from '@/lib/utils/country'
 import { AnimatedSkeleton } from '@/components/ui/AnimatedSkeleton'
@@ -69,7 +70,7 @@ function PlaceCard({ place }: { place: PlaceGroup }) {
 
 export default function PlacesPage() {
   const [scope, setScope] = useState<PlacesScope>('you')
-  const { places, stats, loading } = usePlaces(scope)
+  const { places, stats, loading, error, refetch } = usePlaces(scope)
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-10">
@@ -131,6 +132,12 @@ export default function PlacesPage() {
                 <AnimatedSkeleton key={i} className="aspect-[4/3] w-full rounded-2xl" variant="rounded" />
               ))}
             </div>
+          ) : error ? (
+            <ErrorRetryState
+              title="Couldn’t load places"
+              description="We couldn’t reach the server. Your places are safe — try again."
+              onRetry={() => refetch()}
+            />
           ) : places.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center">
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">

@@ -30,6 +30,7 @@ import { MotionList, MotionItem, MotionReveal } from '@/components/animations/Mo
 import { Button } from '@/components/ui/button'
 import { MotionCard } from '@/components/ui/card'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
+import { ErrorRetryState } from '@/components/ui/error-retry-state'
 import DashboardLoading from './loading'
 import type { User } from '@/types/database'
 
@@ -71,16 +72,19 @@ export default function DashboardContent() {
   const { user } = useAuth()
   const userId = user?.id
 
-  const { data, isPending, isRefetching, refetch } = useQuery<DashboardData>({
+  const { data, isPending, isError, isRefetching, refetch } = useQuery<DashboardData>({
     queryKey: ['dashboard', userId],
     enabled: !!userId,
     queryFn: async () => {
-      // Fetch profile
-      const { data: profile } = await supabase
+      // Fetch profile. A missing row (PGRST116) is fine — it's still being
+      // provisioned; any OTHER error must propagate so the query fails loud
+      // instead of silently rendering an empty dashboard.
+      const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId!)
         .single()
+      if (profileError && profileError.code !== 'PGRST116') throw profileError
 
       // Fetch stats and recent albums in parallel
       const [albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
@@ -99,6 +103,11 @@ export default function DashboardContent() {
           .order('date_start', { ascending: false, nullsFirst: false })
           .limit(6),
       ])
+
+      // Propagate real failures — otherwise a timed-out albums query looks
+      // identical to "you have no albums".
+      if (albumsResult.error) throw albumsResult.error
+      if (recentAlbumsResult.error) throw recentAlbumsResult.error
 
       const albums = (albumsResult.data || []).filter((a) => a.status !== 'draft')
       const albumsWithLocation = albums.filter((a) => a.latitude != null && a.longitude != null)
@@ -179,8 +188,23 @@ export default function DashboardContent() {
   }, [supabase, initialRecentAlbums])
 
   // Loading: no user yet, or the dashboard query is still resolving.
-  if (!userId || isPending || !stats) {
+  if (!userId || (isPending && !isError)) {
     return <DashboardLoading />
+  }
+
+  // The dashboard query failed — show a retry, not an endless skeleton.
+  if (isError || !stats) {
+    return (
+      <div className="mx-auto w-full max-w-2xl px-4 py-12">
+        <ErrorRetryState
+          variant="card"
+          title="Couldn’t load your dashboard"
+          description="We couldn’t reach the server. Your data is safe — try again."
+          onRetry={() => refetch()}
+          retrying={isRefetching}
+        />
+      </div>
+    )
   }
 
   // Profile not found → it's usually still being provisioned (AuthProvider /

@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getCountryName, extractCountryFromLocation, getFlagEmoji } from '@/lib/utils/country'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { ErrorRetryState } from '@/components/ui/error-retry-state'
 import SavedLoading from './loading'
 
 export interface SavedAlbum {
@@ -168,7 +169,7 @@ export default function SavedContent() {
   // refetchOnMount:false from QueryProvider), so navigating away and back
   // repaints from cache instead of re-running the favorites -> albums ->
   // popularity waterfall behind a skeleton.
-  const { data: queryAlbums, isPending } = useQuery({
+  const { data: queryAlbums, isPending, isError, refetch } = useQuery({
     queryKey: ['saved-albums', userId],
     enabled: !!userId,
     queryFn: () => fetchSavedAlbums(supabase, userId!),
@@ -313,6 +314,20 @@ export default function SavedContent() {
   // query is in flight (or before the user id is known).
   if (isPending || !userId) {
     return <SavedLoading />
+  }
+
+  // A failed fetch must not fall through to "0 albums saved" — that's a lie
+  // when the user has saved albums but the request errored.
+  if (isError) {
+    return (
+      <div className="mx-auto w-full max-w-6xl py-10">
+        <ErrorRetryState
+          title="Couldn’t load your saved albums"
+          description="We couldn’t reach the server. Your saved albums are safe — try again."
+          onRetry={() => refetch()}
+        />
+      </div>
+    )
   }
 
   return (

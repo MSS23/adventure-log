@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { computeTravelStats } from '@/lib/utils/travel-stats'
@@ -20,6 +20,10 @@ export interface WrappedData {
   travelMonths: number[]
   personality: string
   loading: boolean
+  /** The albums query failed — distinct from "no trips". Lets the page show a
+   *  retry instead of a misleading "No Adventures Yet" for a user who has some. */
+  error: boolean
+  retry: () => void
   /** Number of distinct years with at least one trip */
   yearsActive: number
   /** Total distance between consecutive pins in km (great-circle) */
@@ -58,7 +62,7 @@ interface WrappedAlbum {
   photos: { id: string; file_path: string }[] | null
 }
 
-const EMPTY_DATA: Omit<WrappedData, 'year' | 'loading' | 'hasAnyTrips'> = {
+const EMPTY_DATA: Omit<WrappedData, 'year' | 'loading' | 'hasAnyTrips' | 'error' | 'retry'> = {
   totalTrips: 0,
   totalPhotos: 0,
   countryCodes: [],
@@ -86,6 +90,13 @@ const EMPTY_DATA: Omit<WrappedData, 'year' | 'loading' | 'hasAnyTrips'> = {
 export function useWrappedData(userId: string | undefined, year?: number | 'all'): WrappedData {
   const mode = year ?? new Date().getFullYear()
   const [albums, setAlbums] = useState<WrappedAlbum[] | null>(null)
+  const [error, setError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
+  const retry = useCallback(() => {
+    setError(false)
+    setAlbums(null)
+    setReloadKey((k) => k + 1)
+  }, [])
 
   useEffect(() => {
     // Keep loading true while waiting for auth
@@ -93,17 +104,26 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
 
     let cancelled = false
     setAlbums(null)
+    setError(false)
 
     const fetchData = async () => {
       const supabase = createClient()
 
-      const { data: allAlbums } = await supabase
+      const { data: allAlbums, error: albumsError } = await supabase
         .from('albums')
         .select('id, title, location_name, country_code, date_start, created_at, cover_photo_url, latitude, longitude, photos(id, file_path)')
         .eq('user_id', userId)
         .order('created_at', { ascending: true })
 
       if (cancelled) return
+
+      // A failed query must surface as an error, not an empty Wrapped — the old
+      // code discarded the error and rendered "No Adventures Yet" to users who
+      // actually have albums.
+      if (albumsError) {
+        setError(true)
+        return
+      }
 
       // Filter out empty albums (drafts with no photos)
       setAlbums((allAlbums || []).filter(a => (a.photos?.length || 0) > 0))
@@ -112,11 +132,14 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
     fetchData()
 
     return () => { cancelled = true }
-  }, [userId])
+  }, [userId, reloadKey])
 
   return useMemo<WrappedData>(() => {
+    if (error) {
+      return { ...EMPTY_DATA, year: mode, loading: false, error: true, retry, hasAnyTrips: false }
+    }
     if (albums === null) {
-      return { ...EMPTY_DATA, year: mode, loading: true, hasAnyTrips: false }
+      return { ...EMPTY_DATA, year: mode, loading: true, error: false, retry, hasAnyTrips: false }
     }
 
     const hasAnyTrips = albums.length > 0
@@ -127,7 +150,7 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       : albums.filter(a => parseLocalDate(a.date_start || a.created_at)?.getFullYear() === mode)
 
     if (selected.length === 0) {
-      return { ...EMPTY_DATA, year: mode, loading: false, hasAnyTrips }
+      return { ...EMPTY_DATA, year: mode, loading: false, error: false, retry, hasAnyTrips }
     }
 
     const stats = computeTravelStats(selected)
@@ -181,10 +204,12 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       travelMonths: stats.travelMonths,
       personality: stats.personality.type,
       loading: false,
+      error: false,
+      retry,
       yearsActive: stats.yearsActive,
       totalDistanceKm: stats.totalDistanceKm,
       hasAnyTrips,
       locations,
     }
-  }, [albums, mode])
+  }, [albums, mode, error, retry])
 }

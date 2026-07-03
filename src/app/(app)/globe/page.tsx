@@ -7,6 +7,7 @@ import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { ErrorRetryState } from '@/components/ui/error-retry-state'
 import type { Profile } from '@/types/database'
 
 // Extracted hook and sub-components
@@ -43,6 +44,7 @@ function GlobePageContent() {
     user, router,
     albums, selectedAlbumId, setSelectedAlbumId, stats, totalDistance, handleAlbumClick,
     isOwnProfile, isPrivateAccount, profileUser, followStatus,
+    isDataError, refetchGlobeData,
     friends, handleViewFriendGlobe,
     selectedYear, setSelectedYear, availableYears,
     showStatsOverlay, setShowStatsOverlay, hideEmptyCta, setHideEmptyCta,
@@ -65,6 +67,23 @@ function GlobePageContent() {
           location_name: w.location_name,
         }))
     : []
+
+  // Load failed with nothing to show — offer a retry instead of an empty globe
+  // with a "0 adventures" header that looks like the user has no travels.
+  if (isDataError && albums.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 dark:bg-[color:var(--background)] p-4">
+        <div className="w-full max-w-md">
+          <ErrorRetryState
+            variant="card"
+            title="Couldn’t load your globe"
+            description="We couldn’t reach the server. Your travels are safe — try again."
+            onRetry={() => refetchGlobeData()}
+          />
+        </div>
+      </div>
+    )
+  }
 
   // Show private account message if user doesn't have access
   if (isPrivateAccount && profileUser && followStatus !== 'following') {

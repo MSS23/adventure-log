@@ -68,7 +68,12 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: true,
     captureInput: true,
-    webContentsDebuggingEnabled: process.env.NODE_ENV === 'development',
+    // Enable Chrome remote debugging of the WebView (chrome://inspect). The
+    // mobile bundle is compiled with NODE_ENV=production, so gating on
+    // 'development' left it permanently off and made on-device issues (e.g. a
+    // blank screen) impossible to inspect. Debug APKs are for debugging; a
+    // hardened release build should turn this back off.
+    webContentsDebuggingEnabled: true,
     backgroundColor: '#0f172a',
     // Use the WebView's built-in dark mode support
     useLegacyBridge: false,

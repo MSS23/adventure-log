@@ -117,24 +117,20 @@ const MOBILE_REMOVE_PATTERNS = [
   'src/app/sign-in/[[...sign-in]]/page.tsx',
   'src/app/sign-up/[[...sign-up]]/page.tsx',
   // ────────────────────────────────────────────────────────────────────
-  // Server-Component pages that pre-fetch with the Supabase server client
-  // (`createClient()` from `@/lib/supabase/server`). These call `cookies()`
-  // /`headers()` transitively, which static export forbids. The mobile shell
-  // omits them; their `*Content.tsx` client siblings can still be wired into a
-  // client-only page wrapper in a follow-up.
+  // Core surfaces dashboard / saved / countries / profile / wishlist and the
+  // /login page are now CLIENT-ONLY, so they static-export and ship in the
+  // mobile bundle. dashboard/saved/countries were already trivial client
+  // wrappers; profile/page.tsx and wishlist/page.tsx were converted from
+  // Supabase-server-client pages to client-only pages (their *Content
+  // components already fetch their own data via the client Supabase, which on
+  // native reads the session stored by the Capacitor Preferences adapter).
+  // login/page.tsx was always a pure client sign-in form — omitting it is what
+  // broke sign-in on the APK (tapping "Sign In" went to a page not in the
+  // bundle). Do NOT re-add these here without a reason.
   //
-  // KNOWN MISSING ON MOBILE: dashboard, wishlist, saved, countries, profile.
-  // These are core surfaces — porting them to client-only fetch
-  // (apiFetch + useEffect) is the highest-priority follow-up.
+  // Still omitted (need generateStaticParams / are genuinely dynamic): the
+  // [id]/[username]/[slug] detail routes above.
   // ────────────────────────────────────────────────────────────────────
-  'src/app/(app)/wishlist/page.tsx',
-  'src/app/(app)/dashboard/page.tsx',
-  'src/app/(app)/profile/page.tsx',
-  'src/app/(app)/saved/page.tsx',
-  'src/app/(app)/countries/page.tsx',
-  // Login page — kept out of the static shell for now. A client-only mobile
-  // auth flow (Supabase email/password via apiFetch) is a tracked follow-up.
-  'src/app/(auth)/login/page.tsx',
 ]
 
 /**

@@ -1,81 +1,47 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+// Client-only profile page.
+//
+// Previously a Server Component that pre-fetched profile/albums/stats with the
+// Supabase server client (cookies()/getUser()). That can't be statically
+// exported, so the whole page was omitted from the Capacitor mobile bundle —
+// which broke the "You" tab on device. ProfileContent already fetches all of
+// its own data client-side (see fetchUserData), so the page just hands it the
+// signed-in user + profile from the auth context and lets it load. Web
+// behaviour is preserved: same component, data now arrives a beat later behind
+// the existing loading shimmer instead of during SSR (the page is auth-gated,
+// so there's no SEO cost).
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
+import { useAuth } from '@/components/auth/AuthProvider'
 import ProfileContent from './ProfileContent'
 
-export default async function ProfilePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const userId = user?.id
-  if (!userId) {
-    redirect('/login')
-  }
+export default function ProfilePage() {
+  const { user, profile, authLoading, profileLoading } = useAuth()
+  const router = useRouter()
 
-  // Fetch profile
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .single()
+  useEffect(() => {
+    if (!authLoading && !user) router.replace('/login')
+  }, [authLoading, user, router])
 
-  if (!profile) {
-    redirect('/login')
-  }
-
-  // Fetch albums with photo counts, and follow stats in parallel
-  const [albumsResult, followersResult, followingResult] = await Promise.all([
-    supabase
-      .from('albums')
-      .select('*, photos(id)')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('follows')
-      .select('id', { count: 'exact' })
-      .eq('following_id', userId)
-      .eq('status', 'accepted'),
-    supabase
-      .from('follows')
-      .select('id', { count: 'exact' })
-      .eq('follower_id', userId)
-      .eq('status', 'accepted'),
-  ])
-
-  // Only show published albums (with photos) on profile
-  const publishedAlbums = (albumsResult.data || []).filter(a => (a.photos?.length || 0) > 0)
-
-  const totalPhotos = publishedAlbums.reduce((sum, album) => sum + (album.photos?.length || 0), 0)
-
-  const followStats = {
-    followersCount: followersResult.count || 0,
-    followingCount: followingResult.count || 0,
-  }
-
-  const countryCodes = [...new Set(
-    publishedAlbums
-      .filter(a => a.country_code)
-      .map(a => a.country_code as string)
-  )]
-
-  const uniqueCities = new Set(
-    publishedAlbums
-      .filter(a => a.location_name)
-      .map(a => a.location_name?.split(',')[0]?.trim())
-  )
-
-  const travelStats = {
-    countries: countryCodes.length,
-    cities: uniqueCities.size,
-    photos: totalPhotos,
+  if (authLoading || profileLoading || !user || !profile) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (
     <ProfileContent
       profile={profile}
-      userId={userId}
-      initialAlbums={publishedAlbums}
-      initialFollowStats={followStats}
-      initialCountryCodes={countryCodes}
-      initialTravelStats={travelStats}
+      userId={user.id}
+      initialAlbums={[]}
+      initialFollowStats={{ followersCount: 0, followingCount: 0 }}
+      initialCountryCodes={[]}
+      initialTravelStats={{ countries: 0, cities: 0, photos: 0 }}
     />
   )
 }

@@ -56,7 +56,10 @@ export default function ProfileContent({
   initialTravelStats,
 }: ProfileContentProps) {
   const [albums, setAlbums] = useState<Album[]>(initialAlbums)
-  const [loading, setLoading] = useState(false)
+  // Start in the loading state when no server data was provided (the mobile /
+  // client-only page passes empty initials and relies on the mount fetch
+  // below), so the shimmer shows instead of a flash of empty state.
+  const [loading, setLoading] = useState(initialAlbums.length === 0)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
   const [followStats, setFollowStats] = useState(initialFollowStats)
   const [, setCountryCodes] = useState<string[]>(initialCountryCodes)
@@ -110,8 +113,18 @@ export default function ProfileContent({
     }
   }, [userId, supabase])
 
+  // Initial load. The page no longer server-fetches (it's client-only so it can
+  // static-export for the mobile bundle), so pull the data on mount when we
+  // weren't handed any. Runs once per userId.
+  const initialLoadDone = useRef(false)
+  useEffect(() => {
+    if (initialLoadDone.current || initialAlbums.length > 0) return
+    initialLoadDone.current = true
+    fetchUserData()
+  }, [fetchUserData, initialAlbums.length])
+
   // Quietly refresh when returning to the tab — no skeleton flash over
-  // already-rendered, server-provided content.
+  // already-rendered content.
   useEffect(() => {
     const handleVisibility = () => { if (!document.hidden) fetchUserData({ silent: true }) }
     document.addEventListener('visibilitychange', handleVisibility)

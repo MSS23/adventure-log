@@ -47,35 +47,56 @@ interface FlightSceneObjects {
   trail: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>
 }
 
-/** Stylized paper plane, nose along +Z, up +Y (so up.copy(normal) +
- *  lookAt(ahead) orients it tangent to the globe, and rotateZ banks it). */
+/** Paper dart, nose along +Z, up +Y (so up.copy(normal) + lookAt(ahead)
+ *  orients it tangent to the globe, and rotateZ banks it).
+ *
+ *  Three folds, like the real thing: two swept wing panels raised into a
+ *  dihedral V, and a brand-orange keel hanging under the spine. Both
+ *  materials carry a touch of emissive so the dart stays readable against
+ *  the blacked-out globe regardless of where the scene lights sit. */
 function buildPlaneMesh(): THREE.Group {
   const g = new THREE.Group()
-  const bodyMat = new THREE.MeshLambertMaterial({ color: 0xff6b35, side: THREE.DoubleSide })
-  const wingMat = new THREE.MeshLambertMaterial({ color: 0xffe3d6, side: THREE.DoubleSide })
+  const paperMat = new THREE.MeshLambertMaterial({
+    color: 0xfff6ee,
+    emissive: 0x3a2418,
+    side: THREE.DoubleSide,
+  })
+  const keelMat = new THREE.MeshLambertMaterial({
+    color: 0xff6b35,
+    emissive: 0x7a2c0c,
+    side: THREE.DoubleSide,
+  })
 
-  const fuselage = new THREE.Mesh(new THREE.ConeGeometry(0.55, 4.4, 6), bodyMat)
-  fuselage.rotation.x = Math.PI / 2 // cone points +Y by default → nose +Z
-  g.add(fuselage)
+  const NOSE = 2.6
+  const TAIL = -2.2
+  const SPINE_Y = 0.18
 
-  const wingGeom = new THREE.BufferGeometry()
-  wingGeom.setAttribute(
+  // Wing panel: nose tip → swept-back raised wingtip → tail end of the spine.
+  const wing = (dir: 1 | -1) => {
+    const geom = new THREE.BufferGeometry()
+    geom.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute(
+        [0, SPINE_Y, NOSE, dir * 3.1, 0.8, TAIL, 0, SPINE_Y, TAIL + 0.4],
+        3
+      )
+    )
+    geom.computeVertexNormals()
+    return new THREE.Mesh(geom, paperMat)
+  }
+  g.add(wing(1), wing(-1))
+
+  // Center keel: the fold you pinch to throw it.
+  const keelGeom = new THREE.BufferGeometry()
+  keelGeom.setAttribute(
     'position',
-    new THREE.Float32BufferAttribute([0, 0, 1.5, -3.2, 0, -1.7, 0, 0, -0.8], 3)
+    new THREE.Float32BufferAttribute(
+      [0, SPINE_Y, NOSE, 0, -0.9, TAIL + 0.7, 0, SPINE_Y, TAIL + 0.4],
+      3
+    )
   )
-  wingGeom.computeVertexNormals()
-  const rightGeom = wingGeom.clone()
-  rightGeom.scale(-1, 1, 1)
-  rightGeom.computeVertexNormals()
-  g.add(new THREE.Mesh(wingGeom, wingMat), new THREE.Mesh(rightGeom, wingMat))
-
-  const finGeom = new THREE.BufferGeometry()
-  finGeom.setAttribute(
-    'position',
-    new THREE.Float32BufferAttribute([0, 0, -0.9, 0, 1.2, -2.0, 0, 0, -2.0], 3)
-  )
-  finGeom.computeVertexNormals()
-  g.add(new THREE.Mesh(finGeom, bodyMat))
+  keelGeom.computeVertexNormals()
+  g.add(new THREE.Mesh(keelGeom, keelMat))
 
   return g
 }
@@ -183,6 +204,20 @@ export function WrappedGlobe({
   const containerRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+
+  // Matte near-black sphere in place of the earth texture (which rendered
+  // poorly, especially in exports). The faint blue-black tint + whisper of
+  // specular keeps the sphere reading as a curved solid rather than a hole
+  // in the star field; the atmosphere rim draws its edge.
+  const globeMaterial = useMemo(
+    () =>
+      new THREE.MeshPhongMaterial({
+        color: 0x0b0b10,
+        specular: new THREE.Color(0x1a1a22),
+        shininess: 8,
+      }),
+    []
+  )
 
   // In-scene flight objects (plane mesh + trail tube), owned by the setup
   // effect below and driven imperatively from the flight rAF loop.
@@ -726,7 +761,7 @@ export function WrappedGlobe({
       const arc = d as FlightArc
       const isLatest = arc.index === revealedArcs - 1
       if (isLatest) return ['#ff6b35', '#ffb088'] // Bright for newest arc
-      return ['rgba(255,107,53,0.6)', 'rgba(255,159,107,0.4)'] // Receded but readable on the day texture
+      return ['rgba(255,107,53,0.45)', 'rgba(255,159,107,0.3)'] // Receded — glows plenty against the black globe
     },
     [revealedArcs]
   )
@@ -764,12 +799,13 @@ export function WrappedGlobe({
           ref={globeRef}
           width={dimensions.width}
           height={dimensions.height}
-          // Day texture: the flyover is a travel story — the viewer should
-          // SEE the coastlines and countries sliding under the plane (the old
-          // night texture rendered as a near-black sphere in exported videos).
-          // The warm atmosphere rim keeps the Wrapped sunset branding.
-          globeImageUrl="/earth-texture.jpg"
-          bumpImageUrl="/earth-topology.png"
+          // Deliberately textureless: the low-res earth imagery read as poor
+          // render quality, so the globe is now a matte black sphere (see
+          // globeMaterial above) and the orange arcs, trail, pins and labels
+          // carry the whole story. The warm atmosphere rim keeps the Wrapped
+          // sunset branding and defines the planet's edge against the stars.
+          globeImageUrl={null}
+          globeMaterial={globeMaterial}
           backgroundImageUrl="/night-sky.png"
           backgroundColor="rgba(0,0,0,0)"
           onGlobeReady={() => setGlobeReady(true)}
@@ -817,7 +853,7 @@ export function WrappedGlobe({
           labelResolution={2}
           // Atmosphere
           atmosphereColor="#ff6b35"
-          atmosphereAltitude={0.12}
+          atmosphereAltitude={0.16}
           showAtmosphere={true}
           // Settings
           enablePointerInteraction={interactive}

@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Image from 'next/image'
+import { RetryableImage } from '@/components/ui/retryable-image'
 import Link from 'next/link'
 import { Album } from '@/types/database'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -52,7 +52,7 @@ export function ProfileAlbumCard({ album, className, index = 0 }: ProfileAlbumCa
         {/* Cover image */}
         <div className="absolute inset-0">
           {coverUrl ? (
-            <Image
+            <RetryableImage
               src={coverUrl}
               alt={album.title}
               fill

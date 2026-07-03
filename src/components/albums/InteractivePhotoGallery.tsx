@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
+import { RetryableImage } from '@/components/ui/retryable-image'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import useEmblaCarousel from 'embla-carousel-react'
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Camera, Heart } from 'lucide-react'
@@ -134,7 +135,7 @@ export function InteractivePhotoGallery({
             >
               <div className="absolute inset-0">
                 {photoUrl && (
-                  <Image
+                  <RetryableImage
                     src={photoUrl}
                     alt={photo.caption || `${albumTitle} - Photo`}
                     fill
@@ -240,7 +241,7 @@ export function InteractivePhotoGallery({
                   transition={{ duration: 0.2 }}
                 >
                   {photoUrl && (
-                    <Image
+                    <RetryableImage
                       src={photoUrl}
                       alt={photo.caption || `${albumTitle} - Photo ${index + 1}`}
                       fill

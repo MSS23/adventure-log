@@ -1,4 +1,4 @@
-import { ImageResponse } from '@vercel/og'
+import { ImageResponse } from 'next/og'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { log } from '@/lib/utils/logger'
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     const personality = stats.personality.type
     const worldPercent = stats.countryPercentage
 
-    return new ImageResponse(
+    const image = new ImageResponse(
       (
         <div
           style={{
@@ -156,8 +156,12 @@ export async function GET(request: NextRequest) {
                   <div style={{ fontSize: '32px', fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
                     {displayName}
                   </div>
+                  {/* Single string child — Satori (next/og) throws on a <div>
+                      with more than one child node unless it sets display:flex,
+                      and the old "@{username} · Travel Passport{cond}" produced
+                      several text/expression children. That threw on every card. */}
                   <div style={{ fontSize: '15px', color: 'rgba(205,224,168,0.92)', lineHeight: 1.4 }}>
-                    @{user.username} &middot; Travel Passport{year !== null ? ` · ${year} Wrapped` : ''}
+                    {`@${user.username} · Travel Passport${year !== null ? ` · ${year} Wrapped` : ''}`}
                   </div>
                 </div>
               </div>
@@ -267,19 +271,29 @@ export async function GET(request: NextRequest) {
       {
         width: 1200,
         height: 630,
-        headers: {
-          // Suggest the browser save this as a file when the user requests
-          // it (the /wrapped Download button uses ?download=1). Otherwise
-          // serve inline so it can be embedded in OG cards / sharing flows.
-          'Content-Disposition': searchParams.get('download') === '1'
-            ? `attachment; filename="${(user.username || 'travel-card').replace(/[^a-z0-9_-]/gi, '_')}-travel-card.png"`
-            : 'inline',
-          // Cache for 5 minutes — the underlying user data changes slowly,
-          // and the cost of generation is non-trivial.
-          'Cache-Control': 'private, max-age=300',
-        },
       }
     )
+
+    // Buffer the image before responding. ImageResponse is a STREAMING Response
+    // that returns before Satori finishes rendering, so a render failure (bad
+    // emoji glyph, font issue) escaped the try/catch and reset the connection —
+    // the client saw "Failed to fetch". Materialising the bytes here makes any
+    // render error throw synchronously so the catch below returns a real 500.
+    const pngBuffer = await image.arrayBuffer()
+    return new Response(pngBuffer, {
+      headers: {
+        'Content-Type': 'image/png',
+        // Suggest the browser save this as a file when the user requests
+        // it (the /wrapped Download button uses ?download=1). Otherwise
+        // serve inline so it can be embedded in OG cards / sharing flows.
+        'Content-Disposition': searchParams.get('download') === '1'
+          ? `attachment; filename="${(user.username || 'travel-card').replace(/[^a-z0-9_-]/gi, '_')}-travel-card.png"`
+          : 'inline',
+        // Cache for 5 minutes — the underlying user data changes slowly,
+        // and the cost of generation is non-trivial.
+        'Cache-Control': 'private, max-age=300',
+      },
+    })
   } catch (error) {
     log.error('Travel card generation error', { component: 'TravelCard', action: 'generate' }, error as Error)
     return NextResponse.json({ error: 'Failed to generate travel card' }, { status: 500 })

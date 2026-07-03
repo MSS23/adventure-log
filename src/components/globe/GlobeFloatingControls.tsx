@@ -79,12 +79,14 @@ export function GlobeFloatingControls({
             <Search className="h-4 w-4" />
           </Button>
 
-          {/* Travel Routes Toggle */}
+          {/* Travel Routes Toggle — desktop only; on phones it's a niche
+              toggle that crowds the control cluster (routes stay visible,
+              they just aren't toggleable there). */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowStaticConnections(!showStaticConnections)}
-            className={cn("h-9 w-9 p-0 text-foreground hover:bg-muted rounded-lg transition-all", showStaticConnections && 'bg-olive-500/30 text-olive-700')}
+            className={cn("hidden md:inline-flex h-9 w-9 p-0 text-foreground hover:bg-muted rounded-lg transition-all", showStaticConnections && 'bg-olive-500/30 text-olive-700')}
             title="Toggle travel routes"
           >
             <Route className="h-4 w-4" />

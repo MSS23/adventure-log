@@ -47,7 +47,7 @@ function GlobePageContent() {
     isDataError, refetchGlobeData,
     friends, handleViewFriendGlobe,
     selectedYear, setSelectedYear, availableYears,
-    showStatsOverlay, setShowStatsOverlay, hideEmptyCta, setHideEmptyCta,
+    hideEmptyCta, setHideEmptyCta,
     exploreMode, setExploreMode, exploreAlbums, exploreLoading, exploreStats,
     wishlistItems, showWishlist, setShowWishlist,
     wishlistPrompt, setWishlistPrompt,
@@ -166,14 +166,12 @@ function GlobePageContent() {
           />
         )}
 
-        {/* Floating Stats Overlay (hidden in explore mode) */}
+        {/* Floating Stats Overlay (desktop only, hidden in explore mode) */}
         {albums.length > 0 && !exploreMode && (
           <GlobeStatsOverlay
             stats={stats}
             totalDistance={totalDistance}
             formatDistance={formatDistance}
-            showStatsOverlay={showStatsOverlay}
-            setShowStatsOverlay={setShowStatsOverlay}
           />
         )}
 

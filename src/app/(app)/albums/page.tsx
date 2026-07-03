@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Grid3x3, Trash2, CheckSquare, Square, ArrowUpDown, Images, Star } from 'lucide-react'
+import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Trash2, CheckSquare, Square, ArrowUpDown, Images, Star } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
@@ -378,8 +378,10 @@ function AlbumsPageContent() {
               Select
             </Button>
           )}
+          {/* On phones the global "+" FAB already covers creation — a second
+              New button here just crowds the header row. */}
           {!isViewingOtherUser && (
-            <Link href="/albums/new">
+            <Link href="/albums/new" className="hidden sm:block">
               <Button size="sm" className="cursor-pointer">
                 <Plus className="h-4 w-4 mr-1" />
                 New
@@ -389,10 +391,11 @@ function AlbumsPageContent() {
         </div>
       </div>
 
-      {/* Search Bar and Sort */}
+      {/* Search Bar and Sort — one row on phones so the toolbar doesn't stack
+          into two full-width controls above the grid. */}
       {albums.length > 0 && (
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
+        <div className="flex flex-row gap-2 sm:gap-3">
+          <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search albums..."
@@ -402,9 +405,9 @@ function AlbumsPageContent() {
             />
           </div>
           <Select value={sortBy} onValueChange={(value: typeof sortBy) => setSortBy(value)}>
-            <SelectTrigger className="w-full sm:w-[180px] h-10 cursor-pointer transition-all duration-200">
-              <div className="flex items-center gap-2">
-                <ArrowUpDown className="h-4 w-4" />
+            <SelectTrigger className="w-[140px] sm:w-[180px] h-10 cursor-pointer transition-all duration-200">
+              <div className="flex items-center gap-2 min-w-0">
+                <ArrowUpDown className="hidden sm:block h-4 w-4 flex-shrink-0" />
                 <SelectValue placeholder="Sort by" />
               </div>
             </SelectTrigger>
@@ -604,16 +607,8 @@ function AlbumsPageContent() {
                 </Button>
               </div>
             </div>
-          ) : (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Grid3x3 className="h-4 w-4" />
-                <span className="text-xs font-mono tracking-wide">
-                  {sortedAlbums.length} album{sortedAlbums.length === 1 ? '' : 's'}
-                </span>
-              </div>
-            </div>
-          )}
+          ) : null /* count already lives in the page header — a second
+                      "N albums" row above the grid was pure noise */}
 
           {/* Instagram-style Grid */}
           <AnimatePresence mode="wait">

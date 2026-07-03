@@ -729,9 +729,8 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                     {parseLocalDate(album.date_end)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 )}
-                {photos.length > 0 && (
-                  <span className="text-xs font-mono tracking-wide text-muted-foreground">{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
-                )}
+                {/* photo count intentionally omitted here — the gallery below
+                    already carries an "N photos" pill */}
                 {isOwner && album.visibility && (
                   <span className="al-badge">
                     {album.visibility === 'private' ? (

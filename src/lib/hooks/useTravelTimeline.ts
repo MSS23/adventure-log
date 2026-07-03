@@ -77,6 +77,16 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
   // Track which years have been fully loaded (with locations) to prevent re-fetching
   const loadedYearsRef = useRef<Set<number>>(new Set())
 
+  // Bounded auto-retry for failed year fetches. fetchYearData swallows its own
+  // errors (returns null) so one bad year can't nuke the others — but that
+  // used to leave the globe permanently pinless after a transient failure
+  // (Supabase free-tier cold-start timeouts hit the heavier friend-globe
+  // queries especially often): nothing re-ran the effect, and the error was
+  // even cleared. The tick re-arms the loader effect; attempts cap the loop.
+  const yearRetryAttemptsRef = useRef(0)
+  const [yearRetryTick, setYearRetryTick] = useState(0)
+  const MAX_YEAR_RETRIES = 3
+
   // Use filterUserId if provided, otherwise use current user's ID
   const targetUserId = filterUserId || user?.id
 
@@ -431,6 +441,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     try {
       // Clear existing year data and loaded tracking to force refresh
       loadedYearsRef.current.clear()
+      yearRetryAttemptsRef.current = 0
       setYearData({})
 
       await fetchAvailableYears()
@@ -459,6 +470,18 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       : []
     const needsAllYearData = yearsToLoad.length > 0
 
+    let retryTimer: NodeJS.Timeout | null = null
+
+    // Re-arm this effect after a backoff so failed years get another attempt.
+    // Returns false once attempts are exhausted (caller surfaces the error).
+    const scheduleYearRetry = () => {
+      if (yearRetryAttemptsRef.current >= MAX_YEAR_RETRIES) return false
+      const delay = 1500 * 2 ** yearRetryAttemptsRef.current
+      yearRetryAttemptsRef.current += 1
+      retryTimer = setTimeout(() => setYearRetryTick(t => t + 1), delay)
+      return true
+    }
+
     if (needsFullData && selectedYear !== null) {
       setLoading(true)
       setError(null)
@@ -468,11 +491,14 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
           if (data) {
             // Mark year as loaded BEFORE updating state
             loadedYearsRef.current.add(selectedYear)
+            yearRetryAttemptsRef.current = 0
             setYearData(prev => ({ ...prev, [selectedYear]: data }))
             // Clear error if data loads successfully
             if (data.locations.length > 0) {
               setError(null)
             }
+          } else if (!scheduleYearRetry()) {
+            setError('Failed to load year data')
           }
         })
         .catch(err => {
@@ -515,7 +541,16 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
             })
             return newYearData
           })
-          setError(null)
+
+          const failed = results.filter(({ data }) => !data)
+          if (failed.length === 0) {
+            yearRetryAttemptsRef.current = 0
+            setError(null)
+          } else if (!scheduleYearRetry() && failed.length === results.length) {
+            // Every year failed and retries are exhausted — say so instead of
+            // rendering a silently empty globe.
+            setError('Failed to load travel timeline')
+          }
         })
         .catch(err => {
           log.error('Failed to load all year data', {
@@ -529,7 +564,11 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
           setLoading(false)
         })
     }
-  }, [selectedYear, fetchYearData, user?.id, availableYears])
+
+    return () => {
+      if (retryTimer) clearTimeout(retryTimer)
+    }
+  }, [selectedYear, fetchYearData, user?.id, availableYears, yearRetryTick])
 
   // Real-time subscriptions for automatic updates
   useEffect(() => {
@@ -612,6 +651,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
 
   // Initial data load
   useEffect(() => {
+    yearRetryAttemptsRef.current = 0
     if (targetUserId) {
       fetchAvailableYears()
     }

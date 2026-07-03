@@ -90,8 +90,6 @@ export function useGlobePageData() {
   const [availableYears, setAvailableYears] = useState<number[]>([])
   const [, setGlobeReady] = useState(false)
 
-  // Mobile stats overlay toggle
-  const [showStatsOverlay, setShowStatsOverlay] = useState(false)
   const [hideEmptyCta, setHideEmptyCta] = useState(false)
 
   // Explore mode state
@@ -562,8 +560,6 @@ export function useGlobePageData() {
     availableYears,
 
     // UI state
-    showStatsOverlay,
-    setShowStatsOverlay,
     hideEmptyCta,
     setHideEmptyCta,
 

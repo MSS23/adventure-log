@@ -48,9 +48,16 @@ export function UnreadCountProvider({ children }: { children: React.ReactNode })
     }
   }, [user, supabase])
 
-  // Fetch on mount and when user changes
+  // Fetch on mount and when user changes — deferred to idle so the badge
+  // count doesn't compete with the page's primary queries for the Supabase
+  // connection during a cold start (the badge is not first-paint-critical).
   useEffect(() => {
-    fetchCount()
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(() => { void fetchCount() }, { timeout: 5000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const timer = setTimeout(() => { void fetchCount() }, 1500)
+    return () => clearTimeout(timer)
   }, [fetchCount])
 
   // Subscribe to new activity feed inserts for real-time badge updates

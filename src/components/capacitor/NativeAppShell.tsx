@@ -60,32 +60,21 @@ export function NativeAppShell() {
     return () => cleanup?.()
   }, [])
 
-  // Status bar style follows the app theme (light/dark class on <html>).
+  // Status bar — the app is light-only (see ThemeContext), so pin dark icons
+  // on the light background once. No theme observer needed.
   useEffect(() => {
     if (!isNativePlatform()) return
-    let observer: MutationObserver | undefined
 
     ;(async () => {
       try {
         const { StatusBar, Style } = await import('@capacitor/status-bar')
-
-        const apply = async () => {
-          const dark = document.documentElement.classList.contains('dark')
-          // Style.Dark = light icons on dark background; Style.Light = the
-          // inverse. Match the theme background colors from layout viewport.
-          await StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light })
-          try {
-            await StatusBar.setBackgroundColor({ color: dark ? '#0C1014' : '#F7F9FB' })
-          } catch {
-            // setBackgroundColor is Android-only; ignore elsewhere.
-          }
+        // Style.Light = dark icons for a light background.
+        await StatusBar.setStyle({ style: Style.Light })
+        try {
+          await StatusBar.setBackgroundColor({ color: '#F7F9FB' })
+        } catch {
+          // setBackgroundColor is Android-only; ignore elsewhere.
         }
-
-        await apply()
-        observer = new MutationObserver(() => {
-          void apply()
-        })
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
       } catch (err) {
         log.error('Failed to configure native status bar', {
           component: 'NativeAppShell',
@@ -93,8 +82,6 @@ export function NativeAppShell() {
         }, err instanceof Error ? err : new Error(String(err)))
       }
     })()
-
-    return () => observer?.disconnect()
   }, [])
 
   return null

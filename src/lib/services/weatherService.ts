@@ -7,6 +7,9 @@
  */
 
 import { log } from '@/lib/utils/logger'
+// apiFetch resolves /api/* against the deployed web origin on Capacitor —
+// a bare fetch('/api/…') 404s inside the native WebView.
+import { apiFetch } from '@/lib/api/client'
 
 interface WeatherCondition {
   id: number
@@ -129,7 +132,7 @@ class WeatherService {
    */
   async getCurrentWeather(location: WeatherLocation): Promise<WeatherData | null> {
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/weather?endpoint=current&lat=${location.latitude}&lon=${location.longitude}`
       )
 
@@ -155,7 +158,7 @@ class WeatherService {
   async getWeatherForecast(location: WeatherLocation, days: number = 5): Promise<ForecastWeather[]> {
     try {
       const cnt = Math.min(days * 8, 40)
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/weather?endpoint=forecast&lat=${location.latitude}&lon=${location.longitude}&cnt=${cnt}`
       )
 
@@ -182,7 +185,7 @@ class WeatherService {
   async getHistoricalWeather(location: WeatherLocation, date: Date): Promise<HistoricalWeather | null> {
     try {
       const timestamp = Math.floor(date.getTime() / 1000)
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/weather?endpoint=historical&lat=${location.latitude}&lon=${location.longitude}&dt=${timestamp}`
       )
 
@@ -207,7 +210,7 @@ class WeatherService {
    */
   async getLocationCoordinates(cityName: string): Promise<WeatherLocation | null> {
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/weather?endpoint=geocode&q=${encodeURIComponent(cityName)}`
       )
 

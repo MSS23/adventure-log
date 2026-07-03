@@ -146,7 +146,7 @@ export default function WrappedPage() {
     // Share a public landing surface, not this auth-gated /wrapped route —
     // recipients who tap the link should reach a page they can act on.
     const shareUrl =
-      typeof window !== 'undefined' ? window.location.origin : 'https://adventurelog.com'
+      typeof window !== 'undefined' ? window.location.origin : 'https://adventure-log-azure.vercel.app'
 
     // Best effort: attach the travel-card PNG so the share carries the visual,
     // not just text. Any failure here falls through to the text-only share.

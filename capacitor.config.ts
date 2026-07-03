@@ -43,7 +43,9 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,
-      backgroundColor: '#0f172a',
+      // App is light-only — match the app background (--background / themeColor
+      // #F7F9FB) so launch doesn't flash dark before the WebView paints.
+      backgroundColor: '#F7F9FB',
       showSpinner: false,
       androidScaleType: 'CENTER_CROP',
       splashFullScreen: true,
@@ -71,15 +73,16 @@ const config: CapacitorConfig = {
     // blank screen) impossible to inspect. Debug APKs are for debugging; a
     // hardened release build should turn this back off.
     webContentsDebuggingEnabled: true,
-    backgroundColor: '#0f172a',
-    // Use the WebView's built-in dark mode support
+    // Light-only app — WebView background must match or rotation/keyboard
+    // resizes flash dark.
+    backgroundColor: '#F7F9FB',
     useLegacyBridge: false,
   },
   ios: {
     contentInset: 'automatic',
     allowsLinkPreview: true,
     scrollEnabled: true,
-    backgroundColor: '#0f172a',
+    backgroundColor: '#F7F9FB',
     // Handle the safe area automatically
     preferredContentMode: 'mobile',
   },

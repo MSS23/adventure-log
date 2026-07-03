@@ -7,7 +7,7 @@ const isMobile = process.env.MOBILE_BUILD === 'true';
 export const dynamic = 'force-static';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventurelog.com'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventure-log-azure.vercel.app'
 
   // Static pages - simplified for mobile builds
   const staticPages: MetadataRoute.Sitemap = [

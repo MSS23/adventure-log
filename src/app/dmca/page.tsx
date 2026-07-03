@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { LegalBackLink } from '@/components/legal/LegalBackLink'
 
 export const metadata = {
   title: 'Copyright & DMCA Policy — Adventure Log',
@@ -10,15 +10,9 @@ export default function DmcaPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
-        <Link
-          href="/"
-          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Home
-        </Link>
+        <LegalBackLink />
 
-        <p className="al-eyebrow mt-8 mb-1">Last updated · June 2026</p>
+        <p className="al-eyebrow mt-8 mb-1">Last updated · July 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Copyright &amp; DMCA Policy</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
           Adventure Log hosts content uploaded by its users. We respect the intellectual property rights of others and respond to clear notices of alleged copyright infringement. This policy explains how to report content you believe infringes your copyright, and how the person who posted it can respond.
@@ -34,7 +28,7 @@ export default function DmcaPage() {
             <li>A statement, made under penalty of perjury, that the information in your notice is accurate and that you are the owner or authorised to act on the owner&apos;s behalf.</li>
             <li>Your physical or electronic signature.</li>
           </ul>
-          <p className="mt-3">Send notices to our copyright agent at <a className="text-primary underline" href="mailto:copyright@adventurelog.app">copyright@adventurelog.app</a> with the subject line &quot;Copyright Notice&quot;.</p>
+          <p className="mt-3">Send notices to our copyright agent at <a className="text-primary underline" href="mailto:msidhu861@gmail.com?subject=Copyright%20Notice">msidhu861@gmail.com</a> with the subject line &quot;Copyright Notice&quot;.</p>
         </Section>
 
         <Section title="2. What happens next">
@@ -42,7 +36,7 @@ export default function DmcaPage() {
         </Section>
 
         <Section title="3. Counter-notice">
-          <p>If your content was removed and you believe that was a mistake or misidentification, you may send a counter-notice to <a className="text-primary underline" href="mailto:copyright@adventurelog.app">copyright@adventurelog.app</a> containing:</p>
+          <p>If your content was removed and you believe that was a mistake or misidentification, you may send a counter-notice to <a className="text-primary underline" href="mailto:msidhu861@gmail.com?subject=DMCA%20Counter-Notice">msidhu861@gmail.com</a> containing:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Your name, address, email, and physical or electronic signature.</li>
             <li>Identification of the content that was removed and the location where it appeared before removal.</li>

@@ -21,7 +21,6 @@ import {
   LayoutDashboard,
   MessageSquarePlus,
 } from 'lucide-react'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
@@ -51,6 +50,7 @@ const browseNavItems: NavItem[] = [
 const yoursNavItems: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Your Globe', href: '/globe', icon: Globe },
+  { name: 'Your Map', href: '/map', icon: MapPinned },
   { name: 'Your Albums', href: '/albums', icon: BookOpen },
   { name: 'Your Trips', href: '/trips', icon: MapIcon },
   { name: 'Saved', href: '/saved', icon: Bookmark },
@@ -354,8 +354,7 @@ export function Sidebar() {
 
           {/* Footer utilities */}
           <div className="px-3 py-3 border-t border-[color:var(--color-line-warm)]">
-            <div className="flex items-center justify-between px-1">
-              <ThemeToggle />
+            <div className="flex items-center justify-end px-1">
               <motion.button
                 onClick={handleLogout}
                 disabled={loggingOut}

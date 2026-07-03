@@ -118,7 +118,7 @@ async function nominatimFetch(nominatimUrl: string): Promise<unknown> {
   const contact =
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    'https://adventure-log.app'
+    'https://adventure-log-azure.vercel.app'
   const response = await fetch(nominatimUrl, {
     headers: { 'User-Agent': `AdventureLog/1.0 (+${contact})` },
   })

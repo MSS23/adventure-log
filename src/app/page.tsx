@@ -108,6 +108,12 @@ export default function HomePage() {
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [globeSize, setGlobeSize] = useState({ w: 1200, h: 800 })
+  // The hero globe is decorative and its chunk (Three.js + react-globe.gl)
+  // is the largest JS payload on this page. Defer mounting it until the main
+  // thread is idle so text/CTAs paint first — and never mount it for a
+  // signed-in user, who is being redirected to /dashboard anyway (the native
+  // app boots into `/` on every launch, so this directly speeds up app start).
+  const [globeReady, setGlobeReady] = useState(false)
 
   // Signed-in users don't want the marketing page — especially on the native
   // app, which boots into `/` (index.html) on every launch. Send them to the
@@ -132,19 +138,28 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
-    if (!mounted || !globeRef.current) return
-    const timer = setTimeout(() => {
-      if (!globeRef.current) return
-      globeRef.current.pointOfView({ lat: 30, lng: 10, altitude: 2.2 }, 0)
-      const controls = globeRef.current.controls()
-      if (controls) {
-        controls.autoRotate = true
-        controls.autoRotateSpeed = 0.4
-        controls.enableZoom = false
-      }
-    }, 300)
+    if (!mounted) return
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(() => setGlobeReady(true), { timeout: 2000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const timer = setTimeout(() => setGlobeReady(true), 300)
     return () => clearTimeout(timer)
   }, [mounted])
+
+  // Configure camera/controls once the globe engine reports ready (the old
+  // fixed 300ms timer raced the dynamic chunk load and could silently skip
+  // auto-rotate setup).
+  const handleGlobeReady = () => {
+    if (!globeRef.current) return
+    globeRef.current.pointOfView({ lat: 30, lng: 10, altitude: 2.2 }, 0)
+    const controls = globeRef.current.controls()
+    if (controls) {
+      controls.autoRotate = true
+      controls.autoRotateSpeed = 0.4
+      controls.enableZoom = false
+    }
+  }
 
   // While redirecting a signed-in user to the dashboard, show a minimal dark
   // screen instead of a flash of the marketing page.
@@ -209,9 +224,10 @@ export default function HomePage() {
             />
             {/* Top/bottom fade */}
             <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E14] via-transparent to-[#0A0E14] z-10 pointer-events-none opacity-60" />
-            {mounted && (
+            {mounted && globeReady && !authLoading && !user && (
               <GlobeGL
                 ref={globeRef}
+                onGlobeReady={handleGlobeReady}
                 globeImageUrl="/earth-dark.jpg"
                 bumpImageUrl="/earth-topology.png"
                 backgroundImageUrl={undefined}

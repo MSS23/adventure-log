@@ -100,6 +100,7 @@ const nextConfig: NextConfig = {
       'lucide-react',
       '@radix-ui/react-icons',
       'date-fns',
+      'framer-motion',
     ],
   },
 

@@ -804,16 +804,18 @@ export function useGlobeState(options: UseGlobeStateOptions) {
 
   // Search and preview functions
   const handleSearchResult = useCallback((result: GlobeSearchResult) => {
+    // Fly to ANY picked result. Only visited locations get an active pin —
+    // external geocoder results (id `external-*`) have no pin, but the old
+    // early-return made clicking them do nothing at all, which read as
+    // "search is broken".
     const location = locations.find(loc => loc.id === result.id)
-    if (location) {
-      setActiveCityId(result.id)
-      setIsAutoRotating(false)
-      animateCameraToPosition({
-        lat: result.latitude,
-        lng: result.longitude,
-        altitude: 2.8
-      }, 1500, 'easeInOutCubic')
-    }
+    setActiveCityId(location ? result.id : null)
+    setIsAutoRotating(false)
+    animateCameraToPosition({
+      lat: result.latitude,
+      lng: result.longitude,
+      altitude: 2.8
+    }, 1500, 'easeInOutCubic')
   }, [locations, animateCameraToPosition])
 
   // `openModal` controls whether a city tap opens the AlbumImageModal preview.

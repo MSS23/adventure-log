@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { LegalBackLink } from '@/components/legal/LegalBackLink'
 import { ManageCookiesButton } from '@/components/legal/ManageCookiesButton'
 
 export const metadata = {
@@ -11,15 +11,9 @@ export default function CookiesPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
-        <Link
-          href="/"
-          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Home
-        </Link>
+        <LegalBackLink />
 
-        <p className="al-eyebrow mt-8 mb-1">Last updated · June 2026</p>
+        <p className="al-eyebrow mt-8 mb-1">Last updated · July 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Cookie Policy</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
           This policy explains the cookies and similar local-storage technologies Adventure Log uses, and how you can control them. It complements our <Link href="/privacy" className="text-primary underline">Privacy Policy</Link>.
@@ -54,7 +48,7 @@ export default function CookiesPage() {
         </Section>
 
         <Section title="5. Contact">
-          <p>Questions about cookies? Email <a className="text-primary underline" href="mailto:privacy@adventurelog.app">privacy@adventurelog.app</a>.</p>
+          <p>Questions about cookies? Email <a className="text-primary underline" href="mailto:msidhu861@gmail.com?subject=Cookie%20Question">msidhu861@gmail.com</a>.</p>
         </Section>
       </div>
     </div>

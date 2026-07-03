@@ -128,6 +128,30 @@ self.addEventListener('fetch', (event) => {
   }
 })
 
+// Store a response with an `sw-cache-date` header so the freshness checks
+// below have a real timestamp to compare against. A bare cache.put() keeps
+// only the origin's headers — the old code read `sw-cache-date` on the way
+// out but never wrote it, so every cached entry looked infinitely stale and
+// the image/API caches never served a hit while online.
+async function putWithDate(cache, request, response) {
+  try {
+    const body = await response.arrayBuffer()
+    const headers = new Headers(response.headers)
+    headers.set('sw-cache-date', new Date().toUTCString())
+    await cache.put(
+      request,
+      new Response(body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      })
+    )
+  } catch (error) {
+    // Body already consumed or opaque response — skip caching rather than fail.
+    swLog('Service Worker: could not stamp+cache response', error)
+  }
+}
+
 // Handle image requests with long-term caching
 async function handleImageRequest(request) {
   try {
@@ -148,8 +172,7 @@ async function handleImageRequest(request) {
     const networkResponse = await fetch(request)
 
     if (networkResponse.ok) {
-      // Clone response for caching - use clone() directly to avoid body stream issues
-      cache.put(request, networkResponse.clone())
+      await putWithDate(cache, request, networkResponse.clone())
     }
 
     return networkResponse
@@ -168,7 +191,7 @@ async function handleAPIRequest(request) {
 
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE)
-      cache.put(request, networkResponse.clone())
+      await putWithDate(cache, request, networkResponse.clone())
     }
 
     return networkResponse

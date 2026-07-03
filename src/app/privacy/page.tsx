@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { LegalBackLink } from '@/components/legal/LegalBackLink'
 
 export const metadata = {
   title: 'Privacy Policy — Adventure Log',
@@ -10,22 +10,16 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
-        <Link
-          href="/"
-          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Home
-        </Link>
+        <LegalBackLink />
 
-        <p className="al-eyebrow mt-8 mb-1">Last updated · June 2026</p>
+        <p className="al-eyebrow mt-8 mb-1">Last updated · July 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Privacy Policy</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
           Adventure Log helps you document and share your travels. This policy explains what we collect, why, and what your rights are. We wrote it to be readable — no dark patterns. It works alongside our <Link href="/terms" className="text-primary underline">Terms of Service</Link> and <Link href="/cookies" className="text-primary underline">Cookie Policy</Link>.
         </p>
 
         <Section title="1. Who we are">
-          <p>Adventure Log (&quot;we&quot;, &quot;us&quot;) is the data controller for the personal data described in this policy. For any privacy question or to exercise your rights, contact <a className="text-primary underline" href="mailto:privacy@adventurelog.app">privacy@adventurelog.app</a>.</p>
+          <p>Adventure Log (&quot;we&quot;, &quot;us&quot;) is the data controller for the personal data described in this policy. For any privacy question or to exercise your rights, contact <a className="text-primary underline" href="mailto:msidhu861@gmail.com?subject=Privacy%20Request">msidhu861@gmail.com</a>.</p>
         </Section>
 
         <Section title="2. What we collect">
@@ -108,7 +102,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="12. Contact">
-          <p>Questions about this policy or a privacy request? Email <a className="text-primary underline" href="mailto:privacy@adventurelog.app">privacy@adventurelog.app</a>.</p>
+          <p>Questions about this policy or a privacy request? Email <a className="text-primary underline" href="mailto:msidhu861@gmail.com?subject=Privacy%20Request">msidhu861@gmail.com</a>.</p>
         </Section>
 
         <p className="text-xs text-muted-foreground mt-10">

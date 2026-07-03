@@ -9,7 +9,16 @@ import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
 import Image from 'next/image'
-import { weatherService } from '@/lib/services/weatherService'
+import { apiFetch } from '@/lib/api/client'
+
+// Response rows from /api/geocode?q= (normalized Nominatim shape).
+interface GeocodeSearchResult {
+  display_name: string
+  lat: string
+  lon: string
+  place_id: string
+  address?: { country_code?: string }
+}
 
 export interface GlobeSearchResult {
   id: string
@@ -83,36 +92,45 @@ export function GlobeSearch({
     return localResults
   }, [data, maxResults])
 
-  // External search for locations not in user data
+  // External search for locations not in user data. Goes through
+  // /api/geocode (Mapbox → Photon/Nominatim fallback, works keyless in prod)
+  // via apiFetch so it also works inside the Capacitor app. The old path went
+  // through the weather service's geocoder, which needs OPENWEATHER_API_KEY
+  // and silently fell back to MOCK coordinates when unavailable.
   const searchExternalLocations = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim() || searchQuery.length < 3) return
 
     setSearchingExternal(true)
     try {
-      const location = await weatherService.getLocationCoordinates(searchQuery)
-      if (location) {
-        const externalResult: GlobeSearchResult = {
-          id: `external-${location.name}-${location.latitude}-${location.longitude}`,
-          name: location.name || searchQuery,
-          latitude: location.latitude,
-          longitude: location.longitude,
-          country: location.country || 'Unknown',
+      const response = await apiFetch(`/api/geocode?q=${encodeURIComponent(searchQuery)}`)
+      if (!response.ok) throw new Error(`Geocode API error: ${response.status}`)
+      const data: GeocodeSearchResult[] = await response.json()
+
+      const externals: GlobeSearchResult[] = data
+        .slice(0, 3)
+        .map((r) => ({
+          id: `external-${r.place_id}`,
+          name: r.display_name.split(',')[0]?.trim() || searchQuery,
+          latitude: parseFloat(r.lat),
+          longitude: parseFloat(r.lon),
+          country:
+            r.address?.country_code?.toUpperCase() ||
+            r.display_name.split(',').pop()?.trim() ||
+            'Unknown',
           visitDate: new Date().toISOString(),
           albumCount: 0,
           photoCount: 0,
           tags: ['external'],
-          type: 'external',
-          isExternal: true
-        }
+          type: 'external' as const,
+          isExternal: true,
+        }))
+        .filter((r) => Number.isFinite(r.latitude) && Number.isFinite(r.longitude))
 
-        // Only add if we don't already have local results for this query
+      if (externals.length > 0) {
+        // Append after any local results, but keep within maxResults.
         setResults(() => {
           const localResults = searchData(searchQuery)
-          if (localResults.length === 0) {
-            return [externalResult]
-          }
-          // Add external result after local results, but limit total
-          return [...localResults, externalResult].slice(0, maxResults)
+          return [...localResults, ...externals].slice(0, maxResults)
         })
         setIsOpen(true)
       }

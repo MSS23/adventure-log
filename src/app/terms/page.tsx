@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { LegalBackLink } from '@/components/legal/LegalBackLink'
 
 export const metadata = {
   title: 'Terms of Service — Adventure Log',
@@ -10,15 +10,9 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
-        <Link
-          href="/"
-          className="font-mono text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Home
-        </Link>
+        <LegalBackLink />
 
-        <p className="al-eyebrow mt-8 mb-1">Last updated · June 2026</p>
+        <p className="al-eyebrow mt-8 mb-1">Last updated · July 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Terms of Service</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
           By creating an Adventure Log account you agree to these terms. They cover what you can do with the service and what we ask of you in return.
@@ -82,7 +76,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="12. Contact">
-          <p>Questions about these Terms? Email <a className="text-primary underline" href="mailto:legal@adventurelog.app">legal@adventurelog.app</a>. Copyright notices: see the <Link className="text-primary underline" href="/dmca">DMCA Policy</Link>.</p>
+          <p>Questions about these Terms? Email <a className="text-primary underline" href="mailto:msidhu861@gmail.com?subject=Terms%20Question">msidhu861@gmail.com</a>. Copyright notices: see the <Link className="text-primary underline" href="/dmca">DMCA Policy</Link>.</p>
         </Section>
       </div>
     </div>

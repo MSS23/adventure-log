@@ -76,18 +76,15 @@ export default function DashboardContent() {
     queryKey: ['dashboard', userId],
     enabled: !!userId,
     queryFn: async () => {
-      // Fetch profile. A missing row (PGRST116) is fine — it's still being
-      // provisioned; any OTHER error must propagate so the query fails loud
-      // instead of silently rendering an empty dashboard.
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId!)
-        .single()
-      if (profileError && profileError.code !== 'PGRST116') throw profileError
-
-      // Fetch stats and recent albums in parallel
-      const [albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
+      // Fetch profile, stats, and recent albums in ONE parallel batch — the
+      // profile has no dependency on the rest, and every serial round-trip
+      // costs a full Supabase RTT (painful on free-tier cold starts).
+      const [profileResult, albumsResult, photosResult, recentAlbumsResult] = await Promise.all([
+        supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId!)
+          .single(),
         supabase
           .from('albums')
           .select('id, country_code, location_name, latitude, longitude, status')
@@ -103,6 +100,12 @@ export default function DashboardContent() {
           .order('date_start', { ascending: false, nullsFirst: false })
           .limit(6),
       ])
+
+      // A missing profile row (PGRST116) is fine — it's still being
+      // provisioned; any OTHER error must propagate so the query fails loud
+      // instead of silently rendering an empty dashboard.
+      const { data: profile, error: profileError } = profileResult
+      if (profileError && profileError.code !== 'PGRST116') throw profileError
 
       // Propagate real failures — otherwise a timed-out albums query looks
       // identical to "you have no albums".

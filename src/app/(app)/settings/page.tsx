@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { log } from '@/lib/utils/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Label } from '@/components/ui/label'
 import {
   Dialog,
@@ -25,8 +26,6 @@ import {
   Globe,
   Users,
   Lock,
-  Eye,
-  EyeOff,
   MapPin,
   Camera,
   Loader2,
@@ -36,7 +35,6 @@ import {
   ChevronRight,
   MessageSquarePlus,
   MessageCircle,
-  Palette,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -45,7 +43,6 @@ import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { FollowRequests } from '@/components/social/FollowRequests'
 import { FollowLists } from '@/components/social/FollowLists'
 import { FeedbackLauncher } from '@/components/feedback/FeedbackLauncher'
-import { ThemeToggleWithLabel } from '@/components/ui/ThemeToggle'
 import { cn } from '@/lib/utils'
 
 const DISCORD_INVITE_URL = process.env.NEXT_PUBLIC_DISCORD_INVITE_URL
@@ -55,8 +52,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [privacyLevel, setPrivacyLevel] = useState(profile?.privacy_level || 'public')
   const [homeLocationData, setHomeLocationData] = useState({ city: profile?.home_city || '', country: profile?.home_country || '' })
@@ -387,20 +382,8 @@ export default function SettingsPage() {
 
       <div className="space-y-5">
 
-        {/* ── APPEARANCE ──────────────────────────────────────── */}
-        <SectionHeader title="Appearance" />
-
-        {/* Theme */}
-        <Card>
-          <CardHead icon={Palette} title="Theme" subtitle="Choose how Adventure Log looks for you" />
-          <div className="p-5 flex flex-wrap items-center gap-3">
-            <ThemeToggleWithLabel />
-            <p className="text-xs text-muted-foreground">Your choice is saved across devices.</p>
-          </div>
-        </Card>
-
         {/* ── ACCOUNT ─────────────────────────────────────────── */}
-        <SectionHeader title="Account" className="pt-3" />
+        <SectionHeader title="Account" />
 
         {/* Edit profile — identity fields live on the dedicated page */}
         <Link
@@ -553,25 +536,15 @@ export default function SettingsPage() {
           <div className="p-5 space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="current-password" className="text-xs font-medium text-foreground">Current password</Label>
-              <div className="relative">
-                <Input id="current-password" type={showCurrentPassword ? 'text' : 'password'} value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="min-h-[44px] text-sm pr-11" />
-                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-10 w-10 grid place-items-center cursor-pointer rounded-xl transition-colors duration-200 hover:bg-muted outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]" onClick={() => setShowCurrentPassword(!showCurrentPassword)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'} aria-pressed={showCurrentPassword} aria-controls="current-password">
-                  {showCurrentPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-                </button>
-              </div>
+              <PasswordInput id="current-password" value={passwordData.currentPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))} className="min-h-[44px] text-sm" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="new-password" className="text-xs font-medium text-foreground">New password</Label>
-              <div className="relative">
-                <Input id="new-password" type={showNewPassword ? 'text' : 'password'} value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="min-h-[44px] text-sm pr-11" />
-                <button type="button" className="absolute right-2.5 inset-y-0 my-auto h-10 w-10 grid place-items-center cursor-pointer rounded-xl transition-colors duration-200 hover:bg-muted outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]" onClick={() => setShowNewPassword(!showNewPassword)} aria-label={showNewPassword ? 'Hide password' : 'Show password'} aria-pressed={showNewPassword} aria-controls="new-password">
-                  {showNewPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-                </button>
-              </div>
+              <PasswordInput id="new-password" value={passwordData.newPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} className="min-h-[44px] text-sm" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="confirm-password" className="text-xs font-medium text-foreground">Confirm new password</Label>
-              <Input id="confirm-password" type="password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} className="min-h-[44px] text-sm" />
+              <PasswordInput id="confirm-password" value={passwordData.confirmPassword} onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} className="min-h-[44px] text-sm" />
             </div>
             <Button size="sm" onClick={updatePassword} disabled={loading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword} className="min-h-[44px] px-5 cursor-pointer">
               {loading ? 'Updating…' : 'Update password'}

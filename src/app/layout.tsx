@@ -26,7 +26,8 @@ if (typeof window === 'undefined') {
 const dmSans = Inter({
   variable: "--font-dm-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  // 800 was loaded but unused anywhere in src — don't ship dead font weight.
+  weight: ["400", "500", "600", "700"],
 });
 
 const playfair = Fraunces({
@@ -69,7 +70,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://adventurelog.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://adventure-log-azure.vercel.app'),
   alternates: {
     canonical: '/',
   },
@@ -158,11 +159,10 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: 'cover',
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F7F9FB' },
-    { media: '(prefers-color-scheme: dark)', color: '#0C1014' }
-  ]
+  // Light-only app: pin the color scheme so form controls / browser chrome
+  // don't render in dark on a dark-mode device.
+  colorScheme: 'light',
+  themeColor: '#F7F9FB'
 };
 
 export default function RootLayout({
@@ -177,15 +177,14 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
+                // Adventure Log is light-only. Force light before first paint so
+                // no stored/system preference can dark-flash the app.
                 try {
-                  var stored = localStorage.getItem('adventure-log-theme');
-                  var theme = stored || 'light';
-                  var resolved = theme;
-                  if (theme === 'system') {
-                    resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  }
-                  document.documentElement.classList.add(resolved);
-                  document.documentElement.setAttribute('data-theme', resolved);
+                  var root = document.documentElement;
+                  root.classList.remove('dark');
+                  root.classList.add('light');
+                  root.setAttribute('data-theme', 'light');
+                  localStorage.setItem('adventure-log-theme', 'light');
                 } catch(e) {}
               })();
             `,

@@ -10,6 +10,7 @@ const LINKS: Array<{ href: string; label: string }> = [
   { href: '/terms', label: 'Terms' },
   { href: '/cookies', label: 'Cookies' },
   { href: '/dmca', label: 'DMCA' },
+  { href: '/contact', label: 'Contact' },
 ]
 
 export function LegalFooter() {

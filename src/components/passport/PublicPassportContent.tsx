@@ -265,7 +265,7 @@ export function PublicPassportContent({
               </AvatarFallback>
             </Avatar>
 
-            <h1 className="font-heading text-3xl md:text-4xl font-semibold text-white mb-1">{displayName}</h1>
+            <h1 className="font-heading text-3xl md:text-4xl font-semibold text-white mb-1 break-words">{displayName}</h1>
             <p className="text-white/90 mb-3 text-sm">@{user.username}</p>
           </motion.div>
 

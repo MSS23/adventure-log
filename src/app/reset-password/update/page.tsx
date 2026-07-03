@@ -89,7 +89,7 @@ export default function ResetPasswordUpdatePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
           {done ? (

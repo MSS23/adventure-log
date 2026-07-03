@@ -41,7 +41,7 @@ export default function SSOCallbackPage() {
   }, [router])
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4 gap-4">
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-background px-4 gap-4">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <p className="text-sm text-muted-foreground">Finishing sign-in…</p>
     </div>

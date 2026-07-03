@@ -172,7 +172,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-background px-4 py-12">
       <Suspense
         fallback={
           <div className="flex items-center justify-center">

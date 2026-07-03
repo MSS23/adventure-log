@@ -93,7 +93,7 @@ export function OnboardingFlow() {
   const Icon = currentStepData.icon
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-olive-50 via-olive-50 to-olive-50 dark:from-[#1B170E] dark:via-[#1B170E] dark:to-[#1B170E] flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-olive-50 via-olive-50 to-olive-50 dark:from-[#1B170E] dark:via-[#1B170E] dark:to-[#1B170E] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Progress Indicator */}
         <div className="mb-8">

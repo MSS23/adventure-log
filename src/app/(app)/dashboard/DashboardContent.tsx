@@ -256,7 +256,7 @@ export default function DashboardContent() {
           <MotionReveal>
             <header className="space-y-1">
               <p className="al-eyebrow">{dateLabel}</p>
-              <h1 className="al-display text-4xl md:text-5xl">
+              <h1 className="al-display text-3xl sm:text-4xl md:text-5xl break-words">
                 {isFirstRun ? `Welcome, ${firstName}.` : `Welcome back, ${firstName}.`}
               </h1>
             </header>

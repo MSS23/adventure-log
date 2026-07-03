@@ -186,8 +186,8 @@ export default function DiscoverPage() {
                 width={size.w}
                 height={size.h}
                 backgroundColor="rgba(0,0,0,0)"
-                globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-                bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
+                globeImageUrl="/earth-dark.jpg"
+                bumpImageUrl="/earth-topology.png"
                 atmosphereColor="#A8A090"
                 atmosphereAltitude={0.18}
                 pointsData={pins}

@@ -667,7 +667,7 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
               </div>
 
               {/* Title + metadata */}
-              <h1 className="al-display text-2xl sm:text-3xl md:text-4xl leading-tight mb-2">
+              <h1 className="al-display text-2xl sm:text-3xl md:text-4xl leading-tight mb-2 break-words">
                 {album.title}
               </h1>
 

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/button'
 import {
   Globe as GlobeIcon,
@@ -101,9 +103,18 @@ const FEATURES = [
 export default function HomePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null)
+  const router = useRouter()
+  const { user, authLoading } = useAuth()
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [globeSize, setGlobeSize] = useState({ w: 1200, h: 800 })
+
+  // Signed-in users don't want the marketing page — especially on the native
+  // app, which boots into `/` (index.html) on every launch. Send them to the
+  // dashboard. Logged-out visitors and crawlers see the landing unchanged.
+  useEffect(() => {
+    if (!authLoading && user) router.replace('/dashboard')
+  }, [authLoading, user, router])
 
   useEffect(() => {
     setMounted(true)
@@ -134,6 +145,18 @@ export default function HomePage() {
     }, 300)
     return () => clearTimeout(timer)
   }, [mounted])
+
+  // While redirecting a signed-in user to the dashboard, show a minimal dark
+  // screen instead of a flash of the marketing page.
+  if (!authLoading && user) {
+    return (
+      <div className="dark">
+        <div className="min-h-[100dvh] bg-[#0A0E14] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full border-2 border-olive-400/40 border-t-olive-400 animate-spin" />
+        </div>
+      </div>
+    )
+  }
 
   // Force dark context so heading colors resolve correctly
   return (

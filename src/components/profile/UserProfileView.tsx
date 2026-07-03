@@ -401,7 +401,7 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
             </AvatarFallback>
           </Avatar>
 
-          <h1 className="al-display text-2xl mt-4">{displayName}</h1>
+          <h1 className="al-display text-2xl mt-4 break-words">{displayName}</h1>
           {profile.username && (
             <p className="text-sm text-muted-foreground mt-1">@{profile.username}</p>
           )}
@@ -444,7 +444,7 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
             </Avatar>
 
             <div className="flex-1 min-w-0">
-              <h1 className="al-display text-2xl sm:text-3xl">{displayName}</h1>
+              <h1 className="al-display text-2xl sm:text-3xl break-words">{displayName}</h1>
               <p className="text-sm text-muted-foreground mt-0.5">
                 @{profile.username || 'anonymous'}
               </p>

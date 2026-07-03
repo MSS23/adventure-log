@@ -105,7 +105,7 @@ export default function OfflinePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
+    <div className="min-h-[100dvh] bg-background flex items-center justify-center px-4 py-8">
       <motion.div
         className="max-w-2xl w-full space-y-6"
         variants={prefersReducedMotion ? {} : containerVariants}

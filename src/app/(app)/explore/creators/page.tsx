@@ -45,52 +45,60 @@ export default function CreatorsPage() {
 
       if (usersError) throw usersError
 
-      // For each user: album count + follower count (both just numbers, safe to
-      // show for anyone). Recent cover photos are fetched ONLY for public
-      // accounts — a private account's images must not appear until you follow.
-      const usersWithCounts = await Promise.all(
-        (usersData || []).map(async (creator) => {
-          const isPublic = creator.privacy_level === 'public'
-          const [albumsResult, followersResult] = await Promise.all([
-            isPublic
-              ? supabase
-                  .from('albums')
-                  .select('id, cover_photo_url, cover_image_url', { count: 'exact' })
-                  .eq('user_id', creator.id)
-                  .neq('status', 'draft')
-                  .order('created_at', { ascending: false })
-                  .limit(3)
-              : // Private: count only — never request cover URLs.
-                supabase
-                  .from('albums')
-                  .select('id', { count: 'exact', head: true })
-                  .eq('user_id', creator.id)
-                  .neq('status', 'draft'),
+      const creators = usersData || []
+      const creatorIds = creators.map((c) => c.id)
+
+      // Batched: two queries for the whole page instead of the previous N+1
+      // storm (2 per creator = ~48 round-trips for 24 creators, which stalled
+      // the page). Fetch every creator's albums and accepted-follower rows in
+      // one call each, then aggregate in memory.
+      const [allAlbumsRes, allFollowsRes] = creatorIds.length
+        ? await Promise.all([
+            supabase
+              .from('albums')
+              .select('id, user_id, cover_photo_url, cover_image_url, created_at, status')
+              .in('user_id', creatorIds)
+              .neq('status', 'draft')
+              .order('created_at', { ascending: false }),
             supabase
               .from('follows')
-              .select('id', { count: 'exact', head: true })
-              .eq('following_id', creator.id)
-              .eq('status', 'accepted')
+              .select('following_id')
+              .in('following_id', creatorIds)
+              .eq('status', 'accepted'),
           ])
+        : [{ data: [] }, { data: [] }]
 
-          const coverRows = (albumsResult.data || []) as Array<{
-            cover_photo_url?: string | null
-            cover_image_url?: string | null
-          }>
-          const covers = isPublic
-            ? coverRows
-                .map((a) => getPhotoUrl(a.cover_photo_url || a.cover_image_url))
-                .filter((url): url is string => Boolean(url))
-            : []
+      if ('error' in allAlbumsRes && allAlbumsRes.error) throw allAlbumsRes.error
 
-          return {
-            ...creator,
-            albumCount: albumsResult.count || 0,
-            followerCount: followersResult.count || 0,
-            covers
-          }
-        })
-      )
+      const albumsByUser = new Map<string, Array<{ cover_photo_url?: string | null; cover_image_url?: string | null }>>()
+      for (const a of (allAlbumsRes.data || []) as Array<{ user_id: string; cover_photo_url?: string | null; cover_image_url?: string | null }>) {
+        const list = albumsByUser.get(a.user_id) || []
+        list.push(a)
+        albumsByUser.set(a.user_id, list)
+      }
+      const followerCountByUser = new Map<string, number>()
+      for (const f of (allFollowsRes.data || []) as Array<{ following_id: string }>) {
+        followerCountByUser.set(f.following_id, (followerCountByUser.get(f.following_id) || 0) + 1)
+      }
+
+      const usersWithCounts = creators.map((creator) => {
+        const isPublic = creator.privacy_level === 'public'
+        const userAlbums = albumsByUser.get(creator.id) || []
+        // Covers only for public accounts, capped at 3 (albums come pre-sorted
+        // newest-first from the single query above).
+        const covers = isPublic
+          ? userAlbums
+              .slice(0, 3)
+              .map((a) => getPhotoUrl(a.cover_photo_url || a.cover_image_url))
+              .filter((url): url is string => Boolean(url))
+          : []
+        return {
+          ...creator,
+          albumCount: userAlbums.length,
+          followerCount: followerCountByUser.get(creator.id) || 0,
+          covers,
+        }
+      })
 
       // Sort by album count
       usersWithCounts.sort((a, b) => (b.albumCount || 0) - (a.albumCount || 0))

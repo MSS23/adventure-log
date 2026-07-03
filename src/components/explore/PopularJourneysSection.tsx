@@ -41,12 +41,16 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
         // `users.privacy_level` makes that explicit at the query level (and is
         // belt-and-suspenders with the albums_public_read RLS policy, which
         // already requires a public owner).
+        // Explicit columns + a single cover photo (not the whole photos row
+        // set). `select('*')` with an unbounded photos embed made this query
+        // heavy enough to hit Supabase's statement timeout; the card only reads
+        // id/title/location_name/cover + the first photo's file_path.
         const { data, error: fetchError } = await supabase
           .from('albums')
           .select(`
-            *,
+            id, title, location_name, cover_photo_url, cover_image_url, created_at,
             users!albums_user_id_fkey!inner(id, username, display_name, avatar_url, privacy_level),
-            photos(id, file_path)
+            photos(file_path)
           `)
           .eq('visibility', 'public')
           .eq('users.privacy_level', 'public')
@@ -62,7 +66,9 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
           return
         }
 
-        setAlbums(data || [])
+        // The trimmed projection is a subset of Album; the render path only
+        // touches the selected fields (id/title/location_name/cover/photos/user).
+        setAlbums((data || []) as unknown as Album[])
       } catch (err) {
         log.error('Error in fetchPopularAlbums', {
           component: 'PopularJourneysSection',

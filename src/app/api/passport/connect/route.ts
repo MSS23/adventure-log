@@ -58,66 +58,66 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Create both follow directions, skipping if already exists.
-    // Private accounts get a 'pending' request instead of an auto-accepted
-    // follow, and existing rows are never upgraded without consent.
+    // Ensure an ACCEPTED follow exists in one direction.
+    //
+    // A passport QR scan is explicit, in-person mutual consent: the owner
+    // shared their QR and the scanner physically scanned it. So we accept
+    // immediately in BOTH directions regardless of either account's privacy
+    // level, and upgrade any prior 'pending' request to 'accepted'. This is
+    // what makes the connection actually mutual — and it's required for the
+    // Travel Blend to work on both sides, because the blend reads each user's
+    // albums under RLS, which only grants access to accepted followers.
+    //
+    // Returns whether this call created or upgraded the row (→ a fresh
+    // connection worth notifying about) vs. it was already accepted.
+    async function ensureAcceptedFollow(
+      followerId: string,
+      followingId: string,
+    ): Promise<{ ok: true; changed: boolean } | { ok: false }> {
+      const { data: existing } = await supabaseAdmin!
+        .from('follows')
+        .select('id, status')
+        .eq('follower_id', followerId)
+        .eq('following_id', followingId)
+        .maybeSingle()
+
+      if (!existing) {
+        const { error } = await supabaseAdmin!.from('follows').insert({
+          follower_id: followerId,
+          following_id: followingId,
+          status: 'accepted',
+          created_at: new Date().toISOString(),
+        })
+        return error ? { ok: false } : { ok: true, changed: true }
+      }
+
+      if (existing.status !== 'accepted') {
+        const { error } = await supabaseAdmin!
+          .from('follows')
+          .update({ status: 'accepted' })
+          .eq('id', existing.id)
+        return error ? { ok: false } : { ok: true, changed: true }
+      }
+
+      return { ok: true, changed: false }
+    }
+
     // Direction 1: scanner → passport owner
-    const { data: existing1 } = await supabaseAdmin
-      .from('follows')
-      .select('id, status')
-      .eq('follower_id', userId)
-      .eq('following_id', targetUserId)
-      .maybeSingle()
-
-    if (!existing1) {
-      const { error: insert1Error } = await supabaseAdmin
-        .from('follows')
-        .insert({
-          follower_id: userId,
-          following_id: targetUserId,
-          status: targetUser.privacy_level === 'private' ? 'pending' : 'accepted',
-          created_at: new Date().toISOString(),
-        })
-      if (insert1Error) {
-        log.error('Passport connect: failed to create follow', {
-          component: 'PassportConnect',
-          action: 'connect',
-          userId,
-          targetUserId,
-        }, insert1Error as unknown as Error)
-        return NextResponse.json({ error: 'Connection failed' }, { status: 500 })
-      }
-    }
-
+    const dir1 = await ensureAcceptedFollow(userId, targetUserId)
     // Direction 2: passport owner → scanner
-    const { data: existing2 } = await supabaseAdmin
-      .from('follows')
-      .select('id, status')
-      .eq('follower_id', targetUserId)
-      .eq('following_id', userId)
-      .maybeSingle()
+    const dir2 = await ensureAcceptedFollow(targetUserId, userId)
 
-    if (!existing2) {
-      const { error: insert2Error } = await supabaseAdmin
-        .from('follows')
-        .insert({
-          follower_id: targetUserId,
-          following_id: userId,
-          status: scannerUser.privacy_level === 'private' ? 'pending' : 'accepted',
-          created_at: new Date().toISOString(),
-        })
-      if (insert2Error) {
-        log.error('Passport connect: failed to create reverse follow', {
-          component: 'PassportConnect',
-          action: 'connect',
-          userId,
-          targetUserId,
-        }, insert2Error as unknown as Error)
-        return NextResponse.json({ error: 'Connection failed' }, { status: 500 })
-      }
+    if (!dir1.ok || !dir2.ok) {
+      log.error('Passport connect: failed to create mutual follow', {
+        component: 'PassportConnect',
+        action: 'connect',
+        userId,
+        targetUserId,
+      })
+      return NextResponse.json({ error: 'Connection failed' }, { status: 500 })
     }
 
-    log.info('Passport connect: mutual follow created', {
+    log.info('Passport connect: mutual follow ensured', {
       component: 'PassportConnect',
       action: 'connect',
       userId,
@@ -128,9 +128,10 @@ export async function POST(request: NextRequest) {
     // Blend link — but without this, the passport OWNER never learns the scan
     // happened. Notify them with a deep link to the same blend so both sides
     // of the connection get the compatibility view. Best-effort: a notification
-    // failure must not fail the connect itself. Only on a NEW connection —
-    // re-scanning an existing connection shouldn't re-notify.
-    const newlyConnected = !existing1 || !existing2
+    // failure must not fail the connect itself. Only on a NEW connection (a
+    // direction was created or upgraded) — re-scanning an already-accepted
+    // connection shouldn't re-notify.
+    const newlyConnected = dir1.changed || dir2.changed
     if (newlyConnected) {
       try {
         const scannerName =

@@ -415,6 +415,96 @@ export function WrappedGlobe({
     return () => clearTimeout(startTimer)
   }, [animate, globeReady, arcs.length])
 
+  // Single-location cinematic: a one-trip year has no flight to fly, but it
+  // shouldn't cut straight to stats either. Instead we "spotlight" the one
+  // pin — the globe turns to bring it into frame, the camera swoops in and
+  // slowly orbits it, a ring bursts on arrival — then hand off to the finale.
+  // Gives a one-pin Wrapped a real moment (and real footage to export).
+  useEffect(() => {
+    if (!animate || !globeReady) return
+    if (arcs.length !== 0 || sortedLocations.length !== 1) return
+
+    const only = sortedLocations[0]
+    const globe = globeRef.current
+    if (!globe) return
+
+    // Reveal the pin + its label up front.
+    setRevealedArcs(1)
+    setFlightLabels([{ lat: only.lat, lng: only.lng, text: only.name.split(',')[0] }])
+    if (flightSceneRef.current) flightSceneRef.current.plane.visible = false
+
+    // Open on a wide shot, offset in longitude so the approach reads as the
+    // planet rotating to reveal the destination.
+    const START_LNG_OFFSET = -58
+    const START_ALT = 2.9
+    const APPROACH_ALT = 1.35
+    const FINAL_ALT = 0.95
+    const ORBIT_SWEEP = 26 // degrees of gentle longitude drift while framed
+    globe.pointOfView({ lat: only.lat * 0.6, lng: only.lng + START_LNG_OFFSET, altitude: START_ALT }, 0)
+
+    const controls = globe.controls()
+    if (controls) controls.autoRotate = false
+
+    const DURATION = 6200
+    let raf = 0
+    let startTime = 0
+    let burstFired = false
+    let burstTimer: ReturnType<typeof setTimeout> | undefined
+    let doneTimer: ReturnType<typeof setTimeout> | undefined
+
+    const tick = (now: number) => {
+      if (!startTime) startTime = now
+      const t = Math.min(1, (now - startTime) / DURATION)
+
+      let lat: number, lng: number, alt: number
+      if (t < 0.5) {
+        // Approach: swoop from the wide offset shot down onto the pin.
+        const k = easeInOutCubic(t / 0.5)
+        lat = only.lat * 0.6 + (only.lat - only.lat * 0.6) * k
+        lng = only.lng + START_LNG_OFFSET * (1 - k)
+        alt = START_ALT + (APPROACH_ALT - START_ALT) * k
+      } else {
+        // Framed: slow orbit + push-in on the destination.
+        const k = (t - 0.5) / 0.5
+        const ke = easeInOutCubic(k)
+        lat = only.lat
+        lng = only.lng + ORBIT_SWEEP * ke
+        alt = APPROACH_ALT + (FINAL_ALT - APPROACH_ALT) * ke
+      }
+      globe.pointOfView({ lat, lng, altitude: alt }, 0)
+
+      onProgress?.(t, 0)
+
+      if (!burstFired && t >= 0.52) {
+        burstFired = true
+        setBurstRing({ lat: only.lat, lng: only.lng, maxR: 9, propagationSpeed: 7, repeatPeriod: 3000 })
+        burstTimer = setTimeout(() => setBurstRing(null), 1200)
+      }
+
+      if (t < 1) {
+        raf = requestAnimationFrame(tick)
+        return
+      }
+
+      // Finale: hand the globe back to idle rotation and complete.
+      if (controls) controls.autoRotate = true
+      onProgress?.(1, 0)
+      doneTimer = setTimeout(() => onAnimationComplete?.(), 400)
+    }
+
+    // Brief beat before the swoop so the wide shot registers.
+    const startTimer = setTimeout(() => {
+      raf = requestAnimationFrame(tick)
+    }, 900)
+
+    return () => {
+      clearTimeout(startTimer)
+      cancelAnimationFrame(raf)
+      clearTimeout(burstTimer)
+      clearTimeout(doneTimer)
+    }
+  }, [animate, globeReady, arcs.length, sortedLocations, onProgress, onAnimationComplete])
+
   // Handle one flight segment: settle the camera on the departure point with
   // the plane parked, take off, chase the plane along the great circle while
   // the trail paints itself underneath, land (ring burst + camera push-in +

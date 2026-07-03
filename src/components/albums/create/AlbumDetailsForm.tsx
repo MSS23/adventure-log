@@ -222,10 +222,11 @@ export function AlbumDetailsForm({
                   onSeasonChange={onSeasonChange}
                 />
 
-                {/* Location */}
+                {/* Location — optional (an album without a place just isn't
+                    pinned on the globe). */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-foreground">
-                    Location <span className="text-destructive">*</span>
+                    Location <span className="text-muted-foreground font-normal">(optional)</span>
                   </label>
                   <LocationSearchInput
                     value={albumLocation}
@@ -235,7 +236,6 @@ export function AlbumDetailsForm({
                     }}
                     placeholder="Search for a city or country"
                     label=""
-                    required
                     showAutoFillButton={photos.length > 0}
                     onAutoFill={onAutoFill}
                     isAutoFilling={isExtractingLocation}
@@ -257,7 +257,7 @@ export function AlbumDetailsForm({
               <EnhancedButton
                 type="submit"
                 variant="default"
-                disabled={isSubmitting || !albumLocation}
+                disabled={isSubmitting}
                 loading={isSubmitting}
                 loadingText={photos.length === 0 ? 'Saving…' : 'Creating…'}
                 className="w-full sm:w-auto sm:self-end"
@@ -270,13 +270,7 @@ export function AlbumDetailsForm({
                 {photos.length === 0 ? 'Save as Draft' : 'Create Album'}
               </EnhancedButton>
 
-              {/* Forgiving guidance instead of a silently-disabled button */}
-              {!albumLocation && (
-                <p className="text-xs text-muted-foreground sm:text-right">
-                  Add a location to {photos.length === 0 ? 'save your draft' : 'create your album'}.
-                </p>
-              )}
-              {albumLocation && photos.length === 0 && (
+              {photos.length === 0 && (
                 <p className="text-xs text-muted-foreground sm:text-right">
                   No photos yet — we&apos;ll save this as a draft so you can add them later.
                 </p>

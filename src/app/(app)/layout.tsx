@@ -12,6 +12,7 @@ import { LegalFooter } from '@/components/layout/LegalFooter'
 import { PageTransition } from '@/components/animations/PageTransition'
 import { PWAProvider } from '@/components/pwa'
 import { UnreadCountProvider } from '@/components/activity/UnreadCountProvider'
+import { PassportConnectListener } from '@/components/passport/PassportConnectListener'
 import { APP_SCROLL_ID } from '@/lib/utils/app-scroll'
 
 const FloatingActionButton = dynamic(
@@ -95,6 +96,10 @@ export default function AppLayout({
 
           {/* Keyboard shortcuts */}
           <KeyboardShortcuts />
+
+          {/* Pulls the passport OWNER into the Travel Blend the instant their
+              QR is scanned (mirrors the scanner's experience). */}
+          <PassportConnectListener />
         </div>
         </UnreadCountProvider>
       </PWAProvider>

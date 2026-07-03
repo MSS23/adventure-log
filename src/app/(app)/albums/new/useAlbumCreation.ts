@@ -18,6 +18,30 @@ import { sanitizeText, validateImageFile } from '@/lib/utils/input-validation'
 import { prepareImageForUpload } from '@/lib/utils/prepare-upload'
 import { takePhoto, selectFromGallery } from '@/lib/capacitor/camera'
 import { localizePath } from '@/lib/utils/native-routes'
+import { apiFetch } from '@/lib/api/client'
+
+// Reverse-geocode via our own /api/geocode proxy (Mapbox → Photon, keyless-
+// safe). MUST go through apiFetch, not a direct Nominatim call: on the APK the
+// WebView origin is capacitor://localhost, so a bare cross-origin fetch to
+// nominatim.openstreetmap.org is CORS/policy-blocked — which silently broke
+// photo-GPS auto-fill on native.
+async function reverseGeocode(
+  lat: number,
+  lng: number,
+): Promise<{ display_name?: string; country_code?: string } | null> {
+  try {
+    const params = new URLSearchParams({ reverse: 'true', lat: String(lat), lon: String(lng) })
+    const res = await apiFetch(`/api/geocode?${params.toString()}`)
+    if (!res.ok) return null
+    const data = await res.json()
+    return {
+      display_name: data?.display_name || undefined,
+      country_code: data?.address?.country_code?.toUpperCase() || undefined,
+    }
+  } catch {
+    return null
+  }
+}
 
 const albumSchema = z.object({
   title: z.string()
@@ -61,12 +85,12 @@ function localTodayString(): string {
   return `${now.getFullYear()}-${month}-${day}`
 }
 
-function generateTitleFromLocation(location: LocationData): string {
+function generateTitleFromLocation(location: LocationData | null): string {
   const now = new Date()
   const month = now.toLocaleString('en-US', { month: 'long' })
   const year = now.getFullYear()
 
-  let shortLocation = location.display_name || ''
+  let shortLocation = location?.display_name || ''
   if (shortLocation.includes(',')) {
     shortLocation = shortLocation.split(',')[0].trim()
   }
@@ -147,29 +171,27 @@ export function useAlbumCreation() {
     }
   })
 
-  // Update suggested title when location or date changes
+  // Update suggested title when location or date changes. A title is ALWAYS
+  // produced now (location is optional) — falls back to "Adventure, <month>"
+  // so a location-less quick post still gets a sensible name.
   useEffect(() => {
-    if (albumLocation) {
-      let shortLocation = albumLocation.display_name || ''
-      if (shortLocation.includes(',')) {
-        shortLocation = shortLocation.split(',')[0].trim()
-      }
-
-      let dateLabel: string
-      if (selectedYear && selectedSeason) {
-        const seasonName = selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1)
-        dateLabel = `${seasonName} ${selectedYear}`
-      } else if (selectedYear) {
-        dateLabel = `${selectedYear}`
-      } else {
-        const now = new Date()
-        dateLabel = `${now.toLocaleString('en-US', { month: 'long' })} ${now.getFullYear()}`
-      }
-
-      setSuggestedTitle(shortLocation ? `${shortLocation}, ${dateLabel}` : `Adventure, ${dateLabel}`)
-    } else {
-      setSuggestedTitle('')
+    let shortLocation = albumLocation?.display_name || ''
+    if (shortLocation.includes(',')) {
+      shortLocation = shortLocation.split(',')[0].trim()
     }
+
+    let dateLabel: string
+    if (selectedYear && selectedSeason) {
+      const seasonName = selectedSeason.charAt(0).toUpperCase() + selectedSeason.slice(1)
+      dateLabel = `${seasonName} ${selectedYear}`
+    } else if (selectedYear) {
+      dateLabel = `${selectedYear}`
+    } else {
+      const now = new Date()
+      dateLabel = `${now.toLocaleString('en-US', { month: 'long' })} ${now.getFullYear()}`
+    }
+
+    setSuggestedTitle(shortLocation ? `${shortLocation}, ${dateLabel}` : `Adventure, ${dateLabel}`)
   }, [albumLocation, selectedYear, selectedSeason])
 
   // Cleanup object URLs on unmount
@@ -195,36 +217,30 @@ export function useAlbumCreation() {
         const locationData = await extractPhotoLocation(photo.file)
 
         if (locationData?.latitude && locationData?.longitude) {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${locationData.latitude}&lon=${locationData.longitude}&format=json&addressdetails=1`
-          )
+          const geo = await reverseGeocode(locationData.latitude, locationData.longitude)
 
-          if (response.ok) {
-            const geocodeData = await response.json()
+          setAlbumLocation({
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+            display_name: geo?.display_name || `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`,
+            country_code: geo?.country_code,
+          })
 
-            setAlbumLocation({
-              latitude: locationData.latitude,
-              longitude: locationData.longitude,
-              display_name: geocodeData.display_name || `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`,
-              country_code: geocodeData.address?.country_code?.toUpperCase() || undefined
-            })
+          setLocationAutoExtracted(true)
 
-            setLocationAutoExtracted(true)
+          await Toast.show({
+            text: 'Location auto-filled from photo GPS data!',
+            duration: 'long',
+            position: 'bottom'
+          })
 
-            await Toast.show({
-              text: 'Location auto-filled from photo GPS data!',
-              duration: 'long',
-              position: 'bottom'
-            })
+          log.info('Location auto-extracted from photo on upload', {
+            component: 'NewAlbumPage',
+            latitude: locationData.latitude,
+            longitude: locationData.longitude
+          })
 
-            log.info('Location auto-extracted from photo on upload', {
-              component: 'NewAlbumPage',
-              latitude: locationData.latitude,
-              longitude: locationData.longitude
-            })
-
-            return
-          }
+          return
         }
       }
     } catch (error) {
@@ -332,34 +348,28 @@ export function useAlbumCreation() {
         const locationData = await extractPhotoLocation(photo.file)
 
         if (locationData?.latitude && locationData?.longitude) {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${locationData.latitude}&lon=${locationData.longitude}&format=json&addressdetails=1`
-          )
+          const geo = await reverseGeocode(locationData.latitude, locationData.longitude)
 
-          if (response.ok) {
-            const geocodeData = await response.json()
+          setAlbumLocation({
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+            display_name: geo?.display_name || `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`,
+            country_code: geo?.country_code,
+          })
 
-            setAlbumLocation({
-              latitude: locationData.latitude,
-              longitude: locationData.longitude,
-              display_name: geocodeData.display_name || `${locationData.latitude.toFixed(4)}, ${locationData.longitude.toFixed(4)}`,
-              country_code: geocodeData.address?.country_code?.toUpperCase() || undefined
-            })
+          await Toast.show({
+            text: 'Location auto-filled from photo GPS data!',
+            duration: 'long',
+            position: 'bottom'
+          })
 
-            await Toast.show({
-              text: 'Location auto-filled from photo GPS data!',
-              duration: 'long',
-              position: 'bottom'
-            })
+          log.info('Location auto-filled from photo', {
+            component: 'NewAlbumPage',
+            latitude: locationData.latitude,
+            longitude: locationData.longitude
+          })
 
-            log.info('Location auto-filled from photo', {
-              component: 'NewAlbumPage',
-              latitude: locationData.latitude,
-              longitude: locationData.longitude
-            })
-
-            return
-          }
+          return
         }
       }
 
@@ -394,10 +404,6 @@ export function useAlbumCreation() {
     dateEnd: string | null
   }) => {
     if (!user) return
-    if (!albumLocation) {
-      setError('Please select a location')
-      return
-    }
 
     setIsSubmitting(true)
     setError(null)
@@ -405,16 +411,19 @@ export function useAlbumCreation() {
     try {
       const status = photos.length === 0 ? 'draft' : 'published'
 
+      // Location is optional (Instagram-style posting). Without it the album
+      // just doesn't get pinned on the globe — the user can add a place later
+      // from the album's edit screen.
       const { data: album, error: albumError } = await supabase
         .from('albums')
         .insert({
           user_id: user.id,
           title: opts.title,
           description: opts.description,
-          location_name: albumLocation.display_name || null,
-          country_code: albumLocation.country_code || null,
-          latitude: albumLocation.latitude,
-          longitude: albumLocation.longitude,
+          location_name: albumLocation?.display_name || null,
+          country_code: albumLocation?.country_code || null,
+          latitude: albumLocation?.latitude ?? null,
+          longitude: albumLocation?.longitude ?? null,
           visibility: opts.visibility || 'public',
           date_start: opts.dateStart,
           date_end: opts.dateEnd,
@@ -522,63 +531,67 @@ export function useAlbumCreation() {
       // it — either via the tick on the wishlist page (passes wishlistItemId)
       // or by creating an album with a location that's close to a wishlist
       // entry. ±0.01° (~1.1km) catches users picking a slightly different
-      // pin for the same destination.
+      // pin for the same destination. Skipped entirely for location-less posts.
       try {
         const wishlistItemId = searchParams.get('wishlistItemId')
         const EPS = 0.01
-        const lat = albumLocation.latitude
-        const lng = albumLocation.longitude
+        const lat = albumLocation?.latitude
+        const lng = albumLocation?.longitude
 
-        let matchQuery = supabase
-          .from('wishlist_items')
-          .select('id, location_name')
-          .eq('user_id', user.id)
-          .is('completed_at', null)
-
-        if (wishlistItemId) {
-          matchQuery = matchQuery.or(
-            `id.eq.${wishlistItemId},and(latitude.gte.${lat - EPS},latitude.lte.${lat + EPS},longitude.gte.${lng - EPS},longitude.lte.${lng + EPS})`
-          )
-        } else {
-          matchQuery = matchQuery
-            .gte('latitude', lat - EPS)
-            .lte('latitude', lat + EPS)
-            .gte('longitude', lng - EPS)
-            .lte('longitude', lng + EPS)
-        }
-
-        const { data: matchingItems, error: matchErr } = await matchQuery
-
-        if (matchErr) {
-          // Table may not exist yet on older instances — ignore quietly.
-          if (matchErr.code !== '42P01' && matchErr.code !== 'PGRST205' && matchErr.code !== 'PGRST200') {
-            log.warn('Failed to look up matching wishlist items', {
-              component: 'NewAlbumPage',
-              action: 'auto-complete-wishlist',
-              albumId: album.id,
-            }, matchErr)
-          }
-        } else if (matchingItems && matchingItems.length > 0) {
-          const ids = matchingItems.map((i) => i.id)
-          const { error: completeErr } = await supabase
+        // Location-less posts can't spatially match a wishlist entry; only
+        // an explicit wishlistItemId (from the wishlist tick) still applies.
+        if (lat != null && lng != null) {
+          let matchQuery = supabase
             .from('wishlist_items')
-            .update({ completed_at: new Date().toISOString() })
-            .in('id', ids)
+            .select('id, location_name')
             .eq('user_id', user.id)
+            .is('completed_at', null)
 
-          if (completeErr) {
-            log.warn('Failed to auto-complete wishlist items', {
-              component: 'NewAlbumPage',
-              action: 'auto-complete-wishlist',
-              albumId: album.id,
-            }, completeErr)
+          if (wishlistItemId) {
+            matchQuery = matchQuery.or(
+              `id.eq.${wishlistItemId},and(latitude.gte.${lat - EPS},latitude.lte.${lat + EPS},longitude.gte.${lng - EPS},longitude.lte.${lng + EPS})`
+            )
           } else {
-            log.info('Auto-completed wishlist items from album', {
-              component: 'NewAlbumPage',
-              action: 'auto-complete-wishlist',
-              albumId: album.id,
-              count: ids.length,
-            })
+            matchQuery = matchQuery
+              .gte('latitude', lat - EPS)
+              .lte('latitude', lat + EPS)
+              .gte('longitude', lng - EPS)
+              .lte('longitude', lng + EPS)
+          }
+
+          const { data: matchingItems, error: matchErr } = await matchQuery
+
+          if (matchErr) {
+            // Table may not exist yet on older instances — ignore quietly.
+            if (matchErr.code !== '42P01' && matchErr.code !== 'PGRST205' && matchErr.code !== 'PGRST200') {
+              log.warn('Failed to look up matching wishlist items', {
+                component: 'NewAlbumPage',
+                action: 'auto-complete-wishlist',
+                albumId: album.id,
+              }, matchErr)
+            }
+          } else if (matchingItems && matchingItems.length > 0) {
+            const ids = matchingItems.map((i) => i.id)
+            const { error: completeErr } = await supabase
+              .from('wishlist_items')
+              .update({ completed_at: new Date().toISOString() })
+              .in('id', ids)
+              .eq('user_id', user.id)
+
+            if (completeErr) {
+              log.warn('Failed to auto-complete wishlist items', {
+                component: 'NewAlbumPage',
+                action: 'auto-complete-wishlist',
+                albumId: album.id,
+              }, completeErr)
+            } else {
+              log.info('Auto-completed wishlist items from album', {
+                component: 'NewAlbumPage',
+                action: 'auto-complete-wishlist',
+                albumId: album.id,
+                count: ids.length,
+              })
+            }
           }
         }
       } catch (wishlistErr) {
@@ -675,7 +688,7 @@ export function useAlbumCreation() {
       return
     }
 
-    const title = sanitizeText(suggestedTitle || generateTitleFromLocation(albumLocation!))
+    const title = sanitizeText(suggestedTitle || generateTitleFromLocation(albumLocation))
     const caption = data.caption ? sanitizeText(data.caption) : null
 
     let dateStart: string | null = null

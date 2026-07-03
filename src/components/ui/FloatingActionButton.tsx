@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
-import { Plus, Camera, Image as ImageIcon, Upload, Images, X } from 'lucide-react'
+import { Plus, Camera, Images, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -12,11 +12,13 @@ interface FloatingActionButtonProps {
 
 const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
+// Two clear choices only. The old menu had four — two of which pointed at the
+// same composer, and "Add to album" dead-ended on the album list. "New post"
+// is the everyday Instagram-style single-album composer; "Import many" is the
+// bulk multi-trip importer.
 const actions = [
-  { id: 'new-album', label: 'New album', icon: Camera, href: '/albums/new' },
-  { id: 'quick-upload', label: 'Quick upload', icon: ImageIcon, href: '/albums/new?quick=true' },
-  { id: 'import-photos', label: 'Import photos', icon: Images, href: '/albums/import' },
-  { id: 'upload-existing', label: 'Add to album', icon: Upload, href: '/albums' },
+  { id: 'new-post', label: 'New post', icon: Camera, href: '/albums/new' },
+  { id: 'import-photos', label: 'Import many', icon: Images, href: '/albums/import' },
 ]
 
 export function FloatingActionButton({ className }: FloatingActionButtonProps) {

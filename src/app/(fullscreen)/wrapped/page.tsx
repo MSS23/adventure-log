@@ -291,8 +291,10 @@ function WrappedExperience() {
   }
 
   const startWrapped = useCallback(() => {
-    if (data.locations.length < 2) {
-      // Skip globe animation if fewer than 2 locations (no arcs to show)
+    // One geolocated trip still gets a globe moment (WrappedGlobe runs a
+    // single-pin "spotlight" cinematic). Only skip to stats when there is
+    // literally nothing to place on the globe.
+    if (data.locations.length < 1) {
       setPhase('stats')
     } else {
       setPhase('globe')
@@ -1068,8 +1070,9 @@ function WrappedExperience() {
                 <div className="flex gap-3 flex-wrap justify-center">
                 {/* Flyover video export — own view only, and only when the
                     browser can actually record a canvas (Safari/older
-                    WebViews hide it) and there's a flight to record. */}
-                {!viewingFriend && user && videoSupported && globeLocations.length >= 2 && (
+                    WebViews hide it). One geolocated trip is enough: the
+                    single-pin spotlight cinematic records fine. */}
+                {!viewingFriend && user && videoSupported && globeLocations.length >= 1 && (
                   <Button
                     onClick={startVideoExport}
                     disabled={videoStatus !== 'idle'}

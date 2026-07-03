@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Zap, ChevronRight, LocateFixed, Loader2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Zap, ChevronRight, LocateFixed, Loader2, CalendarPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { getCurrentLocation } from '@/lib/capacitor/geolocation'
@@ -84,6 +84,10 @@ export function QuickPostMode({
   const { register: registerQuick, handleSubmit: handleSubmitQuick, formState: { errors: quickErrors }, watch: watchQuick, setValue: setValueQuick } = quickForm
 
   const [isLocating, setIsLocating] = useState(false)
+  // Date is optional (defaults to today) — kept behind a disclosure so the
+  // composer stays a short, Instagram-style single screen. Auto-opens if a
+  // date was already chosen (e.g. returning to edit).
+  const [showDate, setShowDate] = useState<boolean>(selectedYear != null || selectedSeason != null)
 
   // One-tap GPS: Capacitor geolocation (web + native, permissions/toasts
   // handled inside), reverse-geocode via our proxy, then fill the picked
@@ -155,10 +159,20 @@ export function QuickPostMode({
             </CardContent>
           </Card>
 
-          {/* Where & When */}
+          {/* Caption + details */}
           <Card>
             <CardContent className="space-y-5">
-              {/* Where — search input + one-tap GPS button */}
+              {/* Caption — the primary field, like Instagram. */}
+              <FloatingTextarea
+                label="Write a caption…"
+                {...registerQuick('caption')}
+                error={quickErrors.caption?.message}
+                maxLength={500}
+                helperText="Optional — say something about this moment"
+              />
+
+              {/* Where — optional. Auto-fills from photo GPS; the one-tap GPS
+                  button and search are there if you want to set it by hand. */}
               <div className="flex items-start gap-2">
                 <div className="flex-1 min-w-0">
                   <LocationSearchInput
@@ -167,9 +181,8 @@ export function QuickPostMode({
                       onSetAlbumLocation(loc)
                       onSetLocationAutoExtracted(false)
                     }}
-                    placeholder="Where did you go?"
+                    placeholder="Add a place (optional)"
                     label="Where"
-                    required
                     showAutoFillButton={photos.length > 0 && !albumLocation}
                     onAutoFill={onAutoFill}
                     isAutoFilling={isExtractingLocation}
@@ -194,33 +207,43 @@ export function QuickPostMode({
                 </Button>
               </div>
 
-              {/* When */}
-              <YearSeasonSelector
-                year={selectedYear}
-                season={selectedSeason}
-                onYearChange={onYearChange}
-                onSeasonChange={onSeasonChange}
-              />
+              {/* When — collapsed by default (posts default to today). */}
+              <div>
+                {!showDate ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowDate(true)}
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 py-1"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                    Add a date
+                    <span className="text-xs text-muted-foreground/70">· defaults to today</span>
+                  </button>
+                ) : (
+                  <AnimatePresence>
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="overflow-hidden"
+                    >
+                      <YearSeasonSelector
+                        year={selectedYear}
+                        season={selectedSeason}
+                        onYearChange={onYearChange}
+                        onSeasonChange={onSeasonChange}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+              </div>
 
-              {/* Caption */}
-              <FloatingTextarea
-                label="Caption (optional)"
-                {...registerQuick('caption')}
-                error={quickErrors.caption?.message}
-                maxLength={500}
-                helperText="Add a note about this moment"
-              />
-
-              {/* Auto-generated title preview */}
-              {albumLocation && suggestedTitle && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="px-3 py-2 rounded-xl bg-muted/50"
-                >
-                  <p className="text-xs text-muted-foreground mb-0.5">Album title (auto-generated)</p>
+              {/* Auto-generated title preview (always available now that a
+                  title is derived even without a location). */}
+              {suggestedTitle && (
+                <div className="px-3 py-2 rounded-xl bg-muted/50">
+                  <p className="text-xs text-muted-foreground mb-0.5">Album title (auto)</p>
                   <p className="text-sm font-medium text-foreground">{suggestedTitle}</p>
-                </motion.div>
+                </div>
               )}
 
               {/* Visibility - inline */}
@@ -261,13 +284,13 @@ export function QuickPostMode({
               <EnhancedButton
                 type="submit"
                 variant="default"
-                disabled={isSubmitting || !albumLocation || photos.length === 0}
+                disabled={isSubmitting || photos.length === 0}
                 loading={isSubmitting}
                 loadingText="Posting..."
                 className="flex-1 sm:flex-none"
               >
                 <Zap className="h-4 w-4 mr-1.5" />
-                Post
+                Share
               </EnhancedButton>
 
               <button
@@ -280,14 +303,10 @@ export function QuickPostMode({
               </button>
             </div>
 
-            {/* Forgiving guidance when Post can't proceed yet */}
-            {!isSubmitting && (photos.length === 0 || !albumLocation) && (
+            {/* Only photos are required now — location is optional. */}
+            {!isSubmitting && photos.length === 0 && (
               <p className="text-xs text-muted-foreground">
-                {photos.length === 0 && !albumLocation
-                  ? 'Add at least one photo and a place to post.'
-                  : photos.length === 0
-                    ? 'Add at least one photo to post.'
-                    : 'Add a place to post.'}
+                Add at least one photo to share.
               </p>
             )}
           </motion.div>

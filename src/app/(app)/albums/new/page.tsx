@@ -94,7 +94,7 @@ export default function NewAlbumPage() {
         {/* Plain-language explanation of the active mode */}
         <p className="mt-2 text-[12px] text-muted-foreground leading-relaxed">
           {mode === 'quick'
-            ? 'Quick Post — drop a few photos and a place. We name it for you. Fastest way to share.'
+            ? 'Quick Post — just add photos and share. We name it for you; a place and date are optional.'
             : 'Full Album — add a title, story, dates and choose your cover. Best for trips worth remembering.'}
         </p>
 

@@ -46,10 +46,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Fetch the scanner's privacy level so the reverse follow respects it
+    // Fetch the scanner's privacy level (the reverse follow respects it) and
+    // identity (the owner's notification names them and links to the blend).
     const { data: scannerUser, error: scannerError } = await supabaseAdmin
       .from('users')
-      .select('id, privacy_level')
+      .select('id, privacy_level, username, display_name')
       .eq('id', userId)
       .single()
 
@@ -122,6 +123,38 @@ export async function POST(request: NextRequest) {
       userId,
       targetUserId,
     })
+
+    // The scanner lands on the "You're now connected" screen with a Travel
+    // Blend link — but without this, the passport OWNER never learns the scan
+    // happened. Notify them with a deep link to the same blend so both sides
+    // of the connection get the compatibility view. Best-effort: a notification
+    // failure must not fail the connect itself. Only on a NEW connection —
+    // re-scanning an existing connection shouldn't re-notify.
+    const newlyConnected = !existing1 || !existing2
+    if (newlyConnected) {
+      try {
+        const scannerName =
+          scannerUser.display_name || scannerUser.username || 'A traveler'
+        await supabaseAdmin.from('notifications').insert({
+          user_id: targetUserId,
+          sender_id: userId,
+          type: 'passport_connect',
+          title: 'New travel connection',
+          message: `${scannerName} scanned your passport — see your Travel Blend together`,
+          link: scannerUser.username
+            ? `/blend/${scannerUser.username}`
+            : '/followers',
+          metadata: { scanner_id: userId },
+        })
+      } catch (notifyErr) {
+        log.error('Passport connect: owner notification failed', {
+          component: 'PassportConnect',
+          action: 'notify',
+          userId,
+          targetUserId,
+        }, notifyErr as Error)
+      }
+    }
 
     return NextResponse.json({
       connected: true,

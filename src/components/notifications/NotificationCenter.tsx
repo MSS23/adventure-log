@@ -425,6 +425,7 @@ function getNotificationIcon(type: string) {
       return <UserPlus className="h-4 w-4 text-primary" />
     case 'album_invite':
     case 'collaboration':
+    case 'passport_connect':
       return <Users className="h-4 w-4 text-primary" />
     case 'photo':
       return <Camera className="h-4 w-4 text-accent" />

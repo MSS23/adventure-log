@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin, Globe, Users, User as UserIcon, Layers, Camera } from 'lucide-react'
 import { usePlaces, type PlacesScope } from '@/lib/hooks/usePlaces'
+import { FriendsNearby } from '@/components/places/FriendsNearby'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getFlagEmoji, getCityName } from '@/lib/utils/country'
 import { AnimatedSkeleton } from '@/components/ui/AnimatedSkeleton'
@@ -109,6 +110,9 @@ export default function PlacesPage() {
             </button>
           ))}
         </div>
+
+        {/* Friends who have been near you or your pinned spots */}
+        <FriendsNearby />
 
         {/* Stats */}
         {!loading && places.length > 0 && (

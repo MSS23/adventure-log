@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Globe, MapPin, Camera, Plane, Users, Share2, Copy, Check, ArrowRight,
   Trophy, Compass, Route, UserCheck, Landmark, Mountain, TreePine, Waves, Sun,
+  AlertCircle,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -132,12 +133,10 @@ export function PublicPassportContent({
   const [showConnected, setShowConnected] = useState(false)
   const connectAttempted = useRef(false)
 
-  // Auto-connect when arriving via QR scan (?connect=true)
-  useEffect(() => {
-    const shouldConnect = searchParams.get('connect') === 'true'
-    if (!shouldConnect || !currentUser || currentUser.id === user.id || connectAttempted.current) return
-    connectAttempted.current = true
-
+  // The connect attempt, callable again from the error banner's "Try again"
+  // (connectAttempted only guards the AUTOMATIC attempt against effect
+  // re-runs/StrictMode — manual retries bypass it deliberately).
+  const attemptConnect = useCallback(() => {
     setConnectStatus('connecting')
 
     apiFetch('/api/passport/connect', {
@@ -145,20 +144,34 @@ export function PublicPassportContent({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ targetUserId: user.id }),
     })
-      .then(res => res.json())
-      .then(data => {
-        if (data.connected) {
+      .then(async (res) => {
+        // Non-2xx (expired session, rate limit, server error) must land in the
+        // error branch — the body may not even be JSON.
+        const data = res.ok ? await res.json() : null
+        if (data?.connected) {
           setConnectStatus('connected')
           setShowConnected(true)
         } else {
           setConnectStatus('error')
+          log.error('Passport auto-connect rejected', {
+            component: 'PublicPassport',
+            action: 'connect',
+          })
         }
       })
       .catch(() => {
         setConnectStatus('error')
         log.error('Passport auto-connect failed', { component: 'PublicPassport', action: 'connect' })
       })
-  }, [searchParams, currentUser, user.id])
+  }, [user.id])
+
+  // Auto-connect when arriving via QR scan (?connect=true)
+  useEffect(() => {
+    const shouldConnect = searchParams.get('connect') === 'true'
+    if (!shouldConnect || !currentUser || currentUser.id === user.id || connectAttempted.current) return
+    connectAttempted.current = true
+    attemptConnect()
+  }, [searchParams, currentUser, user.id, attemptConnect])
 
   // Canonical public passport URL on the web origin. This component also
   // renders inside the APK (/passport/view twin) where window.location.href
@@ -335,6 +348,30 @@ export function PublicPassportContent({
               <div className="rounded-xl border border-border bg-card px-4 py-3 flex items-center gap-3">
                 <div className="size-4 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
                 <p className="text-sm text-muted-foreground">Connecting...</p>
+              </div>
+            </motion.div>
+          )}
+          {connectStatus === 'error' && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4 relative z-20"
+            >
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 flex items-center gap-3">
+                <div className="size-8 rounded-full bg-destructive/15 flex items-center justify-center shrink-0">
+                  <AlertCircle className="size-4 text-destructive" />
+                </div>
+                <p className="text-sm text-foreground flex-1">
+                  Couldn&apos;t connect with <span className="font-semibold">{displayName}</span> — check your connection
+                </p>
+                <button
+                  type="button"
+                  onClick={attemptConnect}
+                  className="text-sm font-semibold text-primary shrink-0 hover:underline"
+                >
+                  Try again
+                </button>
               </div>
             </motion.div>
           )}

@@ -118,8 +118,17 @@ export function PassportConnectListener() {
       // (`/blend/<scanner>`); fall back to a username we resolved.
       // NativeNavigationAdapter rewrites this <Link> to the /blend/view twin
       // on Capacitor, so a canonical href is correct on every platform.
+      //
+      // row.link is DATA from the notifications table, rendered as the CTA of
+      // a trusted-looking modal — accept only the internal paths this feature
+      // legitimately produces, never an arbitrary/external URL.
+      const rowLink =
+        typeof row.link === 'string' &&
+        (/^\/blend\/[\w.-]+$/.test(row.link) || row.link === '/followers')
+          ? row.link
+          : null
       const blendHref =
-        row.link || (scannerUsername ? `/blend/${scannerUsername}` : '/followers')
+        rowLink || (scannerUsername ? `/blend/${scannerUsername}` : '/followers')
 
       setConnect({ scannerId, scannerName, scannerUsername, scannerAvatarUrl, blendHref })
 

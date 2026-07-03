@@ -124,9 +124,10 @@ export async function POST(
     }
 
     // Notify the invitee (best-effort — never fail the invite over a notification).
-    // The notification targets the invitee's row (user_id ≠ caller), which RLS may
-    // block; try the RLS client first, then the service-role client when one is
-    // configured. If neither can write it, the invite still succeeds.
+    // Since migration 73, notifications INSERT is service-role only, so the
+    // service-role client is the primary path; the RLS client is a last resort
+    // for environments without the admin key (where it will be refused, and the
+    // invite still succeeds without a notification).
     try {
       const { data: inviter } = await supabase
         .from('users')
@@ -149,9 +150,10 @@ export async function POST(
         metadata: { album_id: albumId, collaborator_id: collaborator!.id },
       }
 
-      const { error: notifyError } = await supabase.from('notifications').insert(notification)
-      if (notifyError && supabaseAdmin) {
+      if (supabaseAdmin) {
         await supabaseAdmin.from('notifications').insert(notification)
+      } else {
+        await supabase.from('notifications').insert(notification)
       }
     } catch (notifyErr) {
       log.error(

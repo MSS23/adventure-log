@@ -133,52 +133,54 @@ export async function POST(request: NextRequest) {
     // connection shouldn't re-notify.
     const newlyConnected = dir1.changed || dir2.changed
     if (newlyConnected) {
-      try {
-        const scannerName =
-          scannerUser.display_name || scannerUser.username || 'A traveler'
-        const ownerName =
-          targetUser.display_name || targetUser.username || 'A traveler'
+      const scannerName =
+        scannerUser.display_name || scannerUser.username || 'A traveler'
+      const ownerName =
+        targetUser.display_name || targetUser.username || 'A traveler'
 
-        // Both travelers get a persisted record of the connection, each
-        // deep-linked to the SAME symmetric Travel Blend from their own side.
-        // `metadata.scanner_id` is the scanner in BOTH rows — the client
-        // PassportConnectListener only pops the "you're now connected" modal
-        // when scanner_id !== the current user, so it celebrates on the OWNER's
-        // device (who wasn't otherwise pulled in) and stays silent on the
-        // scanner's (who already saw the modal on the passport page).
-        await supabaseAdmin.from('notifications').insert([
-          {
-            // → owner (the person who was scanned)
-            user_id: targetUserId,
-            sender_id: userId,
-            type: 'passport_connect',
-            title: 'New travel connection',
-            message: `${scannerName} scanned your passport — see your Travel Blend together`,
-            link: scannerUser.username
-              ? `/blend/${scannerUser.username}`
-              : '/followers',
-            metadata: { scanner_id: userId },
-          },
-          {
-            // → scanner (bell record only; their modal already fired in-app)
-            user_id: userId,
-            sender_id: targetUserId,
-            type: 'passport_connect',
-            title: 'New travel connection',
-            message: `You connected with ${ownerName} — see your Travel Blend together`,
-            link: targetUser.username
-              ? `/blend/${targetUser.username}`
-              : '/followers',
-            metadata: { scanner_id: userId },
-          },
-        ])
-      } catch (notifyErr) {
+      // Both travelers get a persisted record of the connection, each
+      // deep-linked to the SAME symmetric Travel Blend from their own side.
+      // `metadata.scanner_id` is the scanner in BOTH rows — the client
+      // PassportConnectListener only pops the "you're now connected" modal
+      // when scanner_id !== the current user, so it celebrates on the OWNER's
+      // device (who wasn't otherwise pulled in) and stays silent on the
+      // scanner's (who already saw the modal on the passport page).
+      //
+      // supabase-js reports failures via the returned `error` — it does not
+      // throw — so best-effort here means checking that, not try/catch.
+      const { error: notifyError } = await supabaseAdmin.from('notifications').insert([
+        {
+          // → owner (the person who was scanned)
+          user_id: targetUserId,
+          sender_id: userId,
+          type: 'passport_connect',
+          title: 'New travel connection',
+          message: `${scannerName} scanned your passport — see your Travel Blend together`,
+          link: scannerUser.username
+            ? `/blend/${scannerUser.username}`
+            : '/followers',
+          metadata: { scanner_id: userId },
+        },
+        {
+          // → scanner (bell record only; their modal already fired in-app)
+          user_id: userId,
+          sender_id: targetUserId,
+          type: 'passport_connect',
+          title: 'New travel connection',
+          message: `You connected with ${ownerName} — see your Travel Blend together`,
+          link: targetUser.username
+            ? `/blend/${targetUser.username}`
+            : '/followers',
+          metadata: { scanner_id: userId },
+        },
+      ])
+      if (notifyError) {
         log.error('Passport connect: connection notifications failed', {
           component: 'PassportConnect',
           action: 'notify',
           userId,
           targetUserId,
-        }, notifyErr as Error)
+        }, notifyError as unknown as Error)
       }
     }
 

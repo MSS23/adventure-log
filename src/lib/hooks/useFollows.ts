@@ -105,7 +105,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
 
     try {
       // Users embeds list explicit safe columns — a (*) embed is permission-
-      // denied once migration 75 locks down the users PII columns.
+      // denied once migration 76 locks down the users PII columns.
       const [followersResult, followingResult, pendingResult] = await Promise.all([
         // My followers
         supabase

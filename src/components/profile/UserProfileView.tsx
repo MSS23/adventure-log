@@ -113,7 +113,7 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
       let userError: { code?: string; message?: string } | null = null
 
       // Cross-user read: explicit safe columns only — select('*') is
-      // permission-denied once migration 75 locks down the PII columns.
+      // permission-denied once migration 76 locks down the PII columns.
       if (isUUID) {
         // Direct UUID lookup
         const { data, error } = await supabase

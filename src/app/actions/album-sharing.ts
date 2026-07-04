@@ -43,7 +43,7 @@ export async function createAlbumShare(request: CreateAlbumShareRequest) {
 
     // Look up user by email if provided.
     // Email→id resolution goes through the find_user_id_by_email() SECURITY
-    // DEFINER RPC (migration 75): the users PII lockdown revokes SELECT on
+    // DEFINER RPC (migration 76): the users PII lockdown revokes SELECT on
     // the email column, so even `.select('id').eq('email', x)` is
     // permission-denied for the RLS-bound client. The direct lookup is kept
     // as a fallback for environments where the migration isn't applied yet.

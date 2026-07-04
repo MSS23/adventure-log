@@ -16,7 +16,7 @@
  * call the SECURITY DEFINER RPC instead: supabase.rpc('get_my_profile').
  *
  * Keep this list in sync with the allowlist in
- * supabase/migrations/75_users_pii_lockdown.sql.
+ * supabase/migrations/76_users_pii_lockdown.sql.
  */
 export const PUBLIC_USER_COLUMNS =
   'id, username, display_name, name, bio, avatar_url, cover_photo_url, ' +

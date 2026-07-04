@@ -72,7 +72,7 @@ export async function POST(
       found = byUsername.data
       if (!found) {
         // Email→id via the find_user_id_by_email() SECURITY DEFINER RPC
-        // (migration 75): the users PII lockdown revokes SELECT on the email
+        // (migration 76): the users PII lockdown revokes SELECT on the email
         // column, so even `.select('id').eq('email', q)` is permission-denied
         // for the RLS-bound client.
         const rpcLookup = await supabase.rpc('find_user_id_by_email', { p_email: q })

@@ -229,7 +229,7 @@ export default function SettingsPage() {
         trips,
       ] = await Promise.allSettled([
         // Own FULL row (incl. email / date_of_birth) via the get_my_profile()
-        // SECURITY DEFINER RPC — migration 75 revokes column-level SELECT on
+        // SECURITY DEFINER RPC — migration 76 revokes column-level SELECT on
         // the PII columns, so a direct select('*') is permission-denied once
         // applied. Direct read kept as the pre-migration fallback.
         (async () => {

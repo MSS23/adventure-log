@@ -41,7 +41,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
 
         // Fetch users with public profiles, ordered by created date.
         // Explicit safe columns — select('*') is permission-denied once
-        // migration 75 locks down the users PII columns.
+        // migration 76 locks down the users PII columns.
         const { data, error: fetchError } = await supabase
           .from('users')
           .select(PUBLIC_USER_COLUMNS)

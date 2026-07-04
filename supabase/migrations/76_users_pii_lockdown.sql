@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration 75: users PII lockdown — column-level SELECT privileges
+-- Migration 76: users PII lockdown — column-level SELECT privileges
 -- ============================================================================
 --
 -- THE LEAK (confirmed in production):
@@ -133,7 +133,7 @@ GRANT EXECUTE ON FUNCTION public.get_my_profile() TO authenticated;
 
 COMMENT ON FUNCTION public.get_my_profile() IS
   'Returns the calling user''s own full public.users row (including columns '
-  'excluded from the column-level SELECT grants of migration 75). SECURITY '
+  'excluded from the column-level SELECT grants of migration 76). SECURITY '
   'DEFINER + WHERE id = auth.uid(): callers can never read another user''s row.';
 
 -- ----------------------------------------------------------------------------
@@ -164,7 +164,7 @@ GRANT EXECUTE ON FUNCTION public.find_user_id_by_email(text) TO authenticated;
 COMMENT ON FUNCTION public.find_user_id_by_email(text) IS
   'Resolves an email address to a user id for album sharing / collaborator '
   'invites (authenticated only). Returns only the id — parity with the '
-  'pre-migration-75 lookup, which any authenticated user could already do.';
+  'pre-migration-76 lookup, which any authenticated user could already do.';
 
 
 -- ============================================================================

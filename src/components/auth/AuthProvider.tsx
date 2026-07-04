@@ -158,7 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const promise = (async (): Promise<Profile | null> => {
         // Own-row fetch goes through the get_my_profile() SECURITY DEFINER
-        // RPC (migration 75): the users PII lockdown revokes column-level
+        // RPC (migration 76): the users PII lockdown revokes column-level
         // SELECT on sensitive columns, so a direct select('*') is permission-
         // denied once applied — but the user must still get their own FULL
         // row. Fall back to the direct select for environments where the

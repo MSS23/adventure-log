@@ -23,7 +23,7 @@ async function checkDatabase(): Promise<boolean> {
   try {
     const supabase = await createClient()
     // select('id') rather than select('count'): count(*) needs table-level
-    // SELECT, which migration 75 (users PII lockdown) revokes in favor of
+    // SELECT, which migration 76 (users PII lockdown) revokes in favor of
     // column-level grants. id is in the granted safe-column list.
     const { error } = await supabase.from('users').select('id').limit(1)
     return !error

@@ -130,7 +130,7 @@ export function BlendContent({ username }: { username: string }) {
 
         // 1. Resolve the other traveler by username (or UUID fallback).
         // Cross-user read: explicit safe columns only — select('*') is
-        // permission-denied once migration 75 locks down the PII columns.
+        // permission-denied once migration 76 locks down the PII columns.
         const otherQuery = UUID_RE.test(username)
           ? supabase.from('users').select(PUBLIC_USER_COLUMNS).eq('id', username).maybeSingle()
           : supabase

@@ -1160,7 +1160,7 @@ npm run mobile:sync     # Sync to native
 12. **Handle async cleanup** with AbortController in useEffect
 13. **Rate limit sensitive operations** using RateLimiter utility
 14. **Never expose internal errors** - use `getUserFriendlyMessage()`
-15. **Users PII lockdown (migration 75)** — column-level SELECT on `public.users` is
+15. **Users PII lockdown (migration 76)** — column-level SELECT on `public.users` is
     restricted to a safe allowlist. Cross-user profile reads must use
     `PUBLIC_USER_COLUMNS` from `src/lib/constants/user-columns.ts` (never
     `select('*')` or `users!fk(*)` embeds). Own-row full reads use

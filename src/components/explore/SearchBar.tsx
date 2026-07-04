@@ -85,7 +85,7 @@ export function SearchBar({
 
       // Search users by username or display name.
       // Explicit safe columns — select('*') is permission-denied once
-      // migration 75 locks down the users PII columns.
+      // migration 76 locks down the users PII columns.
       const { data: users, error: usersError } = await supabase
         .from('users')
         .select(PUBLIC_USER_COLUMNS)

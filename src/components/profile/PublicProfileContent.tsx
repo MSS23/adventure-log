@@ -20,6 +20,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { UserActionsMenu } from '@/components/social/UserActionsMenu'
+import { ProfileGlobe } from '@/components/globe/ProfileGlobe'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getFlagEmoji } from '@/lib/utils/country'
@@ -266,7 +267,7 @@ export function PublicProfileContent({
           </motion.div>
         )}
 
-        {/* ───────── Travel Map entry point ───────── */}
+        {/* ───────── Travel Globe ───────── */}
         {!isPrivate && albums.some((a) => a.latitude && a.longitude) && (
           <motion.div
             className="mb-10"
@@ -276,22 +277,22 @@ export function PublicProfileContent({
           >
             <h2 className="al-eyebrow mb-4 flex items-center gap-2">
               <Map className="h-4 w-4" />
-              Travel Map
+              Travel Globe
             </h2>
-            <Link href={`/embed/${user.username}`} target="_blank">
-              <div className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-5 cursor-pointer transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring">
-                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <Globe className="h-6 w-6" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-heading font-semibold text-foreground">View travel map</p>
-                  <p className="text-sm text-muted-foreground">
-                    {albums.filter((a) => a.latitude && a.longitude).length} locations on the interactive 3D globe
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5" />
-              </div>
-            </Link>
+            <ProfileGlobe
+              username={user.username}
+              targetUserId={user.id}
+              locations={albums
+                .filter((a) => a.latitude != null && a.longitude != null)
+                .map((a) => ({
+                  id: a.id,
+                  title: a.title,
+                  location: a.location_name || '',
+                  country_code: a.country_code || '',
+                  lat: a.latitude as number,
+                  lng: a.longitude as number,
+                }))}
+            />
           </motion.div>
         )}
 

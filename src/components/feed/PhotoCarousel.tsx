@@ -26,6 +26,13 @@ interface PhotoCarouselProps {
   coverPhotoOffset?: { x?: number; y?: number }
   className?: string
   priority?: boolean
+  /**
+   * Pre-resolved "viewer has liked this album" from a parent that batched the
+   * lookup (the feed page). Passed through to useLikes so the double-tap
+   * handler knows the current state WITHOUT firing its own per-mount
+   * existence query (that query, times two per feed post, was the feed N+1).
+   */
+  initialLiked?: boolean
   onDoubleTap?: () => void
 }
 
@@ -36,6 +43,7 @@ export function PhotoCarousel({
   coverPhotoOffset,
   className,
   priority = false,
+  initialLiked,
   onDoubleTap
 }: PhotoCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' })
@@ -52,7 +60,7 @@ export function PhotoCarousel({
   const { user } = useAuth()
 
   // Use the same like hook as LikeButton for state sync
-  const { toggleLike } = useLikes(albumId, undefined, undefined, { fetchList: false, subscribe: false })
+  const { toggleLike } = useLikes(albumId, undefined, undefined, { fetchList: false, subscribe: false, initialLiked })
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()

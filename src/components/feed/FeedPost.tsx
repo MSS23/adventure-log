@@ -33,6 +33,12 @@ export interface FeedAlbum {
   cover_photo_y_offset?: number
   likes_count: number
   comments_count: number
+  /**
+   * Whether the current viewer has liked this album, resolved by the feed
+   * page in ONE batched likes query per page. Threaded into useLikes as
+   * initialLiked so each post skips its own existence query (the feed N+1).
+   */
+  is_liked?: boolean
   user_id: string
   user: {
     id: string
@@ -245,6 +251,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
               y: album.cover_photo_y_offset,
             }}
             priority={priority}
+            initialLiked={album.is_liked}
             onDoubleTap={() => {}}
           />
         </div>
@@ -270,6 +277,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
         <div className="flex items-center gap-1">
           <LikeButton
             albumId={album.id}
+            initialLiked={album.is_liked}
             showCount={false}
             size="md"
             onToggle={(liked) => setLikesCount((c) => Math.max(0, c + (liked ? 1 : -1)))}

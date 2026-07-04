@@ -13,6 +13,13 @@ import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 interface LikeButtonProps {
   albumId?: string
   photoId?: string
+  /**
+   * Pre-resolved "viewer has liked this" state from a parent that batched the
+   * lookup (e.g. the feed page fetches likes for a whole page in one query).
+   * When provided, useLikes skips its per-mount existence query — leaving it
+   * undefined keeps the old self-fetching behavior.
+   */
+  initialLiked?: boolean
   showCount?: boolean
   size?: 'sm' | 'md' | 'lg'
   className?: string
@@ -33,13 +40,14 @@ interface LikeButtonProps {
 export function LikeButton({
   albumId,
   photoId,
+  initialLiked,
   showCount = false,
   size: _size = 'md',
   className,
   showParticles = true,
   onToggle,
 }: LikeButtonProps) {
-  const { isLiked, likesCount, toggleLike } = useLikes(albumId, photoId, undefined, { fetchList: showCount, subscribe: showCount })
+  const { isLiked, likesCount, toggleLike } = useLikes(albumId, photoId, undefined, { fetchList: showCount, subscribe: showCount, initialLiked })
   const { triggerLight, triggerSuccess } = useHaptics()
   const [showBurst, setShowBurst] = useState(false)
   const prefersReducedMotion = useReducedMotion()

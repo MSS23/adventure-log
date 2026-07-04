@@ -123,11 +123,18 @@ async function fetchFeedPage(
   // there is no album foreign-key embed available; we group counts here
   // instead. Both queries fire concurrently and are safe to fail
   // independently — a count outage shouldn't blank the feed.
+  //
+  // The likes query also selects user_id so the viewer's own liked set falls
+  // out of the SAME rows — that seeds `is_liked` on every feed item, which
+  // lets useLikes skip its per-mount likes?...limit=1 existence check.
+  // Before this, every LikeButton + PhotoCarousel fired that query
+  // individually (~20 queries per page of 10 posts — a verbatim query shape
+  // from a production statement-timeout incident).
   const [likesResult, commentsResult] = albumIds.length
     ? await Promise.all([
         supabase
           .from('likes')
-          .select('target_id')
+          .select('target_id, user_id')
           .eq('target_type', 'album')
           .in('target_id', albumIds),
         supabase
@@ -136,11 +143,18 @@ async function fetchFeedPage(
           .eq('target_type', 'album')
           .in('target_id', albumIds),
       ])
-    : [{ data: [] as Array<{ target_id: string }> }, { data: [] as Array<{ target_id: string }> }]
+    : [
+        { data: [] as Array<{ target_id: string; user_id: string }> },
+        { data: [] as Array<{ target_id: string }> },
+      ]
 
   const likesByAlbum = new Map<string, number>()
-  for (const row of (likesResult.data ?? []) as Array<{ target_id: string }>) {
+  const likedByViewer = new Set<string>()
+  for (const row of (likesResult.data ?? []) as Array<{ target_id: string; user_id: string }>) {
     likesByAlbum.set(row.target_id, (likesByAlbum.get(row.target_id) ?? 0) + 1)
+    if (row.user_id === userId) {
+      likedByViewer.add(row.target_id)
+    }
   }
   const commentsByAlbum = new Map<string, number>()
   for (const row of (commentsResult.data ?? []) as Array<{ target_id: string }>) {
@@ -168,6 +182,7 @@ async function fetchFeedPage(
       cover_photo_y_offset: row.cover_photo_y_offset as number | undefined,
       likes_count: likesByAlbum.get(albumId) ?? 0,
       comments_count: commentsByAlbum.get(albumId) ?? 0,
+      is_liked: likedByViewer.has(albumId),
       user_id: row.user_id as string,
       user: {
         id: (u as { id?: string })?.id || (row.user_id as string),

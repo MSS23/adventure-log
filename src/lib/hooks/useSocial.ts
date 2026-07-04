@@ -27,11 +27,37 @@ function isStatementTimeout(error: unknown): boolean {
   return code === '57014' || message.includes('canceling statement due to statement timeout')
 }
 
-export function useLikes(albumId?: string, photoId?: string, storyId?: string, options?: { fetchList?: boolean; subscribe?: boolean }) {
-  const { fetchList = true, subscribe = true } = options ?? {}
+export function useLikes(
+  albumId?: string,
+  photoId?: string,
+  storyId?: string,
+  options?: {
+    fetchList?: boolean
+    subscribe?: boolean
+    /**
+     * Seed for the "did I like this?" state. When provided, the per-mount
+     * existence query (likes?...limit=1) is SKIPPED entirely — callers that
+     * render many items (e.g. the feed) batch ONE likes query for the whole
+     * page and pass the answer down. That per-item existence check was the
+     * feed's N+1 (~2 queries per post) and a verbatim query shape from a real
+     * production statement-timeout incident. When undefined, behavior is
+     * unchanged: the hook checks the database itself.
+     */
+    initialLiked?: boolean
+  }
+) {
+  const { fetchList = true, subscribe = true, initialLiked } = options ?? {}
   const [likes, setLikes] = useState<Like[]>([])
-  const [isLiked, setIsLiked] = useState(false)
+  const [isLiked, setIsLiked] = useState(initialLiked ?? false)
   const { user } = useAuth()
+
+  // If the caller's batched data refreshes (e.g. feed refetch returns a new
+  // seed), adopt it — the server value is authoritative at that point.
+  useEffect(() => {
+    if (initialLiked !== undefined) {
+      setIsLiked(initialLiked)
+    }
+  }, [initialLiked])
 
   const fetchLikes = useCallback(async () => {
     const supabase = createClient()
@@ -105,12 +131,15 @@ export function useLikes(albumId?: string, photoId?: string, storyId?: string, o
       if (fetchList) {
         fetchLikes()
       }
-      if (user) {
+      // Skip the existence query when the caller already told us the answer
+      // via initialLiked (see the option's doc comment — this is the feed
+      // N+1 fix). Realtime reconciliation below still calls checkIfLiked.
+      if (user && initialLiked === undefined) {
         checkIfLiked()
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [albumId, photoId, storyId, user?.id, fetchList]) // Only depend on user.id, not the whole user object or functions
+  }, [albumId, photoId, storyId, user?.id, fetchList, initialLiked]) // Only depend on user.id, not the whole user object or functions
 
   // Set up real-time subscription for likes
   useEffect(() => {

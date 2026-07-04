@@ -127,7 +127,13 @@ export default function ProfileContent({
       setCountryCodes(codes)
       setTravelStats({ countries: codes.length, cities: uniqueCities.size, photos: totalPhotos })
     } catch (err) {
-      log.error('Error fetching user data', { component: 'ProfileContent' }, err instanceof Error ? err : new Error(String(err)))
+      // Supabase errors are plain objects — String(err) yields "[object Object]",
+      // which is what Sentry would receive. Surface code + message instead.
+      const supaErr = err as { code?: string; message?: string } | null
+      const error = err instanceof Error
+        ? err
+        : new Error(supaErr?.message ? `[${supaErr.code ?? 'unknown'}] ${supaErr.message}` : JSON.stringify(err))
+      log.error('Error fetching user data', { component: 'ProfileContent' }, error)
     } finally {
       fetchingRef.current = false
       if (!silent) setLoading(false)

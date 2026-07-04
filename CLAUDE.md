@@ -4,14 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Adventure Log is a social travel logging platform built with Next.js 15, TypeScript, Supabase, and Tailwind CSS. Users create albums with photos and locations, which appear on an interactive 3D globe visualization. The app supports social features like stories, likes, comments, and user following.
+Adventure Log is a social travel logging platform built with Next.js 15, TypeScript, Supabase, and Tailwind CSS. Users create albums with photos and locations, which appear on an interactive 3D globe visualization. The app supports social features like likes, comments, user following, trips, and a wishlist.
 
 **Tech Stack:**
 - **Framework:** Next.js 15.5.3 with App Router
 - **Language:** TypeScript (strict mode)
 - **Database:** Supabase (PostgreSQL with RLS)
 - **Styling:** Tailwind CSS v4
-- **State:** React Query + Zustand + Context
+- **State:** React Query + React Context (no Zustand — the dependency lingers in package.json with zero imports)
+- **AI:** `@anthropic-ai/sdk` (Claude, server-only in `src/lib/ai/claude.ts`)
 - **Mobile:** Capacitor 7.x (iOS/Android)
 - **3D Visualization:** react-globe.gl + Three.js
 
@@ -31,6 +32,8 @@ npm run analyze          # Analyze bundle size
 ```bash
 npm test                 # Run Jest tests
 npm run test:watch       # Run tests in watch mode
+npm run test:e2e         # Run Playwright e2e tests
+npm run test:e2e:ui      # Playwright UI mode
 ```
 
 ### Mobile Development (Capacitor)
@@ -99,10 +102,12 @@ npm run seed:clear       # Clear seeded demo data
 - `users` - User profiles (linked to auth.users via id)
 - `albums` - Travel albums with location/date metadata
 - `photos` - Album photos with EXIF data and GPS coordinates
-- `stories` - Ephemeral 24-hour stories (like Instagram)
-- `likes` - Generic polymorphic likes (albums, stories, photos)
+- `likes` - Generic polymorphic likes (albums, photos, ...)
 - `comments` - Polymorphic comments with nested replies
 - `follows` - User following relationships
+- `stories` - table exists but there is **no stories UI**; the only code touching it is the settings data-export and the `/api/maintenance/cleanup` expired-story job
+
+Many more tables exist (trips, wishlist_items, place_recommendations, achievements, feedback, ...) — see `supabase/migrations/` for the full picture.
 
 **Important Fields:**
 - `albums.date_start` / `albums.start_date` - Travel dates (NOT created_at)
@@ -207,11 +212,11 @@ Provides consistent spacing (4px grid), typography, shadows, and interactive sta
 ### State Management
 
 - **Auth State:** React Context (`AuthProvider`)
-- **Server State:** React Query (`@tanstack/react-query`)
+- **Server State:** React Query (`@tanstack/react-query`, ~20 files: `QueryProvider` plus pages like feed, albums, trips, map, globe)
   - 5min staleTime, 10min gcTime
   - Auto-refetch on window focus
   - 2 retry attempts with exponential backoff
-- **Client State:** Zustand (minimal usage)
+- **Client State:** React Context (`AuthProvider`, `AchievementProvider`, `UnreadCountProvider`, `ThemeContext`) — Zustand is NOT used (zero imports)
 - **Form State:** React Hook Form + Zod validation
 
 ---
@@ -266,7 +271,7 @@ if (!ALLOWED_MIME_TYPES.includes(file.type)) throw new Error('Invalid file type'
 
 ### Rate Limiting
 
-**Configured limits** (in `security.ts`, enforcement needed in middleware):
+**Enforced in `src/middleware.ts`** — Upstash Redis (`UPSTASH_REDIS_REST_URL`/`_TOKEN`, via `src/lib/utils/rate-limit-redis.ts`) with an in-memory fallback when Redis isn't configured. Configured limits (in `security.ts`):
 - **API requests:** 100 requests / 15 minutes per IP
 - **Auth attempts:** 5 attempts / 15 minutes per IP
 - **File uploads:** 50 uploads / hour per IP
@@ -366,25 +371,64 @@ PostgreSQL error codes are mapped to app errors:
 
 ### Route Structure
 
-| Route | Method | Purpose |
-|-------|--------|---------|
+47 route handlers live under `src/app/api/`. Grouped by area:
+
+**Platform / infrastructure**
+
+| Route | Methods | Purpose |
+|-------|---------|---------|
 | `/api/health` | GET | Health check (status, version) |
 | `/api/manifest` | GET | PWA manifest |
-| `/api/albums/[id]/cover-position` | PATCH | Update album cover position |
 | `/api/geocode` | GET | Reverse geocoding |
-| `/api/globe-reactions` | GET/POST | Globe reactions |
-| `/api/globe-reactions/[id]` | DELETE | Remove reaction |
-| `/api/globe-reactions/types` | GET | Available reaction types |
-| `/api/itineraries` | GET/POST | Trip itineraries |
-| `/api/itineraries/[id]` | GET/PATCH/DELETE | Single itinerary |
-| `/api/itineraries/[id]/favorite` | POST | Toggle favorite |
-| `/api/playlists` | GET | User playlists |
-| `/api/playlists/[id]/items` | POST/DELETE | Playlist items |
-| `/api/trip-planner/generate` | POST | AI trip generation |
-| `/api/monitoring/errors` | POST | Error collection |
-| `/api/monitoring/performance` | POST | Performance metrics |
-| `/api/monitoring/web-vitals` | POST | Core Web Vitals |
-| `/api/monitoring/security` | POST | Security events |
+| `/api/weather` | GET | Weather lookup |
+| `/api/errors` | POST | Client error reporting |
+| `/api/monitoring/{errors,performance,security,web-vitals}` | POST | Monitoring collectors |
+| `/api/maintenance/cleanup` | GET/POST | Cron cleanup jobs (expired stories, etc.) |
+| `/api/admin/apply-migrations` | POST | Admin migration runner |
+| `/api/email/notify` | POST | Transactional email (Resend) |
+| `/api/feedback` | POST | User feedback (Linear/Discord fan-out) |
+| `/api/reports` | POST | Content reports |
+
+**Albums & photos**
+
+| Route | Methods | Purpose |
+|-------|---------|---------|
+| `/api/albums/[id]/cover-position` | PATCH | Update album cover position |
+| `/api/albums/[id]/collaborators` | POST | Add album collaborator |
+| `/api/albums/[id]/you-were-here` | GET | "You were here" lookup |
+| `/api/photos/upload-url` | POST | Signed upload URL |
+| `/api/photos/finalize` | POST | Finalize uploaded photo |
+| `/api/memories` | GET | Memories feed |
+
+**Trips**
+
+| Route | Methods | Purpose |
+|-------|---------|---------|
+| `/api/trips` | GET/POST | List/create trips |
+| `/api/trips/[id]` | GET/PATCH/DELETE | Single trip |
+| `/api/trips/[id]/members` + `/members/[memberId]` | POST / PATCH/DELETE | Trip membership |
+| `/api/trips/[id]/pins` + `/pins/[pinId]` (+ `/checkin`) | POST / PATCH/DELETE / POST | Trip pins & check-ins |
+| `/api/trips/[id]/save-as-album` | POST | Convert trip to album |
+| `/api/trips/[id]/share` | POST | Share link |
+| `/api/trips/[id]/suggest-route` | POST | Route suggestion |
+| `/api/public/trips/[slug]` | GET | Public trip view |
+
+**Social / discovery**
+
+| Route | Methods | Purpose |
+|-------|---------|---------|
+| `/api/wishlist` + `/api/wishlist/[id]` | GET/POST + PATCH/DELETE | Wishlist CRUD |
+| `/api/wishlist/extract` | POST | AI entity extraction (Claude) |
+| `/api/wishlist/suggest` | POST | Wishlist suggestions |
+| `/api/place-recommendations` (+ `/[id]/bump`, `/cities`) | GET/POST (+ POST, GET) | Place recommendations |
+| `/api/travel-twins` (+ `/[userId]/recommendations`) | GET | Travel-twin matching |
+| `/api/achievements/{check,progress}` | POST / GET | Achievements |
+| `/api/me/streak` | GET/POST | Travel streak |
+| `/api/passport/connect` | POST | Passport connect |
+| `/api/blocks`, `/api/users/block` | GET/POST/DELETE | User blocking |
+| `/api/public/globe-pins` | GET | Public globe pins |
+
+(There are NO `/api/globe-reactions`, `/api/itineraries`, `/api/playlists`, or `/api/trip-planner` routes — those were removed.)
 
 ### Authentication Pattern
 
@@ -430,59 +474,48 @@ export async function GET(request: NextRequest) {
 
 ## Custom Hooks Reference
 
-### Data Fetching
+30 hook files live in `src/lib/hooks/`. The list below covers hooks that exist AND have call sites (import-site counts as of 2026-07). `useAuth` is not in the hooks dir — it's exported from `src/components/auth/AuthProvider.tsx` and is the most-used hook in the app (~80 files).
 
-| Hook | Purpose |
-|------|---------|
-| `useSupabaseQuery` | Standardized Supabase queries with caching |
-| `useSupabaseTable` | Common table operations (filter, order, limit) |
-| `useSupabaseRPC` | RPC function calls |
-| `useSupabaseMutation` | Mutations with optimistic updates |
-| `usePhotos` | Photo data fetching |
-| `usePhotoUpload` | Upload with progress tracking |
-| `useTravelTimeline` | Timeline data with privacy filtering |
+### Data Fetching & Domain
 
-### State Management
+| Hook | Import sites | Purpose |
+|------|--------------|---------|
+| `useTravelTimeline` | 7 | Timeline data with privacy filtering (globe) |
+| `useWishlist` | 8 | Wishlist CRUD |
+| `usePlaceRecommendations` | 5 | Place recommendations (React Query) |
+| `usePlaces` | 3 | Places data (React Query) |
+| `useCollaborativeAlbum` | 3 | Album collaboration |
+| `useActivityFeed` | 2 | Activity feed |
+| `useWrappedData` | 2 | Wrapped/year-in-review data |
+| `useAlbumLocationData`, `useAlbumViews`, `useTravelPassport`, `useStreak`, `useCurrentLocation` | 1 each | Narrow single-purpose fetchers |
 
-| Hook | Purpose |
-|------|---------|
-| `useAuth` | Auth context access |
-| `useAsyncOperation` | Generic async state (data/loading/error) |
-| `useAsyncList` | List operations (add/remove/update) |
-| `useAsyncPagination` | Pagination state |
-| `useLoadingState` | Multi-state loading |
-| `useSimpleLoading` | Boolean loading state |
+### Social
 
-### PWA & Mobile
+| Hook | Import sites | Purpose |
+|------|--------------|---------|
+| `useFollows` | 10 | Follow/unfollow operations |
+| `useSocial` | 5 | Likes/comments aggregate |
+| `useFavorites` | 4 | Like/favorite operations |
+| `useMentions` | 2 | @-mention handling |
+| `useBlockedUsers` | 1 | Blocked-user list (React Query) |
 
-| Hook | Purpose |
-|------|---------|
-| `usePWA` | PWA features detection |
-| `useInstallPrompt` | App installation prompt |
-| `useOnlineStatus` | Network status |
-| `useOfflineData` | Offline storage |
-| `usePWAUpdate` | Service worker updates |
+### UX / Device
 
-### Social Features
+| Hook | Import sites | Purpose |
+|------|--------------|---------|
+| `useReducedMotion` | 26 | Respect prefers-reduced-motion (most-imported hook) |
+| `useHaptics` | 7 | Native haptic feedback |
+| `usePWA` | 6 | PWA detection; also defines `useInstallPrompt`, `useOnlineStatus`, `useOfflineData`, `usePWAUpdate` (used by `src/components/pwa/*`) |
+| `useConsent` | 3 | Cookie/analytics consent |
+| `useDoubleTap`, `useSmartNavigation` | 2 each | Gestures / navigation |
+| `useIntersectionObserver` | 1 | Viewport detection (also defines `useLazyImage`/`useLazyComponent`, currently unused) |
+| `useLoadingState`, `useOfflineSync`, `useFlightAnimation` | 1 each | Loading state / offline queue / globe animation |
 
-| Hook | Purpose |
-|------|---------|
-| `useFollows` | Follow/unfollow operations |
-| `useFavorites` | Like/favorite operations |
-| `useReactions` | Emoji reactions |
-| `useGlobeReactions` | Globe-specific interactions |
-| `useRealTime` | Real-time subscriptions |
+Globe-specific hooks also live in `src/components/globe/hooks/` (e.g. `useGlobeState`).
 
-### Performance
+**Dead files (0 imports, candidates for deletion):** `useDiscoverFeed`, `useFeedData`, `useSmartLocation`, `useUserLevels`.
 
-| Hook | Purpose |
-|------|---------|
-| `useIntersectionObserver` | Viewport detection |
-| `useLazyImage` | Image lazy loading |
-| `useLazyComponent` | Component lazy loading |
-| `useImageOptimization` | Image processing |
-| `useDoubleTap` | Double-tap gestures |
-| `useKeyboardNavigation` | Arrow/enter navigation |
+**Do NOT reference these — they don't exist anywhere in src/:** `useSupabaseQuery`, `useSupabaseTable`, `useSupabaseRPC`, `useSupabaseMutation`, `usePhotos`, `usePhotoUpload`, `useAsyncOperation`, `useAsyncList`, `useAsyncPagination`, `useReactions`, `useGlobeReactions`, `useRealTime`, `useImageOptimization`, `useKeyboardNavigation`. (There is an `imageOptimization` utility class in `src/lib/utils/imageOptimization.ts`, but no hook.)
 
 ---
 
@@ -539,100 +572,33 @@ Priority areas for test coverage:
 
 ## CI/CD
 
-### Recommended GitHub Actions
+CI already exists — three workflows in `.github/workflows/` (do not "create" them):
 
-Create `.github/workflows/ci.yml`:
+### `ci.yml` — "CI"
 
-```yaml
-name: CI
+Runs on push/PR to `main` and `master`. Jobs:
+- **lint** — `npx eslint`
+- **type-check** — `npm run type-check`
+- **test** — `npm test` (Jest)
+- **e2e** — Playwright (chromium), grep-filtered to a smoke subset ("Landing Page|Manifest endpoint|page renders")
+- **build** — `npm run build` with `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` from repo secrets
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+### `lighthouse.yml` — "Lighthouse CI"
 
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run lint
+Runs on pull requests via `treosh/lighthouse-ci-action@v11`; uploads the `.lighthouseci` artifact.
 
-  type-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run type-check
+### `security.yml` — "Security"
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm test
-
-  build:
-    runs-on: ubuntu-latest
-    needs: [lint, type-check, test]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-```
-
-### Security Scanning
-
-Add `.github/workflows/security.yml`:
-
-```yaml
-name: Security
-
-on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: '0 0 * * 1'  # Weekly on Monday
-
-jobs:
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm audit --audit-level=high
-```
+Runs on push/PR plus a weekly cron (`0 0 * * 1`). Jobs:
+- **dependency-audit** — `npm audit --audit-level=high`, plus a production-only pass (`--audit-level=critical --omit=dev`)
+- **codeql-analysis** — GitHub CodeQL
+- **secrets-scan** — TruffleHog
 
 ### Branch Protection
 
-Recommended settings for `main` branch:
-- Require pull request reviews
+The working branch is `master` (workflows target both `main` and `master`). Recommended settings:
 - Require status checks: `lint`, `type-check`, `test`, `build`
 - Require branches to be up to date
-- Do not allow bypassing settings
 
 ---
 
@@ -648,11 +614,11 @@ Recommended settings for `main` branch:
 
 ### Image Optimization
 
-**Multi-size generation on upload:**
-- Original image
-- Thumbnail (`-thumbnail` suffix)
-- Medium (`-medium` suffix)
-- Large (`-large` suffix)
+**Reality check: no size variants are generated.** There is no `-thumbnail`/`-medium`/`-large` pipeline anywhere in src/ (and `sharp`, though in package.json, has zero imports). `getPhotoUrl()` always returns the URL of the single stored original.
+
+**Actual upload pipeline (one image, processed client-side):**
+1. `prepareImageForUpload()` (`src/lib/utils/prepare-upload.ts`) strips metadata (including GPS EXIF) and resizes via canvas, using `uploadSecurity.imageProcessing` maxWidth/quality
+2. `uploadPhotoFile()` (`src/lib/api/upload.ts`) uploads via `/api/photos/upload-url` (signed URL) then `/api/photos/finalize`
 
 **Next.js Image config:**
 - WebP/AVIF format support
@@ -681,7 +647,6 @@ return (
 |------|-----|----------|
 | Profile data | 5 min | AuthProvider |
 | React Query | 5 min stale, 10 min GC | Client |
-| Trip planner results | Permanent (SHA-256 key) | Database |
 | Static assets | 1 year immutable | CDN |
 | Service worker | No cache | Browser |
 
@@ -733,16 +698,34 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
 
 ```bash
 SUPABASE_SERVICE_ROLE_KEY=xxx    # Admin access, bypasses RLS
+UPSTASH_REDIS_REST_URL=xxx       # Redis-backed rate limiting (middleware/rate-limit utils) — expected in prod; missing there logs an ERROR and rate limiting degrades to per-instance
+UPSTASH_REDIS_REST_TOKEN=xxx     # Companion token for the above
+ANTHROPIC_API_KEY=xxx            # Claude — wishlist entity extraction (src/lib/ai/claude.ts). NOT Groq: GROQ_API_KEY is never read
+RESEND_API_KEY=xxx               # Transactional email (/api/email/notify)
+EMAIL_FROM=xxx                   # From address for the above
+OPENWEATHER_API_KEY=xxx          # Weather features (/api/weather)
+CRON_SECRET=xxx                  # Auth for /api/maintenance/cleanup
+MODERATION_PROVIDER=xxx          # Content moderation (with MODERATION_API_KEY)
+LINEAR_API_KEY=xxx               # Feedback -> Linear (with LINEAR_TEAM_ID, LINEAR_FEEDBACK_LABEL_ID)
+DISCORD_FEEDBACK_WEBHOOK_URL=xxx # Feedback -> Discord
+MAPBOX_ACCESS_TOKEN=xxx          # Server-side Mapbox
+SENTRY_DSN=xxx                   # Server-side Sentry
 ```
 
-### Optional
+### Optional (client-visible)
 
 ```bash
-NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=xxx   # Location search
-NEXT_PUBLIC_APP_URL=http://localhost:3000  # SEO/OG tags
-GROQ_API_KEY=xxx                      # Trip planning AI
-OPENWEATHER_API_KEY=xxx               # Weather features
+NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=xxx        # Location search
+NEXT_PUBLIC_APP_URL=http://localhost:3000  # SEO/OG tags (also NEXT_PUBLIC_SITE_URL)
+NEXT_PUBLIC_API_BASE_URL=xxx               # Mobile builds — see Mobile App section
+NEXT_PUBLIC_SENTRY_DSN=xxx                 # Client Sentry
+NEXT_PUBLIC_GA_MEASUREMENT_ID=xxx          # Google Analytics
+NEXT_PUBLIC_SUPPORT_EMAIL=xxx
+NEXT_PUBLIC_DISCORD_INVITE_URL=xxx
+NEXT_PUBLIC_STRIPE_PAYMENT_LINK=xxx        # Pro plan checkout
 ```
+
+Build/platform flags read in `next.config.ts` and src/: `NODE_ENV`, `VERCEL`, `VERCEL_URL`, `VERCEL_GIT_COMMIT_SHA`, `GITHUB_SHA`, `CI`, `ANALYZE`, `MOBILE_BUILD`, `NEXT_PHASE`, `DOCKER_CONTAINER`, plus `GOOGLE_SITE_VERIFICATION` / `YANDEX_VERIFICATION` / `YAHOO_SITE_VERIFICATION` for SEO.
 
 ### Environment Validation
 
@@ -835,7 +818,7 @@ filesystem mutations under `MOBILE_BUILD=true` and reverses them in a
 
 1. **Removes** files that can't survive `output: 'export'` (renamed to
    `.mobile-skip`):
-   - `src/app/api/**/route.{ts,tsx}` (38 routes — refused by static exporter)
+   - `src/app/api/**/route.{ts,tsx}` (all 47 routes — refused by static exporter)
    - Non-API route handlers (`src/app/auth/callback/route.ts`,
      `src/app/(auth)/auth/callback/route.ts`)
    - `src/app/opengraph-image.tsx`, `src/app/twitter-image.tsx`
@@ -1035,8 +1018,6 @@ vercel --prod
 
 **Environment:** Set via Vercel Dashboard > Settings > Environment Variables
 
-**Note:** `vercel-build-ignore.sh` currently checks "master" branch but repo uses "main". Update if using this feature.
-
 ### Docker
 
 **Production build:**
@@ -1058,13 +1039,13 @@ make build-multi        # Build for linux/amd64,linux/arm64
 # Via Supabase CLI
 supabase db push
 
-# Or manually apply files in order:
-# supabase/migrations/01_*.sql
+# Or manually apply files in numeric order:
 # supabase/migrations/02_*.sql
+# supabase/migrations/03_*.sql
 # ...
 ```
 
-**Migration files:** 9 total covering schema, AI features, social features, security hardening, and performance optimizations.
+**Migration files:** 73 `.sql` files, numbered `02`–`74` (there is no `01` or `19`, and `60` is duplicated: `60_album_favorites.sql` and `60_parental_controls.sql`). Latest: `74_fix_rls_initplan_performance.sql`. The directory also has `README.md` / `README_DATABASE_SETUP.md`.
 
 ### Health Checks
 
@@ -1158,7 +1139,7 @@ npm run mobile:sync     # Sync to native
 
 **If sync fails:**
 - Check Capacitor config: `capacitor.config.ts`
-- Ensure `dist/` directory exists
+- Ensure `out/` directory exists (produced by `npm run mobile:build`)
 - Update native plugins: `npx cap update`
 
 ---
@@ -1179,6 +1160,14 @@ npm run mobile:sync     # Sync to native
 12. **Handle async cleanup** with AbortController in useEffect
 13. **Rate limit sensitive operations** using RateLimiter utility
 14. **Never expose internal errors** - use `getUserFriendlyMessage()`
+15. **Users PII lockdown (migration 75)** — column-level SELECT on `public.users` is
+    restricted to a safe allowlist. Cross-user profile reads must use
+    `PUBLIC_USER_COLUMNS` from `src/lib/constants/user-columns.ts` (never
+    `select('*')` or `users!fk(*)` embeds). Own-row full reads use
+    `supabase.rpc('get_my_profile')`; email→id lookups use
+    `supabase.rpc('find_user_id_by_email')`. Sensitive columns (`email`,
+    `date_of_birth`, `phone`, `two_factor_secret`, parental-consent fields,
+    `referred_by`) are not client-readable.
 
 ---
 

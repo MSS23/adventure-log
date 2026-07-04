@@ -149,3 +149,6 @@ __pycache__/
 # bundles are operational scratch and must not be committed.
 /prod-migrations-*.sql
 /trip-planner-combined-migrations.sql
+
+# machine-local npm config (Windows script-shell workaround for the & in the repo path)
+.npmrc

@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
+import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
 
 interface CreatorsToFollowSectionProps {
   className?: string
@@ -38,10 +39,12 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
         setIsLoading(true)
         setError(null)
 
-        // Fetch users with public profiles, ordered by created date
+        // Fetch users with public profiles, ordered by created date.
+        // Explicit safe columns — select('*') is permission-denied once
+        // migration 75 locks down the users PII columns.
         const { data, error: fetchError } = await supabase
           .from('users')
-          .select('*')
+          .select(PUBLIC_USER_COLUMNS)
           .eq('privacy_level', 'public')
           .neq('id', user?.id || '') // Exclude current user if logged in
           .order('created_at', { ascending: false })
@@ -56,7 +59,7 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
           return
         }
 
-        setCreators(data || [])
+        setCreators((data as unknown as User[]) || [])
 
         // Fetch current user's following list
         if (user) {

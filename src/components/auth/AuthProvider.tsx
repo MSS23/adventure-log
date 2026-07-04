@@ -157,25 +157,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (existing) return existing
 
       const promise = (async (): Promise<Profile | null> => {
-        const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', userId)
-          .maybeSingle()
+        // Own-row fetch goes through the get_my_profile() SECURITY DEFINER
+        // RPC (migration 75): the users PII lockdown revokes column-level
+        // SELECT on sensitive columns, so a direct select('*') is permission-
+        // denied once applied — but the user must still get their own FULL
+        // row. Fall back to the direct select for environments where the
+        // migration hasn't been applied yet (the RPC doesn't exist there).
+        let data: Profile | null = null
 
-        if (error) {
-          log.error(
-            'Profile fetch failed',
-            {
-              component: 'AuthProvider',
-              action: 'fetchProfile',
-              userId,
-              errorCode: error.code,
-              errorMessage: error.message,
-            },
-            error as Error,
-          )
-          throw error
+        const rpc = await supabase.rpc('get_my_profile')
+        if (!rpc.error) {
+          const own = ((rpc.data ?? []) as Profile[])[0] ?? null
+          // The RPC returns auth.uid()'s row. Guard against a mid-flight
+          // session change so a stale userId cache key never stores another
+          // account's profile.
+          data = own && own.id === userId ? own : null
+        } else {
+          const { data: direct, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', userId)
+            .maybeSingle()
+
+          if (error) {
+            log.error(
+              'Profile fetch failed',
+              {
+                component: 'AuthProvider',
+                action: 'fetchProfile',
+                userId,
+                errorCode: error.code,
+                errorMessage: error.message,
+              },
+              error as Error,
+            )
+            throw error
+          }
+          data = (direct as Profile | null) ?? null
         }
 
         if (!data) {
@@ -184,7 +202,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return null
         }
 
-        const profileData = data as Profile
+        const profileData = data
         profileCache.current.set(userId, {
           data: profileData,
           timestamp: Date.now(),

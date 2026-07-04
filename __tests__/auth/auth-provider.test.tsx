@@ -78,7 +78,16 @@ function makeSupabaseStub({
     signOut: jest.fn().mockResolvedValue({ error: null }),
   }
 
-  return { from, select, eq, maybeSingle, auth }
+  // AuthProvider tries the get_my_profile() RPC first (migration 75 PII
+  // lockdown) and falls back to the direct select when the RPC errors. The
+  // stub models the pre-migration environment: RPC missing → fallback path,
+  // which the maybeSingle queue above drives.
+  const rpc = jest.fn().mockResolvedValue({
+    data: null,
+    error: { code: 'PGRST202', message: 'function get_my_profile does not exist' },
+  })
+
+  return { from, select, eq, maybeSingle, auth, rpc }
 }
 
 /**

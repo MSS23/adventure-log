@@ -14,6 +14,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { log } from '@/lib/utils/logger'
 import { sanitizeText } from '@/lib/utils/input-validation'
+import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
 
 interface SearchBarProps {
   placeholder?: string
@@ -82,10 +83,12 @@ export function SearchBar({
         }, albumsError)
       }
 
-      // Search users by username or display name
+      // Search users by username or display name.
+      // Explicit safe columns — select('*') is permission-denied once
+      // migration 75 locks down the users PII columns.
       const { data: users, error: usersError } = await supabase
         .from('users')
-        .select('*')
+        .select(PUBLIC_USER_COLUMNS)
         .or(`username.ilike.%${safeQuery}%,display_name.ilike.%${safeQuery}%`)
         .eq('privacy_level', 'public')
         .limit(5)
@@ -100,7 +103,7 @@ export function SearchBar({
       // Combine results
       const combinedResults: SearchResult[] = [
         ...(albums || []).map(album => ({ type: 'album' as const, data: album })),
-        ...(users || []).map(user => ({ type: 'user' as const, data: user }))
+        ...(users || []).map(user => ({ type: 'user' as const, data: user as unknown as User }))
       ]
 
       setResults(combinedResults)

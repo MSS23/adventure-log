@@ -22,7 +22,10 @@ interface HealthCheck {
 async function checkDatabase(): Promise<boolean> {
   try {
     const supabase = await createClient()
-    const { error } = await supabase.from('users').select('count').limit(1)
+    // select('id') rather than select('count'): count(*) needs table-level
+    // SELECT, which migration 75 (users PII lockdown) revokes in favor of
+    // column-level grants. id is in the granted safe-column list.
+    const { error } = await supabase.from('users').select('id').limit(1)
     return !error
   } catch {
     return false

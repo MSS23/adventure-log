@@ -15,6 +15,7 @@ import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getDisplayInitial } from '@/lib/utils/display-name'
 import type { Follower } from '@/types/database'
+import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
 
 // Animated counter component
 function AnimatedCounter({ value, duration = 0.8 }: { value: number; duration?: number }) {
@@ -74,7 +75,7 @@ export default function FollowingPage() {
           .from('follows')
           .select(`
             *,
-            following:users!follows_following_id_fkey(*)
+            following:users!follows_following_id_fkey(${PUBLIC_USER_COLUMNS})
           `)
           .eq('follower_id', user!.id)
           .eq('status', 'accepted'),

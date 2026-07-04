@@ -228,7 +228,18 @@ export default function SettingsPage() {
         wishlist,
         trips,
       ] = await Promise.allSettled([
-        supabase.from('users').select('*').eq('id', uid).maybeSingle().then(r => r.data),
+        // Own FULL row (incl. email / date_of_birth) via the get_my_profile()
+        // SECURITY DEFINER RPC — migration 75 revokes column-level SELECT on
+        // the PII columns, so a direct select('*') is permission-denied once
+        // applied. Direct read kept as the pre-migration fallback.
+        (async () => {
+          const rpc = await supabase.rpc('get_my_profile')
+          if (!rpc.error) {
+            return ((rpc.data ?? []) as Record<string, unknown>[])[0] ?? null
+          }
+          const { data } = await supabase.from('users').select('*').eq('id', uid).maybeSingle()
+          return data as Record<string, unknown> | null
+        })(),
         rows('albums', 'user_id'),
         rows('photos', 'user_id'),
         rows('comments', 'user_id'),

@@ -67,7 +67,9 @@ export async function POST(request: NextRequest) {
     .single()
 
   // Tolerate the plan column not existing yet (migration 69 not applied):
-  // Postgres 42703 = undefined_column → treat the user as free.
+  // Postgres 42703 = undefined_column → treat the user as free. Likewise
+  // 42501 = permission denied if migration 75's column-level grants are in
+  // place without `plan` in the allowlist — same free-plan degradation.
   const plan = planError ? 'free' : (planRow?.plan ?? 'free')
   if (planError && planError.code !== '42703') {
     log.warn('Could not read user plan, treating as free', {

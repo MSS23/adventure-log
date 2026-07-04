@@ -24,6 +24,7 @@ import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import { log } from '@/lib/utils/logger'
 import type { User } from '@/types/database'
+import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
 
 /**
  * BLEND % FORMULA
@@ -128,11 +129,13 @@ export function BlendContent({ username }: { username: string }) {
         setState({ status: 'loading' })
 
         // 1. Resolve the other traveler by username (or UUID fallback).
+        // Cross-user read: explicit safe columns only — select('*') is
+        // permission-denied once migration 75 locks down the PII columns.
         const otherQuery = UUID_RE.test(username)
-          ? supabase.from('users').select('*').eq('id', username).maybeSingle()
+          ? supabase.from('users').select(PUBLIC_USER_COLUMNS).eq('id', username).maybeSingle()
           : supabase
               .from('users')
-              .select('*')
+              .select(PUBLIC_USER_COLUMNS)
               .ilike('username', username)
               .maybeSingle()
 

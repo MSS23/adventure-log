@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import type { Follower } from '@/types/database'
+import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
 
 interface FollowStats {
   followersCount: number
@@ -103,13 +104,15 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
     if (!user?.id) return
 
     try {
+      // Users embeds list explicit safe columns — a (*) embed is permission-
+      // denied once migration 75 locks down the users PII columns.
       const [followersResult, followingResult, pendingResult] = await Promise.all([
         // My followers
         supabase
           .from('follows')
           .select(`
             *,
-            follower:users!follows_follower_id_fkey(*)
+            follower:users!follows_follower_id_fkey(${PUBLIC_USER_COLUMNS})
           `)
           .eq('following_id', user.id)
           .eq('status', 'accepted'),
@@ -119,7 +122,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
           .from('follows')
           .select(`
             *,
-            following:users!follows_following_id_fkey(*)
+            following:users!follows_following_id_fkey(${PUBLIC_USER_COLUMNS})
           `)
           .eq('follower_id', user.id)
           .eq('status', 'accepted'),
@@ -129,7 +132,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
           .from('follows')
           .select(`
             *,
-            follower:users!follows_follower_id_fkey(*)
+            follower:users!follows_follower_id_fkey(${PUBLIC_USER_COLUMNS})
           `)
           .eq('following_id', user.id)
           .eq('status', 'pending')

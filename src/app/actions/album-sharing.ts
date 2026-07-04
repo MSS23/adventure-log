@@ -41,17 +41,29 @@ export async function createAlbumShare(request: CreateAlbumShareRequest) {
       return { success: false, error: 'Failed to generate share token' };
     }
 
-    // Look up user by email if provided
+    // Look up user by email if provided.
+    // Email→id resolution goes through the find_user_id_by_email() SECURITY
+    // DEFINER RPC (migration 75): the users PII lockdown revokes SELECT on
+    // the email column, so even `.select('id').eq('email', x)` is
+    // permission-denied for the RLS-bound client. The direct lookup is kept
+    // as a fallback for environments where the migration isn't applied yet.
     let sharedWithUserId = request.shared_with_user_id;
     if (request.shared_with_email && !sharedWithUserId) {
-      const { data: targetUser, error: userError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', request.shared_with_email)
-        .single();
+      const { data: rpcUserId, error: rpcError } = await supabase
+        .rpc('find_user_id_by_email', { p_email: request.shared_with_email });
 
-      if (!userError && targetUser) {
-        sharedWithUserId = targetUser.id;
+      if (!rpcError && rpcUserId) {
+        sharedWithUserId = rpcUserId as string;
+      } else if (rpcError) {
+        const { data: targetUser, error: userError } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', request.shared_with_email)
+          .single();
+
+        if (!userError && targetUser) {
+          sharedWithUserId = targetUser.id;
+        }
       }
     }
 
@@ -100,7 +112,7 @@ export async function getAlbumShares(albumId: string) {
       .from('album_shares')
       .select(`
         *,
-        shared_with:users!album_shares_shared_with_user_id_fkey(id, username, display_name, avatar_url, email)
+        shared_with:users!album_shares_shared_with_user_id_fkey(id, username, display_name, avatar_url)
       `)
       .eq('album_id', albumId)
       .eq('shared_by_user_id', userId)

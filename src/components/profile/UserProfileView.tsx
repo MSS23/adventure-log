@@ -18,6 +18,7 @@ import {
   Globe as GlobeIcon
 } from 'lucide-react'
 import { User, Album } from '@/types/database'
+import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { getDisplayInitial } from '@/lib/utils/display-name'
@@ -111,32 +112,34 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
       let userData: User | null = null
       let userError: { code?: string; message?: string } | null = null
 
+      // Cross-user read: explicit safe columns only — select('*') is
+      // permission-denied once migration 75 locks down the PII columns.
       if (isUUID) {
         // Direct UUID lookup
         const { data, error } = await supabase
           .from('users')
-          .select('*')
+          .select(PUBLIC_USER_COLUMNS)
           .eq('id', userIdOrUsername)
           .single()
-        userData = data
+        userData = data as User | null
         userError = error
       } else if (generatedUsernameMatch) {
         // Generated username pattern
         const { data, error } = await supabase
           .from('users')
-          .select('*')
+          .select(PUBLIC_USER_COLUMNS)
           .ilike('username', userIdOrUsername)
           .maybeSingle()
-        userData = data
+        userData = data as User | null
         userError = error
       } else {
         // Regular username lookup (case-insensitive)
         const { data, error } = await supabase
           .from('users')
-          .select('*')
+          .select(PUBLIC_USER_COLUMNS)
           .ilike('username', userIdOrUsername)
           .maybeSingle()
-        userData = data
+        userData = data as User | null
         userError = error
       }
 

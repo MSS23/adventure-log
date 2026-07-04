@@ -23,6 +23,9 @@ interface TravelLocation {
   airportCode?: string
   timezone?: string
   islandGroup?: string
+  // Explicit journey link: the album this one continues from (migration 75).
+  // Drives explicit arcs on the globe. null = start of its own journey.
+  connectedFromAlbumId?: string | null
 }
 
 interface Album {
@@ -201,6 +204,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
           favorite_photo_urls,
           visibility,
           status,
+          connected_from_album_id,
           photos(id, file_path)
         `, { count: 'exact' })
         .eq('user_id', targetUserId)
@@ -381,7 +385,9 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
           type: 'city',
           visitDate,
           albums: [albumData],
-          photos: photoData
+          photos: photoData,
+          connectedFromAlbumId:
+            (item as { connected_from_album_id?: string | null }).connected_from_album_id ?? null,
         }
 
         locations.push(location)

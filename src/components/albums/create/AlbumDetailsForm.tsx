@@ -34,6 +34,9 @@ interface AlbumDetailsFormProps {
   suggestedTitle: string
   selectedYear: number | null
   selectedSeason: Season | null
+  previousAlbums: Array<{ id: string; title: string; location_name: string | null; date_start: string | null }>
+  connectedFromAlbumId: string | null
+  onConnectedFromChange: (id: string | null) => void
   onSetAlbumLocation: (loc: LocationData | null) => void
   onSetLocationAutoExtracted: (val: boolean) => void
   onAutoFill: () => void
@@ -61,6 +64,9 @@ export function AlbumDetailsForm({
   suggestedTitle,
   selectedYear,
   selectedSeason,
+  previousAlbums,
+  connectedFromAlbumId,
+  onConnectedFromChange,
   onSetAlbumLocation,
   onSetLocationAutoExtracted,
   onAutoFill,
@@ -241,6 +247,46 @@ export function AlbumDetailsForm({
                     isAutoFilling={isExtractingLocation}
                   />
                 </div>
+
+                {/* Journey connection — link this trip to the one it continues
+                    from, so the globe draws an explicit journey arc between
+                    them (instead of guessing a route chronologically). */}
+                {previousAlbums.length > 0 && (
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="connected-from"
+                      className="block text-sm font-medium text-foreground"
+                    >
+                      Continues from{' '}
+                      <span className="text-muted-foreground font-normal">(optional)</span>
+                    </label>
+                    <select
+                      id="connected-from"
+                      value={connectedFromAlbumId ?? ''}
+                      onChange={(e) => onConnectedFromChange(e.target.value || null)}
+                      className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <option value="">Start of a new journey</option>
+                      {previousAlbums.map((a) => {
+                        const year = a.date_start
+                          ? new Date(a.date_start).getFullYear()
+                          : null
+                        const place = a.location_name?.split(',')[0]?.trim()
+                        const label = [a.title, place, year]
+                          .filter(Boolean)
+                          .join(' · ')
+                        return (
+                          <option key={a.id} value={a.id}>
+                            {label}
+                          </option>
+                        )
+                      })}
+                    </select>
+                    <p className="text-xs text-muted-foreground">
+                      Draws a line on your globe from that trip to this one.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

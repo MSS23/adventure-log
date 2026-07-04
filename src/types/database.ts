@@ -74,6 +74,10 @@ export interface Album {
   // Owner-only "favourite album" flag (migration 60). Optional for back-compat:
   // treat a missing value as `false` (e.g. before the migration is applied).
   is_favorite?: boolean;
+  // Journey connections ("spider's web", migration 75). Optional id of the
+  // album this trip continues from; drives explicit journey arcs on the globe.
+  // Missing/null means this trip is the start of its own journey.
+  connected_from_album_id?: string | null;
   created_at: string;
   updated_at: string;
   // Relations

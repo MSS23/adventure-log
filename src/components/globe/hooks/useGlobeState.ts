@@ -591,48 +591,55 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     })
   }, [locations, activeCityId, performanceConfig.maxPins])
 
-  // Static connection arcs
+  // Journey arcs — explicit links only (migration 75).
+  //
+  // Each arc comes from an album that declares it "continues from" a
+  // predecessor album (connected_from_album_id). We draw predecessor → album,
+  // NOT a chronological guess — so London→Paris (2024) and London→Japan (2025)
+  // stay separate journeys instead of being falsely chained Paris→Japan.
+  // Both endpoints must be present in the current view; the predecessor may
+  // be in another year, so its arc appears in the all-years view.
   const staticConnections = useMemo(() => {
     if (!showStaticConnections || locations.length < 2) return []
 
+    const byId = new Map(locations.map((loc) => [loc.id, loc]))
     const maxConnections = performanceConfig.maxPins - 1
-    const limitedLocations = locations.slice(0, maxConnections + 1)
-
-    const sortedLocations = [...limitedLocations].sort((a, b) =>
-      new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime()
-    )
-
     const paths: FlightPath[] = []
 
-    for (let i = 0; i < sortedLocations.length - 1; i++) {
-      const current = sortedLocations[i]
-      const next = sortedLocations[i + 1]
+    for (const loc of locations) {
+      if (paths.length >= maxConnections) break
 
-      const currentYear = new Date(current.visitDate).getFullYear()
-      const nextYear = new Date(next.visitDate).getFullYear()
+      const fromId = loc.connectedFromAlbumId
+      if (!fromId) continue
+      const from = byId.get(fromId)
+      if (!from || from.id === loc.id) continue // predecessor not in view / self-link
 
-      const shouldConnect = effectiveSelectedYear === null || currentYear === nextYear
+      const toYear = new Date(loc.visitDate).getFullYear()
+      // When a single year is selected, only show arcs that land in that year.
+      if (effectiveSelectedYear !== null && toYear !== effectiveSelectedYear) continue
 
-      if (shouldConnect) {
-        const dLat = next.latitude - current.latitude
-        const dLng = next.longitude - current.longitude
-        const distance = Math.sqrt(dLat * dLat + dLng * dLng)
+      const fromYear = new Date(from.visitDate).getFullYear()
+      const dLat = loc.latitude - from.latitude
+      const dLng = loc.longitude - from.longitude
+      const distance = Math.sqrt(dLat * dLat + dLng * dLng)
 
-        paths.push({
-          startLat: current.latitude,
-          startLng: current.longitude,
-          endLat: next.latitude,
-          endLng: next.longitude,
-          color: getYearColor(currentYear),
-          endColor: getYearColor(nextYear),
-          year: currentYear,
-          name: `${current.name} → ${next.name}`,
-          distance,
-          index: i,
-          total: sortedLocations.length - 1,
-        })
-      }
+      paths.push({
+        startLat: from.latitude,
+        startLng: from.longitude,
+        endLat: loc.latitude,
+        endLng: loc.longitude,
+        color: getYearColor(fromYear),
+        endColor: getYearColor(toYear),
+        year: toYear,
+        name: `${from.name} → ${loc.name}`,
+        distance,
+        index: paths.length,
+        total: 0, // filled in below once the count is known
+      })
     }
+
+    const total = paths.length
+    for (const p of paths) p.total = total
 
     return paths
   }, [locations, showStaticConnections, getYearColor, effectiveSelectedYear, performanceConfig.maxPins])

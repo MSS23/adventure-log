@@ -26,6 +26,8 @@ export default function NewAlbumPage() {
     mode,
     suggestedTitle,
     locationAutoExtracted,
+    connectedFromAlbumId,
+    previousAlbums,
     fullForm,
     quickForm,
     setSelectedCoverIndex,
@@ -37,6 +39,7 @@ export default function NewAlbumPage() {
     setFileErrors,
     setMode,
     setLocationAutoExtracted,
+    setConnectedFromAlbumId,
     onDrop,
     handleTakePhoto,
     handleSelectFromGallery,
@@ -169,6 +172,9 @@ export default function NewAlbumPage() {
               suggestedTitle={suggestedTitle}
               selectedYear={selectedYear}
               selectedSeason={selectedSeason}
+              previousAlbums={previousAlbums}
+              connectedFromAlbumId={connectedFromAlbumId}
+              onConnectedFromChange={setConnectedFromAlbumId}
               onSetAlbumLocation={setAlbumLocation}
               onSetLocationAutoExtracted={setLocationAutoExtracted}
               onAutoFill={autoFillLocationFromPhotos}

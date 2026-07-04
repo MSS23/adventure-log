@@ -151,8 +151,38 @@ export function useAlbumCreation() {
   const [mode, setMode] = useState<'quick' | 'full'>('quick')
   const [suggestedTitle, setSuggestedTitle] = useState<string>('')
   const [locationAutoExtracted, setLocationAutoExtracted] = useState(false)
+  // Journey connection ("spider's web", migration 75): optionally mark this
+  // trip as continuing from a previous album so the globe draws an explicit arc.
+  const [connectedFromAlbumId, setConnectedFromAlbumId] = useState<string | null>(null)
+  const [previousAlbums, setPreviousAlbums] = useState<
+    Array<{ id: string; title: string; location_name: string | null; date_start: string | null }>
+  >([])
   const autoExtractAttemptedRef = useRef(false)
   const supabase = createClient()
+
+  // Load the user's existing located albums so a new trip can be linked to the
+  // one it continues from (the journey-connection dropdown). Only albums with
+  // coordinates are offered — a connection is only meaningful as a globe arc.
+  useEffect(() => {
+    if (!user?.id) return
+    let cancelled = false
+    ;(async () => {
+      const { data } = await supabase
+        .from('albums')
+        .select('id, title, location_name, date_start')
+        .eq('user_id', user.id)
+        .neq('status', 'draft')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .order('date_start', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .limit(100)
+      if (!cancelled && data) setPreviousAlbums(data)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id, supabase])
 
   // Full album form
   const fullForm = useForm<AlbumFormData>({
@@ -429,6 +459,7 @@ export function useAlbumCreation() {
           date_end: opts.dateEnd,
           show_exact_dates: false,
           status: status,
+          connected_from_album_id: connectedFromAlbumId,
           created_at: new Date().toISOString()
         })
         .select()
@@ -732,6 +763,8 @@ export function useAlbumCreation() {
     mode,
     suggestedTitle,
     locationAutoExtracted,
+    connectedFromAlbumId,
+    previousAlbums,
 
     // Forms
     fullForm,
@@ -748,6 +781,7 @@ export function useAlbumCreation() {
     setFileErrors,
     setMode,
     setLocationAutoExtracted,
+    setConnectedFromAlbumId,
     onDrop,
     handleTakePhoto,
     handleSelectFromGallery,

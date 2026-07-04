@@ -12,7 +12,7 @@
  */
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
+import { rateLimitAsync, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
 import type { NextRequest } from 'next/server'
 
@@ -38,7 +38,7 @@ interface PublicGlobePinsResponse {
 }
 
 export async function GET(request: NextRequest) {
-  const rl = rateLimit(request, { ...rateLimitConfigs.api, keyPrefix: 'public-globe-pins' })
+  const rl = await rateLimitAsync(request, { ...rateLimitConfigs.api, keyPrefix: 'public-globe-pins' })
   if (!rl.success) return rateLimitResponse(rl.reset)
 
   try {

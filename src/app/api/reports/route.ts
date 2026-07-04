@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
+import { rateLimitAsync, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
 import { sanitizeText } from '@/lib/utils/input-validation'
 import type { ReportReason, ReportTargetType } from '@/types/database'
@@ -14,7 +14,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * Create a new content/user report.
  */
 export async function POST(request: NextRequest) {
-  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.api, keyPrefix: 'report-create' })
+  const rateLimitResult = await rateLimitAsync(request, { ...rateLimitConfigs.api, keyPrefix: 'report-create' })
   if (!rateLimitResult.success) {
     return rateLimitResponse(rateLimitResult.reset)
   }

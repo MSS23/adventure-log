@@ -1,7 +1,7 @@
 import { GET } from '@/app/api/geocode/route'
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { rateLimit, rateLimitResponse } from '@/lib/utils/rate-limit'
+import { rateLimitAsync, rateLimitResponse } from '@/lib/utils/rate-limit'
 
 // Mock NextResponse.json to return a proper Response with json() method
 jest.mock('next/server', () => {
@@ -33,9 +33,11 @@ jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn()
 }))
 
-// Mock rate limiting
+// Mock rate limiting (the route uses the async Redis-backed limiter; the sync
+// rateLimit is kept in the mock for the shared config import surface)
 jest.mock('@/lib/utils/rate-limit', () => ({
   rateLimit: jest.fn().mockReturnValue({ success: true }),
+  rateLimitAsync: jest.fn().mockResolvedValue({ success: true, remaining: 59, reset: Date.now() + 60000 }),
   rateLimitResponse: jest.fn(),
   rateLimitConfigs: {
     geocode: { limit: 60, windowMs: 60000 }
@@ -43,7 +45,7 @@ jest.mock('@/lib/utils/rate-limit', () => ({
 }))
 
 const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>
-const mockRateLimit = rateLimit as jest.MockedFunction<typeof rateLimit>
+const mockRateLimit = rateLimitAsync as jest.MockedFunction<typeof rateLimitAsync>
 const mockRateLimitResponse = rateLimitResponse as jest.MockedFunction<typeof rateLimitResponse>
 
 describe('/api/geocode', () => {
@@ -70,7 +72,7 @@ describe('/api/geocode', () => {
   })
 
   it('should enforce rate limiting', async () => {
-    mockRateLimit.mockReturnValueOnce({ success: false, reset: Date.now() + 60000 })
+    mockRateLimit.mockResolvedValueOnce({ success: false, remaining: 0, reset: Date.now() + 60000 })
 
     mockRateLimitResponse.mockReturnValueOnce(
       new Response(JSON.stringify({ error: 'Too many requests' }), { status: 429 })

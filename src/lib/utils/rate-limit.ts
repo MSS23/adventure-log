@@ -157,12 +157,15 @@ export interface RateLimitConfig {
 
 /**
  * Check if a request is within rate limits.
- * Uses Redis (Upstash) when UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN
- * are set, otherwise falls back to in-memory store.
+ *
+ * @deprecated In-memory ONLY — never touches Redis, so on serverless the
+ * effective limit multiplies across instances. All API routes have been
+ * migrated to {@link rateLimitAsync}; use that instead. This sync variant is
+ * kept only for callers that cannot await.
  *
  * @example
  * ```typescript
- * const result = rateLimit(request, { limit: 100, windowMs: 15 * 60 * 1000 })
+ * const result = await rateLimitAsync(request, { limit: 100, windowMs: 15 * 60 * 1000 })
  * if (!result.success) {
  *   return rateLimitResponse(result.reset)
  * }

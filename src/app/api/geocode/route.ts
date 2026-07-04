@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
+import { rateLimitAsync, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
 
 /**
@@ -217,7 +217,7 @@ async function photonReverse(lat: string, lon: string): Promise<NormalizedResult
 
 export async function GET(request: NextRequest) {
   // Rate limiting: 60 requests per minute for geocoding
-  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.geocode, keyPrefix: 'geocode' })
+  const rateLimitResult = await rateLimitAsync(request, { ...rateLimitConfigs.geocode, keyPrefix: 'geocode' })
   if (!rateLimitResult.success) {
     return rateLimitResponse(rateLimitResult.reset)
   }

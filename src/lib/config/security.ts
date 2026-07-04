@@ -219,6 +219,11 @@ export const environmentValidation = {
     // WebView calls for /api/*. Optional for web builds (same-origin /api/*).
     // See `src/lib/api/client.ts` and `scripts/mobile-build.mjs`.
     'NEXT_PUBLIC_API_BASE_URL',
+    // Expected in production (environment-validator.ts logs an ERROR when
+    // missing there, warning elsewhere) — without them rate limiting degrades
+    // to a per-instance in-memory map.
+    'UPSTASH_REDIS_REST_URL',
+    'UPSTASH_REDIS_REST_TOKEN',
   ],
 
   sensitive: [
@@ -226,6 +231,7 @@ export const environmentValidation = {
     'OPENWEATHER_API_KEY',
     'GEMINI_API_KEY',
     'CRON_SECRET',
+    'UPSTASH_REDIS_REST_TOKEN',
   ],
 }
 

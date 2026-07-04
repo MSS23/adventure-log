@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { rateLimit, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
+import { rateLimitAsync, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 
 const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY
 
 export async function GET(request: NextRequest) {
   // OpenWeather is a metered upstream — rate-limit like /api/geocode so a
   // looping client can't burn the shared quota.
-  const rateLimitResult = rateLimit(request, { ...rateLimitConfigs.geocode, keyPrefix: 'weather' })
+  const rateLimitResult = await rateLimitAsync(request, { ...rateLimitConfigs.geocode, keyPrefix: 'weather' })
   if (!rateLimitResult.success) {
     return rateLimitResponse(rateLimitResult.reset)
   }

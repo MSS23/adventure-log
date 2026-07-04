@@ -129,9 +129,15 @@ export function PublicPassportContent({
   const isOtherViewer = !!currentUser && currentUser.id !== user.id
 
   // Auto-connect state
-  const [connectStatus, setConnectStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle')
+  const [connectStatus, setConnectStatus] = useState<'idle' | 'connecting' | 'connected' | 'pending' | 'following' | 'error'>('idle')
   const [showConnected, setShowConnected] = useState(false)
   const connectAttempted = useRef(false)
+
+  // Signed QR-connect token (`t`) carried through the scanner from the
+  // owner's on-screen QR. Present → the server treats the scan as in-person
+  // proof and connects instantly even for private/friends accounts. Absent
+  // (long-lived share link) → private/friends owners get a follow request.
+  const qrToken = searchParams.get('t')
 
   // The connect attempt, callable again from the error banner's "Try again"
   // (connectAttempted only guards the AUTOMATIC attempt against effect
@@ -142,7 +148,10 @@ export function PublicPassportContent({
     apiFetch('/api/passport/connect', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetUserId: user.id }),
+      body: JSON.stringify({
+        targetUserId: user.id,
+        ...(qrToken ? { qrToken } : {}),
+      }),
     })
       .then(async (res) => {
         // Non-2xx (expired session, rate limit, server error) must land in the
@@ -151,6 +160,15 @@ export function PublicPassportContent({
         if (data?.connected) {
           setConnectStatus('connected')
           setShowConnected(true)
+        } else if (data?.pending) {
+          // Private/friends owner + no valid QR token: the server sent a
+          // follow REQUEST instead of auto-accepting. No connected modal, no
+          // blend CTA — the owner still has to approve.
+          setConnectStatus('pending')
+        } else if (data?.following) {
+          // Scanner already follows this private owner one-way; nothing new
+          // was sent — say so truthfully instead of claiming a request went out.
+          setConnectStatus('following')
         } else {
           setConnectStatus('error')
           log.error('Passport auto-connect rejected', {
@@ -163,7 +181,7 @@ export function PublicPassportContent({
         setConnectStatus('error')
         log.error('Passport auto-connect failed', { component: 'PublicPassport', action: 'connect' })
       })
-  }, [user.id])
+  }, [user.id, qrToken])
 
   // Auto-connect when arriving via QR scan (?connect=true)
   useEffect(() => {
@@ -334,6 +352,40 @@ export function PublicPassportContent({
                 </div>
                 <p className="text-sm text-foreground">
                   You and <span className="font-semibold">{displayName}</span> are now following each other
+                </p>
+              </div>
+            </motion.div>
+          )}
+          {connectStatus === 'pending' && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4 relative z-20"
+            >
+              <div className="rounded-xl border border-border bg-card px-4 py-3 flex items-center gap-3">
+                <div className="size-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                  <Users className="size-4 text-primary" />
+                </div>
+                <p className="text-sm text-foreground">
+                  Follow request sent to <span className="font-semibold">{displayName}</span> — you&apos;ll connect once they accept
+                </p>
+              </div>
+            </motion.div>
+          )}
+          {connectStatus === 'following' && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4 relative z-20"
+            >
+              <div className="rounded-xl border border-border bg-card px-4 py-3 flex items-center gap-3">
+                <div className="size-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                  <Users className="size-4 text-primary" />
+                </div>
+                <p className="text-sm text-foreground">
+                  You follow <span className="font-semibold">{displayName}</span> — they haven&apos;t followed you back yet
                 </p>
               </div>
             </motion.div>

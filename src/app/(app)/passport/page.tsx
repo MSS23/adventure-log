@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 import { trackGrowthEvent } from '@/lib/utils/growth-events'
+import { apiFetch } from '@/lib/api/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -207,6 +208,33 @@ export default function TravelPassportPage() {
   const { data, loading } = useTravelPassport()
   const [copied, setCopied] = useState(false)
   const [scannerOpen, setScannerOpen] = useState(false)
+  const [qrToken, setQrToken] = useState<string | null>(null)
+
+  // Best-effort mint of a short-lived signed connect token for the on-screen
+  // QR ONLY. It proves to /api/passport/connect that the scanner physically
+  // scanned THIS owner's QR, which authorizes the instant mutual connect even
+  // for private/friends accounts. On any failure we quietly fall back to the
+  // tokenless URL (private/friends scans then downgrade to a follow request).
+  // Re-mint every 10 minutes so a QR sheet left open past the 15-minute token
+  // TTL (e.g. at a meetup) keeps authorizing instant connects.
+  useEffect(() => {
+    if (!profile?.username) return
+    let cancelled = false
+    const mint = () => {
+      apiFetch('/api/passport/qr-token')
+        .then(async (res) => (res.ok ? res.json() : null))
+        .then((data: { token?: string } | null) => {
+          if (!cancelled && typeof data?.token === 'string') setQrToken(data.token)
+        })
+        .catch(() => { /* tokenless QR still works, just without the fast path */ })
+    }
+    mint()
+    const interval = setInterval(mint, 10 * 60 * 1000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [profile?.username])
 
   // Share links must resolve to /u/[username] — the public passport looks the
   // user up by username, and the QR scanner's validator rejects anything that
@@ -224,6 +252,14 @@ export default function TravelPassportPage() {
       profile.username
     )
   }, [profile?.username])
+
+  // QR-ONLY variant of the share URL, carrying the short-lived signed token.
+  // Copy-link and the share sheet keep the tokenless shareUrl — those links
+  // are long-lived and must not embed a 15-minute credential.
+  const qrUrl = useMemo(() => {
+    if (!shareUrl) return ''
+    return qrToken ? `${shareUrl}&t=${qrToken}` : shareUrl
+  }, [shareUrl, qrToken])
 
   const handleShare = useCallback(async () => {
     trackGrowthEvent('share_link_created', { meta: { surface: 'passport_qr' } })
@@ -709,7 +745,7 @@ export default function TravelPassportPage() {
             {shareUrl ? (
               <>
                 <div className="mb-6">
-                  <PassportQRCode url={shareUrl} size={180} />
+                  <PassportQRCode url={qrUrl} size={180} />
                 </div>
 
                 <div className="flex gap-3">

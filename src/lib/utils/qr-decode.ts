@@ -66,11 +66,20 @@ export async function decodeQrFromImageData(
  * shape.
  *
  * On a match, returns a SAFE, SAME-ORIGIN, RELATIVE path string with the
- * `connect=true` query always forced. Returns `null` for ANYTHING else —
- * other paths, missing/invalid usernames, `javascript:`/`data:`/other schemes,
- * or malformed input. NEVER returns an absolute URL or a different-path
- * redirect.
+ * `connect=true` query always forced. If the scanned URL carries a signed
+ * QR-connect token in its `t` query param (shape `<unix-exp>.<64-hex-hmac>`,
+ * minted by /api/passport/qr-token), that single param is preserved on the
+ * returned path so the destination page can present it to
+ * /api/passport/connect as proof of an in-person scan — every other query
+ * param (and any malformed `t`) is still discarded. Returns `null` for
+ * ANYTHING else — other paths, missing/invalid usernames,
+ * `javascript:`/`data:`/other schemes, or malformed input. NEVER returns an
+ * absolute URL or a different-path redirect.
  */
+
+/** Shape of a signed passport-QR connect token: `<unix-exp>.<hmac-sha256-hex>`. */
+const QR_CONNECT_TOKEN_PATTERN = /^\d{1,12}\.[a-f0-9]{64}$/
+
 export function extractPassportConnectPath(raw: string): string | null {
   if (typeof raw !== 'string' || raw.length === 0) {
     return null
@@ -95,5 +104,15 @@ export function extractPassportConnectPath(raw: string): string | null {
   }
 
   const username = match[1]
-  return `/u/${username}/passport?connect=true`
+
+  // Preserve a well-formed signed connect token if the QR carried one; it is
+  // strictly shape-validated here (the server re-verifies the HMAC), so it
+  // cannot smuggle arbitrary content into the path we navigate to.
+  const token = parsed.searchParams.get('t')
+  const tokenSuffix =
+    token && QR_CONNECT_TOKEN_PATTERN.test(token)
+      ? `&t=${encodeURIComponent(token)}`
+      : ''
+
+  return `/u/${username}/passport?connect=true${tokenSuffix}`
 }

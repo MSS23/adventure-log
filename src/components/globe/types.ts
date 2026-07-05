@@ -12,6 +12,10 @@ export interface FlightPath {
   distance: number // great-circle distance in degrees, used for altitude
   index: number // chronological position, used for opacity
   total: number // total paths, used for opacity
+  // 'home' = an arc to/from the base/home hub (home→trip or trip→home);
+  // 'journey' = an explicit trip→trip link within a connected journey.
+  // Drives distinct arc coloring. Defaults to 'journey' when absent.
+  kind?: 'home' | 'journey'
 }
 
 // Type definitions for accessing Three.js renderer internals

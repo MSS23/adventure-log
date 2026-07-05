@@ -133,7 +133,8 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     selectedYear: internalSelectedYear,
     setSelectedYear: setInternalSelectedYear,
     refreshData,
-    getYearData
+    getYearData,
+    homeLocation
   } = useTravelTimeline(filterUserId, instanceId)
 
   // Support controlled mode: use external props if provided, otherwise use internal state
@@ -591,58 +592,133 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     })
   }, [locations, activeCityId, performanceConfig.maxPins])
 
-  // Journey arcs — explicit links only (migration 75).
+  // Travel arcs — "home hub" model.
   //
-  // Each arc comes from an album that declares it "continues from" a
-  // predecessor album (connected_from_album_id). We draw predecessor → album,
-  // NOT a chronological guess — so London→Paris (2024) and London→Japan (2025)
-  // stay separate journeys instead of being falsely chained Paris→Japan.
-  // Both endpoints must be present in the current view; the predecessor may
-  // be in another year, so its arc appears in the all-years view.
+  // Trips are grouped into JOURNEYS using explicit connected_from_album_id
+  // chains (migration 75). Each maximal chain a0→a1→…→an is one journey; a trip
+  // with no connection is a journey of length 1. Then:
+  //
+  //   • With a base/home location (homeLocation): every journey is anchored to
+  //     home — home→a0 (outbound), a0→a1→… (the journey's own legs), an→home
+  //     (return). So two SEPARATE trips read as London→Paris and London→Tokyo
+  //     (each looping home), never Paris→Tokyo. A connected France→Japan trip
+  //     reads as London→France→Japan→London.
+  //
+  //   • Without a base (viewer's home is private / unset): only the explicit
+  //     trip→trip legs are drawn. Standalone trips get no arc; connected trips
+  //     still link to each other. This is the "hide my base" behaviour.
+  //
+  // A single-year selection already narrows `locations` to that year, so
+  // cross-year chain predecessors simply aren't in view and those trips fall
+  // back to being home-anchored heads — which is what we want per-year.
   const staticConnections = useMemo(() => {
-    if (!showStaticConnections || locations.length < 2) return []
+    if (!showStaticConnections || locations.length === 0) return []
 
     const byId = new Map(locations.map((loc) => [loc.id, loc]))
-    const maxConnections = performanceConfig.maxPins - 1
+    const maxConnections = performanceConfig.maxPins
     const paths: FlightPath[] = []
 
-    for (const loc of locations) {
-      if (paths.length >= maxConnections) break
+    const yearOf = (loc: TravelLocation) => new Date(loc.visitDate).getFullYear()
 
-      const fromId = loc.connectedFromAlbumId
-      if (!fromId) continue
-      const from = byId.get(fromId)
-      if (!from || from.id === loc.id) continue // predecessor not in view / self-link
-
-      const toYear = new Date(loc.visitDate).getFullYear()
-      // When a single year is selected, only show arcs that land in that year.
-      if (effectiveSelectedYear !== null && toYear !== effectiveSelectedYear) continue
-
-      const fromYear = new Date(from.visitDate).getFullYear()
-      const dLat = loc.latitude - from.latitude
-      const dLng = loc.longitude - from.longitude
+    // Any node with a lat/lng/name — home or a trip — so arcs share one shape.
+    type ArcNode = { latitude: number; longitude: number; name: string }
+    const pushArc = (
+      from: ArcNode,
+      to: ArcNode,
+      kind: 'home' | 'journey',
+      fromYear: number,
+      toYear: number,
+    ) => {
+      const dLat = to.latitude - from.latitude
+      const dLng = to.longitude - from.longitude
       const distance = Math.sqrt(dLat * dLat + dLng * dLng)
-
       paths.push({
         startLat: from.latitude,
         startLng: from.longitude,
-        endLat: loc.latitude,
-        endLng: loc.longitude,
+        endLat: to.latitude,
+        endLng: to.longitude,
         color: getYearColor(fromYear),
         endColor: getYearColor(toYear),
         year: toYear,
-        name: `${from.name} → ${loc.name}`,
+        name: `${from.name} → ${to.name}`,
         distance,
         index: paths.length,
         total: 0, // filled in below once the count is known
+        kind,
       })
+    }
+
+    // A trip is "chained" when its declared predecessor is present in view.
+    const predecessorInView = (loc: TravelLocation) => {
+      const fromId = loc.connectedFromAlbumId
+      return !!(fromId && fromId !== loc.id && byId.has(fromId))
+    }
+
+    // successorsOf: predecessor id → trips that continue from it.
+    const successorsOf = new Map<string, TravelLocation[]>()
+    for (const loc of locations) {
+      if (!predecessorInView(loc)) continue
+      const fromId = loc.connectedFromAlbumId as string
+      const list = successorsOf.get(fromId)
+      if (list) list.push(loc)
+      else successorsOf.set(fromId, [loc])
+    }
+
+    // Journey heads = trips with no predecessor in view, oldest first for
+    // stable arc ordering (and stable dash offsets / colors).
+    const heads = locations
+      .filter((loc) => !predecessorInView(loc))
+      .sort((a, b) => a.visitDate.getTime() - b.visitDate.getTime())
+
+    const home: ArcNode | null = homeLocation
+      ? { latitude: homeLocation.latitude, longitude: homeLocation.longitude, name: homeLocation.name }
+      : null
+
+    const visited = new Set<string>()
+
+    for (const head of heads) {
+      if (paths.length >= maxConnections) break
+      if (visited.has(head.id)) continue
+
+      // Walk the chain forward. If a trip branches (rare), follow the earliest
+      // unvisited successor; cycle-safe via `visited`.
+      const chain: TravelLocation[] = []
+      let cur: TravelLocation | undefined = head
+      while (cur && !visited.has(cur.id)) {
+        visited.add(cur.id)
+        chain.push(cur)
+        const next = (successorsOf.get(cur.id) || [])
+          .filter((s) => !visited.has(s.id))
+          .sort((a, b) => a.visitDate.getTime() - b.visitDate.getTime())
+        cur = next[0]
+      }
+
+      const first = chain[0]
+      const last = chain[chain.length - 1]
+
+      // Outbound from home to the start of the journey.
+      if (home) {
+        pushArc(home, first, 'home', yearOf(first), yearOf(first))
+      }
+
+      // The journey's own legs (only present for multi-stop journeys).
+      for (let i = 0; i < chain.length - 1; i++) {
+        if (paths.length >= maxConnections) break
+        pushArc(chain[i], chain[i + 1], 'journey', yearOf(chain[i]), yearOf(chain[i + 1]))
+      }
+
+      // Return home. Skipped for a single-stop journey (the outbound arc is the
+      // same great circle reversed — drawing both just doubles it up).
+      if (home && chain.length >= 2 && paths.length < maxConnections) {
+        pushArc(last, home, 'home', yearOf(last), yearOf(last))
+      }
     }
 
     const total = paths.length
     for (const p of paths) p.total = total
 
     return paths
-  }, [locations, showStaticConnections, getYearColor, effectiveSelectedYear, performanceConfig.maxPins])
+  }, [locations, showStaticConnections, getYearColor, homeLocation, performanceConfig.maxPins])
 
   // Update flight animation when locations change
   useEffect(() => {
@@ -1013,5 +1089,6 @@ export function useGlobeState(options: UseGlobeStateOptions) {
     getYearColor,
     cityPins,
     staticConnections,
+    homeLocation,
   }
 }

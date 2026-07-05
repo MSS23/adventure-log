@@ -46,6 +46,12 @@ const ringColorAccessor = () => 'transparent'
 
 const arcColorAccessor = (d: object) => {
   const path = d as FlightPath
+  // Home-hub arcs (base → trip / trip → base) get a distinct warm amber→rose
+  // gradient so they read as "lines home" and never blend into the greenish
+  // journey legs between connected trips.
+  if (path.kind === 'home') {
+    return ['rgba(251,191,36,0.85)', 'rgba(244,114,182,0.45)']
+  }
   const progress = path.total > 1 ? path.index / (path.total - 1) : 0.5
   const colors = [
     ['rgba(124,154,62,0.8)', 'rgba(153,177,105,0.4)'],
@@ -152,6 +158,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     handleYearChange, handlePlayPause, handleSearchResult,
     handleCityClick, handleClusterClick, handleLocationToggle,
     searchData, travelStats, getYearColor, cityPins, staticConnections,
+    homeLocation,
   } = state
 
   // Expose navigation and year data methods to parent component
@@ -228,11 +235,29 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       isCurrentLocation?: boolean;
       isWishlist?: boolean;
       wishlistId?: string;
+      isHome?: boolean;
       label: string;
       albumCount: number;
       photoCount: number;
       accuracy?: number;
     }>
+
+    // Home hub pin — the base every travel line radiates from. Present on your
+    // own globe whenever you've set a home; on someone else's globe only when
+    // they opted in (homeLocation is already gated by the RPC upstream).
+    if (homeLocation) {
+      pins.push({
+        lat: homeLocation.latitude,
+        lng: homeLocation.longitude,
+        size: 2.4,
+        color: '#f59e0b',
+        opacity: 0.96,
+        isHome: true,
+        label: homeLocation.name || 'Home',
+        albumCount: 0,
+        photoCount: 0,
+      })
+    }
 
     if (currentLocation && showCurrentLocation && isOwnProfile) {
       pins.push({
@@ -279,7 +304,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     return pins
     // isOwnProfile gates the current-location pin above — omitting it here
     // left a stale GPS pin visible after switching to someone else's globe.
-  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation, wishlistPins, isOwnProfile])
+  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation, wishlistPins, isOwnProfile, homeLocation])
 
   // Pin DOM factory — memoized so three-globe doesn't regenerate every pin
   // element whenever this component re-renders for unrelated reasons.

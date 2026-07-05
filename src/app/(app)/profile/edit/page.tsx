@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ArrowLeft, Save, Check, X, Loader2, Camera, Lock } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { ArrowLeft, Save, Check, X, Loader2, Camera, Lock, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { ProfileFormData, profileSchema } from '@/lib/validations/auth'
 import { log } from '@/lib/utils/logger'
@@ -29,12 +30,13 @@ export default function EditProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null)
   const [checkingUsername, setCheckingUsername] = useState(false)
-  // Private home location — never shown to anyone; geocoded on save and used
-  // only to measure how far the user has travelled. Same data model as the
-  // Settings "home base" (home_city/home_country/home_latitude/home_longitude),
-  // so the two stay in sync.
+  // Home / base location — geocoded on save (home_city/home_country →
+  // home_latitude/home_longitude). Always used privately for distance stats;
+  // when homeIsPublic is on (migration 77) it also becomes the "home hub" that
+  // travel lines radiate from on the user's globe, visible to profile visitors.
   const [homeCity, setHomeCity] = useState('')
   const [homeCountry, setHomeCountry] = useState('')
+  const [homeIsPublic, setHomeIsPublic] = useState(false)
   const avatarObjectUrlRef = useRef<string | null>(null)
   const supabase = createClient()
 
@@ -57,6 +59,7 @@ export default function EditProfilePage() {
       setValue('website', profile.website || '')
       setHomeCity(profile.home_city || '')
       setHomeCountry(profile.home_country || '')
+      setHomeIsPublic(profile.home_location_is_public ?? false)
       setAvatarPreview(getPhotoUrl(profile.avatar_url, 'avatars') || null)
     }
   }, [profile, setValue])
@@ -198,25 +201,47 @@ export default function EditProfilePage() {
         }
       }
 
-      const { error } = await supabase
+      const baseUpdate = {
+        username: data.username || null,
+        display_name: data.display_name || data.username || null,
+        name: data.display_name || data.username || null,
+        bio: data.bio || null,
+        website: websiteUrl,
+        // Public profile location is retired — the location here is private,
+        // so clear any legacy public value.
+        location: null,
+        home_city: trimmedCity || null,
+        home_country: trimmedCountry || null,
+        home_latitude: homeLatitude,
+        home_longitude: homeLongitude,
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString()
+      }
+
+      // home_location_is_public arrives with migration 77. Deploys can lead the
+      // migration, so if the column isn't there yet (42703 undefined_column /
+      // PGRST204 unknown column), retry WITHOUT it rather than failing the whole
+      // save — the rest of the profile edit must keep working regardless.
+      let { error } = await supabase
         .from('users')
-        .update({
-          username: data.username || null,
-          display_name: data.display_name || data.username || null,
-          name: data.display_name || data.username || null,
-          bio: data.bio || null,
-          website: websiteUrl,
-          // Public profile location is retired — the location here is private,
-          // so clear any legacy public value.
-          location: null,
-          home_city: trimmedCity || null,
-          home_country: trimmedCountry || null,
-          home_latitude: homeLatitude,
-          home_longitude: homeLongitude,
-          avatar_url: avatarUrl,
-          updated_at: new Date().toISOString()
-        })
+        .update({ ...baseUpdate, home_location_is_public: homeIsPublic })
         .eq('id', user?.id)
+
+      if (
+        error &&
+        ((error as { code?: string }).code === '42703' ||
+          (error as { code?: string }).code === 'PGRST204' ||
+          /home_location_is_public/i.test((error as { message?: string }).message || ''))
+      ) {
+        log.warn('home_location_is_public column missing — saving without base visibility (apply migration 77)', {
+          component: 'EditProfile',
+          action: 'save-profile',
+        })
+        ;({ error } = await supabase
+          .from('users')
+          .update(baseUpdate)
+          .eq('id', user?.id))
+      }
 
       if (error) {
         // 23505 = unique_violation: the case-insensitive username index (or the
@@ -389,12 +414,20 @@ export default function EditProfilePage() {
             />
           </div>
 
-          {/* Home location — private, distance stats only */}
-          <div className="space-y-2 rounded-xl border border-border bg-muted/30 p-4">
+          {/* Home / base location — private distance stats always; optionally
+              the "home hub" travel lines radiate from on your globe. */}
+          <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
             <div className="flex items-center gap-2">
-              <Lock className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+              {homeIsPublic ? (
+                <Globe className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+              ) : (
+                <Lock className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+              )}
               <Label className="text-foreground font-medium">
-                Home location <span className="text-muted-foreground font-normal">(private)</span>
+                Base location{' '}
+                <span className="text-muted-foreground font-normal">
+                  ({homeIsPublic ? 'shown on your globe' : 'private'})
+                </span>
               </Label>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -417,8 +450,30 @@ export default function EditProfilePage() {
                 />
               </div>
             </div>
+
+            {/* Visibility toggle */}
+            <div className="flex items-start justify-between gap-3 rounded-lg border border-border bg-background/60 p-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="home-public" className="text-sm font-medium text-foreground">
+                  Show my base on my globe &amp; profile
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {homeIsPublic
+                    ? 'Visitors see a home marker (city-level) and travel lines connecting it to your trips.'
+                    : 'Off — your base stays hidden. Trips only connect to each other where you’ve linked them.'}
+                </p>
+              </div>
+              <Switch
+                id="home-public"
+                checked={homeIsPublic}
+                onCheckedChange={setHomeIsPublic}
+                aria-label="Show my base location on my globe and profile"
+              />
+            </div>
+
             <p className="text-xs text-muted-foreground">
-              Never shown to anyone. Used only to measure how far you&apos;ve travelled from home.
+              Your base is always used privately to measure how far you&apos;ve travelled.
+              Only the city-level point is ever shown — never a precise address.
             </p>
           </div>
         </div>

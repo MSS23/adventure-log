@@ -16,6 +16,11 @@ export interface User {
   home_country?: string;
   home_latitude?: number;
   home_longitude?: number;
+  // Opt-in flag (migration 77): when true the user's base/home location is
+  // shown on their globe & profile to other viewers. Default false → private
+  // (self-only, matching migration 76). Home coords for OTHER users are read
+  // via the get_public_home_location() RPC, which enforces this flag.
+  home_location_is_public?: boolean;
   // Self-declared date of birth recorded at signup for the 18+ age gate
   // (migration 60). Optional so older rows / pre-migration builds typecheck.
   date_of_birth?: string | null;

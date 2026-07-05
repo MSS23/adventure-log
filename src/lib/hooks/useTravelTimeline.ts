@@ -56,6 +56,20 @@ interface YearTravelData {
   endDate: Date | null
 }
 
+/**
+ * The viewed user's base/home location — the "home hub" that travel lines
+ * radiate from on the globe. For your OWN globe this comes from your profile
+ * (always available). For someone else's globe it is fetched via the
+ * get_public_home_location() RPC, which returns coordinates ONLY when that
+ * user opted in (home_location_is_public), so a null result means "no hub".
+ */
+interface HomeLocation {
+  latitude: number
+  longitude: number
+  name: string
+  isOwn: boolean
+}
+
 interface UseTravelTimelineReturn {
   availableYears: number[]
   yearData: Record<number, YearTravelData>
@@ -65,10 +79,16 @@ interface UseTravelTimelineReturn {
   setSelectedYear: (year: number | null) => void
   refreshData: () => Promise<void>
   getYearData: (year: number) => YearTravelData | null
+  homeLocation: HomeLocation | null
+}
+
+function formatHomeName(city?: string | null, country?: string | null): string {
+  return [city, country].filter(Boolean).join(', ') || 'Home'
 }
 
 export function useTravelTimeline(filterUserId?: string, instanceId?: string): UseTravelTimelineReturn {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const [homeLocation, setHomeLocation] = useState<HomeLocation | null>(null)
   const [availableYears, setAvailableYears] = useState<number[]>([])
   const [yearData, setYearData] = useState<Record<number, YearTravelData>>({})
   const [loading, setLoading] = useState(true)
@@ -663,6 +683,87 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     }
   }, [targetUserId, fetchAvailableYears])
 
+  // Resolve the viewed user's base/home location (the globe's "home hub").
+  //  - Own globe: read straight from the auth profile (loaded via
+  //    get_my_profile, so home coords are always available regardless of the
+  //    public flag — you always see your own base).
+  //  - Someone else's globe: the get_public_home_location() RPC returns coords
+  //    only when they opted in; otherwise no hub is shown.
+  useEffect(() => {
+    if (!targetUserId) {
+      setHomeLocation(null)
+      return
+    }
+
+    const isOwnProfile = user?.id === targetUserId
+    let cancelled = false
+
+    if (isOwnProfile) {
+      const lat = profile?.home_latitude
+      const lng = profile?.home_longitude
+      if (typeof lat === 'number' && typeof lng === 'number') {
+        setHomeLocation({
+          latitude: lat,
+          longitude: lng,
+          name: formatHomeName(profile?.home_city, profile?.home_country),
+          isOwn: true,
+        })
+      } else {
+        setHomeLocation(null)
+      }
+      return
+    }
+
+    // Other user — opt-in-gated RPC.
+    ;(async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_public_home_location', {
+          p_user_id: targetUserId,
+        })
+        if (cancelled) return
+        const row = (Array.isArray(data) ? data[0] : data) as
+          | { home_city?: string | null; home_country?: string | null; home_latitude?: number | null; home_longitude?: number | null }
+          | undefined
+        if (
+          !error &&
+          row &&
+          typeof row.home_latitude === 'number' &&
+          typeof row.home_longitude === 'number'
+        ) {
+          setHomeLocation({
+            latitude: row.home_latitude,
+            longitude: row.home_longitude,
+            name: formatHomeName(row.home_city, row.home_country),
+            isOwn: false,
+          })
+        } else {
+          setHomeLocation(null)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setHomeLocation(null)
+          log.warn('Failed to load public home location', {
+            component: 'useTravelTimeline',
+            action: 'fetch-home-location',
+            userId: targetUserId,
+          }, toError(err))
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    targetUserId,
+    user?.id,
+    profile?.home_latitude,
+    profile?.home_longitude,
+    profile?.home_city,
+    profile?.home_country,
+    supabase,
+  ])
+
   return {
     availableYears,
     yearData,
@@ -671,7 +772,8 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     selectedYear,
     setSelectedYear,
     refreshData,
-    getYearData
+    getYearData,
+    homeLocation
   }
 }
 
@@ -680,5 +782,6 @@ export type {
   YearTravelData,
   Album,
   Photo,
+  HomeLocation,
   UseTravelTimelineReturn
 }

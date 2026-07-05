@@ -21,5 +21,5 @@
 export const PUBLIC_USER_COLUMNS =
   'id, username, display_name, name, bio, avatar_url, cover_photo_url, ' +
   'website, privacy_level, is_private, is_verified, created_at, updated_at, ' +
-  'deleted_at, location, home_city, home_country, current_streak_days, ' +
-  'longest_streak_days, last_activity_date'
+  'deleted_at, location, home_city, home_country, home_location_is_public, ' +
+  'current_streak_days, longest_streak_days, last_activity_date'

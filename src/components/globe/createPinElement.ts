@@ -18,6 +18,7 @@ interface PinData {
   isCurrentLocation?: boolean
   isWishlist?: boolean
   wishlistId?: string
+  isHome?: boolean
   label: string
   albumCount: number
   photoCount: number
@@ -40,7 +41,7 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
   // full photo pins — a dot + count badge, no emoji, no photo thumbnail.
   // Wishlist pins are a compact marker (not a full photo pin), so they get a
   // smaller dedicated size rather than the 50px album-pin minimum.
-  const pinSize = data.isWishlist
+  const pinSize = data.isWishlist || data.isHome
     ? Math.max(data.size * 14, 28)
     : data.isCheap
       ? Math.max(data.size * 14, 28)
@@ -146,6 +147,68 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
     })
 
     el.title = data.label || 'Wishlist destination'
+    return el
+  }
+
+  // Handle home hub pin — the base every travel line radiates from. A warm
+  // amber marker with a house glyph, visually distinct from album/wishlist/
+  // current-location pins. Non-interactive (it's an anchor, not an album).
+  if (data.isHome) {
+    el.style.cursor = 'default'
+    el.style.zIndex = '9'
+    const labelText = escapeHtml(data.label || 'Home')
+    el.innerHTML = `
+      <div class="globe-pin globe-home-pin" style="
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 30% 30%, rgba(253, 230, 138, 0.95) 0%, rgba(245, 158, 11, 0.9) 60%, rgba(180, 83, 9, 0.85) 100%);
+        border: 2.5px solid white;
+        border-radius: 50%;
+        opacity: ${data.opacity};
+        box-shadow: 0 0 16px rgba(245, 158, 11, 0.6), 0 4px 12px rgba(0,0,0,0.4);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+      ">
+        <svg width="${Math.max(pinSize * 0.5, 16)}" height="${Math.max(pinSize * 0.5, 16)}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));">
+          <path d="M3 10.5 12 3l9 7.5" />
+          <path d="M5 9.5V21h14V9.5" />
+          <path d="M9 21v-6h6v6" />
+        </svg>
+        <div class="home-pin-label" style="
+          position: absolute;
+          left: 50%;
+          top: calc(100% + 6px);
+          transform: translateX(-50%);
+          background: rgba(15, 15, 15, 0.85);
+          color: #fde68a;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 3px 8px;
+          border-radius: 6px;
+          white-space: nowrap;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.18s ease;
+          border: 1px solid rgba(245, 158, 11, 0.4);
+        ">${labelText}</div>
+      </div>
+    `
+
+    el.addEventListener('mouseenter', () => {
+      el.style.zIndex = '1000'
+      const label = el.querySelector('.home-pin-label') as HTMLElement | null
+      if (label) label.style.opacity = '1'
+    })
+    el.addEventListener('mouseleave', () => {
+      el.style.zIndex = '9'
+      const label = el.querySelector('.home-pin-label') as HTMLElement | null
+      if (label) label.style.opacity = '0'
+    })
+
+    el.title = data.label || 'Home'
     return el
   }
 

@@ -42,6 +42,11 @@ Thumbs.db
 .env.test.local
 .env.production.local
 
+# Local npm config — sets script-shell to a Windows Git-bash path (workaround
+# for the "&" in this repo's path). Harmful on Vercel's Linux builder (spawns
+# C:\Program Files\Git\bin\bash.exe -> ENOENT). Not in git; must not upload.
+.npmrc
+
 # Logs
 logs
 *.log

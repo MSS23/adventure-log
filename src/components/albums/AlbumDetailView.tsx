@@ -174,11 +174,13 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
       setIsPrivateContent(false)
 
       // Fetch photos for this album
+      // order_index is the column all writers populate (display_order was a
+      // never-written twin — sorting by it silently fell back to created_at).
       const { data: photosData, error: photosError } = await supabase
         .from('photos')
         .select('*')
         .eq('album_id', albumId)
-        .order('display_order', { ascending: true })
+        .order('order_index', { ascending: true })
         .order('created_at', { ascending: true })
 
       if (photosError) {

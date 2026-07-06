@@ -50,6 +50,9 @@ interface PublicAlbum {
   created_at: string
   latitude: number | null
   longitude: number | null
+  // Journey link for the globe's travel lines; optional so callers that
+  // don't select it still typecheck (the globe just draws no legs).
+  connected_from_album_id?: string | null
 }
 
 interface PublicUser {
@@ -291,6 +294,8 @@ export function PublicProfileContent({
                   country_code: a.country_code || '',
                   lat: a.latitude as number,
                   lng: a.longitude as number,
+                  date: a.date_start || a.created_at,
+                  connectedFromAlbumId: a.connected_from_album_id ?? null,
                 }))}
             />
           </motion.div>

@@ -151,9 +151,13 @@ const nextConfig: NextConfig = {
   },
 
   // Bundle optimization
-  webpack: (config, { isServer }) => {
-    // Optimize bundle size
-    if (!isServer) {
+  webpack: (config, { isServer, dev }) => {
+    // Optimize bundle size — PRODUCTION ONLY. Overriding splitChunks in dev
+    // corrupts HMR's chunk map: routes intermittently request a CSS asset as
+    // a script ("Refused to execute script … vendor.css") or hit
+    // "Cannot read properties of undefined (reading 'call')" in the webpack
+    // factory, and the route error-boundaries with "We hit a detour".
+    if (!isServer && !dev) {
       config.optimization = {
         ...config.optimization,
         splitChunks: {

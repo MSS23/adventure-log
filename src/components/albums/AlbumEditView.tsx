@@ -153,11 +153,15 @@ export function AlbumEditView({ albumId }: { albumId: string }) {
 
       // Fetch photos for this album
       setPhotosLoading(true)
+      // WHY order_index: it's the column every writer populates (creation,
+      // bulk import, upload page) and the one with a DB index. display_order
+      // was a phantom twin — never written on upload, so sorting by it always
+      // fell back to created_at and ignored the user's intended order.
       const { data: photosData, error: photosError } = await supabase
         .from('photos')
         .select('*')
         .eq('album_id', albumId)
-        .order('display_order', { ascending: true })
+        .order('order_index', { ascending: true })
         .order('created_at', { ascending: true })
 
       if (!photosError && photosData) {
@@ -248,27 +252,27 @@ export function AlbumEditView({ albumId }: { albumId: string }) {
   const handlePhotosReorder = async (reorderedPhotos: Photo[]) => {
     setPhotos(reorderedPhotos)
 
-    // Update display order in the database
-    try {
-      const updates = reorderedPhotos.map((photo, index) => ({
-        id: photo.id,
-        display_order: index
-      }))
-
-      for (const update of updates) {
-        await supabase
+    // Persist the new order to order_index — the column every reader sorts
+    // by (album/feed/public pages). Supabase returns errors instead of
+    // throwing, so collect them explicitly; the old try/catch around bare
+    // .update() calls could never fire.
+    const results = await Promise.all(
+      reorderedPhotos.map((photo, index) =>
+        supabase
           .from('photos')
-          .update({ display_order: update.display_order })
-          .eq('id', update.id)
-      }
-      // Note: PhotoGridEditor already shows toast on reorder
-    } catch (err) {
+          .update({ order_index: index })
+          .eq('id', photo.id)
+      )
+    )
+    const failed = results.find((r) => r.error)
+    if (failed?.error) {
       log.error('Failed to update photo order', {
         component: 'AlbumEditPage',
         action: 'reorderPhotos'
-      }, err instanceof Error ? err : new Error(String(err)))
+      }, new Error(failed.error.message))
       toast.error('Failed to update photo order')
     }
+    // Note: PhotoGridEditor already shows toast on successful reorder
   }
 
   const onSubmit = async (data: AlbumFormData) => {

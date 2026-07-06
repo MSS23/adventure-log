@@ -5,6 +5,9 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Globe as GlobeIcon, MapPin, ArrowRight, Maximize2 } from 'lucide-react'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { createClient } from '@/lib/supabase/client'
+import { localizePath } from '@/lib/utils/native-routes'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
 // react-globe.gl compiles GLSL shaders at runtime (three.js) — must be
 // client-only. Loaded the same way the main globe and embed globe are.
@@ -20,6 +23,10 @@ export interface ProfileGlobeLocation {
   country_code: string
   lat: number
   lng: number
+  /** Travel date (date_start/created_at) — used to order journey chains. */
+  date?: string
+  /** Explicit journey link (albums.connected_from_album_id, migration 75). */
+  connectedFromAlbumId?: string | null
 }
 
 interface ProfileGlobeProps {
@@ -27,23 +34,71 @@ interface ProfileGlobeProps {
   username: string
   /** UUID of the profile owner — used for the authenticated /globe?user= link. */
   targetUserId: string
-  /** Album locations to pin. Each pin links to its public album page. */
+  /** Album locations to pin. Each pin links to its album page. */
   locations: ProfileGlobeLocation[]
   /** Extra classes for the outer wrapper. */
   className?: string
 }
 
+// Travel arc between two stops — same "home hub" journey model as the main
+// globe (useGlobeState.staticConnections), reduced to what the teaser needs.
+interface ProfileArc {
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  kind: 'home' | 'journey'
+  distance: number
+  index: number
+  total: number
+}
+
+// Mirrors EnhancedGlobe's arcColorAccessor: home legs get the warm amber→rose
+// "lines home" gradient; journey legs cycle the same muted palette.
+const arcColorAccessor = (d: object) => {
+  const arc = d as ProfileArc
+  if (arc.kind === 'home') {
+    return ['rgba(251,191,36,0.85)', 'rgba(244,114,182,0.45)']
+  }
+  const progress = arc.total > 1 ? arc.index / (arc.total - 1) : 0.5
+  const colors = [
+    ['rgba(124,154,62,0.8)', 'rgba(153,177,105,0.4)'],
+    ['rgba(196,175,93,0.8)', 'rgba(218,200,130,0.4)'],
+    ['rgba(99,206,180,0.75)', 'rgba(134,220,200,0.35)'],
+    ['rgba(147,165,220,0.75)', 'rgba(170,185,235,0.35)'],
+  ]
+  const idx = Math.floor(progress * (colors.length - 1))
+  const pair = colors[Math.min(idx, colors.length - 1)]
+  return [pair[0], pair[1]]
+}
+
+const arcAltitudeAccessor = (d: object) => {
+  const arc = d as ProfileArc
+  return 0.08 + Math.min(arc.distance / 90, 1) * 0.45
+}
+
+const arcDashAnimateTimeAccessor = (d: object) => {
+  const arc = d as ProfileArc
+  return 3000 + Math.min(arc.distance / 60, 1) * 3000
+}
+
+const arcDashAnimateTimeStaticAccessor = () => 0
+
+const arcDashInitialGapAccessor = (d: object) => {
+  const arc = d as ProfileArc
+  return (arc.index * 0.37) % 1
+}
+
 /**
- * Embedded interactive travel globe for a user's public profile.
+ * Embedded interactive travel globe for a user's profile.
  *
- * Mirrors the look of the main `/globe` page (same earth texture + atmosphere)
- * but is intentionally self-contained: it renders from the `locations` passed
- * by the server component, so it works for logged-out visitors without any
- * client-side authenticated fetch.
+ * Mirrors the look of the main `/globe` page (same earth texture, atmosphere,
+ * and travel-line "spider's web") but is intentionally self-contained: it
+ * renders from the `locations` passed in, so it works for logged-out visitors
+ * without any client-side authenticated fetch.
  *
  * Interaction:
- *   - Click a location pin  → open that album on the owner's profile
- *     (`/albums/<id>/public`).
+ *   - Click a location pin  → open that album.
  *   - Click the globe itself → open the full-screen globe experience for the
  *     owner. Signed-in visitors get the rich in-app globe (`/globe?user=<id>`);
  *     anonymous visitors get the public embed globe (`/embed/<username>`).
@@ -60,6 +115,7 @@ export function ProfileGlobe({
 }: ProfileGlobeProps) {
   const router = useRouter()
   const { user } = useAuth()
+  const prefersReducedMotion = useReducedMotion()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null)
@@ -67,10 +123,46 @@ export function ProfileGlobe({
   const [mounted, setMounted] = useState(false)
   const [globeReady, setGlobeReady] = useState(false)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [homeLocation, setHomeLocation] = useState<{
+    lat: number
+    lng: number
+    name: string
+  } | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Owner's opted-in base location (migration 77): the RPC only returns
+  // coordinates when the owner set home_location_is_public, so a private
+  // base never reaches this component. With a base, every journey anchors
+  // to home (the "spider's web" hub); without one, only explicit
+  // trip→trip legs are drawn — same rules as the main globe.
+  useEffect(() => {
+    let cancelled = false
+    const supabase = createClient()
+    supabase
+      .rpc('get_public_home_location', { p_user_id: targetUserId })
+      .then(({ data, error }) => {
+        if (cancelled || error) return
+        const row = (data as Array<{
+          home_city: string | null
+          home_country: string | null
+          home_latitude: number | null
+          home_longitude: number | null
+        }> | null)?.[0]
+        if (row && row.home_latitude != null && row.home_longitude != null) {
+          setHomeLocation({
+            lat: row.home_latitude,
+            lng: row.home_longitude,
+            name: row.home_city || row.home_country || 'Home',
+          })
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [targetUserId])
 
   // Higher-res texture on desktop, lighter one on mobile — matches the main
   // globe's performance heuristic.
@@ -88,7 +180,7 @@ export function ProfileGlobe({
     : `/embed/${username}`
 
   const goToFullGlobe = useCallback(() => {
-    router.push(fullGlobeHref)
+    router.push(localizePath(fullGlobeHref))
   }, [router, fullGlobeHref])
 
   const updateDimensions = useCallback(() => {
@@ -155,12 +247,99 @@ export function ProfileGlobe({
     [locations],
   )
 
+  // Travel lines ("spider's web") — the same home-hub journey model as the
+  // main globe: explicit connected_from chains form journeys; with a public
+  // base every journey loops home (home→first, legs, last→home), without one
+  // only the explicit legs are drawn.
+  const arcsData = useMemo<ProfileArc[]>(() => {
+    if (locations.length === 0) return []
+
+    const byId = new Map(locations.map((loc) => [loc.id, loc]))
+    const timeOf = (loc: ProfileGlobeLocation) =>
+      loc.date ? new Date(loc.date).getTime() : 0
+
+    const arcs: ProfileArc[] = []
+    const pushArc = (
+      from: { lat: number; lng: number },
+      to: { lat: number; lng: number },
+      kind: 'home' | 'journey',
+    ) => {
+      const dLat = to.lat - from.lat
+      const dLng = to.lng - from.lng
+      arcs.push({
+        startLat: from.lat,
+        startLng: from.lng,
+        endLat: to.lat,
+        endLng: to.lng,
+        kind,
+        distance: Math.sqrt(dLat * dLat + dLng * dLng),
+        index: arcs.length,
+        total: 0, // filled in below once the count is known
+      })
+    }
+
+    const predecessorInView = (loc: ProfileGlobeLocation) => {
+      const fromId = loc.connectedFromAlbumId
+      return !!(fromId && fromId !== loc.id && byId.has(fromId))
+    }
+
+    // successorsOf: predecessor id → trips that continue from it.
+    const successorsOf = new Map<string, ProfileGlobeLocation[]>()
+    for (const loc of locations) {
+      if (!predecessorInView(loc)) continue
+      const fromId = loc.connectedFromAlbumId as string
+      const list = successorsOf.get(fromId)
+      if (list) list.push(loc)
+      else successorsOf.set(fromId, [loc])
+    }
+
+    // Journey heads = trips with no predecessor in view, oldest first.
+    const heads = locations
+      .filter((loc) => !predecessorInView(loc))
+      .sort((a, b) => timeOf(a) - timeOf(b))
+
+    const visited = new Set<string>()
+    for (const head of heads) {
+      if (visited.has(head.id)) continue
+
+      const chain: ProfileGlobeLocation[] = []
+      let cur: ProfileGlobeLocation | undefined = head
+      while (cur && !visited.has(cur.id)) {
+        visited.add(cur.id)
+        chain.push(cur)
+        const next = (successorsOf.get(cur.id) || [])
+          .filter((s) => !visited.has(s.id))
+          .sort((a, b) => timeOf(a) - timeOf(b))
+        cur = next[0]
+      }
+
+      const first = chain[0]
+      const last = chain[chain.length - 1]
+
+      if (homeLocation) {
+        pushArc(homeLocation, first, 'home')
+      }
+      for (let i = 0; i < chain.length - 1; i++) {
+        pushArc(chain[i], chain[i + 1], 'journey')
+      }
+      if (homeLocation && chain.length >= 2) {
+        pushArc(last, homeLocation, 'home')
+      }
+    }
+
+    for (const arc of arcs) arc.total = arcs.length
+    return arcs
+  }, [locations, homeLocation])
+
   const handlePointClick = useCallback(
     (point: object) => {
       const p = point as { id?: string }
-      if (p.id) router.push(`/albums/${p.id}/public`)
+      if (!p.id) return
+      // Signed-in viewers get the in-app album page; anonymous visitors the
+      // public share view (the in-app route would bounce them to /login).
+      router.push(localizePath(user ? `/albums/${p.id}` : `/albums/${p.id}/public`))
     },
-    [router],
+    [router, user],
   )
 
   const hasLocations = locations.length > 0
@@ -190,6 +369,18 @@ export function ProfileGlobe({
             pointAltitude={0.02}
             pointRadius={0.45}
             pointColor={() => '#F2A179'}
+            arcsData={arcsData}
+            arcColor={arcColorAccessor}
+            arcAltitude={arcAltitudeAccessor}
+            arcStroke={0.4}
+            arcDashLength={0.25}
+            arcDashGap={0.15}
+            arcDashAnimateTime={
+              prefersReducedMotion
+                ? arcDashAnimateTimeStaticAccessor
+                : arcDashAnimateTimeAccessor
+            }
+            arcDashInitialGap={arcDashInitialGapAccessor}
             pointLabel={(d: object) => {
               const point = d as { label: string; location: string }
               return `<div style="

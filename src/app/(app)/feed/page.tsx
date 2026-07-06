@@ -87,10 +87,11 @@ async function fetchFeedPage(
       photos(id, file_path, caption, taken_at)
     `
     )
-    // WHY: order embedded photos by display_order first (created_at as
-    // tiebreaker) to match the album page — otherwise a user's manual photo
-    // reordering never shows up in feed carousels.
-    .order('display_order', { ascending: true, referencedTable: 'photos' })
+    // WHY: order embedded photos by order_index first (created_at as
+    // tiebreaker) to match the album page — order_index is what uploads and
+    // reorders actually write; the previous display_order sort read a column
+    // that is never populated, so feed carousels ignored the user's order.
+    .order('order_index', { ascending: true, referencedTable: 'photos' })
     .order('created_at', { ascending: true, referencedTable: 'photos' })
     .limit(10, { referencedTable: 'photos' })
     // WHY: RLS only enforces visibility, not publish state — without this,
@@ -237,6 +238,15 @@ export default function FeedPage() {
         throw error
       }
     },
+    // WHY: the free-tier Supabase instance cold-starts after idle, and the
+    // first queries then die at the network layer ("TypeError: Failed to
+    // fetch") for several seconds. The provider default (2 retries, ~3s
+    // total) gives up inside that window and strands the feed on the error
+    // card until a manual retry — the same failure mode the globe timeline
+    // fixed with its own retry loop. 5 attempts with capped backoff spans
+    // ~25s, comfortably past a cold start.
+    retry: 5,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 8000),
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length === PAGE_SIZE ? allPages.length : undefined,
   })

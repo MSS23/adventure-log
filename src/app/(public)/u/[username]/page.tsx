@@ -133,7 +133,7 @@ export default async function PublicProfilePage({
   const { data: albums } = await supabase
     .from('albums')
     .select(
-      'id, title, cover_photo_url, location_name, country_code, date_start, created_at, latitude, longitude'
+      'id, title, cover_photo_url, location_name, country_code, date_start, created_at, latitude, longitude, connected_from_album_id'
     )
     .eq('user_id', user.id)
     .eq('visibility', 'public')

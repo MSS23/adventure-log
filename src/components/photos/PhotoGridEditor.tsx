@@ -100,7 +100,7 @@ export function PhotoGridEditor({
 
       const newPhotos = arrayMove(photos, oldIndex, newIndex).map((photo, index) => ({
         ...photo,
-        display_order: index,
+        order_index: index,
       }))
 
       onPhotosReorder(newPhotos)

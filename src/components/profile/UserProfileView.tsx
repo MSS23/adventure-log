@@ -14,8 +14,7 @@ import {
   UserPlus,
   UserMinus,
   Loader2,
-  Users,
-  Globe as GlobeIcon
+  Users
 } from 'lucide-react'
 import { User, Album } from '@/types/database'
 import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
@@ -25,23 +24,10 @@ import { getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji } from '@/lib/utils/country'
 import Image from 'next/image'
 import Link from 'next/link'
-import { localizePath } from '@/lib/utils/native-routes'
-import dynamic from 'next/dynamic'
-
-// Read-only footprint globe — reuses the Wrapped page's static globe (the same
-// component it renders as a dimmed backdrop with `animate={false}`). Lazy-loaded
-// with ssr:false so react-globe.gl/Three.js never enter the server bundle.
-const FootprintGlobe = dynamic(
-  () => import('@/components/wrapped/WrappedGlobe').then((m) => ({ default: m.WrappedGlobe })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-full flex items-center justify-center bg-black">
-        <Loader2 className="h-6 w-6 animate-spin text-white/50" />
-      </div>
-    ),
-  }
-)
+// Interactive travel globe teaser (navigation inside handles native routes) — same earth texture, pins, and travel-line
+// "spider's web" as the main /globe page. It lazy-loads react-globe.gl
+// internally with ssr:false, so no dynamic() wrapper is needed here.
+import { ProfileGlobe, type ProfileGlobeLocation } from '@/components/globe/ProfileGlobe'
 
 // View-model returned by the profile query. The sentinel `redirectToOwn`
 // signals that the viewer is looking at their own profile.
@@ -288,19 +274,23 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
   )
   const countriesCount = countryCodes.length
 
-  // Geocoded albums → pins for the footprint globe (chronological).
-  const footprint = useMemo(
+  // Geocoded albums → pins + journey links for the interactive globe teaser
+  // (chronological, same data shape the main globe builds its arcs from).
+  const footprint = useMemo<ProfileGlobeLocation[]>(
     () =>
       albums
         .filter((a) => typeof a.latitude === 'number' && typeof a.longitude === 'number')
         .map((a) => ({
+          id: a.id,
+          title: a.title,
+          location: a.location_name || '',
+          country_code: a.country_code || '',
           lat: a.latitude as number,
           lng: a.longitude as number,
-          name: a.location_name?.split(',')[0]?.trim() || a.title,
           date: a.date_start || a.created_at || '',
-          albumId: a.id,
+          connectedFromAlbumId: a.connected_from_album_id ?? null,
         }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+        .sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime()),
     [albums]
   )
 
@@ -482,20 +472,11 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
             <p className="al-eyebrow mb-3">Footprint</p>
 
             {footprint.length > 0 && (
-              <div className="relative h-72 sm:h-80 w-full overflow-hidden rounded-2xl border border-border bg-black">
-                <FootprintGlobe
-                  locations={footprint}
-                  animate={false}
-                  onPinClick={(loc) => {
-                    if (loc.albumId) router.push(localizePath(`/albums/${loc.albumId}`))
-                  }}
-                />
-                {/* Places-visited badge */}
-                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
-                  <GlobeIcon className="h-3.5 w-3.5 text-olive-400" />
-                  {footprint.length} {footprint.length === 1 ? 'place' : 'places'}
-                </div>
-              </div>
+              <ProfileGlobe
+                username={profile.username || ''}
+                targetUserId={profile.id}
+                locations={footprint}
+              />
             )}
 
             {/* Country flags */}

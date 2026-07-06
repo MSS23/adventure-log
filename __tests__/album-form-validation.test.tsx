@@ -55,11 +55,18 @@ describe('Album Form Validation', () => {
     })
   })
 
+  // Format a Date as its LOCAL YYYY-MM-DD. toISOString() is UTC — between
+  // local midnight and UTC midnight (e.g. any night in BST) "tomorrow via
+  // toISOString" is still TODAY's local date, which the schema rightly
+  // accepts, so the future-date tests flaked in that window.
+  const toLocalDateStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
   describe('Date validation', () => {
     it('rejects future start dates', () => {
       const futureDate = new Date()
       futureDate.setDate(futureDate.getDate() + 1)
-      const futureDateStr = futureDate.toISOString().split('T')[0]
+      const futureDateStr = toLocalDateStr(futureDate)
 
       const result = albumSchema.safeParse({
         title: 'Test Album',
@@ -77,7 +84,7 @@ describe('Album Form Validation', () => {
     it('rejects future end dates', () => {
       const futureDate = new Date()
       futureDate.setDate(futureDate.getDate() + 1)
-      const futureDateStr = futureDate.toISOString().split('T')[0]
+      const futureDateStr = toLocalDateStr(futureDate)
 
       const result = albumSchema.safeParse({
         title: 'Test Album',

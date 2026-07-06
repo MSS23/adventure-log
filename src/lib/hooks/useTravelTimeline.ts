@@ -86,6 +86,36 @@ function formatHomeName(city?: string | null, country?: string | null): string {
   return [city, country].filter(Boolean).join(', ') || 'Home'
 }
 
+/**
+ * Retry a Supabase query on transient failure with capped exponential backoff.
+ *
+ * WHY: Supabase free-tier instances cold-start slowly, so the FIRST query
+ * after idle frequently fails or times out. `fetchYearData` already had a
+ * coarse effect-level retry, but `fetchAvailableYears` (the initial load) had
+ * NONE — a single blip on that query left the globe permanently stuck on
+ * "Failed to load travel timeline" with no auto-recovery. Wrapping the query
+ * builders here gives every query a few in-place attempts before the error
+ * ever surfaces.
+ *
+ * The builder must be constructed inside `build()` because a Supabase query
+ * builder is a one-shot thenable — it can only be awaited once, so each
+ * attempt needs a fresh builder.
+ */
+async function runQueryWithRetry<T>(
+  build: () => PromiseLike<{ data: T; error: unknown }>,
+  { attempts = 3, baseDelayMs = 800 }: { attempts?: number; baseDelayMs?: number } = {}
+): Promise<{ data: T; error: unknown }> {
+  let result: { data: T; error: unknown } = { data: null as T, error: new Error('query not run') }
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    result = await build()
+    if (!result.error) return result
+    if (attempt < attempts - 1) {
+      await new Promise(resolve => setTimeout(resolve, baseDelayMs * 2 ** attempt))
+    }
+  }
+  return result
+}
+
 export function useTravelTimeline(filterUserId?: string, instanceId?: string): UseTravelTimelineReturn {
   const { user, profile } = useAuth()
   const [homeLocation, setHomeLocation] = useState<HomeLocation | null>(null)
@@ -123,25 +153,29 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     }
 
     try {
-      // Build query with privacy filter
-      let query = supabase
-        .from('albums')
-        .select('id, created_at, date_start, location_name, latitude, longitude, visibility')
-        .eq('user_id', targetUserId)
-        .neq('status', 'draft')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-
       // Apply privacy filters
       const isOwnProfile = user?.id === targetUserId
-      if (!isOwnProfile) {
-        // Include public and friends albums - canViewContent will filter friends-only
-        // for non-friends in fetchYearData
-        query = query.in('visibility', ['public', 'friends'])
-      }
-      // If viewing own profile, show all albums (no additional filter needed)
 
-      const { data, error } = await query
+      // Retry the query in place — a transient cold-start failure here used to
+      // permanently strand the globe (this path had no retry at all).
+      const { data, error } = await runQueryWithRetry(async () => {
+        let query = supabase
+          .from('albums')
+          .select('id, created_at, date_start, location_name, latitude, longitude, visibility')
+          .eq('user_id', targetUserId)
+          .neq('status', 'draft')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+
+        if (!isOwnProfile) {
+          // Include public and friends albums - canViewContent will filter friends-only
+          // for non-friends in fetchYearData
+          query = query.in('visibility', ['public', 'friends'])
+        }
+        // If viewing own profile, show all albums (no additional filter needed)
+
+        return await query
+      })
 
       if (error) throw error
 
@@ -205,34 +239,42 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
    * Fetch detailed travel data for a specific year
    */
   const fetchYearData = useCallback(async (year: number): Promise<YearTravelData | null> => {
-    if (!user?.id) return null
+    // Guard on targetUserId (not user?.id) so this stays consistent with
+    // fetchAvailableYears: it drives which user's albums we load, and gating on
+    // the viewer's id instead made every year "fail" (return null) whenever the
+    // auth user hadn't hydrated yet — which the retry loop then escalated into a
+    // permanent "Failed to load travel timeline".
+    if (!targetUserId) return null
 
     try {
-      // Fetch all albums for the user with location data (exclude drafts)
-      const { data: allAlbums, error: timelineError } = await supabase
-        .from('albums')
-        .select(`
-          id,
-          title,
-          location_name,
-          country_code,
-          latitude,
-          longitude,
-          created_at,
-          date_start,
-          cover_photo_url,
-          favorite_photo_urls,
-          visibility,
-          status,
-          connected_from_album_id,
-          photos(id, file_path)
-        `, { count: 'exact' })
-        .eq('user_id', targetUserId)
-        .neq('status', 'draft')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-        .order('date_start', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: true })
+      // Fetch all albums for the user with location data (exclude drafts).
+      // Retried in place to survive Supabase cold-start blips on this heavy query.
+      const { data: allAlbums, error: timelineError } = await runQueryWithRetry(async () =>
+        supabase
+          .from('albums')
+          .select(`
+            id,
+            title,
+            location_name,
+            country_code,
+            latitude,
+            longitude,
+            created_at,
+            date_start,
+            cover_photo_url,
+            favorite_photo_urls,
+            visibility,
+            status,
+            connected_from_album_id,
+            photos(id, file_path)
+          `, { count: 'exact' })
+          .eq('user_id', targetUserId)
+          .neq('status', 'draft')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .order('date_start', { ascending: true, nullsFirst: false })
+          .order('created_at', { ascending: true })
+      )
 
       if (timelineError) throw timelineError
 

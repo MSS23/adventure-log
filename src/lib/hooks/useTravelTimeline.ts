@@ -87,6 +87,24 @@ function formatHomeName(city?: string | null, country?: string | null): string {
   return [city, country].filter(Boolean).join(', ') || 'Home'
 }
 
+/** Row shape of the shared base-dataset query in fetchYearData. */
+interface TimelineAlbumRow {
+  id: string
+  title: string | null
+  location_name: string | null
+  country_code: string | null
+  latitude: number | string
+  longitude: number | string
+  created_at: string
+  date_start: string | null
+  cover_photo_url: string | null
+  favorite_photo_urls: string[] | null
+  visibility: string | null
+  status: string | null
+  connected_from_album_id: string | null
+  photos: Array<{ id: string; file_path: string }> | null
+}
+
 export function useTravelTimeline(filterUserId?: string, instanceId?: string): UseTravelTimelineReturn {
   const { user, profile } = useAuth()
   const [homeLocation, setHomeLocation] = useState<HomeLocation | null>(null)
@@ -100,6 +118,20 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
 
   // Track which years have been fully loaded (with locations) to prevent re-fetching
   const loadedYearsRef = useRef<Set<number>>(new Set())
+
+  // One base-dataset fetch per viewed user, shared across per-year calls.
+  // "All Years" fires fetchYearData once per year IN PARALLEL, and each call
+  // used to re-download every located album + photo row for the user (the
+  // query has no year filter — year bucketing happens client-side). N years
+  // cost N full-dataset downloads + N photo-count queries + N friendship
+  // checks, which is why other people's globes took so long to grow pins and
+  // travel lines on free-tier Postgres. Caching the PROMISE (not the result)
+  // lets concurrent year calls share a single in-flight request.
+  const baseAlbumsRef = useRef<{
+    userId: string
+    promise: Promise<{ data: TimelineAlbumRow[] | null; error: unknown }>
+  } | null>(null)
+  const friendshipRef = useRef<{ key: string; promise: Promise<boolean> } | null>(null)
 
   // Bounded auto-retry for failed year fetches. fetchYearData swallows its own
   // errors (returns null) so one bad year can't nuke the others — but that
@@ -218,49 +250,66 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     if (!targetUserId) return null
 
     try {
-      // Fetch all albums for the user with location data (exclude drafts).
+      // Fetch all located albums for the user ONCE (exclude drafts) and share
+      // the in-flight promise across every per-year call — see baseAlbumsRef.
       // Retried in place to survive Supabase cold-start blips on this heavy query.
-      const { data: allAlbums, error: timelineError } = await runQueryWithRetry(async () =>
-        supabase
-          .from('albums')
-          .select(`
-            id,
-            title,
-            location_name,
-            country_code,
-            latitude,
-            longitude,
-            created_at,
-            date_start,
-            cover_photo_url,
-            favorite_photo_urls,
-            visibility,
-            status,
-            connected_from_album_id,
-            photos(id, file_path)
-          `, { count: 'exact' })
-          .eq('user_id', targetUserId)
-          .neq('status', 'draft')
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-          .order('date_start', { ascending: true, nullsFirst: false })
-          .order('created_at', { ascending: true })
-      )
+      if (!baseAlbumsRef.current || baseAlbumsRef.current.userId !== targetUserId) {
+        baseAlbumsRef.current = {
+          userId: targetUserId,
+          promise: runQueryWithRetry(async () =>
+            supabase
+              .from('albums')
+              .select(`
+                id,
+                title,
+                location_name,
+                country_code,
+                latitude,
+                longitude,
+                created_at,
+                date_start,
+                cover_photo_url,
+                favorite_photo_urls,
+                visibility,
+                status,
+                connected_from_album_id,
+                photos(id, file_path)
+              `)
+              .eq('user_id', targetUserId)
+              .neq('status', 'draft')
+              .not('latitude', 'is', null)
+              .not('longitude', 'is', null)
+              .order('date_start', { ascending: true, nullsFirst: false })
+              .order('created_at', { ascending: true })
+          ),
+        }
+      }
+      const sharedFetch = baseAlbumsRef.current
+      const { data: allAlbums, error: timelineError } = await sharedFetch.promise
 
-      if (timelineError) throw timelineError
+      if (timelineError) {
+        // Drop the failed promise so the retry tick re-fetches instead of
+        // replaying the cached failure forever.
+        if (baseAlbumsRef.current === sharedFetch) baseAlbumsRef.current = null
+        throw timelineError
+      }
 
       // Determine if viewing own profile (no privacy checks needed)
       const isOwnProfile = user?.id === targetUserId
 
-      // For other profiles, check friendship ONCE (not per album)
+      // For other profiles, check friendship ONCE per (viewer, owner) pair —
+      // shared across the parallel per-year calls like the base dataset.
       let isFriendWithOwner = false
       if (!isOwnProfile && user?.id && targetUserId) {
-        // Single friendship check for all friends-only albums
-        isFriendWithOwner = await areFriends(user.id, targetUserId, supabase)
+        const friendshipKey = `${user.id}:${targetUserId}`
+        if (!friendshipRef.current || friendshipRef.current.key !== friendshipKey) {
+          friendshipRef.current = { key: friendshipKey, promise: areFriends(user.id, targetUserId, supabase) }
+        }
+        isFriendWithOwner = await friendshipRef.current.promise
       }
 
       // Filter albums by privacy and year - NO per-album database calls
-      const privacyFilteredAlbums: typeof allAlbums = []
+      const privacyFilteredAlbums: TimelineAlbumRow[] = []
       for (const album of allAlbums || []) {
         // Exclude drafts (status='draft' OR no photos)
         const isDraft = album.status === 'draft' || !album.photos || album.photos.length === 0
@@ -312,24 +361,6 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         }
       }
 
-      // Batch query photo counts for all albums in a single query
-      const albumIds = timelineData.map(item => item.id)
-      const photoCounts = new Map<string, number>()
-
-      if (albumIds.length > 0) {
-        const { data: photoRows } = await supabase
-          .from('photos')
-          .select('album_id')
-          .in('album_id', albumIds)
-
-        // Count photos per album from the single query result
-        if (photoRows) {
-          for (const row of photoRows) {
-            photoCounts.set(row.album_id, (photoCounts.get(row.album_id) || 0) + 1)
-          }
-        }
-      }
-
       // Process timeline data into travel locations
       const locations: TravelLocation[] = []
       const countriesSet = new Set<string>()
@@ -357,8 +388,10 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
           countriesSet.add(item.country_code)
         }
 
-        // Get photo count from our batch query
-        const photoCount = photoCounts.get(item.id) || 0
+        // The embedded photos relation is unbounded, so its length IS the
+        // photo count (the old separate photos-count query re-downloaded
+        // every photo row per year for data we already had here).
+        const photoCount = Array.isArray(item.photos) ? item.photos.length : 0
         totalPhotos += photoCount
 
         const locationName = formatLocationLabel(item.location_name, item.country_code)
@@ -394,7 +427,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
           coverPhotoUrl,
           favoritePhotoUrls,
           userId: targetUserId,
-          visibility: item.visibility
+          visibility: item.visibility ?? undefined
         }
 
         // Create photo objects - convert file paths to public URLs
@@ -413,8 +446,8 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         const location: TravelLocation = {
           id: item.id,
           name: locationName,
-          latitude: parseFloat(item.latitude),
-          longitude: parseFloat(item.longitude),
+          latitude: Number(item.latitude),
+          longitude: Number(item.longitude),
           type: 'city',
           visitDate,
           albums: [albumData],
@@ -480,6 +513,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     try {
       // Clear existing year data and loaded tracking to force refresh
       loadedYearsRef.current.clear()
+      baseAlbumsRef.current = null
       yearRetryAttemptsRef.current = 0
       setYearData({})
 
@@ -620,6 +654,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       refreshTimeout = setTimeout(async () => {
         // Clear loaded years tracking to force re-fetch
         loadedYearsRef.current.clear()
+        baseAlbumsRef.current = null
         setYearData({})
         await fetchAvailableYears()
       }, 1000) // Wait 1 second before refreshing

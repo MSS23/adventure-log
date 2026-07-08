@@ -124,6 +124,14 @@ const nextConfig: NextConfig = {
           pathname: '/**',
         },
         {
+          // Google OAuth profile photos (users.avatar_url stores the
+          // lh3.googleusercontent.com URL captured at signup — migration 79)
+          protocol: 'https',
+          hostname: '*.googleusercontent.com',
+          port: '',
+          pathname: '/**',
+        },
+        {
           protocol: 'https',
           hostname: 'staticmap.openstreetmap.de',
           port: '',

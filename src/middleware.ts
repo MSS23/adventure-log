@@ -3,6 +3,36 @@ import { createServerClient } from '@supabase/ssr'
 import { rateLimit as redisRateLimit } from '@/lib/utils/rate-limit-redis'
 
 // ============================================
+// Expired-session log noise filter
+// ============================================
+//
+// When a returning user's refresh token has expired, auth-js's
+// _recoverAndRefresh does a raw `console.error(AuthApiError: Invalid Refresh
+// Token: ...)` from inside `supabase.auth.getUser()` — there's no option to
+// lower it and no way to catch it (the promise itself resolves normally).
+// That's a routine "please sign in again", not a fault, but every hit lands
+// in the production error stream watched during launch. Downgrade exactly
+// that signature to a warn; everything else passes through untouched.
+const EXPIRED_REFRESH_TOKEN_SNIPPETS = ['refresh_token_not_found', 'Invalid Refresh Token']
+function isExpiredRefreshTokenArg(arg: unknown): boolean {
+  const text =
+    typeof arg === 'string'
+      ? arg
+      : arg instanceof Error
+        ? `${(arg as Error & { code?: string }).code ?? ''} ${arg.message}`
+        : ''
+  return EXPIRED_REFRESH_TOKEN_SNIPPETS.some((s) => text.includes(s))
+}
+const originalConsoleError = console.error.bind(console)
+console.error = (...args: unknown[]) => {
+  if (args.some(isExpiredRefreshTokenArg)) {
+    console.warn('[middleware] session refresh token expired — user must sign in again')
+    return
+  }
+  originalConsoleError(...args)
+}
+
+// ============================================
 // Rate Limiting Configuration
 // ============================================
 //

@@ -16,6 +16,7 @@ import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage
 import { BackButton } from '@/components/common/BackButton'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { filterDuplicatePhotos } from '@/lib/utils/photo-deduplication'
+import { runQueryWithRetry, isNoRowsError } from '@/lib/utils/query-retry'
 import { toast } from 'sonner'
 import { InteractivePhotoGallery } from '@/components/albums/InteractivePhotoGallery'
 import { LiveViewers } from '@/components/albums/LiveViewers'
@@ -106,15 +107,22 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
       setLoading(true)
       setError(null)
 
-      // Fetch album details
-      const { data: albumData, error: albumError } = await supabase
-        .from('albums')
-        .select('*')
-        .eq('id', albumId)
-        .single()
+      // Fetch album details. Retried in place: a Supabase cold start on this
+      // query used to strand the album page on the error card (same failure
+      // mode the feed and globe timeline already guard against). A genuine
+      // no-rows result must NOT retry — deleted albums should resolve fast.
+      const { data: albumData, error: albumError } = await runQueryWithRetry(
+        () =>
+          supabase
+            .from('albums')
+            .select('*')
+            .eq('id', albumId)
+            .single(),
+        { shouldRetry: (err) => !isNoRowsError(err) }
+      )
 
       if (albumError) {
-        if (albumError.code === 'PGRST116' || albumError.message?.includes('No rows')) {
+        if (isNoRowsError(albumError)) {
           setIsDeleted(true)
           setLoading(false)
           return
@@ -176,12 +184,14 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
       // Fetch photos for this album
       // order_index is the column all writers populate (display_order was a
       // never-written twin — sorting by it silently fell back to created_at).
-      const { data: photosData, error: photosError } = await supabase
-        .from('photos')
-        .select('*')
-        .eq('album_id', albumId)
-        .order('order_index', { ascending: true })
-        .order('created_at', { ascending: true })
+      const { data: photosData, error: photosError } = await runQueryWithRetry(() =>
+        supabase
+          .from('photos')
+          .select('*')
+          .eq('album_id', albumId)
+          .order('order_index', { ascending: true })
+          .order('created_at', { ascending: true })
+      )
 
       if (photosError) {
         setPhotos([])

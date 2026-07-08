@@ -285,6 +285,25 @@ export default function FeedPage() {
   })
   const isFirstRun = myAlbumCount === 0
 
+  // Brand-new account (0 follows, 0 albums): the Friends tab resolves to an
+  // empty list, which new users consistently read as "the feed doesn't load".
+  // Swap them to Discover once so their first screen has real content; the
+  // flag makes it one-time, so tabbing back to Friends is respected.
+  const [autoSwitchedToDiscover, setAutoSwitchedToDiscover] = useState(false)
+  useEffect(() => {
+    if (
+      !autoSwitchedToDiscover &&
+      mode === 'following' &&
+      !loading &&
+      !loadError &&
+      albums.length === 0 &&
+      myAlbumCount === 0
+    ) {
+      setAutoSwitchedToDiscover(true)
+      setMode('discover')
+    }
+  }, [autoSwitchedToDiscover, mode, loading, loadError, albums.length, myAlbumCount])
+
   // Infinite scroll: a sentinel above the "Load more" fallback button fetches
   // the next page as it approaches the viewport — the button remains for
   // reduced-motion/failed-observer cases.
@@ -419,6 +438,14 @@ export default function FeedPage() {
       </div>
 
       <MemoryLaneCard />
+
+      {/* Context line for the one-time empty-Friends → Discover swap above */}
+      {autoSwitchedToDiscover && mode === 'discover' && (
+        <p className="mb-4 rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+          Your Friends feed is empty for now, so here&apos;s what travelers everywhere are
+          posting. Follow a few of them to build your own feed.
+        </p>
+      )}
 
       {loading ? (
         <FeedSkeleton />

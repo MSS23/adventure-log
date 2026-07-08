@@ -1,0 +1,39 @@
+# Keep the free-tier Supabase instance warm.
+#
+# WHY: the Supabase free tier idles after inactivity; the first queries on
+# resume fail at the network layer / return PGRST002 for up to ~30s, which is
+# the root cause of every "the feed doesn't load" report. The client-side
+# retry hardening papers over it, but the real mitigation is to never let the
+# instance go cold: /api/health runs a cheap `users` select on every hit, so
+# pinging it keeps PostgREST + the database awake (and counts as project
+# activity against the 7-day free-tier pause).
+#
+# GitHub Actions is the vehicle because Vercel Hobby crons are daily-only.
+# Schedule is every 10 minutes; GH may delay ticks by a few minutes under
+# load, which is fine — the goal is "never idle for hours", not precision.
+#
+# Retire this (delete the file) if the project moves to Supabase Pro, which
+# doesn't pause.
+
+name: Keep warm
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping /api/health (touches the database)
+        run: |
+          status=$(curl -s -o /tmp/health.json -w '%{http_code}' --max-time 60 \
+            https://adventure-log-azure.vercel.app/api/health)
+          echo "HTTP $status"
+          cat /tmp/health.json || true
+          # 200 = healthy/degraded is fine; only a hard failure should alert.
+          [ "$status" = "200" ]

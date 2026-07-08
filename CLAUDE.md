@@ -11,7 +11,7 @@ Adventure Log is a social travel logging platform built with Next.js 15, TypeScr
 - **Language:** TypeScript (strict mode)
 - **Database:** Supabase (PostgreSQL with RLS)
 - **Styling:** Tailwind CSS v4
-- **State:** React Query + React Context (no Zustand — the dependency lingers in package.json with zero imports)
+- **State:** React Query + React Context (no Zustand)
 - **AI:** `@anthropic-ai/sdk` (Claude, server-only in `src/lib/ai/claude.ts`)
 - **Mobile:** Capacitor 7.x (iOS/Android)
 - **3D Visualization:** react-globe.gl + Three.js
@@ -216,7 +216,7 @@ Provides consistent spacing (4px grid), typography, shadows, and interactive sta
   - 5min staleTime, 10min gcTime
   - Auto-refetch on window focus
   - 2 retry attempts with exponential backoff
-- **Client State:** React Context (`AuthProvider`, `AchievementProvider`, `UnreadCountProvider`, `ThemeContext`) — Zustand is NOT used (zero imports)
+- **Client State:** React Context (`AuthProvider`, `AchievementProvider`, `UnreadCountProvider`, `ThemeContext`) — Zustand is NOT used (removed from package.json)
 - **Form State:** React Hook Form + Zod validation
 
 ---
@@ -513,7 +513,7 @@ export async function GET(request: NextRequest) {
 
 Globe-specific hooks also live in `src/components/globe/hooks/` (e.g. `useGlobeState`).
 
-**Dead files (0 imports, candidates for deletion):** `useDiscoverFeed`, `useFeedData`, `useSmartLocation`, `useUserLevels`.
+(The formerly dead hooks `useDiscoverFeed`, `useFeedData`, `useSmartLocation`, `useUserLevels` were deleted — don't reference them.)
 
 **Do NOT reference these — they don't exist anywhere in src/:** `useSupabaseQuery`, `useSupabaseTable`, `useSupabaseRPC`, `useSupabaseMutation`, `usePhotos`, `usePhotoUpload`, `useAsyncOperation`, `useAsyncList`, `useAsyncPagination`, `useReactions`, `useGlobeReactions`, `useRealTime`, `useImageOptimization`, `useKeyboardNavigation`. (There is an `imageOptimization` utility class in `src/lib/utils/imageOptimization.ts`, but no hook.)
 
@@ -614,7 +614,7 @@ The working branch is `master` (workflows target both `main` and `master`). Reco
 
 ### Image Optimization
 
-**Reality check: no size variants are generated.** There is no `-thumbnail`/`-medium`/`-large` pipeline anywhere in src/ (and `sharp`, though in package.json, has zero imports). `getPhotoUrl()` always returns the URL of the single stored original.
+**Reality check: no size variants are generated.** There is no `-thumbnail`/`-medium`/`-large` pipeline anywhere in src/ (`sharp` is a devDependency used only by `scripts/generate-pwa-assets.mjs`). `getPhotoUrl()` always returns the URL of the single stored original.
 
 **Actual upload pipeline (one image, processed client-side):**
 1. `prepareImageForUpload()` (`src/lib/utils/prepare-upload.ts`) strips metadata (including GPS EXIF) and resizes via canvas, using `uploadSecurity.imageProcessing` maxWidth/quality
@@ -1045,7 +1045,7 @@ supabase db push
 # ...
 ```
 
-**Migration files:** 73 `.sql` files, numbered `02`–`74` (there is no `01` or `19`, and `60` is duplicated: `60_album_favorites.sql` and `60_parental_controls.sql`). Latest: `74_fix_rls_initplan_performance.sql`. The directory also has `README.md` / `README_DATABASE_SETUP.md`.
+**Migration files:** numbered `02`–`78` (there is no `01` or `19`, and `60` is duplicated: `60_album_favorites.sql` and `60_parental_controls.sql`). Latest: `78_drop_photos_display_order.sql`. The directory also has `README.md` / `README_DATABASE_SETUP.md`.
 
 ### Health Checks
 

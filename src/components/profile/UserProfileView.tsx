@@ -231,7 +231,15 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
         albums: albumsData || [],
         followStats: await fetchFollowStats(userData.id)
       }
-    }
+    },
+    // Supabase free-tier cold starts fail the first queries at the network
+    // layer for up to ~30s; the provider default (2 retries, ~3s) gives up
+    // inside that window and strands the profile on the error card — the same
+    // failure mode the feed fixed with per-query retry. "User not found" is
+    // a real answer, not a transient error, so it must surface immediately.
+    retry: (failureCount, err) =>
+      failureCount < 5 && !(err instanceof Error && err.message === 'User not found'),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 8000),
   })
 
   // Perform the own-profile redirect once the query resolves to that sentinel.

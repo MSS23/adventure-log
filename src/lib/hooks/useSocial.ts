@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
+import { runQueryWithRetry } from '@/lib/utils/query-retry'
 
 export interface Like {
   id: string
@@ -359,32 +360,38 @@ export function useComments(albumId?: string, photoId?: string) {
   const fetchComments = useCallback(async () => {
     const supabase = createClient()
     try {
-      let query = supabase
-        .from('comments')
-        .select(`
-          id,
-          content,
-          user_id,
-          target_type,
-          target_id,
-          created_at,
-          updated_at,
-          users!comments_user_id_fkey(
+      // Built inside the retry closure (a Supabase builder is one-shot) and
+      // retried in place: cold-start blips and statement timeouts (57014,
+      // seen live on this exact fetch) used to silently leave an album with
+      // zero comments until a full page reload.
+      const { data: commentsData, error: commentsError } = await runQueryWithRetry(() => {
+        let query = supabase
+          .from('comments')
+          .select(`
             id,
-            username,
-            display_name,
-            avatar_url
-          )
-        `)
-        .order('created_at', { ascending: true })
+            content,
+            user_id,
+            target_type,
+            target_id,
+            created_at,
+            updated_at,
+            users!comments_user_id_fkey(
+              id,
+              username,
+              display_name,
+              avatar_url
+            )
+          `)
+          .order('created_at', { ascending: true })
 
-      if (albumId) {
-        query = query.eq('target_type', 'album').eq('target_id', albumId)
-      } else if (photoId) {
-        query = query.eq('target_type', 'photo').eq('target_id', photoId)
-      }
+        if (albumId) {
+          query = query.eq('target_type', 'album').eq('target_id', albumId)
+        } else if (photoId) {
+          query = query.eq('target_type', 'photo').eq('target_id', photoId)
+        }
 
-      const { data: commentsData, error: commentsError } = await query
+        return query
+      })
 
       if (commentsError) throw commentsError
 

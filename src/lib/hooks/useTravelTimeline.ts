@@ -9,6 +9,7 @@ import { formatLocationLabel } from '@/lib/utils/country'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { haversineKm } from '@/lib/utils/geoCalculations'
+import { runQueryWithRetry } from '@/lib/utils/query-retry'
 
 interface TravelLocation {
   id: string
@@ -84,36 +85,6 @@ interface UseTravelTimelineReturn {
 
 function formatHomeName(city?: string | null, country?: string | null): string {
   return [city, country].filter(Boolean).join(', ') || 'Home'
-}
-
-/**
- * Retry a Supabase query on transient failure with capped exponential backoff.
- *
- * WHY: Supabase free-tier instances cold-start slowly, so the FIRST query
- * after idle frequently fails or times out. `fetchYearData` already had a
- * coarse effect-level retry, but `fetchAvailableYears` (the initial load) had
- * NONE — a single blip on that query left the globe permanently stuck on
- * "Failed to load travel timeline" with no auto-recovery. Wrapping the query
- * builders here gives every query a few in-place attempts before the error
- * ever surfaces.
- *
- * The builder must be constructed inside `build()` because a Supabase query
- * builder is a one-shot thenable — it can only be awaited once, so each
- * attempt needs a fresh builder.
- */
-async function runQueryWithRetry<T>(
-  build: () => PromiseLike<{ data: T; error: unknown }>,
-  { attempts = 3, baseDelayMs = 800 }: { attempts?: number; baseDelayMs?: number } = {}
-): Promise<{ data: T; error: unknown }> {
-  let result: { data: T; error: unknown } = { data: null as T, error: new Error('query not run') }
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    result = await build()
-    if (!result.error) return result
-    if (attempt < attempts - 1) {
-      await new Promise(resolve => setTimeout(resolve, baseDelayMs * 2 ** attempt))
-    }
-  }
-  return result
 }
 
 export function useTravelTimeline(filterUserId?: string, instanceId?: string): UseTravelTimelineReturn {

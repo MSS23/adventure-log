@@ -9,7 +9,6 @@ import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Camera, Heart } from 'lu
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { useDoubleTapTouch } from '@/lib/hooks/useDoubleTap'
-import { useLikes } from '@/lib/hooks/useSocial'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { useAuth } from '@/components/auth/AuthProvider'
 
@@ -26,6 +25,13 @@ interface InteractivePhotoGalleryProps {
   albumId?: string
   className?: string
   onDoubleTapLike?: () => void
+  /**
+   * Like state/action threaded from the parent's useLikes. The gallery used
+   * to mount its own useLikes(albumId), duplicating the parent's fetches and
+   * realtime channel on every album view.
+   */
+  isLiked?: boolean
+  onToggleLike?: () => void
 }
 
 export function InteractivePhotoGallery({
@@ -33,7 +39,9 @@ export function InteractivePhotoGallery({
   albumTitle,
   albumId,
   className,
-  onDoubleTapLike
+  onDoubleTapLike,
+  isLiked = false,
+  onToggleLike
 }: InteractivePhotoGalleryProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -46,8 +54,7 @@ export function InteractivePhotoGallery({
   const [showHeartAnimation, setShowHeartAnimation] = useState(false)
   const { user } = useAuth()
 
-  // Double-tap to like hooks
-  const { toggleLike, isLiked } = useLikes(albumId)
+  // Double-tap to like haptics
   const { triggerDoubleTap } = useHaptics()
 
   // Handle double-tap to like (Instagram-style: only likes, doesn't unlike)
@@ -63,12 +70,12 @@ export function InteractivePhotoGallery({
 
     // Only like if not already liked (Instagram behavior)
     if (!isLiked) {
-      toggleLike()
+      onToggleLike?.()
     }
 
     // Call parent handler if provided
     onDoubleTapLike?.()
-  }, [albumId, user?.id, isLiked, toggleLike, triggerDoubleTap, onDoubleTapLike])
+  }, [albumId, user?.id, isLiked, onToggleLike, triggerDoubleTap, onDoubleTapLike])
 
   const { handleTouchStart, handleTouchEnd, cleanup } = useDoubleTapTouch({
     onDoubleTap: handleDoubleTapLike,
@@ -375,7 +382,7 @@ export function InteractivePhotoGallery({
       >
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
           {photos.map((photo, index) => {
-            const photoUrl = getPhotoUrl(photo.file_path)
+            const photoUrl = getPhotoUrl(photo.file_path, 'photos', 128)
             return (
               <motion.button
                 key={photo.id}
@@ -619,7 +626,7 @@ function Lightbox({
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
           <div className="flex justify-center gap-2 overflow-x-auto pb-2">
             {photos.map((photo, index) => {
-              const thumbUrl = getPhotoUrl(photo.file_path)
+              const thumbUrl = getPhotoUrl(photo.file_path, 'photos', 128)
               return (
                 <motion.button
                   key={photo.id}

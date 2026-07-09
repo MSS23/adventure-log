@@ -41,7 +41,19 @@ interface UseFollowsReturn {
   refreshFollowLists: () => Promise<void>
 }
 
-export function useFollows(targetUserId?: string): UseFollowsReturn {
+export function useFollows(
+  targetUserId?: string,
+  options?: {
+    /**
+     * Skip the viewer-wide eager work (6 stats/lists queries + a realtime
+     * channel) and only expose follow status + actions. For pages that just
+     * render a Follow button (profile view, album detail) — the eager load
+     * is about the VIEWER's own follow graph, which those pages never show.
+     */
+    statusOnly?: boolean
+  }
+): UseFollowsReturn {
+  const statusOnly = options?.statusOnly ?? false
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -392,6 +404,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
 
   // Initial data load - only run once per user session
   useEffect(() => {
+    if (statusOnly) return
     if (user?.id && loadedForUserIdRef.current !== user.id) {
       loadedForUserIdRef.current = user.id
       refreshStats()
@@ -402,7 +415,7 @@ export function useFollows(targetUserId?: string): UseFollowsReturn {
 
   // Real-time subscription for follow changes
   useEffect(() => {
-    if (!user?.id) return
+    if (statusOnly || !user?.id) return
 
     // Topic must be unique PER HOOK INSTANCE: realtime-js "leaves open topics"
     // on subscribe, so with the shared `follows-${user.id}` topic every newly

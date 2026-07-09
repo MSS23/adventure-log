@@ -20,6 +20,7 @@ import { User, Album } from '@/types/database'
 import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
 import { useFollows } from '@/lib/hooks/useFollows'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
+import { prefetchGlobeBaseDataset } from '@/lib/globe/base-dataset'
 import { getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji } from '@/lib/utils/country'
 import Image from 'next/image'
@@ -28,6 +29,12 @@ import Link from 'next/link'
 // "spider's web" as the main /globe page. It lazy-loads react-globe.gl
 // internally with ssr:false, so no dynamic() wrapper is needed here.
 import { ProfileGlobe, type ProfileGlobeLocation } from '@/components/globe/ProfileGlobe'
+
+// Grid tiles rendered before "Load more". The query stays unbounded — the
+// rows are 11 light columns and the countries stat + globe teaser need ALL
+// albums to be correct — but rendering every cover image at once is what
+// actually hurt on long profiles.
+const ALBUM_PAGE_SIZE = 30
 
 // View-model returned by the profile query. The sentinel `redirectToOwn`
 // signals that the viewer is looking at their own profile.
@@ -45,7 +52,7 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
   const { user: currentUser, authLoading } = useAuth()
   const queryClient = useQueryClient()
   const supabase = useMemo(() => createClient(), [])
-  const { getFollowStatus, followUser, unfollowUser } = useFollows()
+  const { getFollowStatus, followUser, unfollowUser } = useFollows(undefined, { statusOnly: true })
   const [followLoading, setFollowLoading] = useState(false)
 
   const viewerId = currentUser?.id ?? null
@@ -209,12 +216,20 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
         }
       }
 
-      // Fetch user's albums
-      const { data: albumsData, error: albumsError } = await supabase
-        .from('albums')
-        .select('*')
-        .eq('user_id', userData.id)
-        .order('created_at', { ascending: false })
+      // Fetch the user's albums and follow counts in parallel. Only the
+      // columns the grid + globe teaser render — select('*') dragged every
+      // heavy text column of every album across the wire, and the counts
+      // used to wait behind it. Drafts are excluded like every other
+      // cross-user surface (globe, wrapped).
+      const [{ data: albumsData, error: albumsError }, followStats] = await Promise.all([
+        supabase
+          .from('albums')
+          .select('id, title, location_name, country_code, latitude, longitude, date_start, created_at, connected_from_album_id, cover_photo_url, cover_image_url')
+          .eq('user_id', userData.id)
+          .neq('status', 'draft')
+          .order('created_at', { ascending: false }),
+        fetchFollowStats(userData.id)
+      ])
 
       if (albumsError) {
         log.error('Error fetching albums', {
@@ -228,8 +243,8 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
         profile: userData,
         isPrivate: false,
         followStatus: resolvedFollowStatus,
-        albums: albumsData || [],
-        followStats: await fetchFollowStats(userData.id)
+        albums: (albumsData || []) as ProfileViewModel['albums'],
+        followStats
       }
     },
     // Supabase free-tier cold starts fail the first queries at the network
@@ -256,11 +271,13 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
   // Local follow status/stats, seeded from the query and updated by the toggle.
   const [followStatusOverride, setFollowStatusOverride] = useState<'not_following' | 'following' | 'pending' | 'blocked' | null>(null)
   const [followStatsOverride, setFollowStatsOverride] = useState<{ followersCount: number; followingCount: number } | null>(null)
+  const [visibleAlbumCount, setVisibleAlbumCount] = useState(ALBUM_PAGE_SIZE)
 
   // Reset overrides whenever a fresh view-model arrives.
   useEffect(() => {
     setFollowStatusOverride(null)
     setFollowStatsOverride(null)
+    setVisibleAlbumCount(ALBUM_PAGE_SIZE)
   }, [viewModel])
 
   const followStatus = followStatusOverride ?? viewModel?.followStatus ?? 'not_following'
@@ -308,6 +325,17 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
     }
   }, [queryError, userIdOrUsername])
 
+  // Warm this user's globe dataset while the viewer reads their profile, so
+  // tapping the globe teaser / "Explore globe" paints pins instantly instead
+  // of re-running the heavy albums+photos download. Delayed so it never
+  // competes with the profile's own first paint; deduped + TTL'd by the
+  // base-dataset module, so repeat visits inside the TTL cost nothing.
+  useEffect(() => {
+    if (!profile?.id || isPrivate || footprint.length === 0) return
+    const timer = setTimeout(() => prefetchGlobeBaseDataset(supabase, profile.id), 1500)
+    return () => clearTimeout(timer)
+  }, [profile?.id, isPrivate, footprint.length, supabase])
+
   const handleFollowToggle = async () => {
     if (!profile) return
 
@@ -340,9 +368,36 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
   }
 
   if (loading) {
+    // Skeleton mirroring the loaded layout (hero card → stats → album grid)
+    // so the page doesn't flash from a centered spinner to full content.
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background" aria-busy="true" aria-label="Loading profile">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-24 space-y-8">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              <div className="h-24 w-24 rounded-full bg-muted animate-pulse shrink-0" />
+              <div className="flex-1 w-full flex flex-col items-center sm:items-start gap-3">
+                <div className="h-7 w-44 max-w-full rounded-md bg-muted animate-pulse" />
+                <div className="h-4 w-28 rounded-md bg-muted animate-pulse" />
+                <div className="h-4 w-64 max-w-full rounded-md bg-muted animate-pulse" />
+                <div className="h-9 w-28 rounded-full bg-muted animate-pulse mt-1" />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3 sm:gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-16 rounded-2xl bg-muted animate-pulse" />
+            ))}
+          </div>
+          <div>
+            <div className="h-4 w-24 rounded-md bg-muted animate-pulse mb-3" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="aspect-[4/3] rounded-2xl bg-muted animate-pulse" />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -510,7 +565,7 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
           <p className="al-eyebrow mb-3">Adventures</p>
           {albums.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-              {albums.map((album) => (
+              {albums.slice(0, visibleAlbumCount).map((album) => (
                 <Link
                   key={album.id}
                   href={`/albums/${album.id}`}
@@ -518,7 +573,7 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
                 >
                   {album.cover_photo_url || album.cover_image_url ? (
                     <Image
-                      src={getPhotoUrl(album.cover_photo_url || album.cover_image_url) || ''}
+                      src={getPhotoUrl(album.cover_photo_url || album.cover_image_url, 'photos', 640) || ''}
                       alt={album.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
@@ -545,6 +600,18 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
                 <Camera className="h-6 w-6" />
               </div>
               <p className="text-sm text-muted-foreground">No public albums yet</p>
+            </div>
+          )}
+
+          {albums.length > visibleAlbumCount && (
+            <div className="flex justify-center mt-6">
+              <Button
+                variant="outline"
+                className="cursor-pointer rounded-full"
+                onClick={() => setVisibleAlbumCount((count) => count + ALBUM_PAGE_SIZE)}
+              >
+                Load more ({albums.length - visibleAlbumCount} remaining)
+              </Button>
             </div>
           )}
         </div>

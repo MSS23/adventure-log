@@ -45,7 +45,7 @@ function GlobePageContent() {
     albums, selectedAlbumId, setSelectedAlbumId, stats, totalDistance, handleAlbumClick,
     isOwnProfile, isPrivateAccount, profileUser, followStatus,
     isDataError, refetchGlobeData,
-    friends, handleViewFriendGlobe,
+    friends, handleViewFriendGlobe, handlePrefetchFriendGlobe,
     selectedYear, setSelectedYear, availableYears,
     hideEmptyCta, setHideEmptyCta,
     exploreMode, setExploreMode, exploreAlbums, exploreLoading, exploreStats,
@@ -124,6 +124,7 @@ function GlobePageContent() {
         setSelectedYear={setSelectedYear}
         friends={friends}
         onViewFriendGlobe={handleViewFriendGlobe}
+        onPrefetchFriendGlobe={handlePrefetchFriendGlobe}
         showWishlist={showWishlist}
         setShowWishlist={setShowWishlist}
         setWishlistPrompt={() => setWishlistPrompt(null)}

@@ -9,7 +9,11 @@ import { formatLocationLabel } from '@/lib/utils/country'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { haversineKm } from '@/lib/utils/geoCalculations'
-import { runQueryWithRetry } from '@/lib/utils/query-retry'
+import {
+  fetchGlobeBaseDataset,
+  invalidateGlobeBaseDataset,
+  type GlobeAlbumRow,
+} from '@/lib/globe/base-dataset'
 
 interface TravelLocation {
   id: string
@@ -87,23 +91,20 @@ function formatHomeName(city?: string | null, country?: string | null): string {
   return [city, country].filter(Boolean).join(', ') || 'Home'
 }
 
-/** Row shape of the shared base-dataset query in fetchYearData. */
-interface TimelineAlbumRow {
-  id: string
-  title: string | null
-  location_name: string | null
-  country_code: string | null
-  latitude: number | string
-  longitude: number | string
-  created_at: string
-  date_start: string | null
-  cover_photo_url: string | null
-  favorite_photo_urls: string[] | null
-  visibility: string | null
-  status: string | null
-  connected_from_album_id: string | null
-  photos: Array<{ id: string; file_path: string }> | null
-}
+/**
+ * Row shape of the shared base-dataset query — one download serves this hook
+ * AND useGlobePageData (see src/lib/globe/base-dataset.ts, which also owns
+ * the cross-mount caching).
+ */
+type TimelineAlbumRow = GlobeAlbumRow
+
+/**
+ * Cross-mount friendship cache: navigating to a friend's globe and back used
+ * to re-run the two-directional follows check every time. 5 minutes matches
+ * the app-wide React Query staleTime.
+ */
+const CROSS_USER_CACHE_TTL_MS = 5 * 60_000
+const crossUserFriendshipCache = new Map<string, { at: number; promise: Promise<boolean> }>()
 
 export function useTravelTimeline(filterUserId?: string, instanceId?: string): UseTravelTimelineReturn {
   const { user, profile } = useAuth()
@@ -159,28 +160,21 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       // Apply privacy filters
       const isOwnProfile = user?.id === targetUserId
 
-      // Retry the query in place — a transient cold-start failure here used to
-      // permanently strand the globe (this path had no retry at all).
-      const { data, error } = await runQueryWithRetry(async () => {
-        let query = supabase
-          .from('albums')
-          .select('id, created_at, date_start, location_name, latitude, longitude, visibility')
-          .eq('user_id', targetUserId)
-          .neq('status', 'draft')
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
-
-        if (!isOwnProfile) {
-          // Include public and friends albums - canViewContent will filter friends-only
-          // for non-friends in fetchYearData
-          query = query.in('visibility', ['public', 'friends'])
-        }
-        // If viewing own profile, show all albums (no additional filter needed)
-
-        return await query
+      // Shared base dataset (retried internally) — the year buckets derive
+      // from the same located-albums download that fetchYearData and the
+      // globe page header use, so this costs zero extra round trips.
+      const { data: allRows, error } = await fetchGlobeBaseDataset(supabase, targetUserId, {
+        isOwnProfile,
       })
 
       if (error) throw error
+
+      // Parity with the old dedicated query: other users' year badges only
+      // count public + friends albums (RLS already scopes rows server-side;
+      // fetchYearData applies the fine-grained friend check per album).
+      const data = isOwnProfile
+        ? allRows
+        : allRows?.filter(a => a.visibility === 'public' || a.visibility === 'friends')
 
       // Extract unique years and count locations per year
       const yearLocationCounts = new Map<number, Set<string>>()
@@ -250,38 +244,15 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     if (!targetUserId) return null
 
     try {
-      // Fetch all located albums for the user ONCE (exclude drafts) and share
-      // the in-flight promise across every per-year call — see baseAlbumsRef.
-      // Retried in place to survive Supabase cold-start blips on this heavy query.
+      // Shared base dataset (see src/lib/globe/base-dataset.ts): one download
+      // serves every per-year call here, the availableYears buckets, AND the
+      // globe page header/stats — retried and cross-mount cached internally.
+      const isOwnProfile = user?.id === targetUserId
+
       if (!baseAlbumsRef.current || baseAlbumsRef.current.userId !== targetUserId) {
         baseAlbumsRef.current = {
           userId: targetUserId,
-          promise: runQueryWithRetry(async () =>
-            supabase
-              .from('albums')
-              .select(`
-                id,
-                title,
-                location_name,
-                country_code,
-                latitude,
-                longitude,
-                created_at,
-                date_start,
-                cover_photo_url,
-                favorite_photo_urls,
-                visibility,
-                status,
-                connected_from_album_id,
-                photos(id, file_path)
-              `)
-              .eq('user_id', targetUserId)
-              .neq('status', 'draft')
-              .not('latitude', 'is', null)
-              .not('longitude', 'is', null)
-              .order('date_start', { ascending: true, nullsFirst: false })
-              .order('created_at', { ascending: true })
-          ),
+          promise: fetchGlobeBaseDataset(supabase, targetUserId, { isOwnProfile }),
         }
       }
       const sharedFetch = baseAlbumsRef.current
@@ -289,21 +260,29 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
 
       if (timelineError) {
         // Drop the failed promise so the retry tick re-fetches instead of
-        // replaying the cached failure forever.
+        // replaying the cached failure forever (the module cache already
+        // self-invalidated on the error).
         if (baseAlbumsRef.current === sharedFetch) baseAlbumsRef.current = null
         throw timelineError
       }
 
-      // Determine if viewing own profile (no privacy checks needed)
-      const isOwnProfile = user?.id === targetUserId
-
       // For other profiles, check friendship ONCE per (viewer, owner) pair —
-      // shared across the parallel per-year calls like the base dataset.
+      // shared across the parallel per-year calls like the base dataset, and
+      // across mounts via the module cache.
       let isFriendWithOwner = false
       if (!isOwnProfile && user?.id && targetUserId) {
         const friendshipKey = `${user.id}:${targetUserId}`
         if (!friendshipRef.current || friendshipRef.current.key !== friendshipKey) {
-          friendshipRef.current = { key: friendshipKey, promise: areFriends(user.id, targetUserId, supabase) }
+          const cachedFriendship = crossUserFriendshipCache.get(friendshipKey)
+          if (cachedFriendship && Date.now() - cachedFriendship.at < CROSS_USER_CACHE_TTL_MS) {
+            friendshipRef.current = { key: friendshipKey, promise: cachedFriendship.promise }
+          } else {
+            const friendshipPromise = areFriends(user.id, targetUserId, supabase)
+            // Never replay a rejection from the cache for the full TTL.
+            friendshipPromise.catch(() => crossUserFriendshipCache.delete(friendshipKey))
+            friendshipRef.current = { key: friendshipKey, promise: friendshipPromise }
+            crossUserFriendshipCache.set(friendshipKey, { at: Date.now(), promise: friendshipPromise })
+          }
         }
         isFriendWithOwner = await friendshipRef.current.promise
       }
@@ -402,20 +381,21 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
         // First, try the cover_photo_url field
         const coverPhotoPath = item.cover_photo_url
         if (coverPhotoPath) {
-          // getPhotoUrl handles full-URL passthrough + storage conversion + validation
-          coverPhotoUrl = getPhotoUrl(coverPhotoPath)
+          // getPhotoUrl handles full-URL passthrough + storage conversion +
+          // validation; 640 covers the small globe pin cards/popups
+          coverPhotoUrl = getPhotoUrl(coverPhotoPath, 'photos', 640)
         }
 
         // Fallback to first photo if no cover photo is set
         if (!coverPhotoUrl && item.photos && item.photos.length > 0 && item.photos[0].file_path) {
-          coverPhotoUrl = getPhotoUrl(item.photos[0].file_path)
+          coverPhotoUrl = getPhotoUrl(item.photos[0].file_path, 'photos', 640)
         }
 
         // Get favorite photo URLs if available
         let favoritePhotoUrls: string[] | undefined = undefined
         if (item.favorite_photo_urls && Array.isArray(item.favorite_photo_urls)) {
           favoritePhotoUrls = item.favorite_photo_urls
-            .map(path => getPhotoUrl(path) || '')
+            .map(path => getPhotoUrl(path, 'photos', 640) || '')
             .filter(url => url) // Filter out invalid URLs
         }
 
@@ -511,9 +491,12 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
     setError(null)
 
     try {
-      // Clear existing year data and loaded tracking to force refresh
+      // Clear existing year data and loaded tracking to force refresh —
+      // including the cross-mount module cache, or an explicit refresh of
+      // someone else's globe would silently replay the cached dataset.
       loadedYearsRef.current.clear()
       baseAlbumsRef.current = null
+      if (targetUserId) invalidateGlobeBaseDataset(targetUserId)
       yearRetryAttemptsRef.current = 0
       setYearData({})
 
@@ -523,7 +506,7 @@ export function useTravelTimeline(filterUserId?: string, instanceId?: string): U
       setError(err instanceof Error ? err.message : 'Failed to refresh data')
       setLoading(false)
     }
-  }, [fetchAvailableYears, user?.id])
+  }, [fetchAvailableYears, user?.id, targetUserId])
 
   /**
    * Get cached year data or fetch if not available

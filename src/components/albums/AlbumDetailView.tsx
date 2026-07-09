@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
@@ -44,21 +45,39 @@ import { FavoriteAlbumToggle } from '@/components/albums/FavoriteAlbumToggle'
 import { placeSlug } from '@/lib/utils/places'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 
+/**
+ * Everything the album page needs for first paint, resolved by ONE React
+ * Query so back-navigation and revisits serve from the 5-minute cache
+ * instead of re-running the whole fetch waterfall (this was the last major
+ * surface still on bare useState/useEffect).
+ */
+interface AlbumDetailData {
+  album: Album | null
+  photos: Photo[]
+  isDeleted: boolean
+  isPrivateContent: boolean
+}
+
+// Privacy verdicts are real answers, not transient failures — they must
+// surface immediately instead of burning the cold-start retry schedule.
+const TERMINAL_ALBUM_ERRORS = new Set([
+  'You do not have permission to view this album',
+  'This album is only visible to friends',
+])
+
 export function AlbumDetailView({ albumId }: { albumId: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, profile } = useAuth()
-  const [album, setAlbum] = useState<Album | null>(null)
-  const [photos, setPhotos] = useState<Photo[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isPrivateContent, setIsPrivateContent] = useState(false)
-  const [isDeleted, setIsDeleted] = useState(false)
+  const queryClient = useQueryClient()
   const [redirectTimer, setRedirectTimer] = useState<number>(3)
   const [showSharePrompt, setShowSharePrompt] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const supabase = createClient()
-  const { getFollowStatus, follow, unfollow } = useFollows(album?.user_id)
+  // statusOnly + no target: this page renders a single Follow button and runs
+  // its own follow-status effect below — skip the hook's eager viewer-wide
+  // stats/lists queries, realtime channel, and duplicate status lookup.
+  const { getFollowStatus, follow, unfollow } = useFollows(undefined, { statusOnly: true })
   const [followLoading, setFollowLoading] = useState(false)
   const [followStatus, setFollowStatus] = useState<string>('not_following')
 
@@ -79,34 +98,22 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
     }
   }, [searchParams, albumId])
 
-  // Use likes hook for like functionality
-  const { likes, isLiked, toggleLike } = useLikes(album?.id)
+  // Keyed on the viewer so a login/logout re-resolves privacy gating.
+  const albumQueryKey = useMemo(
+    () => ['album-detail', albumId, user?.id ?? null],
+    [albumId, user?.id]
+  )
 
-  // Use comments hook for comment count
-  const { comments: albumComments } = useComments(album?.id)
-
-  // Use favorites hook for save functionality
-  const { isFavorited, toggleFavorite } = useFavorites({
-    targetType: 'album',
-    autoFetch: true
-  })
-  const isSaved = album?.id ? isFavorited(album.id, 'album') : false
-
-  // Animation support - used for reduced motion preference in RelatedAlbums
-  const prefersReducedMotion = useReducedMotion()
-
-  // Track album view (deduplicated per user per day)
-  useRecordAlbumView(album?.id, user?.id)
-
-  // Collaborative album support
-  const { collaborators } = useCollaborativeAlbum(album?.id)
-  const activeCollaborators = collaborators.filter(c => c.status === 'accepted')
-
-  const fetchAlbumData = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
+  const {
+    data: albumDetail,
+    isPending: loading,
+    isFetching: albumRefetching,
+    error: albumQueryError,
+    refetch: refetchAlbum,
+  } = useQuery<AlbumDetailData>({
+    queryKey: albumQueryKey,
+    enabled: !!albumId,
+    queryFn: async (): Promise<AlbumDetailData> => {
       // Fetch album details. Retried in place: a Supabase cold start on this
       // query used to strand the album page on the error card (same failure
       // mode the feed and globe timeline already guard against). A genuine
@@ -123,21 +130,38 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
 
       if (albumError) {
         if (isNoRowsError(albumError)) {
-          setIsDeleted(true)
-          setLoading(false)
-          return
+          return { album: null, photos: [], isDeleted: true, isPrivateContent: false }
         }
         throw albumError
       }
 
-      // Fetch user data separately
+      // Kick off the photos query immediately — it only depends on albumId,
+      // and RLS scopes the rows server-side, so it need not wait for the
+      // byline fetch or the friends-visibility gate below. Serializing these
+      // (album → user → follow check → photos) was most of the
+      // time-to-first-photo on other people's albums.
+      // order_index is the column all writers populate (display_order was a
+      // never-written twin — sorting by it silently fell back to created_at).
+      const photosPromise = runQueryWithRetry(() =>
+        supabase
+          .from('photos')
+          .select('*')
+          .eq('album_id', albumId)
+          .order('order_index', { ascending: true })
+          .order('created_at', { ascending: true })
+      )
+
+      // Fetch user data separately (cold-start hardened like the album query;
+      // the album can still display without the byline)
       let userData = null
       try {
-        const { data, error: userError } = await supabase
-          .from('users')
-          .select('username, avatar_url, display_name')
-          .eq('id', albumData.user_id)
-          .single()
+        const { data, error: userError } = await runQueryWithRetry(() =>
+          supabase
+            .from('users')
+            .select('username, avatar_url, display_name')
+            .eq('id', albumData.user_id)
+            .single()
+        )
 
         if (!userError) {
           userData = data
@@ -157,18 +181,14 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
       if (!isOwner) {
         if (albumData.visibility === 'private') {
           if (!user) {
-            setIsPrivateContent(true)
-            setAlbum(albumData)
-            return
+            return { album: albumData, photos: [], isDeleted: false, isPrivateContent: true }
           }
           throw new Error('You do not have permission to view this album')
         }
 
         if (albumData.visibility === 'friends') {
           if (!user) {
-            setIsPrivateContent(true)
-            setAlbum(albumData)
-            return
+            return { album: albumData, photos: [], isDeleted: false, isPrivateContent: true }
           }
 
           const status = await getFollowStatus(albumData.user_id)
@@ -178,55 +198,79 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
         }
       }
 
-      setAlbum(albumData)
-      setIsPrivateContent(false)
+      // Photos were fetched in parallel with the byline/privacy work above.
+      const { data: photosData, error: photosError } = await photosPromise
+      const photos = photosError ? [] : filterDuplicatePhotos(photosData || [])
 
-      // Fetch photos for this album
-      // order_index is the column all writers populate (display_order was a
-      // never-written twin — sorting by it silently fell back to created_at).
-      const { data: photosData, error: photosError } = await runQueryWithRetry(() =>
-        supabase
-          .from('photos')
-          .select('*')
-          .eq('album_id', albumId)
-          .order('order_index', { ascending: true })
-          .order('created_at', { ascending: true })
-      )
+      return { album: albumData, photos, isDeleted: false, isPrivateContent: false }
+    },
+    // Cold starts fail at the network layer for up to ~30s; retry through
+    // that window, but privacy verdicts must surface immediately.
+    retry: (failureCount, err) =>
+      failureCount < 5 && !(err instanceof Error && TERMINAL_ALBUM_ERRORS.has(err.message)),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 8000),
+  })
 
-      if (photosError) {
-        setPhotos([])
-      } else {
-        const filteredPhotos = filterDuplicatePhotos(photosData || [])
-        setPhotos(filteredPhotos)
-      }
-    } catch (err) {
-      let errorMessage = 'Unknown error occurred'
-      if (err instanceof Error) {
-        errorMessage = err.message
-      } else if (typeof err === 'string') {
-        errorMessage = err
-      }
+  const album = albumDetail?.album ?? null
+  const photos = albumDetail?.photos ?? []
+  const isDeleted = albumDetail?.isDeleted ?? false
+  const isPrivateContent = albumDetail?.isPrivateContent ?? false
+  const error = albumQueryError
+    ? albumQueryError instanceof Error
+      ? albumQueryError.message
+      : String(albumQueryError)
+    : null
 
+  useEffect(() => {
+    if (albumQueryError) {
       log.error('Failed to fetch album details', {
         component: 'AlbumDetailPage',
         action: 'fetchAlbum',
         albumId,
         userId: user?.id,
-        errorMessage: errorMessage
-      }, err instanceof Error ? err : new Error(errorMessage))
-
-      setError(errorMessage)
-    } finally {
-      setLoading(false)
+        errorMessage: error ?? 'Unknown error occurred'
+      }, albumQueryError instanceof Error ? albumQueryError : new Error(String(albumQueryError)))
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- user?.id is sufficient; adding full user object causes unnecessary re-renders
-  }, [albumId, user?.id, supabase, getFollowStatus])
+  }, [albumQueryError, albumId, user?.id, error])
 
-  useEffect(() => {
-    if (albumId) {
-      fetchAlbumData()
-    }
-  }, [albumId, fetchAlbumData])
+  // Surgical cache patches for realtime updates and optimistic toggles —
+  // the setAlbum/setIsDeleted equivalents now that the data lives in the
+  // React Query cache.
+  const patchAlbumDetail = useCallback(
+    (patch: Partial<AlbumDetailData> | ((prev: AlbumDetailData) => AlbumDetailData)) => {
+      queryClient.setQueryData<AlbumDetailData>(albumQueryKey, (prev) => {
+        if (!prev) return prev
+        return typeof patch === 'function' ? patch(prev) : { ...prev, ...patch }
+      })
+    },
+    [queryClient, albumQueryKey]
+  )
+
+  // Use likes hook for like functionality
+  const { likes, isLiked, toggleLike } = useLikes(album?.id)
+
+  // Single useComments instance for the whole page — powers the engagement-bar
+  // count here and is threaded into <Comments> below (it used to mount its
+  // own duplicate fetch + realtime channel).
+  const commentsApi = useComments(album?.id)
+  const { comments: albumComments } = commentsApi
+
+  // Use favorites hook for save functionality
+  const { isFavorited, toggleFavorite } = useFavorites({
+    targetType: 'album',
+    autoFetch: true
+  })
+  const isSaved = album?.id ? isFavorited(album.id, 'album') : false
+
+  // Animation support - used for reduced motion preference in RelatedAlbums
+  const prefersReducedMotion = useReducedMotion()
+
+  // Track album view (deduplicated per user per day)
+  useRecordAlbumView(album?.id, user?.id)
+
+  // Collaborative album support
+  const { collaborators } = useCollaborativeAlbum(album?.id)
+  const activeCollaborators = collaborators.filter(c => c.status === 'accepted')
 
   // Update follow status
   useEffect(() => {
@@ -255,7 +299,7 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
         },
         (payload) => {
           if (payload.eventType === 'DELETE') {
-            setIsDeleted(true)
+            patchAlbumDetail({ isDeleted: true })
             toast.error('This album has been deleted', {
               description: 'Redirecting to feed...'
             })
@@ -266,13 +310,17 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
               toast.warning('Album visibility changed', {
                 description: 'This album is now private. Redirecting...'
               })
-              setIsPrivateContent(true)
+              patchAlbumDetail({ isPrivateContent: true })
               redirectTimeout = setTimeout(() => router.push('/feed'), 2000)
             } else {
               // WHY: payload.new is the bare albums row — replacing state with
-              // it would wipe the joined `user` relation fetchAlbumData merged
-              // in (breaking the owner byline). Merge into the previous album.
-              setAlbum(prev => prev ? { ...prev, ...updatedAlbum, user: prev.user } : prev)
+              // it would wipe the joined `user` relation the query merged in
+              // (breaking the owner byline). Merge into the previous album.
+              patchAlbumDetail(prev =>
+                prev.album
+                  ? { ...prev, album: { ...prev.album, ...updatedAlbum, user: prev.album.user } }
+                  : prev
+              )
               toast.info('Album updated')
             }
           }
@@ -284,7 +332,7 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
       if (redirectTimeout) clearTimeout(redirectTimeout)
       supabase.removeChannel(channel)
     }
-  }, [albumId, user?.id, router, supabase])
+  }, [albumId, user?.id, router, supabase, patchAlbumDetail])
 
   // Handle redirect timer for deleted albums
   useEffect(() => {
@@ -467,8 +515,12 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                     <p className="text-destructive text-sm mt-1">{error}</p>
                   </div>
                   <div className="flex gap-2 justify-center pt-2">
-                    <Button onClick={fetchAlbumData} disabled={loading} className="min-w-[120px]">
-                      {loading ? 'Retrying...' : 'Try Again'}
+                    <Button
+                      onClick={() => refetchAlbum()}
+                      disabled={loading || albumRefetching}
+                      className="min-w-[120px]"
+                    >
+                      {loading || albumRefetching ? 'Retrying...' : 'Try Again'}
                     </Button>
                     <Link href="/albums">
                       <Button variant="outline">Back to Albums</Button>
@@ -795,6 +847,8 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                 photos={photos}
                 albumTitle={album.title}
                 albumId={album.id}
+                isLiked={isLiked}
+                onToggleLike={toggleLike}
               />
             </motion.div>
 
@@ -891,7 +945,9 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                       albumId={album.id}
                       initialFavorite={album.is_favorite}
                       onChange={(next) =>
-                        setAlbum((prev) => (prev ? { ...prev, is_favorite: next } : prev))
+                        patchAlbumDetail((prev) =>
+                          prev.album ? { ...prev, album: { ...prev.album, is_favorite: next } } : prev
+                        )
                       }
                     />
                     <Link href={`/albums/${album.id}/edit`} className="cursor-pointer">
@@ -914,7 +970,7 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <Comments albumId={album.id} />
+              <Comments albumId={album.id} api={commentsApi} />
             </motion.div>
 
             {/* ── Related Albums ── */}
@@ -1026,7 +1082,9 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                   albumId={album.id}
                   initialFavorite={album.is_favorite}
                   onChange={(next) =>
-                    setAlbum((prev) => (prev ? { ...prev, is_favorite: next } : prev))
+                    patchAlbumDetail((prev) =>
+                      prev.album ? { ...prev, album: { ...prev.album, is_favorite: next } } : prev
+                    )
                   }
                   className="!p-0"
                 />

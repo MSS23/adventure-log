@@ -550,7 +550,11 @@ function PublicWrappedExperience() {
 
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40 z-10" />
 
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 pt-16 pb-8 sm:pb-10 overflow-y-auto">
+          {/* Centering lives on an inner min-h-full wrapper: justify-center
+              directly on the scroll container pushes overflow above the
+              scroll start edge, clipping the top unreachably on phones. */}
+          <div className="absolute inset-0 z-20 overflow-y-auto">
+          <div className="min-h-full flex flex-col items-center justify-center px-5 pt-[max(4rem,calc(env(safe-area-inset-top)+3rem))] pb-[max(2rem,env(safe-area-inset-bottom))]">
             <motion.div
               className="text-center mb-5"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -736,6 +740,7 @@ function PublicWrappedExperience() {
               </button>
               <p className="al-eyebrow !text-white/55 mt-1">Adventure Log</p>
             </motion.div>
+          </div>
           </div>
         </motion.div>
       )}

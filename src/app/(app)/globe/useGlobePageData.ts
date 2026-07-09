@@ -9,6 +9,7 @@ import { useFollows } from '@/lib/hooks/useFollows'
 import { useWishlist, type WishlistItem } from '@/lib/hooks/useWishlist'
 import { log } from '@/lib/utils/logger'
 import { haversineKm } from '@/lib/utils/geoCalculations'
+import { fetchGlobeBaseDataset, prefetchGlobeBaseDataset } from '@/lib/globe/base-dataset'
 
 export interface AlbumPreview {
   id: string
@@ -176,31 +177,21 @@ export function useGlobePageData() {
         }
       }
 
-      const { data, error } = await supabase
-        .from('albums')
-        .select(`
-          id,
-          title,
-          cover_photo_url,
-          location_name,
-          latitude,
-          longitude,
-          created_at,
-          country_code,
-          date_start,
-          start_date,
-          description,
-          photos(id)
-        `)
-        .eq('user_id', targetUserId)
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-        .neq('status', 'draft')
-        .order('created_at', { ascending: false })
+      // Shared with useTravelTimeline (pins/arcs) — one albums+photos
+      // download per user serves both consumers instead of two parallel
+      // copies of the same dataset. See src/lib/globe/base-dataset.ts.
+      const { data, error } = await fetchGlobeBaseDataset(supabase, targetUserId, {
+        isOwnProfile: isOwn,
+      })
 
       if (error) throw error
 
-      const albumsData = (data || []).filter(a => a.photos && a.photos.length > 0)
+      const albumsData = (data || [])
+        .filter(a => a.photos && a.photos.length > 0)
+        // The old dedicated query ordered newest-first; the shared dataset
+        // is oldest-first for the timeline, so re-sort locally.
+        .slice()
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
       const uniqueCountries = new Set(
         albumsData
@@ -214,7 +205,9 @@ export function useGlobePageData() {
         .eq('user_id', targetUserId)
 
       return {
-        albums: albumsData as AlbumPreview[],
+        // Superset rows (nullable columns) narrowed to the preview shape the
+        // page consumes; extra fields are harmless structurally.
+        albums: albumsData as unknown as AlbumPreview[],
         stats: {
           totalAlbums: albumsData.length,
           totalCountries: uniqueCountries.size,
@@ -519,6 +512,13 @@ export function useGlobePageData() {
     router.push(`/globe?user=${friendId}`)
   }
 
+  // Warm a friend's globe dataset on hover/focus so the switch feels instant.
+  // Deduped + TTL'd by the base-dataset module, so repeat hovers are free.
+  const handlePrefetchFriendGlobe = useCallback(
+    (friendId: string) => prefetchGlobeBaseDataset(supabase, friendId),
+    [supabase]
+  )
+
   return {
     // Refs
     globeRef,
@@ -553,6 +553,7 @@ export function useGlobePageData() {
     // Friends
     friends,
     handleViewFriendGlobe,
+    handlePrefetchFriendGlobe,
 
     // Year filter
     selectedYear,

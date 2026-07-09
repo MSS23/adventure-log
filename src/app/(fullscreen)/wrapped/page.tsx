@@ -857,8 +857,12 @@ function WrappedExperience() {
             {/* Dark overlay for readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40 z-10" />
 
-            {/* Stats content */}
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-5 py-8 sm:py-10 overflow-y-auto">
+            {/* Stats content. Centering must live on an inner min-h-full
+                wrapper: justify-center directly on the scroll container pushes
+                overflow above the scroll start edge, clipping the top
+                unreachably on phone-height viewports. */}
+            <div className="absolute inset-0 z-20 overflow-y-auto">
+            <div className="min-h-full flex flex-col items-center justify-center px-5 pt-[max(4rem,calc(env(safe-area-inset-top)+3rem))] pb-[max(2rem,env(safe-area-inset-bottom))]">
               {/* Personality */}
               <motion.div
                 className="text-center mb-5"
@@ -1162,6 +1166,7 @@ function WrappedExperience() {
                   Adventure Log
                 </motion.p>
               </motion.div>
+            </div>
             </div>
           </motion.div>
         )}

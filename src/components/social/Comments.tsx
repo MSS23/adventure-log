@@ -24,10 +24,16 @@ interface CommentsProps {
   albumId?: string
   photoId?: string
   className?: string
+  /**
+   * useComments output threaded from the parent. The page already mounts the
+   * hook for its engagement-bar count; mounting a second instance here
+   * duplicated the joined comments fetch and realtime channel per view.
+   */
+  api: ReturnType<typeof useComments>
 }
 
-export function Comments({ albumId, photoId, className }: CommentsProps) {
-  const { comments, loading, addComment, deleteComment, commentsCount } = useComments(albumId, photoId)
+export function Comments({ albumId, photoId, className, api }: CommentsProps) {
+  const { comments, loading, addComment, deleteComment, commentsCount } = api
   const { user, profile } = useAuth()
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)

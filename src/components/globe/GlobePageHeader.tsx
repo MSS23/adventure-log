@@ -37,6 +37,7 @@ interface GlobePageHeaderProps {
   // Friends
   friends: Array<{ id: string; username: string; display_name: string; avatar_url?: string }>
   onViewFriendGlobe: (friendId: string) => void
+  onPrefetchFriendGlobe?: (friendId: string) => void
 
   // Wishlist
   showWishlist: boolean
@@ -63,6 +64,7 @@ export function GlobePageHeader({
   setSelectedYear,
   friends,
   onViewFriendGlobe,
+  onPrefetchFriendGlobe,
   showWishlist,
   setShowWishlist,
   setWishlistPrompt,
@@ -212,6 +214,8 @@ export function GlobePageHeader({
                     type="button"
                     key={friend.id}
                     onClick={() => onViewFriendGlobe(friend.id)}
+                    onPointerEnter={() => onPrefetchFriendGlobe?.(friend.id)}
+                    onFocus={() => onPrefetchFriendGlobe?.(friend.id)}
                     className="relative group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-full active:scale-[0.97]"
                     title={friend.display_name}
                     aria-label={`View ${friend.display_name}'s globe`}

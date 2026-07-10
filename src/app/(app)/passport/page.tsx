@@ -209,6 +209,13 @@ export default function TravelPassportPage() {
   const [copied, setCopied] = useState(false)
   const [scannerOpen, setScannerOpen] = useState(false)
   const [qrToken, setQrToken] = useState<string | null>(null)
+  // 'pending' until the first mint resolves — the QR is NOT rendered in that
+  // window. A tokenless QR scanned by a private/friends account silently
+  // downgrades the mutual connect to a one-way follow request, which is the
+  // "first scan didn't connect us, second did" bug. 'failed' still renders
+  // the tokenless QR (degraded but functional) so an API outage doesn't
+  // blank the sharing card.
+  const [qrTokenState, setQrTokenState] = useState<'pending' | 'ready' | 'failed'>('pending')
 
   // Best-effort mint of a short-lived signed connect token for the on-screen
   // QR ONLY. It proves to /api/passport/connect that the scanner physically
@@ -224,9 +231,18 @@ export default function TravelPassportPage() {
       apiFetch('/api/passport/qr-token')
         .then(async (res) => (res.ok ? res.json() : null))
         .then((data: { token?: string } | null) => {
-          if (!cancelled && typeof data?.token === 'string') setQrToken(data.token)
+          if (cancelled) return
+          if (typeof data?.token === 'string') {
+            setQrToken(data.token)
+            setQrTokenState('ready')
+          } else {
+            setQrTokenState('failed')
+          }
         })
-        .catch(() => { /* tokenless QR still works, just without the fast path */ })
+        .catch(() => {
+          // Tokenless QR still works, just without the instant-connect path.
+          if (!cancelled) setQrTokenState('failed')
+        })
     }
     mint()
     const interval = setInterval(mint, 10 * 60 * 1000)
@@ -745,7 +761,20 @@ export default function TravelPassportPage() {
             {shareUrl ? (
               <>
                 <div className="mb-6">
-                  <PassportQRCode url={qrUrl} size={180} />
+                  {qrTokenState === 'pending' ? (
+                    /* Hold the QR until the connect token mints — a tokenless
+                       scan downgrades private-account connects to a one-way
+                       request. Same footprint as the QR so nothing shifts. */
+                    <div
+                      className="flex items-center justify-center rounded-xl border border-border bg-muted/40"
+                      style={{ width: 180, height: 180 }}
+                      aria-label="Preparing QR code"
+                    >
+                      <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <PassportQRCode url={qrUrl} size={180} />
+                  )}
                 </div>
 
                 <div className="flex gap-3">

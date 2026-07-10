@@ -131,6 +131,10 @@ export function PublicPassportContent({
   // Auto-connect state
   const [connectStatus, setConnectStatus] = useState<'idle' | 'connecting' | 'connected' | 'pending' | 'following' | 'error'>('idle')
   const [showConnected, setShowConnected] = useState(false)
+  // Connected, but the reverse (owner→you) follow is still awaiting YOUR
+  // approval (private account + tokenless link) — the blend stays one-sided
+  // until it's accepted, so don't celebrate an unconditional connection.
+  const [mutualPending, setMutualPending] = useState(false)
   const connectAttempted = useRef(false)
 
   // Signed QR-connect token (`t`) carried through the scanner from the
@@ -145,19 +149,38 @@ export function PublicPassportContent({
   const attemptConnect = useCallback(() => {
     setConnectStatus('connecting')
 
-    apiFetch('/api/passport/connect', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        targetUserId: user.id,
-        ...(qrToken ? { qrToken } : {}),
-      }),
-    })
+    const postConnect = () =>
+      apiFetch('/api/passport/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetUserId: user.id,
+          ...(qrToken ? { qrToken } : {}),
+        }),
+      })
+
+    postConnect()
+      .then(async (res) => {
+        // A 401 right after a scan is usually an access token that expired in
+        // the WebView while the server can't mint a refreshed one mid-request
+        // (its cookie adapter is read-only for bearer auth). Force a client
+        // refresh and retry exactly once — this was a "first scan fails,
+        // second works" source on the APK.
+        if (res.status === 401) {
+          const { createClient } = await import('@/lib/supabase/client')
+          const { error: refreshError } = await createClient().auth.refreshSession()
+          if (!refreshError) {
+            return postConnect()
+          }
+        }
+        return res
+      })
       .then(async (res) => {
         // Non-2xx (expired session, rate limit, server error) must land in the
         // error branch — the body may not even be JSON.
         const data = res.ok ? await res.json() : null
         if (data?.connected) {
+          setMutualPending(data.mutual === false)
           setConnectStatus('connected')
           setShowConnected(true)
         } else if (data?.pending) {
@@ -262,17 +285,35 @@ export function PublicPassportContent({
 
               <p className="al-eyebrow mb-1">Connected</p>
               <h2 className="al-display text-2xl mb-1.5">You&apos;re now connected</h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                You and <span className="font-semibold text-foreground">{displayName}</span> now follow each other.
-              </p>
+              {mutualPending ? (
+                <p className="text-sm text-muted-foreground mb-6">
+                  You now follow <span className="font-semibold text-foreground">{displayName}</span>.
+                  Your account is private, so approve their follow request to unlock
+                  your shared Travel Blend.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground mb-6">
+                  You and <span className="font-semibold text-foreground">{displayName}</span> now follow each other.
+                </p>
+              )}
 
-              <Link
-                href={`/blend/${user.username}`}
-                className="flex items-center justify-center gap-2 w-full rounded-full bg-[color:var(--color-coral)] text-white font-semibold px-5 py-3 shadow-lg transition-transform active:scale-[0.98]"
-              >
-                See your Travel Blend
-                <ArrowRight className="size-4" />
-              </Link>
+              {mutualPending ? (
+                <Link
+                  href="/followers"
+                  className="flex items-center justify-center gap-2 w-full rounded-full bg-[color:var(--color-coral)] text-white font-semibold px-5 py-3 shadow-lg transition-transform active:scale-[0.98]"
+                >
+                  Review follow request
+                  <ArrowRight className="size-4" />
+                </Link>
+              ) : (
+                <Link
+                  href={`/blend/${user.username}`}
+                  className="flex items-center justify-center gap-2 w-full rounded-full bg-[color:var(--color-coral)] text-white font-semibold px-5 py-3 shadow-lg transition-transform active:scale-[0.98]"
+                >
+                  See your Travel Blend
+                  <ArrowRight className="size-4" />
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => setShowConnected(false)}
@@ -351,7 +392,19 @@ export function PublicPassportContent({
                   <UserCheck className="size-4 text-primary" />
                 </div>
                 <p className="text-sm text-foreground">
-                  You and <span className="font-semibold">{displayName}</span> are now following each other
+                  {mutualPending ? (
+                    <>
+                      You follow <span className="font-semibold">{displayName}</span> — approve their{' '}
+                      <Link href="/followers" className="font-semibold underline underline-offset-2">
+                        follow request
+                      </Link>{' '}
+                      to unlock your Travel Blend
+                    </>
+                  ) : (
+                    <>
+                      You and <span className="font-semibold">{displayName}</span> are now following each other
+                    </>
+                  )}
                 </p>
               </div>
             </motion.div>

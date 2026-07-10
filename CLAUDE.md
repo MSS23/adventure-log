@@ -965,11 +965,17 @@ straight to `/login`/`/signup`).
 
 Camera, Geolocation, Filesystem, Network, Preferences, Share, Toast.
 
-Native OAuth (when wired up) needs `@capacitor/browser` + `@capacitor/app` for
-the in-app browser + deep-link round-trip (the
-`com.adventurelog.app://auth/callback` scheme is already reserved in
-`capacitor.config.ts`; the web PKCE callback lives at `/sso-callback`).
-Both plugins must be added to package.json when that work starts.
+Native Google OAuth IS wired (July 2026): `GoogleSignInButton` detects native,
+calls `signInWithOAuth({ skipBrowserRedirect: true, redirectTo:
+'com.adventurelog.app://auth/callback' })`, opens the provider URL via
+`@capacitor/browser` (system Custom Tab — Google blocks OAuth in embedded
+WebViews), and `NativeAppShell`'s `appUrlOpen` listener finishes
+`exchangeCodeForSession` (`src/lib/auth/native-oauth.ts`). The post-login
+`next` path is stashed in localStorage, NOT in the redirect URL, so the
+Supabase allowlist entry stays an exact match. REQUIREMENT: the exact URL
+`com.adventurelog.app://auth/callback` must be in Supabase Auth → URL
+Configuration → Redirect URLs or Supabase rejects the flow before Google
+even renders. `/sso-callback` remains the web PKCE fallback page.
 
 ### After code changes
 

@@ -5,6 +5,10 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './__tests__/e2e',
+  // Seeds/removes the fixture users (e2e_main / e2e_friend) around the run.
+  // No-ops without SUPABASE_SERVICE_ROLE_KEY; fixture specs then self-skip.
+  globalSetup: './__tests__/e2e/global-setup.ts',
+  globalTeardown: './__tests__/e2e/global-teardown.ts',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -27,29 +31,41 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    /* Logs the fixture users in once and saves storage state for reuse. */
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
     },
 
+    /* Journey specs are chromium-only (they depend on the setup project's
+       saved auth state); cross-browser coverage stays on critical-path. */
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      testIgnore: /user-journeys/,
     },
 
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      testIgnore: /user-journeys/,
     },
 
     /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
+      testIgnore: /user-journeys/,
     },
     {
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
+      testIgnore: /user-journeys/,
     },
   ],
 

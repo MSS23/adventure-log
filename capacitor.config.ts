@@ -4,10 +4,12 @@ import type { CapacitorConfig } from '@capacitor/cli';
 //   * iOS:     ios/App/App/Info.plist → CFBundleURLTypes
 //   * Android: android/app/src/main/AndroidManifest.xml → <intent-filter>
 //
-// Deep-link scheme for a future native OAuth bridge (custom URL scheme +
-// system browser handshake). Auth today is Supabase email/password with no
-// social providers wired, so no native OAuth round-trip is active yet — keep
-// the scheme registered for when one is.
+// Deep-link scheme for the native OAuth bridge (custom URL scheme + system
+// browser handshake). Google sign-in on native uses it: GoogleSignInButton
+// opens the provider URL via @capacitor/browser, Supabase redirects to
+// `${OAUTH_REDIRECT_SCHEME}://auth/callback`, and NativeAppShell's appUrlOpen
+// listener exchanges the PKCE code (src/lib/auth/native-oauth.ts). The exact
+// callback URL must be allow-listed in Supabase Auth → Redirect URLs.
 const OAUTH_REDIRECT_SCHEME = 'com.adventurelog.app';
 
 // Hostnames the WebView is allowed to navigate to without leaving the app.

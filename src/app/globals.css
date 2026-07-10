@@ -272,6 +272,21 @@
     font-weight: 500;
   }
 
+  /* WHY: the Android WebView delays taps ~300ms on zoomable pages to
+     disambiguate double-tap zoom (viewport keeps userScalable for a11y —
+     see layout.tsx). touch-action: manipulation removes that delay on
+     interactive elements only, so taps activate immediately without
+     disabling pinch/double-tap zoom on content. */
+  button,
+  [role='button'],
+  a,
+  input,
+  select,
+  textarea,
+  label {
+    touch-action: manipulation;
+  }
+
   /* Refined image rendering */
   img {
     image-rendering: -webkit-optimize-contrast;

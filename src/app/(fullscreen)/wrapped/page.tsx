@@ -656,6 +656,56 @@ function WrappedExperience() {
                 <span><span className="font-semibold text-white">{data.totalDistanceKm.toLocaleString()}</span> km</span>
               </motion.div>
 
+              {/* A single-year view with <2 stops can't fly, but the full
+                  history can — offer the switch instead of silently playing
+                  the one-pin spotlight (trips dated in different years never
+                  meet in a year view, e.g. London 2025 + Paris 2026). */}
+              {mode === 'year' && data.locations.length < 2 && data.allTimeLocatedCount >= 2 && (
+                <motion.p
+                  className="mt-5 text-sm text-white/60"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.2 }}
+                >
+                  Your trips span more than one year.{' '}
+                  <button
+                    type="button"
+                    onClick={() => switchMode('all')}
+                    className="cursor-pointer underline underline-offset-4 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-400 rounded-sm"
+                  >
+                    Watch All Time
+                  </button>{' '}
+                  to fly the whole journey.
+                </motion.p>
+              )}
+
+              {/* Trips with no location at all can't join the flight path —
+                  say so instead of silently flying fewer stops than trips. */}
+              {!viewingFriend && data.unlocatedTrips.length > 0 && (
+                <motion.p
+                  className="mt-4 text-xs text-white/50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.4 }}
+                >
+                  {data.unlocatedTrips.length === 1 ? (
+                    <>&ldquo;{data.unlocatedTrips[0].title}&rdquo; has no location yet, so it can&apos;t join the flight.{' '}</>
+                  ) : (
+                    <>{data.unlocatedTrips.length} trips have no location yet, so they can&apos;t join the flight.{' '}</>
+                  )}
+                  <a
+                    href={
+                      data.unlocatedTrips.length === 1
+                        ? `/albums/${data.unlocatedTrips[0].id}/edit`
+                        : '/albums'
+                    }
+                    className="underline underline-offset-2 !text-white/70 hover:!text-white"
+                  >
+                    Add {data.unlocatedTrips.length === 1 ? 'one' : 'locations'}
+                  </a>
+                </motion.p>
+              )}
+
               {/* Friends strip — jump into a friend's Wrapped. On a friend's
                   intro it becomes a "back to yours" affordance instead. */}
               {viewingFriend ? (

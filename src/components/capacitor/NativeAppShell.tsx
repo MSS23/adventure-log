@@ -14,10 +14,49 @@
  */
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { isNativePlatform } from '@/lib/api/client'
+import { isNativeOAuthCallback, completeNativeOAuth } from '@/lib/auth/native-oauth'
 import { log } from '@/lib/utils/logger'
 
 export function NativeAppShell() {
+  const router = useRouter()
+
+  // OAuth deep-link return path (com.adventurelog.app://auth/callback).
+  // The provider buttons open the system browser; the OS hands the redirect
+  // back here as an appUrlOpen event, where the PKCE code is exchanged for a
+  // session. Without this listener the deep link is silently dropped and
+  // Google sign-in can never complete on native.
+  useEffect(() => {
+    if (!isNativePlatform()) return
+    let cleanup: (() => void) | undefined
+
+    ;(async () => {
+      try {
+        const { App } = await import('@capacitor/app')
+        const handle = await App.addListener('appUrlOpen', async ({ url }) => {
+          if (!url || !isNativeOAuthCallback(url)) return
+          // Close the in-app browser sheet (iOS; unsupported no-op on Android,
+          // where returning to the app already backgrounds the Custom Tab).
+          import('@capacitor/browser')
+            .then(({ Browser }) => Browser.close())
+            .catch(() => {})
+          const target = await completeNativeOAuth(url)
+          router.replace(target)
+        })
+        cleanup = () => {
+          handle.remove()
+        }
+      } catch (err) {
+        log.error('Failed to install OAuth deep-link handler', {
+          component: 'NativeAppShell',
+          action: 'appUrlOpen',
+        }, err instanceof Error ? err : new Error(String(err)))
+      }
+    })()
+
+    return () => cleanup?.()
+  }, [router])
   // Android back button
   useEffect(() => {
     if (!isNativePlatform()) return

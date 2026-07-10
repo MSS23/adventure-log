@@ -221,8 +221,14 @@ export async function POST(request: NextRequest) {
     const scannerIsPublic =
       scannerUser.privacy_level == null || scannerUser.privacy_level === 'public'
     let dir2: { ok: true; changed: boolean } | { ok: false }
+    // Whether the reverse direction ends this call ACCEPTED — i.e. the
+    // connection is truly mutual and the Travel Blend will work for BOTH
+    // travelers. Reported to the client so the scanner isn't shown an
+    // unconditional success when the owner still can't see their albums.
+    let dir2Accepted = false
     if (hasValidToken || scannerIsPublic || targetToScanner?.status === 'accepted') {
       dir2 = await ensureAcceptedFollow(targetUserId, userId)
+      dir2Accepted = dir2.ok
     } else if (!targetToScanner) {
       const { error: reversePendingError } = await supabaseAdmin.from('follows').insert({
         follower_id: targetUserId,
@@ -344,6 +350,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       connected: true,
+      // False when the owner→scanner direction is still pending (private
+      // scanner, tokenless link): the scanner follows the owner, but the
+      // blend stays one-sided until the scanner approves the owner's follow
+      // request. The client uses this to prompt that approval instead of
+      // celebrating a connection that half-works.
+      mutual: dir2Accepted,
       user: {
         username: targetUser.username,
         displayName: targetUser.display_name || targetUser.username,

@@ -72,16 +72,24 @@ export default function ExplorePage() {
           <p className="text-sm text-muted-foreground">
             Destinations, journeys, and fellow adventurers.
           </p>
-          {/* Places moved out of the bottom tab bar (5-tab limit) — this is
-              its mobile entry point now. */}
-          <Link
-            href="/places"
-            className="inline-flex items-center gap-1 shrink-0 text-sm font-medium text-primary hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-          >
-            <MapPinned className="h-4 w-4" />
-            Places
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+          {/* Places + Map moved out of the bottom tab bar (5-tab limit) —
+              these are their mobile entry points now. */}
+          <span className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/map"
+              className="inline-flex items-center gap-1 shrink-0 text-sm font-medium text-primary hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            >
+              <MapPinned className="h-4 w-4" />
+              Your Map
+            </Link>
+            <Link
+              href="/places"
+              className="inline-flex items-center gap-1 shrink-0 text-sm font-medium text-primary hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            >
+              Places
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </span>
         </div>
       </header>
 

@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { computeTravelStats } from '@/lib/utils/travel-stats'
 import { parseLocalDate } from '@/lib/utils/travel-date'
+import { getCountryCentroid } from '@/lib/utils/country-centroids'
+import { getCountryCodeFromLocation } from '@/lib/utils/country'
 
 export interface WrappedData {
   year: number | 'all'
@@ -46,7 +48,20 @@ export interface WrappedData {
     albumTitle?: string
     /** ISO 2-letter country code, when known. */
     country?: string
+    /** True when the pin is a country-centroid fallback, not a precise spot. */
+    approximate?: boolean
   }[]
+  /** Trips in the selected view with no usable coordinates at all (no
+   *  lat/lng AND no recognizable country) — they can't join the flight path.
+   *  Lets the page nudge the user to add locations instead of silently
+   *  showing fewer stops than they have trips. */
+  unlocatedTrips: { id: string; title: string }[]
+  /** How many trips across ALL years have usable coordinates (precise or
+   *  country-level). Lets the page suggest "All Time" when the selected year
+   *  alone can't produce a flight (needs ≥2 stops) but the full history can —
+   *  e.g. London dated 2025 + Paris dated 2026 never fly together in a
+   *  single-year view. */
+  allTimeLocatedCount: number
 }
 
 interface WrappedAlbum {
@@ -76,6 +91,8 @@ const EMPTY_DATA: Omit<WrappedData, 'year' | 'loading' | 'hasAnyTrips' | 'error'
   yearsActive: 0,
   totalDistanceKm: 0,
   locations: [],
+  unlocatedTrips: [],
+  allTimeLocatedCount: 0,
 }
 
 /**
@@ -148,13 +165,20 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
 
     const hasAnyTrips = albums.length > 0
 
+    // Count all-time flyable trips (precise coords or country fallback) so the
+    // page can suggest All Time when the single-year view can't fly.
+    const allTimeLocatedCount = albums.filter(a =>
+      (a.latitude != null && a.longitude != null) ||
+      getCountryCentroid(a.country_code || getCountryCodeFromLocation(a.location_name)) != null
+    ).length
+
     // Filter by year if not "all" — check both date_start and created_at
     const selected = mode === 'all'
       ? albums
       : albums.filter(a => parseLocalDate(a.date_start || a.created_at)?.getFullYear() === mode)
 
     if (selected.length === 0) {
-      return { ...EMPTY_DATA, year: mode, loading: false, error: false, retry, hasAnyTrips }
+      return { ...EMPTY_DATA, year: mode, loading: false, error: false, retry, hasAnyTrips, allTimeLocatedCount }
     }
 
     const stats = computeTravelStats(selected)
@@ -172,19 +196,32 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       .sort((a, b) => b.photo_count - a.photo_count)
       .slice(0, 3)
 
+    // Build the flight-path pins. Albums without precise coordinates fall
+    // back to their country centroid — a country-level pin keeps the trip in
+    // the flight reel instead of silently dropping it (the "added Paris but
+    // Wrapped still only shows London" failure: photos with no GPS EXIF + no
+    // manual pin leave lat/lng null). Only trips with no coordinates AND no
+    // recognizable country are reported as unlocated.
     const locations: WrappedData['locations'] = []
+    const unlocatedTrips: WrappedData['unlocatedTrips'] = []
     for (const a of stats.sortedAlbums) {
-      if (a.latitude != null && a.longitude != null) {
+      const precise = a.latitude != null && a.longitude != null
+      const fallbackCode = a.country_code || getCountryCodeFromLocation(a.location_name)
+      const centroid = precise ? null : getCountryCentroid(fallbackCode)
+      if (precise || centroid) {
         locations.push({
-          lat: a.latitude,
-          lng: a.longitude,
+          lat: precise ? (a.latitude as number) : centroid!.lat,
+          lng: precise ? (a.longitude as number) : centroid!.lng,
           name: a.location_name?.split(',')[0]?.trim() || a.title,
           date: a.date_start || a.created_at || '',
           albumId: a.id,
           coverUrl: getPhotoUrl(a.cover_photo_url || a.photos?.[0]?.file_path),
           albumTitle: a.title,
-          country: a.country_code || undefined,
+          country: fallbackCode || undefined,
+          approximate: !precise || undefined,
         })
+      } else {
+        unlocatedTrips.push({ id: a.id, title: a.title })
       }
     }
 
@@ -214,6 +251,8 @@ export function useWrappedData(userId: string | undefined, year?: number | 'all'
       totalDistanceKm: stats.totalDistanceKm,
       hasAnyTrips,
       locations,
+      unlocatedTrips,
+      allTimeLocatedCount,
     }
   }, [albums, mode, error, retry])
 }

@@ -1,15 +1,33 @@
 'use client'
 
-// "Continue with Google" button. Starts Supabase's OAuth/PKCE flow and sends
-// the browser to Google; Google redirects to Supabase, which redirects back to
-// /auth/callback (server route) where the code is exchanged for a session
-// cookie before continuing to `next`. New Google users get a profile row from
-// the handle_new_user trigger.
+// "Continue with Google" button. Two flows share the same PKCE dance:
+//
+// Web: supabase.auth.signInWithOAuth navigates this tab to Google; Google
+// redirects to Supabase, which redirects back to /auth/callback (server
+// route) where the code is exchanged for a session cookie before continuing
+// to `next`. New Google users get a profile row from handle_new_user.
+//
+// Native (Capacitor): Google refuses OAuth inside embedded WebViews
+// (403 disallowed_useragent), and /auth/callback is a server route that is
+// stripped from the static APK bundle — so the web flow can never work there.
+// Instead we ask Supabase for the provider URL without redirecting
+// (skipBrowserRedirect), open it in the SYSTEM browser (@capacitor/browser →
+// Custom Tabs / SFSafariViewController), and Supabase redirects back to the
+// com.adventurelog.app://auth/callback deep link. NativeAppShell catches that
+// via App.appUrlOpen and finishes exchangeCodeForSession — the code_verifier
+// lives in the shared Preferences-backed storage adapter, so the exchange
+// works from any component. `next` is stashed in localStorage rather than the
+// redirect URL so the Supabase redirect-allowlist entry stays an exact match.
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { safeInternalPath } from '@/lib/utils/safe-redirect'
+import { isNativePlatform } from '@/lib/api/client'
+import {
+  NATIVE_OAUTH_CALLBACK_URL,
+  NATIVE_OAUTH_NEXT_KEY,
+} from '@/lib/auth/native-oauth'
 import { Button } from '@/components/ui/button'
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -45,6 +63,14 @@ interface GoogleSignInButtonProps {
 export function GoogleSignInButton({ next, disabled = false }: GoogleSignInButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const mountedRef = useRef(true)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   const handleClick = async () => {
     setError(null)
@@ -52,6 +78,37 @@ export function GoogleSignInButton({ next, disabled = false }: GoogleSignInButto
     try {
       const supabase = createClient()
       const safeNext = safeInternalPath(next, '/feed')
+
+      if (isNativePlatform()) {
+        // Native: get the provider URL without navigating the WebView, then
+        // hand off to the system browser. NativeAppShell completes the flow.
+        localStorage.setItem(NATIVE_OAUTH_NEXT_KEY, safeNext)
+        const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: NATIVE_OAUTH_CALLBACK_URL,
+            skipBrowserRedirect: true,
+          },
+        })
+        if (oauthError || !data?.url) {
+          throw oauthError ?? new Error('Could not start Google sign-in.')
+        }
+        const { Browser } = await import('@capacitor/browser')
+        await Browser.open({ url: data.url })
+        // Clear the spinner when the user dismisses the browser without
+        // completing sign-in (a successful sign-in navigates away anyway).
+        try {
+          const handle = await Browser.addListener('browserFinished', () => {
+            if (mountedRef.current) setLoading(false)
+            handle.remove()
+          })
+        } catch {
+          // Listener not supported on this platform — leave the spinner;
+          // navigation on success replaces this screen regardless.
+        }
+        return
+      }
+
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

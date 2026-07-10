@@ -49,6 +49,33 @@ export function extractCountryFromLocation(locationName: string): string {
   return parts[parts.length - 1] || ''
 }
 
+// Common country aliases that i18n-iso-countries' English name lookup misses.
+const COUNTRY_NAME_ALIASES: Record<string, string> = {
+  UK: 'GB',
+  USA: 'US',
+  UAE: 'AE',
+  ENGLAND: 'GB',
+  SCOTLAND: 'GB',
+  WALES: 'GB',
+  'NORTHERN IRELAND': 'GB',
+  'SOUTH KOREA': 'KR',
+  'NORTH KOREA': 'KP',
+}
+
+/**
+ * Best-effort ISO2 code from a free-text location ("Paris, France" -> "FR").
+ * Used as a fallback when albums lack a country_code column value.
+ */
+export function getCountryCodeFromLocation(locationName?: string | null): string | null {
+  const countryName = extractCountryFromLocation(locationName || '')
+  if (!countryName) return null
+  const upper = countryName.toUpperCase()
+  if (COUNTRY_NAME_ALIASES[upper]) return COUNTRY_NAME_ALIASES[upper]
+  // A bare 2-letter segment is almost always already an ISO code ("Paris, FR").
+  if (/^[A-Z]{2}$/.test(upper) && countries.getName(upper, 'en')) return upper
+  return countries.getAlpha2Code(countryName, 'en') || null
+}
+
 /**
  * Just the city/primary segment of a location string ("New York, USA" -> "New York").
  */

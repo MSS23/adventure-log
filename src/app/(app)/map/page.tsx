@@ -2,9 +2,12 @@
 
 /**
  * /map — one 2D map of your travel world:
+ *   · Been    — your own album locations (places you've actually been)
  *   · Friends — album locations from people you follow (public/friends posts)
  *   · Trips   — every stop pinned in your trip plans
  *   · Wishlist — bucket-list destinations
+ *   · Friends recommend — places people you follow posted as recommendations
+ *     ("Rohan recommends" pins, attributed to the recommender)
  *   (Wishlist includes places saved from TikTok / Google Maps links —
  *   they're the same table since migration 67.)
  * plus a "locate me" button that works on web and in the native app.
@@ -18,8 +21,18 @@ import { useMemo, useState } from 'react'
 import nextDynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
-import { LocateFixed, Loader2, AlertTriangle, Globe as GlobeIcon } from 'lucide-react'
+import {
+  LocateFixed,
+  Loader2,
+  AlertTriangle,
+  Globe as GlobeIcon,
+  HelpCircle,
+  Map as MapIcon,
+  Layers,
+  MessageCircleHeart,
+} from 'lucide-react'
 import { toast } from 'sonner'
+import { WalkthroughTour, type TourStep } from '@/components/ui/walkthrough-tour'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { apiFetch } from '@/lib/api/client'
@@ -80,6 +93,17 @@ interface WishlistItemRow {
   source_url?: string | null
 }
 
+interface FriendRecRow {
+  id: string
+  title: string
+  tip: string | null
+  city: string
+  place_type: string | null
+  latitude: number
+  longitude: number
+  user?: { username: string | null; display_name: string | null } | null
+}
+
 const PLATFORM_LABEL: Record<string, string> = {
   tiktok: 'TikTok',
   google_maps: 'Google Maps',
@@ -102,13 +126,67 @@ export default function MapPage() {
   const supabase = useMemo(() => createClient(), [])
 
   const [enabled, setEnabled] = useState<Record<MapLayerKind, boolean>>({
+    been: true,
     friends: true,
     trips: true,
     wishlist: true,
+    recs: true,
   })
   const [me, setMe] = useState<{ latitude: number; longitude: number } | null>(null)
   const [flyTarget, setFlyTarget] = useState<FlyTarget | null>(null)
   const [locating, setLocating] = useState(false)
+
+  // ── Been: your own album locations ───────────────────────────────────────
+  const beenQuery = useQuery<ExploreMapPin[]>({
+    queryKey: ['map-been', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('albums')
+        .select('id, title, location_name, latitude, longitude')
+        .eq('user_id', userId!)
+        .or('status.is.null,status.neq.draft')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .limit(500)
+      if (error) throw error
+
+      return ((data || []) as Omit<FriendAlbumRow, 'user'>[]).filter(hasCoords).map((a) => ({
+        id: a.id,
+        kind: 'been' as const,
+        latitude: a.latitude!,
+        longitude: a.longitude!,
+        title: a.title || 'Untitled album',
+        subtitle: a.location_name ? `You were here · ${a.location_name}` : 'You were here',
+        href: `/albums/${a.id}`,
+        hrefLabel: 'View album',
+      }))
+    },
+  })
+
+  // ── Friends recommend: attributed picks from people you follow ──────────
+  const recsQuery = useQuery<ExploreMapPin[]>({
+    queryKey: ['map-friend-recs', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const res = await apiFetch('/api/place-recommendations?scope=friends&limit=200')
+      if (!res.ok) throw new Error(`Recommendations API ${res.status}`)
+      const { recommendations } = (await res.json()) as { recommendations: FriendRecRow[] }
+      return (recommendations || []).filter(hasCoords).map((r) => {
+        const who = r.user?.display_name || r.user?.username || 'A friend'
+        return {
+          id: r.id,
+          kind: 'recs' as const,
+          latitude: r.latitude,
+          longitude: r.longitude,
+          title: r.title,
+          subtitle: `${who} recommends${r.tip ? ` — “${r.tip.slice(0, 80)}${r.tip.length > 80 ? '…' : ''}”` : ''}`,
+          href: `/explore/recommendations?city=${encodeURIComponent(r.city)}`,
+          hrefLabel: 'See recommendations',
+        }
+      })
+    },
+  })
 
   // ── Friends: albums (with coordinates) from people you follow ───────────
   const friendsQuery = useQuery<ExploreMapPin[]>({
@@ -214,9 +292,11 @@ export default function MapPage() {
   })
 
   const layerQueries: Record<MapLayerKind, typeof friendsQuery> = {
+    been: beenQuery,
     friends: friendsQuery,
     trips: tripsQuery,
     wishlist: wishlistQuery,
+    recs: recsQuery,
   }
 
   const pins = useMemo<ExploreMapPin[]>(
@@ -225,7 +305,7 @@ export default function MapPage() {
         enabled[kind] ? layerQueries[kind].data ?? [] : []
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [enabled, friendsQuery.data, tripsQuery.data, wishlistQuery.data]
+    [enabled, beenQuery.data, friendsQuery.data, tripsQuery.data, wishlistQuery.data, recsQuery.data]
   )
 
   const anyLoading = Object.values(layerQueries).some((q) => q.isPending)
@@ -251,17 +331,72 @@ export default function MapPage() {
     }
   }
 
+  // First-run tour — the layer pills are the whole interface, so three quick
+  // steps stop the five-layer map from feeling like a wall of pins.
+  const tourSteps: TourStep[] = useMemo(
+    () => [
+      {
+        target: 'map-header',
+        title: 'Your travel map',
+        description:
+          "Everything in one view: places you've been, friends' travels, trip plans, your wishlist, and spots friends recommend.",
+        icon: <MapIcon className="h-5 w-5" />,
+        placement: 'bottom' as const,
+        spotlightPadding: 12,
+      },
+      {
+        target: 'map-layer-pills',
+        title: 'Show only what you want',
+        description:
+          'Tap a pill to hide or show that layer. Each shows how many pins it adds — turn everything off except one to focus.',
+        icon: <Layers className="h-5 w-5" />,
+        placement: 'bottom' as const,
+        spotlightPadding: 10,
+      },
+      {
+        target: 'map-recs-pill',
+        title: 'Friends recommend',
+        description:
+          'Pink pins are places people you follow recommend — each one says who suggested it and their tip. Like having a mate’s list for every city.',
+        icon: <MessageCircleHeart className="h-5 w-5" />,
+        placement: 'bottom' as const,
+      },
+    ],
+    []
+  )
+
   return (
     <div className="space-y-4">
+      <WalkthroughTour tourId="map-tour" steps={tourSteps} autoStart={true}>
+        {(startTour) => (
+          <button
+            type="button"
+            id="map-tour-restart-trigger"
+            onClick={startTour}
+            className="hidden"
+            aria-hidden
+          />
+        )}
+      </WalkthroughTour>
+
       {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-3" data-tour-step="map-header">
         <div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">Map</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Friends&apos; travels, your plans, and saved places — all in one view.
+            Where you&apos;ve been, where you&apos;re going, and what friends recommend.
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => document.getElementById('map-tour-restart-trigger')?.click()}
+            className="inline-flex items-center justify-center rounded-xl border border-border bg-card p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            title="Take a tour"
+            aria-label="Take a tour of the map"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </button>
           {/* Sibling 3D view — mirrors the Map link in the globe's header. */}
           <Link
             href="/globe"
@@ -287,7 +422,7 @@ export default function MapPage() {
       </div>
 
       {/* Layer toggles */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2" data-tour-step="map-layer-pills">
         {(Object.keys(LAYER_META) as MapLayerKind[]).map((kind) => {
           const meta = LAYER_META[kind]
           const query = layerQueries[kind]
@@ -299,6 +434,7 @@ export default function MapPage() {
               type="button"
               onClick={() => setEnabled((prev) => ({ ...prev, [kind]: !prev[kind] }))}
               aria-pressed={on}
+              {...(kind === 'recs' ? { 'data-tour-step': 'map-recs-pill' } : {})}
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all cursor-pointer',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -342,8 +478,8 @@ export default function MapPage() {
 
       {allEmpty && (
         <p className="text-sm text-muted-foreground text-center">
-          No pins yet — follow some friends, plan a trip, add wishlist spots, or paste a TikTok
-          link on the Saved page to fill your map.
+          No pins yet — post an album with a location, follow some friends, plan a trip, or add
+          wishlist spots to fill your map.
         </p>
       )}
     </div>

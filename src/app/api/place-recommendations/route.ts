@@ -24,6 +24,11 @@ export async function GET(request: NextRequest) {
     // inputs and keeps the .or() clause small).
     const q = (searchParams.get('q')?.trim() || '').slice(0, 100) || null
     const sort = searchParams.get('sort')?.trim() === 'new' ? 'new' : 'top'
+    // scope=friends → only recommendations made by people the caller follows
+    // (accepted). Powers the "friends recommend" map layer: "Rohan recommends
+    // these places in Greece" on YOUR map. Plain app-level filter — the table
+    // is public-read by design (RLS USING true), this just narrows authorship.
+    const scope = searchParams.get('scope')?.trim() === 'friends' ? 'friends' : 'all'
 
     let limit = DEFAULT_LIMIT
     const limitParam = searchParams.get('limit')
@@ -35,6 +40,23 @@ export async function GET(request: NextRequest) {
     }
 
     let query = supabase.from('place_recommendations').select('*')
+
+    if (scope === 'friends') {
+      if (!userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      const { data: follows, error: followsError } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', userId)
+        .eq('status', 'accepted')
+      if (followsError) throw followsError
+      const followedIds = (follows || []).map((f) => f.following_id)
+      if (followedIds.length === 0) {
+        return NextResponse.json({ recommendations: [] })
+      }
+      query = query.in('created_by', followedIds)
+    }
 
     if (city) query = query.ilike('city', city) // case-insensitive exact match
     if (countryCode) query = query.eq('country_code', countryCode)

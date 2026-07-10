@@ -152,3 +152,11 @@ __pycache__/
 
 # machine-local npm config (Windows script-shell workaround for the & in the repo path)
 .npmrc
+
+# e2e fixture artifacts (generated per-run)
+__tests__/e2e/fixtures/.fixture-state.json
+__tests__/e2e/fixtures/.auth-*.json
+
+# Playwright artifacts
+test-results/
+playwright-report/

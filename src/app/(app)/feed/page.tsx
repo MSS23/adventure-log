@@ -4,14 +4,13 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { Loader2, Compass, Users } from 'lucide-react'
+import { Loader2, Compass, Users, MapPinned } from 'lucide-react'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { FeedItem, type FeedAlbum } from '@/components/feed/FeedPost'
 import { FeedSkeleton } from '@/components/ui/skeleton-screens'
 import { SuggestedUsersRow } from '@/components/feed/SuggestedUsersRow'
-import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import { useSuggestedUsers } from '@/app/(app)/feed/useFeedPageData'
 import { MemoryLaneCard } from '@/components/memories/MemoryLaneCard'
 import { FirstRunGuide } from '@/components/feed/FirstRunGuide'
@@ -383,41 +382,10 @@ export default function FeedPage() {
         </button>
       </nav>
 
-      {/* Suggested travelers — compact, no Instagram rings */}
-      {suggestedUsers.length > 0 && (
-        <section
-          aria-label="Suggested travelers"
-          className="mb-6 pb-6 border-b border-border"
-        >
-          <p className="al-eyebrow mb-3">Travelers to follow</p>
-          <div className="flex gap-4 overflow-x-auto -mx-4 px-4 scrollbar-hide">
-            {suggestedUsers.slice(0, 7).map((u) => {
-              const name = u.display_name || u.username || 'Explorer'
-              return (
-                <Link
-                  key={u.id}
-                  href={`/profile/${u.username}`}
-                  className="flex flex-col items-center gap-1.5 min-w-[60px] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
-                  aria-label={`View ${name}'s profile`}
-                >
-                  <span className="transition-transform duration-200 group-hover:-translate-y-0.5">
-                    <OptimizedAvatar
-                      src={u.avatar_url || undefined}
-                      alt={name}
-                      fallback={name[0]?.toUpperCase() || 'U'}
-                      size="lg"
-                      className="ring-2 ring-primary/20"
-                    />
-                  </span>
-                  <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground transition-colors truncate max-w-[60px] text-center">
-                    {name.split(' ')[0]}
-                  </span>
-                </Link>
-              )
-            })}
-          </div>
-        </section>
-      )}
+      {/* Suggested travelers used to render here as a second avatar strip —
+          removed: it duplicated the SuggestedUsersRow injected into the feed
+          below (which has follow buttons) and pushed the first post below the
+          fold behind up to six stacked cards. */}
 
       {/* Discovery — single quiet row, only what matters */}
       <div className="flex gap-2 mb-6 overflow-x-auto -mx-4 px-4 scrollbar-hide">
@@ -427,6 +395,13 @@ export default function FeedPage() {
         >
           <Compass className="h-3 w-3" strokeWidth={2} />
           Explore
+        </Link>
+        <Link
+          href="/map"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+        >
+          <MapPinned className="h-3 w-3" strokeWidth={2} />
+          Your map
         </Link>
         <Link
           href="/travel-twins"
@@ -469,7 +444,9 @@ export default function FeedPage() {
           {albums.map((album, idx) => (
             <div key={album.id}>
               <FeedItem album={album} currentUserId={user.id} priority={idx === 0} />
-              {idx === 2 && mode === 'following' && suggestedUsers.length > 0 && (
+              {/* Both tabs get the suggestions row (it's the only one now —
+                  the old header avatar strip was removed as a duplicate). */}
+              {idx === 2 && suggestedUsers.length > 0 && (
                 <div className="my-8">
                   <SuggestedUsersRow users={suggestedUsers} />
                 </div>

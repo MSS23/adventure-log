@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { AgeGate } from '@/components/auth/AgeGate'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -100,6 +101,9 @@ export default function AppLayout({
           {/* Pulls the passport OWNER into the Travel Blend the instant their
               QR is scanned (mirrors the scanner's experience). */}
           <PassportConnectListener />
+
+          {/* 18+ backstop for OAuth accounts, which sign up without a DOB */}
+          <AgeGate />
         </div>
         </UnreadCountProvider>
       </PWAProvider>

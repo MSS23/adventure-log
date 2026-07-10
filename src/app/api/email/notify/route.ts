@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { emailService } from '@/lib/services/email'
+import { emailService, getAppUrl } from '@/lib/services/email'
+import { buildUnsubscribeUrl } from '@/lib/utils/unsubscribe'
 import { log } from '@/lib/utils/logger'
 import { verifyBearer } from '@/lib/utils/bearer'
 
@@ -48,14 +49,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing type or recipientUserId' }, { status: 400 })
     }
 
-    // Basic shape check on Clerk user ID (e.g. "user_2x7…"); reject empties/whitespace.
+    // Basic shape check on the Supabase user UUID; reject empties/whitespace.
     if (typeof recipientUserId !== 'string' || recipientUserId.trim().length === 0 || recipientUserId.length > 64) {
       return NextResponse.json({ error: 'Invalid recipientUserId format' }, { status: 400 })
     }
 
     // Get recipient info + email using admin client (bypasses RLS).
-    // Post-Clerk migration the canonical email lives on public.users.email
-    // (synced by the Clerk user.created/updated webhooks); auth.users is empty.
+    // The canonical email lives on public.users.email.
     const { data: recipient } = await supabaseAdmin
       .from('users')
       .select('username, display_name, email, email_notifications')
@@ -78,11 +78,15 @@ export async function POST(request: NextRequest) {
 
     const recipientName = recipient.display_name || recipient.username || 'Traveler'
 
+    // Signed one-click opt-out link, embedded in every email footer and the
+    // List-Unsubscribe header (PECR/GDPR + Gmail/Yahoo sender requirements).
+    const unsubscribeUrl = buildUnsubscribeUrl(getAppUrl(), recipientUserId)
+
     let sent = false
 
     switch (type) {
       case 'welcome': {
-        sent = await emailService.sendWelcome(recipientEmail, recipientName)
+        sent = await emailService.sendWelcome(recipientEmail, recipientName, unsubscribeUrl)
         break
       }
 
@@ -98,7 +102,8 @@ export async function POST(request: NextRequest) {
             recipientEmail,
             recipientName,
             actor.display_name || actor.username,
-            actor.username
+            actor.username,
+            unsubscribeUrl
           )
         }
         break
@@ -117,7 +122,8 @@ export async function POST(request: NextRequest) {
             actor.display_name || actor.username,
             album.title,
             albumId,
-            commentPreview || ''
+            commentPreview || '',
+            unsubscribeUrl
           )
         }
         break
@@ -135,7 +141,8 @@ export async function POST(request: NextRequest) {
             recipientName,
             actor.display_name || actor.username,
             album.title,
-            albumId
+            albumId,
+            unsubscribeUrl
           )
         }
         break

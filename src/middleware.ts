@@ -113,6 +113,7 @@ const PUBLIC_API_PATHS = [
   '/api/manifest',
   '/api/maintenance/cleanup',
   '/api/email/notify',
+  '/api/email/unsubscribe', // clicked from email clients with no session; HMAC-authorized
   '/api/admin/apply-migrations',
   '/api/errors',
   '/api/monitoring/web-vitals',
@@ -454,6 +455,10 @@ export async function middleware(request: NextRequest) {
   // ----------------------------------------------------------------
   const CSRF_EXEMPT_WEBHOOKS = new Set<string>([
     // Add webhook paths here as they're created; each verifies its own signature.
+    // One-click unsubscribe POSTs arrive from mail-provider servers (RFC 8058)
+    // and from mail-client webviews that may send Origin: null; the route
+    // authorizes via its HMAC signature, not cookies.
+    '/api/email/unsubscribe',
   ])
 
   if (

@@ -9,10 +9,12 @@ import {
   MessageCircle,
   UserPlus,
   Bell,
+  Mail,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useToast } from '@/components/ui/toast-provider'
+import { apiFetch } from '@/lib/api/client'
 import { log } from '@/lib/utils/logger'
 
 interface NotificationPreferences {
@@ -22,6 +24,58 @@ interface NotificationPreferences {
   messages_enabled: boolean
   collaborations_enabled: boolean
   achievements_enabled: boolean
+}
+
+/** Clickable preference row: the whole row is the switch. */
+function ToggleRow({
+  icon: Icon,
+  iconColor,
+  title,
+  description,
+  checked,
+  disabled,
+  onToggle,
+}: {
+  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>
+  iconColor: string
+  title: string
+  description: string
+  checked: boolean
+  disabled?: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div
+      role="switch"
+      aria-checked={checked}
+      tabIndex={0}
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onToggle()
+        }
+      }}
+      className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 min-h-[44px] cursor-pointer transition-colors duration-200 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <div className="flex items-center gap-3 flex-1">
+        <Icon className={`h-5 w-5 ${iconColor}`} aria-hidden />
+        <div className="flex-1">
+          <p className="font-medium text-foreground">{title}</p>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+
+      {/* Visual only — the whole row is the control. */}
+      <Switch
+        checked={checked}
+        disabled={disabled}
+        tabIndex={-1}
+        aria-hidden="true"
+        className="pointer-events-none"
+      />
+    </div>
+  )
 }
 
 export function NotificationSettings() {
@@ -35,7 +89,13 @@ export function NotificationSettings() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const { user } = useAuth()
+  // Email opt-in lives on users.email_notifications (server-only column).
+  // The current value is already in the profile AuthProvider loaded via
+  // get_my_profile() — no extra fetch. Saves immediately via
+  // /api/me/email-preferences, independent of the in-app form below.
+  const [emailEnabled, setEmailEnabled] = useState<boolean | null>(null)
+  const [emailSaving, setEmailSaving] = useState(false)
+  const { user, profile, refreshProfile } = useAuth()
   const { success, error: showError } = useToast()
   const supabase = createClient()
 
@@ -45,6 +105,41 @@ export function NotificationSettings() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  // Seed (and re-sync) from the profile, except mid-save when local
+  // optimistic state is authoritative.
+  useEffect(() => {
+    if (profile && !emailSaving) {
+      setEmailEnabled(profile.email_notifications !== false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile])
+
+  const toggleEmailNotifications = async () => {
+    if (emailEnabled === null || emailSaving) return
+    const next = !emailEnabled
+    setEmailSaving(true)
+    setEmailEnabled(next)
+    try {
+      const res = await apiFetch('/api/me/email-preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email_notifications: next }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      success('Saved!', next ? 'Email notifications enabled' : 'You will no longer receive notification emails')
+      void refreshProfile()
+    } catch (error) {
+      setEmailEnabled(!next)
+      log.error('Failed to update email preference', {
+        component: 'NotificationSettings',
+        action: 'toggle-email'
+      }, error instanceof Error ? error : new Error(String(error)))
+      showError('Save failed', 'Could not update email notifications. Please try again.')
+    } finally {
+      setEmailSaving(false)
+    }
+  }
 
   const fetchPreferences = async () => {
     try {
@@ -168,43 +263,34 @@ export function NotificationSettings() {
         <div className="space-y-1">
           {notificationTypes.map((type) => {
             const key = type.key as keyof NotificationPreferences
-            const checked = preferences[key]
             return (
-              <div
+              <ToggleRow
                 key={type.key}
-                role="switch"
-                aria-checked={checked}
-                tabIndex={0}
-                onClick={() => updatePreference(key, !checked)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    updatePreference(key, !checked)
-                  }
-                }}
-                className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 min-h-[44px] cursor-pointer transition-colors duration-200 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <type.icon className={`h-5 w-5 ${type.color}`} aria-hidden="true" />
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground">{type.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {type.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Visual only — the whole row is the control. */}
-                <Switch
-                  checked={checked}
-                  tabIndex={-1}
-                  aria-hidden="true"
-                  className="pointer-events-none"
-                />
-              </div>
+                icon={type.icon}
+                iconColor={type.color}
+                title={type.title}
+                description={type.description}
+                checked={preferences[key]}
+                onToggle={() => updatePreference(key, !preferences[key])}
+              />
             )
           })}
         </div>
+
+        {/* Email notifications — saves immediately, backed by users.email_notifications */}
+        {emailEnabled !== null && (
+          <div className="border-t border-border pt-4">
+            <ToggleRow
+              icon={Mail}
+              iconColor="text-primary"
+              title="Email notifications"
+              description="Receive emails about likes, comments, and new followers. Every email also includes an unsubscribe link."
+              checked={emailEnabled}
+              disabled={emailSaving}
+              onToggle={toggleEmailNotifications}
+            />
+          </div>
+        )}
 
         {/* Info Box */}
         <div className="rounded-xl bg-muted/50 p-4">

@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Link2, Loader2, Sparkles, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { apiFetch } from '@/lib/api/client'
+import { features } from '@/lib/config/features'
 import type { ExtractResult, AddPlaceParams } from '@/lib/links/place-types'
 import { ReviewPlacesModal } from './ReviewPlacesModal'
 
@@ -96,10 +97,20 @@ export function SaveFromLinkCard({ onSave }: SaveFromLinkCardProps) {
           <h3 className="font-heading text-base font-semibold text-foreground">
             Save a place from a link
           </h3>
+          {!features.aiLinkExtract && (
+            <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              Coming soon
+            </span>
+          )}
         </div>
         <p className="text-sm text-muted-foreground mb-3">
-          Paste a TikTok or Google Maps link — AI reads it and works out the place, then you
-          confirm before it&apos;s added to your wishlist. Do check the details.
+          {features.aiLinkExtract ? (
+            <>Paste a TikTok or Google Maps link — AI reads it and works out the place, then you
+            confirm before it&apos;s added to your wishlist. Do check the details.</>
+          ) : (
+            <>AI link import is coming soon — paste a TikTok or Google Maps link and it&apos;ll
+            work out the place for you. Until then, add places with the search below.</>
+          )}
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
@@ -115,12 +126,13 @@ export function SaveFromLinkCard({ onSave }: SaveFromLinkCardProps) {
               }}
               placeholder="https://www.tiktok.com/@user/video/…  or  maps.app.goo.gl/…"
               className="pl-9"
+              disabled={!features.aiLinkExtract}
             />
           </div>
           <div className="flex gap-2">
             <Button
               onClick={handlePaste}
-              disabled={extracting || !linkUrl.trim()}
+              disabled={!features.aiLinkExtract || extracting || !linkUrl.trim()}
               variant="coral"
               className="gap-2 shrink-0"
             >
@@ -129,7 +141,7 @@ export function SaveFromLinkCard({ onSave }: SaveFromLinkCardProps) {
             </Button>
             <Button onClick={openManual} variant="secondary" className="gap-2 shrink-0">
               <Plus className="h-4 w-4" />
-              Manual
+              {features.aiLinkExtract ? 'Manual' : 'Add a place'}
             </Button>
           </div>
         </div>

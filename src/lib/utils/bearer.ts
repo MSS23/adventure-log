@@ -31,13 +31,20 @@ export function verifyBearer(
   if (!headerValue || !secret) return false
   const prefix = 'Bearer '
   if (!headerValue.startsWith(prefix)) return false
+  return timingSafeStringEqual(headerValue.slice(prefix.length), secret)
+}
 
-  const provided = Buffer.from(headerValue.slice(prefix.length))
-  const expected = Buffer.from(secret)
+/**
+ * Constant-time string equality for secrets and signatures (bearer tokens,
+ * HMAC hex digests). See the timing-attack rationale above.
+ */
+export function timingSafeStringEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a)
+  const bufB = Buffer.from(b)
 
   // timingSafeEqual throws if buffers differ in length. Short-circuiting on
-  // length still leaks length, but the secret length is a build-time constant
+  // length still leaks length, but secret/signature lengths are constants
   // anyway — no incremental information disclosed.
-  if (provided.length !== expected.length) return false
-  return timingSafeEqual(provided, expected)
+  if (bufA.length !== bufB.length) return false
+  return timingSafeEqual(bufA, bufB)
 }

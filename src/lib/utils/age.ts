@@ -29,3 +29,15 @@ export function isAdult(dob: Date | string): boolean {
   const age = calculateAge(dob)
   return age !== null && age >= MIN_AGE
 }
+
+/**
+ * Strict YYYY-MM-DD validation, including calendar validity — JS Date rolls
+ * "2025-02-31" over to March 3rd, so a parse-only check silently accepts
+ * impossible dates. The round-trip comparison rejects them.
+ */
+export function isIsoDateString(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const parsed = new Date(`${value}T00:00:00Z`)
+  if (Number.isNaN(parsed.getTime())) return false
+  return parsed.toISOString().slice(0, 10) === value
+}

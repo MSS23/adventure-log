@@ -13,6 +13,7 @@
  */
 
 import { log } from '@/lib/utils/logger'
+import { postDiscordEmbed } from '@/lib/services/discord'
 
 export type FeedbackCategory = 'bug' | 'idea' | 'praise' | 'other'
 
@@ -61,36 +62,18 @@ export async function deliverToDiscord(p: FeedbackPayload): Promise<boolean> {
     ...(p.pageUrl ? [{ name: 'Page', value: p.pageUrl.slice(0, 1024), inline: false }] : []),
   ]
 
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: 'Adventure Log Feedback',
-        embeds: [
-          {
-            title: `${meta.emoji} ${meta.label}`,
-            description: p.message.slice(0, 4000),
-            color: meta.color,
-            fields,
-            footer: { text: `Adventure Log${p.appVersion ? ` · v${p.appVersion}` : ''}` },
-          },
-        ],
-      }),
-    })
-    if (!res.ok) {
-      log.warn('Discord feedback webhook returned non-OK', {
-        component: 'FeedbackDelivery',
-        action: 'discord',
-        status: res.status,
-      })
-      return false
-    }
-    return true
-  } catch (error) {
-    log.error('Discord feedback webhook failed', { component: 'FeedbackDelivery', action: 'discord' }, error as Error)
-    return false
-  }
+  return postDiscordEmbed(
+    url,
+    'Adventure Log Feedback',
+    {
+      title: `${meta.emoji} ${meta.label}`,
+      description: p.message.slice(0, 4000),
+      color: meta.color,
+      fields,
+      footer: { text: `Adventure Log${p.appVersion ? ` · v${p.appVersion}` : ''}` },
+    },
+    { component: 'FeedbackDelivery', action: 'discord' }
+  )
 }
 
 /** Creates a Linear issue for the feedback. Returns the issue id + url. */

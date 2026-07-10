@@ -8,7 +8,7 @@ const resend = process.env.RESEND_API_KEY
 const FROM_EMAIL = process.env.EMAIL_FROM || 'Adventure Log <noreply@adventurelog.app>'
 const APP_NAME = 'Adventure Log'
 
-function getAppUrl(): string {
+export function getAppUrl(): string {
   const url = process.env.NEXT_PUBLIC_APP_URL
   if (url) return url
   const vercelUrl = process.env.VERCEL_URL
@@ -47,6 +47,12 @@ const baseStyles = `
   .muted { color: #78716c; font-size: 13px; }
 `
 
+/** Footer fragment linking the signed one-click unsubscribe endpoint. */
+function unsubscribeFooter(unsubscribeUrl?: string | null): string {
+  if (!unsubscribeUrl) return ''
+  return `<br><a href="${unsubscribeUrl}">Unsubscribe from email notifications</a>`
+}
+
 function wrapHtml(title: string, content: string): string {
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${title}</title>
@@ -56,7 +62,7 @@ function wrapHtml(title: string, content: string): string {
 
 // ─── Email Templates ──────────────────────────────────────────────────────────
 
-function welcomeEmail(username: string): { subject: string; html: string } {
+function welcomeEmail(username: string, unsubscribeUrl?: string | null): { subject: string; html: string } {
   const safeUsername = escapeHtml(username)
   return {
     subject: `Welcome to ${APP_NAME}!`,
@@ -79,13 +85,13 @@ function welcomeEmail(username: string): { subject: string; html: string } {
         </p>
       </div>
       <div class="footer">
-        <p>${APP_NAME} &mdash; Your travels, beautifully mapped</p>
+        <p>${APP_NAME} &mdash; Your travels, beautifully mapped${unsubscribeFooter(unsubscribeUrl)}</p>
       </div>
     `)
   }
 }
 
-function newFollowerEmail(username: string, followerName: string, followerUsername: string): { subject: string; html: string } {
+function newFollowerEmail(username: string, followerName: string, followerUsername: string, unsubscribeUrl?: string | null): { subject: string; html: string } {
   const safeName = escapeHtml(username)
   const safeFollower = escapeHtml(followerName)
   const safeFollowerUser = escapeHtml(followerUsername)
@@ -104,7 +110,7 @@ function newFollowerEmail(username: string, followerName: string, followerUserna
       </div>
       <div class="footer">
         <p>You received this because you have email notifications enabled.<br>
-        <a href="${getAppUrl()}/settings/notifications">Manage preferences</a></p>
+        <a href="${getAppUrl()}/settings/notifications">Manage preferences</a>${unsubscribeFooter(unsubscribeUrl)}</p>
       </div>
     `)
   }
@@ -115,7 +121,8 @@ function albumCommentEmail(
   commenterName: string,
   albumTitle: string,
   albumId: string,
-  commentPreview: string
+  commentPreview: string,
+  unsubscribeUrl?: string | null
 ): { subject: string; html: string } {
   const safeName = escapeHtml(username)
   const safeCommenter = escapeHtml(commenterName)
@@ -138,7 +145,7 @@ function albumCommentEmail(
         </p>
       </div>
       <div class="footer">
-        <p><a href="${getAppUrl()}/settings/notifications">Manage email preferences</a></p>
+        <p><a href="${getAppUrl()}/settings/notifications">Manage email preferences</a>${unsubscribeFooter(unsubscribeUrl)}</p>
       </div>
     `)
   }
@@ -148,7 +155,8 @@ function albumLikeEmail(
   username: string,
   likerName: string,
   albumTitle: string,
-  albumId: string
+  albumId: string,
+  unsubscribeUrl?: string | null
 ): { subject: string; html: string } {
   const safeName = escapeHtml(username)
   const safeLiker = escapeHtml(likerName)
@@ -167,7 +175,7 @@ function albumLikeEmail(
         </p>
       </div>
       <div class="footer">
-        <p><a href="${getAppUrl()}/settings/notifications">Manage email preferences</a></p>
+        <p><a href="${getAppUrl()}/settings/notifications">Manage email preferences</a>${unsubscribeFooter(unsubscribeUrl)}</p>
       </div>
     `)
   }
@@ -175,7 +183,7 @@ function albumLikeEmail(
 
 // ─── Send Functions ───────────────────────────────────────────────────────────
 
-async function send(to: string, subject: string, html: string): Promise<boolean> {
+async function send(to: string, subject: string, html: string, unsubscribeUrl?: string | null): Promise<boolean> {
   if (!resend) {
     log.warn('Email not sent - RESEND_API_KEY not configured', {
       component: 'EmailService',
@@ -192,6 +200,16 @@ async function send(to: string, subject: string, html: string): Promise<boolean>
       to,
       subject,
       html,
+      // RFC 8058 one-click unsubscribe — mail clients surface a native
+      // "Unsubscribe" control, and Gmail/Yahoo bulk-sender rules require it.
+      ...(unsubscribeUrl
+        ? {
+            headers: {
+              'List-Unsubscribe': `<${unsubscribeUrl}>`,
+              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+            },
+          }
+        : {}),
     })
 
     if (error) {
@@ -210,14 +228,14 @@ async function send(to: string, subject: string, html: string): Promise<boolean>
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export const emailService = {
-  async sendWelcome(to: string, username: string) {
-    const { subject, html } = welcomeEmail(username)
-    return send(to, subject, html)
+  async sendWelcome(to: string, username: string, unsubscribeUrl?: string | null) {
+    const { subject, html } = welcomeEmail(username, unsubscribeUrl)
+    return send(to, subject, html, unsubscribeUrl)
   },
 
-  async sendNewFollower(to: string, username: string, followerName: string, followerUsername: string) {
-    const { subject, html } = newFollowerEmail(username, followerName, followerUsername)
-    return send(to, subject, html)
+  async sendNewFollower(to: string, username: string, followerName: string, followerUsername: string, unsubscribeUrl?: string | null) {
+    const { subject, html } = newFollowerEmail(username, followerName, followerUsername, unsubscribeUrl)
+    return send(to, subject, html, unsubscribeUrl)
   },
 
   async sendAlbumComment(
@@ -226,10 +244,11 @@ export const emailService = {
     commenterName: string,
     albumTitle: string,
     albumId: string,
-    commentPreview: string
+    commentPreview: string,
+    unsubscribeUrl?: string | null
   ) {
-    const { subject, html } = albumCommentEmail(username, commenterName, albumTitle, albumId, commentPreview)
-    return send(to, subject, html)
+    const { subject, html } = albumCommentEmail(username, commenterName, albumTitle, albumId, commentPreview, unsubscribeUrl)
+    return send(to, subject, html, unsubscribeUrl)
   },
 
   async sendAlbumLike(
@@ -237,10 +256,11 @@ export const emailService = {
     username: string,
     likerName: string,
     albumTitle: string,
-    albumId: string
+    albumId: string,
+    unsubscribeUrl?: string | null
   ) {
-    const { subject, html } = albumLikeEmail(username, likerName, albumTitle, albumId)
-    return send(to, subject, html)
+    const { subject, html } = albumLikeEmail(username, likerName, albumTitle, albumId, unsubscribeUrl)
+    return send(to, subject, html, unsubscribeUrl)
   },
 
   /** Check if email service is configured */

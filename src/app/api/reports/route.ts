@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimitAsync, rateLimitResponse, rateLimitConfigs } from '@/lib/utils/rate-limit'
 import { log } from '@/lib/utils/logger'
 import { sanitizeText } from '@/lib/utils/input-validation'
+import { deliverReportToDiscord } from '@/lib/services/report-delivery'
 import type { ReportReason, ReportTargetType } from '@/types/database'
 
 const VALID_REASONS: ReportReason[] = ['spam', 'harassment', 'inappropriate', 'copyright', 'misinformation', 'other']
@@ -139,12 +140,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to submit report' }, { status: 500 })
     }
 
-    log.info('Report submitted', {
-      component: 'Reports',
-      action: 'submit',
-      targetType: target_type,
-      targetId: target_id,
-      reason,
+    // Best-effort moderation ping, delivered AFTER the response is sent
+    // (after() maps to waitUntil on Vercel) so the reporter's 201 never
+    // waits on Discord latency or outages.
+    after(async () => {
+      const discordOk = await deliverReportToDiscord({
+        reportId: report.id,
+        targetType: target_type,
+        targetId: target_id,
+        reason,
+        description: cleanDescription,
+        reportedUserId: derivedReportedUserId,
+      })
+      log.info('Report submitted', {
+        component: 'Reports',
+        action: 'submit',
+        targetType: target_type,
+        targetId: target_id,
+        reason,
+        discordOk,
+      })
     })
 
     return NextResponse.json({ report }, { status: 201 })

@@ -108,21 +108,15 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
     )
   }
 
+  // Quiet, compact states — a discovery feed shouldn't stack billboard-sized
+  // "nothing here" cards under every section header.
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4">
-          <MapPin className="h-6 w-6" />
-        </div>
-        <p className="font-heading text-lg font-semibold text-foreground">Oops, something went wrong</p>
-        <p className="mt-1 text-sm text-muted-foreground">{error}</p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setRetryKey(k => k + 1)}
-          className="mt-5"
-        >
-          Try again
+      <div className="flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3">
+        <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <p className="flex-1 text-sm text-muted-foreground">Couldn&apos;t load popular albums.</p>
+        <Button variant="ghost" size="sm" onClick={() => setRetryKey(k => k + 1)}>
+          Retry
         </Button>
       </div>
     )
@@ -130,15 +124,15 @@ export function PopularJourneysSection({ className, limit = 6 }: PopularJourneys
 
   if (albums.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-          <MapPin className="h-6 w-6" />
-        </div>
-        <p className="font-heading text-lg font-semibold text-foreground">No albums yet</p>
-        <p className="mt-1 text-sm text-muted-foreground">Be the first to share an album!</p>
-        <Button asChild className="mt-5">
-          <Link href="/albums/new">Share your first album</Link>
-        </Button>
+      <div className="flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3">
+        <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <p className="flex-1 text-sm text-muted-foreground">
+          No albums yet —{' '}
+          <Link href="/albums/new" className="font-medium text-primary hover:underline">
+            share the first one
+          </Link>
+          .
+        </p>
       </div>
     )
   }

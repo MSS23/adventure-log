@@ -178,26 +178,22 @@ export function CreatorsToFollowSection({ className, limit = 8 }: CreatorsToFoll
     )
   }
 
+  // Quiet, compact states — a discovery feed shouldn't stack billboard-sized
+  // "nothing here" cards under every section header.
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10 text-destructive mb-4">
-          <UserPlus className="h-6 w-6" />
-        </div>
-        <p className="font-heading text-lg font-semibold text-foreground">Unable to load creators</p>
-        <p className="mt-1 text-sm text-muted-foreground">{error}</p>
+      <div className="flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3">
+        <UserPlus className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Couldn&apos;t load travelers right now.</p>
       </div>
     )
   }
 
   if (creators.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-          <Users className="h-6 w-6" />
-        </div>
-        <p className="font-heading text-lg font-semibold text-foreground">No creators yet</p>
-        <p className="mt-1 text-sm text-muted-foreground">Join the community and start sharing!</p>
+      <div className="flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3">
+        <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">No travelers to suggest yet — check back soon.</p>
       </div>
     )
   }

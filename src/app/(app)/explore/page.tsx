@@ -120,6 +120,23 @@ export default function ExplorePage() {
         )}
       </div>
 
+      {/* One-tap starting points — searching from a blank box is the hardest
+          first step on a discovery page. Hidden once a query is typed. */}
+      {showDefaultContent && (
+        <div className="-mt-4 mb-8 flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+          {['Japan', 'Italy', 'Beaches', 'Road trips', 'Greece', 'Hiking'].map((term) => (
+            <button
+              key={term}
+              type="button"
+              onClick={() => setSearchQuery(term)}
+              className="shrink-0 rounded-full border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors cursor-pointer hover:border-primary/30 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {term}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Content */}
       <AnimatePresence mode="wait">
         {showDefaultContent ? (
@@ -200,7 +217,9 @@ export default function ExplorePage() {
                 title="Top adventurers"
                 href="/explore/leaderboard"
               />
-              <Leaderboard limit={10} metric="score" />
+              {/* Top 5 keeps the page from ending in a wall of rows — the
+                  full board lives behind "View all". */}
+              <Leaderboard limit={5} metric="score" />
             </motion.section>
           </motion.div>
         ) : (

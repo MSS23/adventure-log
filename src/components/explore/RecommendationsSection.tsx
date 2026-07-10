@@ -47,34 +47,25 @@ export function RecommendationsSection({ className, limit = 3 }: Recommendations
     )
   }
 
-  // Discovery surface: stay quiet on error rather than shouting on the Explore feed.
+  // Discovery surface: stay quiet on error/empty rather than stacking a
+  // billboard-sized card under the section header.
   if (isError || top.length === 0) {
     return (
       <div
         className={cn(
-          'flex flex-col items-center rounded-2xl border border-dashed border-[color:var(--color-line-warm)] bg-[color:var(--color-ivory)] px-6 py-10 text-center dark:bg-white/[0.02] dark:border-white/[0.12]',
+          'flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3',
           className
         )}
       >
-        <span
-          className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[color:var(--color-forest)]/10 text-[color:var(--color-forest)]"
-          aria-hidden
-        >
-          <MapPinned className="h-6 w-6" strokeWidth={1.8} />
-        </span>
-        <p className="font-heading text-[16px] font-semibold text-[color:var(--color-ink)] dark:text-stone-100">
-          No recommendations yet
+        <MapPinned className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+        <p className="flex-1 text-sm text-muted-foreground">
+          No recommendations yet —{' '}
+          <Link href="/explore/recommendations" className="font-medium text-primary hover:underline">
+            <Plus className="mb-0.5 inline h-3.5 w-3.5" strokeWidth={2.2} aria-hidden />
+            add the first one
+          </Link>
+          .
         </p>
-        <p className="mt-1 max-w-sm text-[13px] text-[color:var(--color-ink-soft)] dark:text-stone-400">
-          Share a great place to eat, see, or stay — the ones fellow travelers bump rise to the top.
-        </p>
-        <Link
-          href="/explore/recommendations"
-          className="al-btn-accent mt-4 inline-flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold"
-        >
-          <Plus className="h-[18px] w-[18px]" strokeWidth={2.2} aria-hidden />
-          Add a recommendation
-        </Link>
       </div>
     )
   }

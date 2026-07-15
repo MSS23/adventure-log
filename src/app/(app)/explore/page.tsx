@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, ChevronRight, MapPinned } from 'lucide-react'
+import { Search, X, ChevronRight, MapPinned, UsersRound } from 'lucide-react'
 import { FriendsMapSection } from '@/components/explore/FriendsMapSection'
 import { PopularJourneysSection } from '@/components/explore/PopularJourneysSection'
 import { CreatorsToFollowSection } from '@/components/explore/CreatorsToFollowSection'
@@ -60,41 +60,51 @@ export default function ExplorePage() {
   const showDefaultContent = !searchQuery.trim()
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 pb-24 md:pb-8 pt-6 md:pt-8">
+    <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 pb-24 md:pb-8 pt-6 md:pt-8">
       {/* Editorial header */}
-      <header className="space-y-1 mb-6">
-        <p className="al-eyebrow">Discover</p>
-        <h1 className="al-display text-3xl md:text-5xl leading-[1.02]">
-          Where the world{' '}
-          <em className="italic font-normal text-accent">is going.</em>
-        </h1>
-        <div className="flex items-center justify-between gap-3 max-w-xl">
-          <p className="text-sm text-muted-foreground">
-            Destinations, journeys, and fellow adventurers.
-          </p>
+      <header className="relative mb-5 overflow-hidden rounded-3xl border border-border bg-card px-5 pb-12 pt-7 shadow-[var(--shadow-resting)] sm:px-8 sm:pb-14 sm:pt-9">
+        <div aria-hidden className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative">
+          <p className="al-eyebrow">Discover</p>
+          <h1 className="al-display text-3xl md:text-5xl leading-[1.02]">
+            Find somewhere worth{' '}
+            <em className="italic font-normal text-accent">remembering.</em>
+          </h1>
+          <div className="mt-3 flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Places your friends loved, people with a footprint like yours, and ideas for the next adventure.
+            </p>
           {/* Places + Map moved out of the bottom tab bar (5-tab limit) —
               these are their mobile entry points now. */}
-          <span className="flex items-center gap-3 shrink-0">
+          <span className="grid shrink-0 grid-cols-3 gap-1.5">
             <Link
               href="/map"
-              className="inline-flex items-center gap-1 shrink-0 text-sm font-medium text-primary hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-background/65 px-3 text-xs font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <MapPinned className="h-4 w-4" />
               Your Map
             </Link>
             <Link
               href="/places"
-              className="inline-flex items-center gap-1 shrink-0 text-sm font-medium text-primary hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-background/65 px-3 text-xs font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Places
               <ChevronRight className="h-3.5 w-3.5" />
             </Link>
-          </span>
+            <Link
+              href="/travel-twins"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-background/65 px-3 text-xs font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <UsersRound className="h-4 w-4" />
+              Travel twins
+            </Link>
+            </span>
+          </div>
         </div>
       </header>
 
       {/* Search pill */}
-      <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-3 mb-8 shadow-[var(--shadow-resting)] transition-all duration-200 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
+      <div className="relative z-10 mx-3 -mt-11 mb-8 flex min-h-14 items-center gap-3 rounded-2xl border border-border bg-background/95 px-4 py-3 shadow-[var(--shadow-overlay)] backdrop-blur-xl transition-all duration-200 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background sm:mx-6">
         <Search className="h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
         <input
           type="text"
@@ -129,7 +139,7 @@ export default function ExplorePage() {
               key={term}
               type="button"
               onClick={() => setSearchQuery(term)}
-              className="shrink-0 rounded-full border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors cursor-pointer hover:border-primary/30 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="min-h-9 shrink-0 rounded-full border border-border bg-card px-3 text-[12px] font-medium text-muted-foreground shadow-[var(--shadow-resting)] transition-colors cursor-pointer hover:border-primary/30 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {term}
             </button>

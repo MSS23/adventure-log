@@ -1,7 +1,8 @@
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useState, useCallback, useEffect } from 'react'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import useEmblaCarousel from 'embla-carousel-react'
 import { Camera, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -137,21 +138,17 @@ export function PhotoCarousel({
       >
         {photoUrl ? (
           <>
-            <Image
+            <img
               src={photoUrl}
               alt={photo.caption || albumTitle}
-              fill
               className={cn(
-                'object-cover select-none transition-opacity duration-500 ease-out',
+                'absolute inset-0 h-full w-full object-cover select-none transition-opacity duration-500 ease-out',
                 loadedIds[photo.id] ? 'opacity-100' : 'opacity-0',
               )}
               style={{
                 objectPosition: `${coverPhotoOffset?.x ?? 50}% ${coverPhotoOffset?.y ?? 50}%`
               }}
-              sizes="(max-width: 480px) 100vw, (max-width: 768px) 90vw, 650px"
               loading={priority ? 'eager' : 'lazy'}
-              priority={priority}
-              quality={75}
               onLoad={() => markLoaded(photo.id)}
             />
             <HeartAnimation
@@ -189,12 +186,11 @@ export function PhotoCarousel({
                 className="flex-[0_0_100%] min-w-0 relative aspect-[4/3] bg-muted"
               >
                 {photoUrl ? (
-                  <Image
+                  <img
                     src={photoUrl}
                     alt={photo.caption || `${albumTitle} - Photo ${index + 1}`}
-                    fill
                     className={cn(
-                      'object-cover select-none transition-opacity duration-500 ease-out',
+                      'absolute inset-0 h-full w-full object-cover select-none transition-opacity duration-500 ease-out',
                       loadedIds[photo.id] ? 'opacity-100' : 'opacity-0',
                     )}
                     style={{
@@ -202,10 +198,7 @@ export function PhotoCarousel({
                         ? `${coverPhotoOffset.x ?? 50}% ${coverPhotoOffset.y ?? 50}%`
                         : 'center'
                     }}
-                    sizes="(max-width: 480px) 100vw, (max-width: 768px) 90vw, 650px"
                     loading={index === 0 && priority ? 'eager' : 'lazy'}
-                    quality={75}
-                    priority={index === 0 && priority}
                     onLoad={() => markLoaded(photo.id)}
                   />
                 ) : (

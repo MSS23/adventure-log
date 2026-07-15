@@ -285,7 +285,7 @@ export default function ActivityPage() {
       {/* Activity Feed */}
       <div className="space-y-2">
         {displayedActivities.length > 0 && (
-          <p className="al-eyebrow">Today</p>
+          <p className="al-eyebrow">Recent activity</p>
         )}
 
         <div className="rounded-2xl border border-border bg-card overflow-hidden">

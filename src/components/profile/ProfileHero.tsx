@@ -1,19 +1,18 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 import Link from 'next/link'
+import { Pencil, Settings, Share2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { User } from '@/types/database'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { getAvatarUrl } from '@/lib/utils/avatar'
-import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
-import { Settings, Pencil, Share2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { AnimatedCounter } from '@/components/ui/animated-count'
 import { FollowButton } from '@/components/social/FollowButton'
-import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 import { FoundingExplorerBadge } from '@/components/profile/FoundingExplorerBadge'
+import { getAvatarUrl } from '@/lib/utils/avatar'
+import { getDisplayInitial, getDisplayName } from '@/lib/utils/display-name'
+import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 import { trackGrowthEvent } from '@/lib/utils/growth-events'
 
 interface ProfileHeroProps {
@@ -28,14 +27,12 @@ interface ProfileHeroProps {
 export function ProfileHero({
   profile,
   isOwnProfile = false,
-  followStats
+  followStats,
 }: ProfileHeroProps) {
   const displayName = getDisplayName(profile.display_name, profile.username)
   const username = profile.username || 'anonymous'
   const initials = getDisplayInitial(profile.display_name, profile.username)
 
-  // Share the public profile URL (web origin + referral handle) via the native
-  // share sheet when available, otherwise copy to clipboard with a toast.
   const handleShare = async () => {
     if (!profile.username) return
     const url = withRef(`${getWebOrigin()}/u/${profile.username}`, profile.username)
@@ -54,9 +51,8 @@ export function ProfileHero({
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({ title, url })
-      } catch (err) {
-        // User dismissing the share sheet is not an error.
-        if (err instanceof Error && err.name === 'AbortError') return
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return
         await copyToClipboard()
       }
     } else {
@@ -65,93 +61,59 @@ export function ProfileHero({
   }
 
   return (
-    <div className="relative px-4 sm:px-6">
-      {/* Cover band — the photo uploaded in Settings when set (this is the
-          only surface that displays it), otherwise a quiet accent surface. */}
-      <div className="relative h-32 sm:h-40 rounded-2xl overflow-hidden bg-primary/10 dark:bg-primary/15">
-        {profile.cover_photo_url && (
-          <Image
-            src={profile.cover_photo_url}
-            alt=""
-            fill
-            priority
-            className="object-cover"
-            sizes="(max-width: 672px) 100vw, 672px"
-          />
-        )}
-      </div>
-
-      <div className="relative z-10 pb-7 -mt-12 sm:-mt-14">
-        <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-          {/* Avatar — overlaps the cover band */}
+    <section className="px-4 pt-8 sm:px-6 sm:pt-10">
+      <div className="border-b border-border pb-7">
+        <div className="flex items-start gap-4 sm:gap-6">
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.92, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-            className="relative"
+            className="relative shrink-0"
           >
-            <Avatar className="h-24 w-24 sm:h-28 sm:w-28 ring-4 ring-background">
-              <AvatarImage
-                src={getAvatarUrl(profile.avatar_url, profile.username)}
-                alt={displayName}
-              />
-              <AvatarFallback className="bg-accent font-heading text-3xl font-semibold text-accent-foreground">
+            <Avatar className="h-20 w-20 border border-border ring-4 ring-background sm:h-24 sm:w-24">
+              <AvatarImage src={getAvatarUrl(profile.avatar_url, profile.username)} alt={displayName} />
+              <AvatarFallback className="bg-accent font-heading text-2xl font-semibold text-accent-foreground">
                 {initials}
               </AvatarFallback>
             </Avatar>
+            <span className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-[3px] border-background bg-primary" aria-hidden />
           </motion.div>
 
-          {/* Profile Info */}
-          <div className="flex-1 pt-3 sm:pt-12">
+          <div className="min-w-0 flex-1">
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="flex flex-wrap items-start justify-between gap-x-3 gap-y-3"
+              transition={{ delay: 0.08 }}
+              className="flex flex-wrap items-start justify-between gap-3"
             >
               <div className="min-w-0">
-                <h1 className="al-display text-2xl sm:text-3xl">
-                  {displayName}
-                </h1>
-                <p className="font-mono text-[11px] tracking-wider text-muted-foreground mt-1 flex items-center gap-2">
+                <p className="al-eyebrow mb-1">Travel profile</p>
+                <h1 className="al-display truncate text-2xl sm:text-3xl">{displayName}</h1>
+                <p className="mt-1 flex items-center gap-2 font-mono text-[11px] tracking-wider text-muted-foreground">
                   @{username}
                   <FoundingExplorerBadge createdAt={profile.created_at} />
                 </p>
               </div>
 
-              {/* Action Buttons — top-right of info block, wrap tidily on narrow screens */}
-              <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="flex items-center gap-1.5">
                 {isOwnProfile ? (
                   <>
-                    <Link href="/profile/edit">
-                      <Button
-                        size="sm"
-                        className="rounded-full text-[12px] font-semibold min-h-[44px]"
-                      >
-                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                        Edit profile
-                      </Button>
-                    </Link>
+                    <Button asChild size="sm" className="min-h-10 rounded-full px-4 text-xs font-semibold">
+                      <Link href="/profile/edit">
+                        <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                        Edit
+                      </Link>
+                    </Button>
                     {profile.username && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleShare}
-                        aria-label="Share profile"
-                        className="rounded-full h-11 w-11"
-                      >
+                      <Button variant="ghost" size="icon" onClick={handleShare} aria-label="Share profile" className="h-10 w-10 rounded-full">
                         <Share2 className="h-4 w-4" />
                       </Button>
                     )}
-                    <Link href="/settings" aria-label="Settings">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full h-11 w-11"
-                      >
+                    <Button asChild variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                      <Link href="/settings" aria-label="Settings">
                         <Settings className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </>
                 ) : (
                   <FollowButton userId={profile.id} size="sm" showText />
@@ -159,45 +121,39 @@ export function ProfileHero({
               </div>
             </motion.div>
 
-            {/* Bio — serif italic, editorial voice */}
             {profile.bio && (
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="mt-3 font-heading italic text-[15px] leading-relaxed max-w-xl text-muted-foreground"
+                transition={{ delay: 0.16 }}
+                className="mt-3 max-w-xl font-heading text-[15px] italic leading-relaxed text-muted-foreground"
               >
                 {profile.bio}
               </motion.p>
             )}
 
-            {/* Follow Stats Row */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex items-center gap-6 mt-4"
+              transition={{ delay: 0.22 }}
+              className="mt-4 flex items-center gap-5"
             >
-              <Link href="/following" className="group">
-                <span className="font-heading text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-                  <AnimatedCounter value={followStats.followingCount} className="" />
-                </span>
-                <span className="text-muted-foreground ml-1 text-xs">
-                  Following
-                </span>
-              </Link>
-              <Link href="/followers" className="group">
-                <span className="font-heading text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-                  <AnimatedCounter value={followStats.followersCount} className="" />
-                </span>
-                <span className="text-muted-foreground ml-1 text-xs">
-                  Followers
-                </span>
-              </Link>
+              <FollowStat href="/following" value={followStats.followingCount} label="Following" />
+              <span className="h-4 w-px bg-border" aria-hidden />
+              <FollowStat href="/followers" value={followStats.followersCount} label="Followers" />
             </motion.div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
+  )
+}
+
+function FollowStat({ href, value, label }: { href: string; value: number; label: string }) {
+  return (
+    <Link href={href} className="group inline-flex items-baseline gap-1.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <AnimatedCounter value={value} className="font-heading text-base font-semibold text-foreground transition-colors group-hover:text-primary" />
+      <span className="text-xs text-muted-foreground">{label}</span>
+    </Link>
   )
 }

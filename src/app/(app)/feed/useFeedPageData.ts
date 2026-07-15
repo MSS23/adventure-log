@@ -60,7 +60,11 @@ export function useSuggestedUsers(userId: string | undefined, limit = 5) {
           id: u.id,
           username: u.username,
           display_name: u.display_name,
-          avatar_url: u.avatar_url,
+          // Demo fixtures use DiceBear SVGs. Let the shared avatar fallback
+          // render initials here so a third-party host can never blank the feed.
+          avatar_url: u.avatar_url?.startsWith('https://api.dicebear.com/')
+            ? null
+            : u.avatar_url,
           album_count: Number(u.album_count) || 0,
           privacy_level: u.privacy_level,
         }))

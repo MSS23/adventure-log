@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, Map as MapIcon, Loader2, Calendar } from 'lucide-react'
+import { Plus, Map as MapIcon, Loader2, Calendar, UsersRound, Link2, MapPinned } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -173,12 +173,17 @@ export default function TripsPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-24 md:pb-8 space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <section className="relative overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-resting)] sm:p-7">
+        <div aria-hidden className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
         <header className="min-w-0 space-y-1">
-          <p className="al-eyebrow">Plan · Together</p>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <p className="al-eyebrow">Plan · Together</p>
+            <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary">Collaborative beta</span>
+          </div>
           <h1 className="al-display text-3xl md:text-4xl">Trip Planner</h1>
           <p className="text-sm text-muted-foreground max-w-xl">
-            Collaborate on trips — paste Google Maps links, each person pins in their own color.
+            One shared board for everyone&apos;s ideas, links, and must-do places.
           </p>
         </header>
 
@@ -242,7 +247,13 @@ export default function TripsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+        </div>
+        <div className="relative mt-6 grid grid-cols-1 gap-2 border-t border-border pt-5 sm:grid-cols-3">
+          <PlannerFeature icon={<Link2 className="h-4 w-4" />} title="Paste places" copy="Google Maps links become pins" />
+          <PlannerFeature icon={<UsersRound className="h-4 w-4" />} title="Plan together" copy="Everyone adds in their own colour" />
+          <PlannerFeature icon={<MapPinned className="h-4 w-4" />} title="Keep the route" copy="Turn the finished trip into an album" />
+        </div>
+      </section>
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
@@ -311,10 +322,10 @@ export default function TripsPage() {
             <Link
               key={trip.id}
               href={`/trips/${trip.id}`}
-              className="group block h-full rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group block h-full rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-resting)] transition-all duration-200 hover:border-primary/30 hover:shadow-[var(--shadow-hover)] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="text-4xl">{trip.cover_emoji || '🗺️'}</div>
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-2xl">{trip.cover_emoji || '🗺️'}</div>
                 <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                   {trip.my_role}
                 </span>
@@ -346,6 +357,26 @@ export default function TripsPage() {
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function PlannerFeature({
+  icon,
+  title,
+  copy,
+}: {
+  icon: React.ReactNode
+  title: string
+  copy: string
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-2xl bg-muted/55 p-3.5">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-card text-primary shadow-sm">{icon}</span>
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-foreground">{title}</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{copy}</p>
+      </div>
     </div>
   )
 }

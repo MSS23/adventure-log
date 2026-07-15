@@ -86,9 +86,24 @@ export function PublicProfileContent({
   // getWebOrigin (not window.location.origin — capacitor://localhost in the
   // APK); ?ref= credits the profile owner, so signups from a shared profile
   // auto-follow them.
-  const profileUrl = withRef(`${getWebOrigin()}/u/${user.username}`, user.username)
+  const profilePath = `/u/${user.username}`
+  const configuredOrigin = (
+    process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || ''
+  ).replace(/\/$/, '')
+  const profileUrl = configuredOrigin
+    ? withRef(`${configuredOrigin}${profilePath}`, user.username)
+    : `${profilePath}?ref=${encodeURIComponent(user.username)}`
+  const embedUrl = configuredOrigin
+    ? `${configuredOrigin}/embed/${user.username}`
+    : `/embed/${user.username}`
+  const embedCode = `<iframe src="${embedUrl}" width="100%" height="500" style="border:none;border-radius:12px;" title="${displayName}'s Travel Map"></iframe>`
 
-  const embedCode = `<iframe src="${getWebOrigin()}/embed/${user.username}" width="100%" height="500" style="border:none;border-radius:12px;" title="${displayName}'s Travel Map"></iframe>`
+  const getShareableProfileUrl = () => withRef(
+    `${getWebOrigin()}${profilePath}`,
+    user.username
+  )
+
+  const getShareableEmbedCode = () => `<iframe src="${getWebOrigin()}/embed/${user.username}" width="100%" height="500" style="border:none;border-radius:12px;" title="${displayName}'s Travel Map"></iframe>`
 
   const copyToClipboard = async (text: string, type: 'url' | 'embed') => {
     try {
@@ -115,7 +130,7 @@ export function PublicProfileContent({
     const shareData = {
       title: `${displayName} on Adventure Log`,
       text: `Check out ${displayName}'s travels on Adventure Log 🌍`,
-      url: profileUrl,
+      url: getShareableProfileUrl(),
     }
     if (typeof navigator !== 'undefined' && 'share' in navigator) {
       try {
@@ -126,47 +141,47 @@ export function PublicProfileContent({
         // User cancelled or share unavailable — fall through to copy.
       }
     }
-    copyToClipboard(profileUrl, 'url')
+    copyToClipboard(getShareableProfileUrl(), 'url')
   }
 
   const stats = [
     { icon: Camera, value: albums.length, label: 'Adventures' },
     { icon: Globe, value: countryCodes.length, label: 'Countries' },
     { icon: Users, value: followerCount, label: 'Followers' },
-    { icon: Plane, value: formatDistanceKm(totalDistance), label: 'traveled' },
+    { icon: Plane, value: formatDistanceKm(totalDistance), label: 'Distance' },
   ]
 
   return (
     <div className="min-h-screen bg-[color:var(--background)]">
       {/* ───────── Hero Section ───────── */}
       <motion.section
-        className="relative overflow-hidden"
+        className="relative mx-auto max-w-4xl px-4 pt-8 sm:px-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
         {/* Gradient backdrop — Field Notebook forest */}
         <div
-          className="absolute inset-0"
+          className="hidden"
           style={{ background: 'linear-gradient(to bottom right, var(--color-forest-deep), var(--color-forest), var(--color-forest-deep))' }}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(153,177,105,0.3)_0%,_transparent_60%)]" />
+        <div className="hidden" />
         {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+        <div className="hidden" />
 
-        <div className="relative max-w-4xl mx-auto px-6 pt-16 pb-20 text-center">
+        <div className="relative rounded-3xl border border-border bg-card px-6 py-8 text-center shadow-[var(--shadow-resting)] sm:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div className="relative inline-block mb-6">
-              <Avatar className="relative w-28 h-28 ring-4 ring-white/30">
+            <div className="relative mb-5 inline-block">
+              <Avatar className="relative h-24 w-24 ring-4 ring-primary/10">
                 <AvatarImage
                   src={getAvatarUrl(user.avatar_url, user.username)}
                   alt={displayName}
                 />
-                <AvatarFallback className="bg-accent text-3xl text-accent-foreground font-heading">
+                <AvatarFallback className="bg-accent font-heading text-2xl text-accent-foreground">
                   {getDisplayInitial(user.display_name, user.username)}
                 </AvatarFallback>
               </Avatar>
@@ -178,15 +193,16 @@ export function PublicProfileContent({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <h1 className="font-heading text-4xl md:text-5xl font-semibold tracking-tight text-white mb-2">
+            <p className="al-eyebrow mb-1.5">Travel profile</p>
+            <h1 className="al-display text-3xl sm:text-4xl">
               {displayName}
             </h1>
-            <p className="text-white/85 text-lg mb-4 flex items-center justify-center gap-2">
+            <p className="mt-1 flex items-center justify-center gap-2 text-sm text-muted-foreground">
               @{user.username}
               <FoundingExplorerBadge createdAt={user.created_at} />
             </p>
             {user.bio && (
-              <p className="text-white/90 max-w-prose mx-auto text-lg leading-relaxed">
+              <p className="mx-auto mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
                 {user.bio}
               </p>
             )}
@@ -194,7 +210,7 @@ export function PublicProfileContent({
         </div>
 
         {/* Curved bottom edge */}
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="hidden">
           <svg
             viewBox="0 0 1440 60"
             fill="none"
@@ -210,10 +226,10 @@ export function PublicProfileContent({
         </div>
       </motion.section>
 
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">
         {/* ───────── Stats Bar ───────── */}
         <motion.div
-          className="-mt-8 relative z-10 rounded-2xl border border-border bg-card p-6 mb-10"
+          className="relative z-10 mb-10 mt-4 rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-resting)] sm:p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
@@ -246,7 +262,7 @@ export function PublicProfileContent({
               Travel Passport
             </h2>
             <div className="flex flex-wrap gap-2">
-              {countryCodes.slice(0, 30).map((code, i) => (
+              {countryCodes.map((code, i) => (
                 <motion.span
                   key={code}
                   className="inline-flex items-center gap-1.5 al-badge !normal-case !text-sm !py-1.5 !px-3"
@@ -459,7 +475,7 @@ export function PublicProfileContent({
                     size="sm"
                     variant="outline"
                     className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0"
-                    onClick={() => copyToClipboard(profileUrl, 'url')}
+                    onClick={() => copyToClipboard(getShareableProfileUrl(), 'url')}
                   >
                     {copiedUrl ? (
                       <>
@@ -492,7 +508,7 @@ export function PublicProfileContent({
                     size="sm"
                     variant="outline"
                     className="cursor-pointer rounded-xl gap-1.5 flex-shrink-0 mt-0.5"
-                    onClick={() => copyToClipboard(embedCode, 'embed')}
+                    onClick={() => copyToClipboard(getShareableEmbedCode(), 'embed')}
                   >
                     {copiedEmbed ? (
                       <>

@@ -359,9 +359,10 @@ export default function SavedContent() {
         ) : (
           <>
             {/* Controls Bar */}
+            <div className="space-y-3 rounded-3xl border border-border bg-card p-3 shadow-[var(--shadow-resting)] sm:p-4">
             <div className="flex flex-wrap items-center gap-3">
               {/* View Toggle */}
-              <div className="flex items-center rounded-xl border border-border bg-card p-1">
+              <div className="flex items-center rounded-xl bg-muted/70 p-1">
                 <button
                   type="button"
                   onClick={() => setViewMode('grid')}
@@ -370,8 +371,8 @@ export default function SavedContent() {
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]',
                     viewMode === 'grid'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-card/60'
                   )}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -385,8 +386,8 @@ export default function SavedContent() {
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97]',
                     viewMode === 'collections'
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-card/60'
                   )}
                 >
                   <FolderOpen className="h-4 w-4" />
@@ -397,7 +398,7 @@ export default function SavedContent() {
               {/* Sort / Group By */}
               {viewMode === 'grid' ? (
                 <Select value={sortMode} onValueChange={(v: SortMode) => setSortMode(v)}>
-                  <SelectTrigger className="w-[160px] h-9">
+                  <SelectTrigger className="h-10 w-[160px] rounded-xl">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -417,7 +418,7 @@ export default function SavedContent() {
                 </Select>
               ) : (
                 <Select value={groupBy} onValueChange={(v: GroupBy) => setGroupBy(v)}>
-                  <SelectTrigger className="w-[170px] h-9">
+                  <SelectTrigger className="h-10 w-[170px] rounded-xl">
                     <SelectValue placeholder="Group by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -434,7 +435,7 @@ export default function SavedContent() {
 
             {/* Filter Bar — only render filters that have something to choose from */}
             {(userOptions.length > 1 || countryOptions.length > 1) && (
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
                 <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                   <Filter className="h-3.5 w-3.5" />
                   Filter
@@ -443,7 +444,7 @@ export default function SavedContent() {
                 {/* By User */}
                 {userOptions.length > 1 && (
                   <Select value={filterUser} onValueChange={setFilterUser}>
-                    <SelectTrigger className="w-[160px] h-9">
+                    <SelectTrigger className="h-10 w-[160px] rounded-xl">
                       <span className="flex items-center gap-2 truncate">
                         <Users className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                         <SelectValue placeholder="All users" />
@@ -463,7 +464,7 @@ export default function SavedContent() {
                 {/* By Country */}
                 {countryOptions.length > 1 && (
                   <Select value={filterCountry} onValueChange={setFilterCountry}>
-                    <SelectTrigger className="w-[180px] h-9">
+                    <SelectTrigger className="h-10 w-[180px] rounded-xl">
                       <span className="flex items-center gap-2 truncate">
                         <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                         <SelectValue placeholder="All countries" />
@@ -501,6 +502,7 @@ export default function SavedContent() {
                 </span>
               </div>
             )}
+            </div>
 
             {/* No albums match the active filters */}
             {filteredAlbums.length === 0 ? (
@@ -529,12 +531,13 @@ export default function SavedContent() {
                     visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
                   }}
                 >
-                  {sortedAlbums.map((album) => (
+                  {sortedAlbums.map((album, index) => (
                     <AlbumCard
                       key={album.id}
                       album={album}
                       onRemove={handleRemove}
                       prefersReducedMotion={prefersReducedMotion}
+                      priority={index < 4}
                     />
                   ))}
                 </motion.div>
@@ -674,16 +677,18 @@ function AlbumCard({
   album,
   onRemove,
   prefersReducedMotion,
-  compact = false
+  compact = false,
+  priority = false,
 }: {
   album: SavedAlbum
   onRemove: (id: string) => void
   prefersReducedMotion: boolean
   compact?: boolean
+  priority?: boolean
 }) {
   return (
     <motion.div
-      className="group relative rounded-2xl border border-border bg-card overflow-hidden shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:border-primary/30 hover:shadow-[var(--shadow-hover)]"
+      className="group relative overflow-hidden rounded-3xl border border-border bg-card shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:border-primary/30 hover:shadow-[var(--shadow-hover)]"
       variants={{
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
@@ -692,7 +697,7 @@ function AlbumCard({
     >
       <Link
         href={`/albums/${album.id}`}
-        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-2xl"
+        className="block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {/* Album Cover */}
         <div className={cn(
@@ -704,6 +709,7 @@ function AlbumCard({
               src={getPhotoUrl(album.cover_photo_url) || ''}
               alt={album.title}
               fill
+              priority={priority}
               className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
               sizes={compact ? "(max-width: 640px) 50vw, 25vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"}
             />
@@ -742,7 +748,7 @@ function AlbumCard({
         </div>
 
         {/* Album Info */}
-        <div className={cn(compact ? "p-3" : "p-4")}>
+        <div className={cn(compact ? "p-3" : "p-4 sm:p-5")}>
           <h3 className={cn(
             "font-heading font-semibold text-foreground truncate group-hover:text-primary transition-colors",
             compact ? "text-sm mb-0.5" : "mb-1"

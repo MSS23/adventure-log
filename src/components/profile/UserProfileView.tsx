@@ -14,7 +14,9 @@ import {
   UserPlus,
   UserMinus,
   Loader2,
-  Users
+  Users,
+  GitCompareArrows,
+  Globe2,
 } from 'lucide-react'
 import { User, Album } from '@/types/database'
 import { PUBLIC_USER_COLUMNS } from '@/lib/constants/user-columns'
@@ -298,6 +300,14 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
     [albums]
   )
   const countriesCount = countryCodes.length
+  const citiesCount = useMemo(
+    () => new Set(
+      albums
+        .map((album) => album.location_name?.split(',')[0]?.trim())
+        .filter((city): city is string => Boolean(city))
+    ).size,
+    [albums]
+  )
 
   // Geocoded albums → pins + journey links for the interactive globe teaser
   // (chronological, same data shape the main globe builds its arcs from).
@@ -425,14 +435,15 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
 
   const displayName = profile.display_name || profile.username || 'Anonymous User'
   const isFriendsOnly = profile.privacy_level === 'friends'
+  const followIsWaiting = followStatus === 'pending' || followStatus === 'blocked'
 
   const followButton = currentUser ? (
     <Button
       onClick={handleFollowToggle}
-      disabled={followLoading}
+      disabled={followLoading || followIsWaiting}
       variant={followStatus === 'following' ? 'outline' : 'coral'}
-      size="pill"
       className="cursor-pointer rounded-full"
+      aria-live="polite"
     >
       {followLoading ? (
         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -441,7 +452,13 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
       ) : (
         <UserPlus className="h-4 w-4 mr-2" />
       )}
-      {followStatus === 'following' ? 'Unfollow' : followStatus === 'pending' ? 'Requested' : 'Follow'}
+      {followStatus === 'following'
+        ? 'Unfollow'
+        : followStatus === 'pending'
+          ? 'Requested'
+          : followStatus === 'blocked'
+            ? 'Unavailable'
+            : 'Follow'}
     </Button>
   ) : null
 
@@ -509,7 +526,40 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
                   {profile.bio}
                 </p>
               )}
-              {followButton && <div className="mt-4">{followButton}</div>}
+              <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
+                {followButton}
+                {footprint.length > 0 && (
+                  <Button asChild variant="outline" className="rounded-full">
+                    <Link
+                      href={`/globe?user=${profile.id}`}
+                      aria-label={`View ${displayName}'s full travel globe`}
+                    >
+                      <Globe2 className="h-4 w-4" aria-hidden />
+                      View globe
+                    </Link>
+                  </Button>
+                )}
+                {currentUser && profile.username && countryCodes.length > 0 && (
+                  <Button
+                    asChild
+                    variant={followStatus === 'following' ? 'coral' : 'outline'}
+                    className="rounded-full"
+                  >
+                    <Link
+                      href={`/blend/${profile.username}`}
+                      aria-label={`Compare your travel footprint with ${displayName}`}
+                    >
+                      <GitCompareArrows className="h-4 w-4" aria-hidden />
+                      Compare footprints
+                    </Link>
+                  </Button>
+                )}
+              </div>
+              {currentUser && profile.username && countryCodes.length > 0 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Travel Blend compares countries and shared places—not exact travel dates.
+                </p>
+              )}
             </div>
           </div>
 
@@ -518,8 +568,8 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
             {[
               { value: albums.length, label: 'Albums' },
               { value: countriesCount, label: 'Countries' },
+              { value: citiesCount, label: 'Cities' },
               { value: followStats.followersCount, label: 'Followers' },
-              { value: followStats.followingCount, label: 'Following' },
             ].map((s) => (
               <div key={s.label} className="text-center">
                 <div className="al-stat-value text-xl sm:text-2xl">{s.value}</div>
@@ -556,17 +606,17 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
 
             {/* Country flags */}
             {countryCodes.length > 0 && (
-              <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                {countryCodes.slice(0, 24).map((code) => (
-                  <span key={code} title={code} className="text-2xl leading-none">
-                    {getFlagEmoji(code)}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {countryCodes.map((code) => (
+                  <span
+                    key={code}
+                    title={code}
+                    className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 text-sm font-semibold text-foreground shadow-[var(--shadow-resting)]"
+                  >
+                    <span className="text-lg leading-none">{getFlagEmoji(code)}</span>
+                    <span className="font-mono text-[10px] tracking-wider text-muted-foreground">{code}</span>
                   </span>
                 ))}
-                {countryCodes.length > 24 && (
-                  <span className="text-sm font-medium text-muted-foreground">
-                    +{countryCodes.length - 24}
-                  </span>
-                )}
               </div>
             )}
           </div>

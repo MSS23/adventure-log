@@ -172,7 +172,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
   }
 
   return (
-    <article className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-resting)] transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-hover)]">
+    <article className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-[var(--shadow-resting)] transition-shadow duration-200 ease-out hover:shadow-[var(--shadow-hover)]">
       {/* Byline — avatar, name + flag, then a secondary location · date meta line.
           Tightened to a single balanced row: identity on the left, the globe
           affordance pinned right. */}

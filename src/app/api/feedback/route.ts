@@ -131,5 +131,16 @@ export async function POST(request: NextRequest) {
     userId: payload.userId || undefined,
   })
 
-  return NextResponse.json({ ok: true, id: feedbackId ?? null }, { status: 201 })
+  return NextResponse.json(
+    {
+      ok: true,
+      id: feedbackId ?? null,
+      delivery: {
+        stored: !!feedbackId,
+        discord: discordOk,
+        linear: !!linear,
+      },
+    },
+    { status: 201 }
+  )
 }

@@ -8,7 +8,7 @@
  * build.
  */
 
-export type MapLayerKind = 'been' | 'friends' | 'trips' | 'wishlist' | 'recs'
+export type MapLayerKind = 'friends' | 'wishlist' | 'recs'
 
 export interface ExploreMapPin {
   id: string
@@ -22,9 +22,6 @@ export interface ExploreMapPin {
   hrefLabel?: string
   /** External source link (e.g. the original TikTok). Sanitized before render. */
   externalUrl?: string | null
-  /** Pins sharing a route group are connected in routeOrder order. */
-  routeGroup?: string
-  routeOrder?: number
 }
 
 export interface FlyTarget {
@@ -38,9 +35,7 @@ export interface FlyTarget {
 // 'saved' layer removed in migration 67 — saved places ARE wishlist items now.
 // Iteration order here is also the pill order on /map.
 export const LAYER_META: Record<MapLayerKind, { label: string; color: string }> = {
-  been: { label: 'Been', color: '#3D6B35' },
   friends: { label: 'Friends', color: '#5B5BD6' },
-  trips: { label: 'Trips', color: '#2563EB' },
   wishlist: { label: 'Wishlist', color: '#B96800' },
   recs: { label: 'Friends recommend', color: '#C2416C' },
 }

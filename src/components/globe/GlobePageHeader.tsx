@@ -73,7 +73,10 @@ export function GlobePageHeader({
   router,
 }: GlobePageHeaderProps) {
   return (
-    <div className="bg-white dark:bg-[#111111] border-b border-stone-200 dark:border-white/[0.08] shadow-sm flex-shrink-0">
+    <div
+      className="bg-white dark:bg-[#111111] border-b border-stone-200 dark:border-white/[0.08] shadow-sm flex-shrink-0"
+      data-tour-step="globe-controls"
+    >
       <div className="w-full px-2 md:px-3 py-1.5 md:py-2">
         <div className="flex items-center justify-between gap-1 md:gap-2">
           {/* Left: Title + Mode Toggle */}

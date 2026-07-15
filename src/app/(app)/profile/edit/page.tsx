@@ -329,12 +329,6 @@ export default function EditProfilePage() {
             <div>
               <p className="text-sm font-semibold text-foreground">Profile photo</p>
               <p className="text-xs text-muted-foreground mt-0.5">Square image, at least 200&times;200px</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Looking for your cover photo?{' '}
-                <Link href="/settings" className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
-                  Change it in Settings
-                </Link>
-              </p>
             </div>
           </div>
         </div>

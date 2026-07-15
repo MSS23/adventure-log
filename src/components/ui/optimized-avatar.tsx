@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
@@ -76,13 +75,19 @@ export function OptimizedAvatar({
         <Skeleton className="absolute inset-0 z-10" />
       )}
       <div className="relative w-full h-full">
-        <Image
+        {/* Avatars render at 56px or less. A native image avoids routing tiny
+            OAuth and generated-avatar assets through the full photo optimizer,
+            while preserving lazy/eager loading semantics. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={avatarUrl}
           alt={alt}
-          fill
-          sizes={`${sizeConfig.size}px`}
+          width={sizeConfig.size}
+          height={sizeConfig.size}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
           className={cn(
-            'object-cover',
+            'h-full w-full object-cover',
             isLoading && 'opacity-0',
             !isLoading && 'animate-in fade-in-50 duration-300'
           )}
@@ -91,8 +96,6 @@ export function OptimizedAvatar({
             setIsLoading(false)
             setHasError(true)
           }}
-          priority={priority}
-          quality={85}
         />
       </div>
     </Avatar>

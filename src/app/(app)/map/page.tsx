@@ -1,11 +1,9 @@
 'use client'
 
 /**
- * /map — one 2D map of your travel world:
- *   · Been    — your own album locations (places you've actually been)
- *   · Friends — album locations from people you follow (public/friends posts)
- *   · Trips   — every stop pinned in your trip plans
- *   · Wishlist — bucket-list destinations
+ * /map — timely place context based on where the user is now:
+ *   · Friends — album locations from people they follow (public/friends posts)
+ *   · Wishlist — saved destinations, including places imported from links
  *   · Friends recommend — places people you follow posted as recommendations
  *     ("Rohan recommends" pins, attributed to the recommender)
  *   (Wishlist includes places saved from TikTok / Google Maps links —
@@ -25,13 +23,13 @@ import {
   LocateFixed,
   Loader2,
   AlertTriangle,
+  CarFront,
+  Footprints,
   Globe as GlobeIcon,
   HelpCircle,
   Map as MapIcon,
-  MapPinned,
   Layers,
   MessageCircleHeart,
-  Route,
   Star,
   UsersRound,
   type LucideIcon,
@@ -49,6 +47,11 @@ import {
   type MapLayerKind,
   type FlyTarget,
 } from '@/components/map/map-layers'
+import {
+  distanceInKilometres,
+  estimateTravelTime,
+  formatDistance,
+} from '@/components/map/map-proximity'
 
 const ExploreMap = nextDynamic(() => import('@/components/map/ExploreMap'), {
   ssr: false,
@@ -67,34 +70,12 @@ interface FriendAlbumRow {
   location_name: string | null
   latitude: number | null
   longitude: number | null
+  date_start: string | null
+  created_at: string
   user:
     | { username: string | null; display_name: string | null }
     | { username: string | null; display_name: string | null }[]
     | null
-}
-
-interface BeenAlbumRow {
-  id: string
-  title: string | null
-  location_name: string | null
-  latitude: number | null
-  longitude: number | null
-  date_start: string | null
-  created_at: string
-}
-
-interface TripListEntry {
-  id: string
-  title: string
-  pin_count?: number
-}
-
-interface TripPinRow {
-  id: string
-  name: string
-  latitude: number
-  longitude: number
-  sort_order: number | null
 }
 
 interface WishlistItemRow {
@@ -128,10 +109,12 @@ const PLATFORM_LABEL: Record<string, string> = {
   other: 'a link',
 }
 
-const LAYER_ICONS: Record<MapLayerKind, LucideIcon> = {
-  been: MapPinned,
+type DiscoveryLayerKind = Extract<MapLayerKind, 'friends' | 'wishlist' | 'recs'>
+
+const DISCOVERY_LAYERS: DiscoveryLayerKind[] = ['friends', 'recs', 'wishlist']
+
+const LAYER_ICONS: Record<DiscoveryLayerKind, LucideIcon> = {
   friends: UsersRound,
-  trips: Route,
   wishlist: Star,
   recs: MessageCircleHeart,
 }
@@ -144,58 +127,31 @@ function displayNameOf(user: FriendAlbumRow['user']): string {
 const hasCoords = (p: { latitude: number | null; longitude: number | null }) =>
   typeof p.latitude === 'number' && typeof p.longitude === 'number'
 
+function relativeVisitDate(value: string | null): string {
+  if (!value) return 'a while ago'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'a while ago'
+
+  const years = Math.floor((Date.now() - date.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+  if (years >= 2) return `${years} years ago`
+  if (years === 1) return 'last year'
+
+  return new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric' }).format(date)
+}
+
 export default function MapPage() {
   const { user } = useAuth()
   const userId = user?.id
   const supabase = useMemo(() => createClient(), [])
 
-  const [enabled, setEnabled] = useState<Record<MapLayerKind, boolean>>({
-    been: true,
+  const [enabled, setEnabled] = useState<Record<DiscoveryLayerKind, boolean>>({
     friends: true,
-    trips: true,
     wishlist: true,
     recs: true,
   })
   const [me, setMe] = useState<{ latitude: number; longitude: number } | null>(null)
   const [flyTarget, setFlyTarget] = useState<FlyTarget | null>(null)
   const [locating, setLocating] = useState(false)
-
-  // ── Been: your own album locations ───────────────────────────────────────
-  const beenQuery = useQuery<ExploreMapPin[]>({
-    queryKey: ['map-been', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('albums')
-        .select('id, title, location_name, latitude, longitude, date_start, created_at')
-        .eq('user_id', userId!)
-        .or('status.is.null,status.neq.draft')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-        .limit(500)
-      if (error) throw error
-
-      return ((data || []) as BeenAlbumRow[])
-        .filter(hasCoords)
-        .sort((a, b) => {
-          const aTime = Date.parse(a.date_start || a.created_at)
-          const bTime = Date.parse(b.date_start || b.created_at)
-          return (Number.isFinite(aTime) ? aTime : 0) - (Number.isFinite(bTime) ? bTime : 0)
-        })
-        .map((album, routeOrder) => ({
-          id: album.id,
-          kind: 'been' as const,
-          latitude: album.latitude!,
-          longitude: album.longitude!,
-          title: album.title || 'Untitled album',
-          subtitle: album.location_name ? `You were here · ${album.location_name}` : 'You were here',
-          href: `/albums/${album.id}`,
-          hrefLabel: 'View album',
-          routeGroup: `been-${userId}`,
-          routeOrder,
-        }))
-    },
-  })
 
   // ── Friends recommend: attributed picks from people you follow ──────────
   const recsQuery = useQuery<ExploreMapPin[]>({
@@ -239,7 +195,7 @@ export default function MapPage() {
       const { data, error } = await supabase
         .from('albums')
         .select(
-          'id, title, location_name, latitude, longitude, user:users!albums_user_id_fkey(username, display_name)'
+          'id, title, location_name, latitude, longitude, date_start, created_at, user:users!albums_user_id_fkey(username, display_name)'
         )
         .in('user_id', followedIds)
         // Never surface a followed user's PRIVATE albums (same rule as feed).
@@ -251,59 +207,20 @@ export default function MapPage() {
         .limit(500)
       if (error) throw error
 
-      return ((data || []) as FriendAlbumRow[]).filter(hasCoords).map((a) => ({
-        id: a.id,
-        kind: 'friends' as const,
-        latitude: a.latitude!,
-        longitude: a.longitude!,
-        title: a.title || 'Untitled album',
-        subtitle: `${displayNameOf(a.user)}${a.location_name ? ` · ${a.location_name}` : ''}`,
-        href: `/albums/${a.id}`,
-        hrefLabel: 'View album',
-      }))
-    },
-  })
-
-  // ── Trips: every pinned stop across your trip plans ─────────────────────
-  const tripsQuery = useQuery<ExploreMapPin[]>({
-    queryKey: ['map-trips', userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const res = await apiFetch('/api/trips')
-      if (!res.ok) throw new Error(`Trips API ${res.status}`)
-      const { trips } = (await res.json()) as { trips: TripListEntry[] }
-
-      // Only fetch details for trips that actually have pins (pin_count is in
-      // the list response), capped to keep the fan-out bounded.
-      const withPins = (trips || []).filter((t) => (t.pin_count ?? 0) > 0).slice(0, 12)
-      const details = await Promise.all(
-        withPins.map(async (t) => {
-          const r = await apiFetch(`/api/trips/${t.id}`)
-          return r.ok ? ((await r.json()) as { pins?: TripPinRow[] }) : null
-        })
-      )
-
-      return details.flatMap((detail, tripIndex) =>
-        (detail?.pins || [])
-          .filter(hasCoords)
-          .sort(
-            (a, b) =>
-              (a.sort_order ?? Number.MAX_SAFE_INTEGER) -
-              (b.sort_order ?? Number.MAX_SAFE_INTEGER)
-          )
-          .map((pin, routeOrder) => ({
-            id: pin.id,
-            kind: 'trips' as const,
-            latitude: pin.latitude,
-            longitude: pin.longitude,
-            title: pin.name,
-            subtitle: `Trip: ${withPins[tripIndex].title}`,
-            href: `/trips/${withPins[tripIndex].id}`,
-            hrefLabel: 'Open trip',
-            routeGroup: `trip-${withPins[tripIndex].id}`,
-            routeOrder,
-          }))
-      )
+      return ((data || []) as FriendAlbumRow[]).filter(hasCoords).map((a) => {
+        const who = displayNameOf(a.user)
+        const visited = relativeVisitDate(a.date_start || a.created_at)
+        return {
+          id: a.id,
+          kind: 'friends' as const,
+          latitude: a.latitude!,
+          longitude: a.longitude!,
+          title: a.location_name || a.title || 'A friend was here',
+          subtitle: `${who} was here ${visited}${a.title ? ` · ${a.title}` : ''}`,
+          href: `/albums/${a.id}`,
+          hrefLabel: 'See their album',
+        }
+      })
     },
   })
 
@@ -333,25 +250,34 @@ export default function MapPage() {
     },
   })
 
-  const layerQueries: Record<MapLayerKind, typeof friendsQuery> = {
-    been: beenQuery,
+  const layerQueries: Record<DiscoveryLayerKind, typeof friendsQuery> = {
     friends: friendsQuery,
-    trips: tripsQuery,
     wishlist: wishlistQuery,
     recs: recsQuery,
   }
 
   const pins = useMemo<ExploreMapPin[]>(
     () =>
-      (Object.keys(layerQueries) as MapLayerKind[]).flatMap((kind) =>
+      DISCOVERY_LAYERS.flatMap((kind) =>
         enabled[kind] ? layerQueries[kind].data ?? [] : []
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [enabled, beenQuery.data, friendsQuery.data, tripsQuery.data, wishlistQuery.data, recsQuery.data]
+    [enabled, friendsQuery.data, wishlistQuery.data, recsQuery.data]
   )
 
+  const nearbyPins = useMemo(() => {
+    if (!me) return []
+    return pins
+      .map((pin) => {
+        const distanceKm = distanceInKilometres(me, pin)
+        return { pin, distanceKm, estimate: estimateTravelTime(distanceKm) }
+      })
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, 5)
+  }, [me, pins])
+
   const anyLoading = Object.values(layerQueries).some((q) => q.isPending)
-  const failedLayers = (Object.keys(layerQueries) as MapLayerKind[]).filter(
+  const failedLayers = DISCOVERY_LAYERS.filter(
     (k) => layerQueries[k].isError
   )
   const allEmpty =
@@ -373,24 +299,24 @@ export default function MapPage() {
     }
   }
 
-  // First-run tour — the layer pills are the whole interface, so three quick
-  // steps stop the five-layer map from feeling like a wall of pins.
+  // First-run tour: explain the three contextual layers without interrupting
+  // the user's ability to pan or inspect the map.
   const tourSteps: TourStep[] = useMemo(
     () => [
       {
         target: 'map-header',
-        title: 'Your travel map',
+        title: 'Useful places around you',
         description:
-          "Everything in one view: places you've been, friends' travels, trip plans, your wishlist, and spots friends recommend.",
+          'Share your location when you need it and the map brings nearby friend visits, recommendations, and wishlist saves to the surface.',
         icon: <MapIcon className="h-5 w-5" />,
         placement: 'bottom' as const,
         spotlightPadding: 12,
       },
       {
         target: 'map-layer-pills',
-        title: 'Show only what you want',
+        title: 'Choose the context',
         description:
-          'Tap a pill to hide or show that layer. Each shows how many pins it adds — turn everything off except one to focus.',
+          'Filter between places friends visited, recommendations, and your wishlist. Pins are never joined by travel lines.',
         icon: <Layers className="h-5 w-5" />,
         placement: 'bottom' as const,
         spotlightPadding: 10,
@@ -424,9 +350,10 @@ export default function MapPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3" data-tour-step="map-header">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">Your map</h1>
+          <p className="al-eyebrow mb-1">Around you</p>
+          <h1 className="al-display text-3xl sm:text-4xl text-foreground">Your map</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Where you&apos;ve been, where you&apos;re going, and what friends recommend.
+            Timely places from people you trust, plus the places you saved for later.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -451,14 +378,14 @@ export default function MapPage() {
             type="button"
             onClick={handleLocate}
             disabled={locating}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {locating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <LocateFixed className="h-4 w-4" />
             )}
-            My location
+            {me ? 'Refresh location' : 'Use my location'}
           </button>
         </div>
       </div>
@@ -468,7 +395,7 @@ export default function MapPage() {
         className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border/80 bg-card/80 p-1.5 shadow-sm backdrop-blur-xl"
         data-tour-step="map-layer-pills"
       >
-        {(Object.keys(LAYER_META) as MapLayerKind[]).map((kind) => {
+        {DISCOVERY_LAYERS.map((kind) => {
           const meta = LAYER_META[kind]
           const LayerIcon = LAYER_ICONS[kind]
           const query = layerQueries[kind]
@@ -530,15 +457,106 @@ export default function MapPage() {
         </div>
       )}
 
-      {/* The map */}
-      <div className="h-[calc(100dvh-330px)] min-h-[420px] lg:h-[calc(100dvh-280px)]">
-        <ExploreMap pins={pins} me={me} flyTarget={flyTarget} loading={anyLoading} />
+      {/* The map + proximity briefing */}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="h-[58dvh] min-h-[440px] lg:h-[calc(100dvh-290px)]">
+          <ExploreMap pins={pins} me={me} flyTarget={flyTarget} loading={anyLoading} />
+        </div>
+
+        <aside
+          className="rounded-[24px] border border-border bg-card p-4 shadow-[var(--shadow-resting)] lg:overflow-y-auto"
+          data-tour-step="map-nearby"
+          aria-label="Places near your current location"
+        >
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <p className="al-eyebrow">Right now</p>
+              <h2 className="font-heading text-lg font-semibold text-foreground">
+                {me ? 'Closest to you' : 'What is nearby?'}
+              </h2>
+            </div>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+              <LocateFixed className="h-5 w-5" aria-hidden />
+            </span>
+          </div>
+
+          {!me ? (
+            <div className="rounded-2xl bg-muted/60 p-4">
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Use your location to find the friend recommendation or wishlist place that is useful now.
+              </p>
+              <button
+                type="button"
+                onClick={handleLocate}
+                disabled={locating}
+                className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+                Find places near me
+              </button>
+              <p className="mt-2 text-center text-[11px] leading-relaxed text-muted-foreground">
+                Your live location is used for this view and is not added to your profile.
+              </p>
+            </div>
+          ) : nearbyPins.length > 0 ? (
+            <div className="space-y-2.5">
+              {nearbyPins.map(({ pin, distanceKm, estimate }) => {
+                const NearbyIcon = LAYER_ICONS[pin.kind as DiscoveryLayerKind]
+                const TravelIcon = estimate.mode === 'walk' ? Footprints : CarFront
+                return (
+                  <div key={`${pin.kind}-${pin.id}`} className="rounded-2xl border border-border bg-background p-3">
+                    <button
+                      type="button"
+                      onClick={() => setFlyTarget({ lat: pin.latitude, lng: pin.longitude, zoom: 14, ts: Date.now() })}
+                      className="w-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span
+                          className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                          style={{ backgroundColor: `${LAYER_META[pin.kind].color}18`, color: LAYER_META[pin.kind].color }}
+                        >
+                          <NearbyIcon className="h-4 w-4" aria-hidden />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold leading-snug text-foreground">{pin.title}</span>
+                          {pin.subtitle && (
+                            <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{pin.subtitle}</span>
+                          )}
+                        </span>
+                      </div>
+                      <span className="mt-3 flex items-center gap-2 text-xs font-semibold text-primary">
+                        <TravelIcon className="h-3.5 w-3.5" aria-hidden />
+                        {estimate.label}
+                        <span className="font-normal text-muted-foreground">&middot; {formatDistance(distanceKm)}</span>
+                      </span>
+                    </button>
+                    {pin.href && (
+                      <Link
+                        href={pin.href}
+                        className="mt-2 inline-flex min-h-9 items-center text-xs font-semibold text-foreground underline decoration-border underline-offset-4 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {pin.hrefLabel || 'Open place'}
+                      </Link>
+                    )}
+                  </div>
+                )
+              })}
+              <p className="px-1 pt-1 text-[11px] leading-relaxed text-muted-foreground">
+                Times are approximate. Open the place for live directions.
+              </p>
+            </div>
+          ) : (
+            <p className="rounded-2xl bg-muted/60 p-4 text-sm leading-relaxed text-muted-foreground">
+              No visible places nearby. Turn on a map filter or add somewhere to your wishlist.
+            </p>
+          )}
+        </aside>
       </div>
 
       {allEmpty && (
         <p className="text-sm text-muted-foreground text-center">
-          No pins yet — post an album with a location, follow some friends, plan a trip, or add
-          wishlist spots to fill your map.
+          No useful places yet — follow friends who share albums or recommendations, or add a
+          place to your wishlist.
         </p>
       )}
     </div>

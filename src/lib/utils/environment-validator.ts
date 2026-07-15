@@ -107,6 +107,17 @@ function validateEnvironmentVariable(
       }
       break
 
+    case 'DISCORD_FEEDBACK_WEBHOOK_URL':
+      try {
+        const webhookUrl = new URL(value)
+        if (webhookUrl.protocol !== 'https:' || !['discord.com', 'discordapp.com'].includes(webhookUrl.hostname)) {
+          errors.push(`${name} must be an HTTPS Discord webhook URL`)
+        }
+      } catch {
+        errors.push(`Invalid URL format for ${name}`)
+      }
+      break
+
     case 'NODE_ENV':
       if (!['development', 'production', 'test'].includes(value)) {
         warnings.push(`Unexpected NODE_ENV value: ${value}`)
@@ -193,6 +204,12 @@ export function validateEnvironment(): ValidationResult {
     // SUPABASE_SERVICE_ROLE_KEY is only needed at runtime, not build time
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       warnings.push('SUPABASE_SERVICE_ROLE_KEY not set - some server features may not work')
+    }
+
+    if (!process.env.DISCORD_FEEDBACK_WEBHOOK_URL) {
+      warnings.push(
+        'DISCORD_FEEDBACK_WEBHOOK_URL is not set - feedback is stored in Supabase but cannot be delivered to Discord'
+      )
     }
   }
 

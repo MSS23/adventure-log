@@ -44,7 +44,7 @@ export function WishlistCard({ item, index, onMarkCompleted, onEdit, onRemove, o
     >
       <div
         className={cn(
-          'group relative h-full rounded-2xl border border-border bg-card shadow-[var(--shadow-resting)] transition-all duration-200 ease-out',
+          'group relative h-full overflow-hidden rounded-3xl border border-border bg-card shadow-[var(--shadow-resting)] transition-all duration-200 ease-out',
           completed
             ? 'opacity-60'
             : 'hover:border-primary/30 hover:shadow-[var(--shadow-hover)] hover:-translate-y-0.5'
@@ -56,10 +56,10 @@ export function WishlistCard({ item, index, onMarkCompleted, onEdit, onRemove, o
             src={item.thumbnail_url}
             alt=""
             referrerPolicy="no-referrer"
-            className="w-full h-28 object-cover rounded-t-2xl"
+            className="h-36 w-full object-cover"
           />
         )}
-        <div className="p-5">
+        <div className="p-5 sm:p-5">
           {/* Top row: location + priority */}
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex-1 min-w-0">
@@ -71,7 +71,7 @@ export function WishlistCard({ item, index, onMarkCompleted, onEdit, onRemove, o
                 )}
                 <h3
                   className={cn(
-                    'font-heading font-semibold text-foreground truncate',
+                    'font-heading text-[17px] font-semibold leading-tight text-foreground truncate',
                     completed && 'line-through text-muted-foreground'
                   )}
                 >

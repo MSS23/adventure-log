@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Trash2, CheckSquare, Square, ArrowUpDown, Images, Star } from 'lucide-react'
+import { Camera, Plus, Search, MapPin, Globe, Eye, Lock, Users, Trash2, CheckSquare, Square, ArrowUpDown, Images, Star, Move } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Album } from '@/types/database'
@@ -23,6 +23,8 @@ import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { NoAlbumsEmptyState } from '@/components/ui/enhanced-empty-state'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
+import { CoverPhotoPositionEditor } from '@/components/albums/CoverPhotoPositionEditor'
+import { apiFetch } from '@/lib/api/client'
 
 const photoCount = (album: Album) => (album.photos as unknown as { count: number }[] | undefined)?.[0]?.count ?? 0
 
@@ -73,10 +75,12 @@ function AlbumsPageContent() {
   const queryClient = useQueryClient()
   const filterUserId = searchParams.get('user')
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'name-asc' | 'name-desc' | 'photo-count'>('date-desc')
+  const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'name-asc' | 'name-desc' | 'photo-count' | 'country'>('date-desc')
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedAlbums, setSelectedAlbums] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
+  const [coverPositionAlbum, setCoverPositionAlbum] = useState<Album | null>(null)
+  const [savingCoverPosition, setSavingCoverPosition] = useState(false)
   const supabase = useMemo(() => createClient(), [])
   const prefersReducedMotion = useReducedMotion()
 
@@ -170,6 +174,11 @@ function AlbumsPageContent() {
         return b.title.localeCompare(a.title)
       case 'photo-count':
         return photoCount(b) - photoCount(a)
+      case 'country': {
+        const countryA = a.country_code || a.location_name?.split(',').at(-1)?.trim() || 'ZZZ'
+        const countryB = b.country_code || b.location_name?.split(',').at(-1)?.trim() || 'ZZZ'
+        return countryA.localeCompare(countryB) || travelTime(b) - travelTime(a)
+      }
       default:
         return 0
     }
@@ -200,6 +209,51 @@ function AlbumsPageContent() {
       }
       return newSet
     })
+  }
+
+  const handleCoverPositionSave = async (position: {
+    position: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'custom'
+    xOffset: number
+    yOffset: number
+  }) => {
+    if (!coverPositionAlbum) return
+    setSavingCoverPosition(true)
+    try {
+      const response = await apiFetch(`/api/albums/${coverPositionAlbum.id}/cover-position`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(position),
+      })
+      if (!response.ok) throw new Error('Failed to update cover position')
+
+      queryClient.setQueryData<{ albums: Album[]; drafts: Album[] }>(
+        ['albums', targetUserId],
+        (current) => current
+          ? {
+              ...current,
+              albums: current.albums.map((album) => album.id === coverPositionAlbum.id
+                ? {
+                    ...album,
+                    cover_photo_position: position.position,
+                    cover_photo_x_offset: position.xOffset,
+                    cover_photo_y_offset: position.yOffset,
+                  }
+                : album),
+            }
+          : current
+      )
+      toast.success('Cover crop updated')
+      setCoverPositionAlbum(null)
+    } catch (err) {
+      log.error('Failed to update album cover position', {
+        component: 'AlbumsPage',
+        action: 'updateCoverPosition',
+        albumId: coverPositionAlbum.id,
+      }, toError(err))
+      toast.error('Could not update the cover crop')
+    } finally {
+      setSavingCoverPosition(false)
+    }
   }
 
   const handleSelectAll = () => {
@@ -414,6 +468,7 @@ function AlbumsPageContent() {
             <SelectContent>
               <SelectItem value="date-desc">Newest First</SelectItem>
               <SelectItem value="date-asc">Oldest First</SelectItem>
+              <SelectItem value="country">Country</SelectItem>
               <SelectItem value="name-asc">Name (A-Z)</SelectItem>
               <SelectItem value="name-desc">Name (Z-A)</SelectItem>
               <SelectItem value="photo-count">Most Photos</SelectItem>
@@ -690,8 +745,19 @@ function AlbumsPageContent() {
                     whileHover={prefersReducedMotion ? {} : { y: -2 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className="group"
+                    className="group relative"
                   >
+                    {!isViewingOtherUser && album.cover_photo_url && (
+                      <button
+                        type="button"
+                        onClick={() => setCoverPositionAlbum(album)}
+                        className="absolute right-2 top-2 z-20 inline-flex min-h-10 min-w-10 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                        aria-label={`Adjust the cover crop for ${album.title}`}
+                        title="Adjust cover crop"
+                      >
+                        <Move className="h-4 w-4" aria-hidden />
+                      </button>
+                    )}
                     <Link href={`/albums/${album.id}`} className="cursor-pointer">
                       <div className={cn(
                         "relative touch-manipulation",
@@ -749,7 +815,7 @@ function AlbumsPageContent() {
                           {/* Favourite badge (owner's favourited albums only;
                               `is_favorite` is undefined pre-migration => hidden) */}
                           {!isViewingOtherUser && album.is_favorite && (
-                            <div className="absolute top-2 right-2">
+                            <div className={cn("absolute right-2", album.cover_photo_url ? "top-14" : "top-2")}>
                               <div className="bg-black/55 backdrop-blur-sm rounded-full p-1 sm:p-1.5 drop-shadow-sm" title="Highlighted">
                                 <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400 fill-current" />
                               </div>
@@ -764,6 +830,23 @@ function AlbumsPageContent() {
             </motion.div>
           </AnimatePresence>
         </>
+      )}
+
+      {coverPositionAlbum?.cover_photo_url && (
+        <CoverPhotoPositionEditor
+          isOpen={!!coverPositionAlbum}
+          onClose={() => {
+            if (!savingCoverPosition) setCoverPositionAlbum(null)
+          }}
+          imageUrl={coverPositionAlbum.cover_photo_url}
+          currentPosition={{
+            position: coverPositionAlbum.cover_photo_position || 'center',
+            xOffset: coverPositionAlbum.cover_photo_x_offset ?? 50,
+            yOffset: coverPositionAlbum.cover_photo_y_offset ?? 50,
+          }}
+          onSave={handleCoverPositionSave}
+          isSaving={savingCoverPosition}
+        />
       )}
 
       {/* Quick Delete Confirmation Dialog */}

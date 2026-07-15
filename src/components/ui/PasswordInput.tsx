@@ -28,9 +28,6 @@ export function PasswordInput({ className, ...props }: PasswordInputProps) {
         onClick={() => setShow((v) => !v)}
         aria-label={show ? 'Hide password' : 'Show password'}
         aria-pressed={show}
-        // Keep the toggle out of the tab order so Tab goes straight to the
-        // next field; it's still reachable by click/touch.
-        tabIndex={-1}
         className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-xl"
       >
         {show ? (

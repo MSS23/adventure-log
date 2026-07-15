@@ -45,8 +45,8 @@ export function GlobeFloatingControls({
   return (
     <>
       {/* Floating Controls - Top Right Only */}
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
-        <div className="flex items-center gap-1.5 backdrop-blur-xl bg-card/90 rounded-xl p-1.5 shadow-2xl border border-border">
+      <div className="absolute right-3 top-3 z-30 flex items-center gap-2 sm:right-4 sm:top-4">
+        <div className="flex items-center gap-1 rounded-2xl border border-white/12 bg-[#171a16]/88 p-1 shadow-[0_14px_36px_rgba(0,0,0,0.34)] backdrop-blur-xl">
           {/* Play/Pause Journey — flight animation through 2+ locations. The
               after:-inset-1 overlay extends the 36px button to a 44px touch
               target without changing its visual size. */}
@@ -56,8 +56,8 @@ export function GlobeFloatingControls({
               size="sm"
               onClick={onPlayPause}
               className={cn(
-                "relative h-9 w-9 p-0 rounded-lg transition-all after:absolute after:-inset-1 after:content-['']",
-                isPlaying ? 'bg-olive-500/30 text-olive-700' : 'text-foreground hover:bg-muted'
+                "relative h-10 w-10 p-0 rounded-xl transition-all after:absolute after:-inset-0.5 after:content-['']",
+                isPlaying ? 'bg-olive-400/20 text-olive-200' : 'text-white/75 hover:bg-white/10 hover:text-white'
               )}
               title={isPlaying ? 'Pause journey' : 'Play journey'}
               aria-label={isPlaying ? 'Pause journey animation' : 'Play journey animation'}
@@ -71,12 +71,16 @@ export function GlobeFloatingControls({
             variant="ghost"
             size="sm"
             onClick={() => setShowSearch(!showSearch)}
-            className={cn("h-9 w-9 p-0 text-foreground hover:bg-muted rounded-lg transition-all", showSearch && 'bg-olive-500/30 text-olive-700')}
+            className={cn(
+              "h-10 min-w-10 gap-2 rounded-xl px-3 text-white/75 transition-all hover:bg-white/10 hover:text-white",
+              showSearch && 'bg-olive-400/20 text-olive-200'
+            )}
             title="Search locations"
             aria-label={showSearch ? 'Close location search' : 'Search locations'}
             aria-pressed={showSearch}
           >
             <Search className="h-4 w-4" />
+            <span className="hidden text-xs font-semibold sm:inline">Search</span>
           </Button>
 
           {/* Travel Routes Toggle — desktop only; on phones it's a niche
@@ -86,8 +90,10 @@ export function GlobeFloatingControls({
             variant="ghost"
             size="sm"
             onClick={() => setShowStaticConnections(!showStaticConnections)}
-            className={cn("hidden md:inline-flex h-9 w-9 p-0 text-foreground hover:bg-muted rounded-lg transition-all", showStaticConnections && 'bg-olive-500/30 text-olive-700')}
+            className={cn("hidden md:inline-flex h-10 w-10 p-0 text-white/75 hover:bg-white/10 hover:text-white rounded-xl transition-all", showStaticConnections && 'bg-olive-400/20 text-olive-200')}
             title="Toggle travel routes"
+            aria-label={showStaticConnections ? 'Hide travel routes' : 'Show travel routes'}
+            aria-pressed={showStaticConnections}
           >
             <Route className="h-4 w-4" />
           </Button>
@@ -100,12 +106,12 @@ export function GlobeFloatingControls({
             onClick={onLocationToggle}
             disabled={locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied'}
             className={cn(
-              "h-9 w-9 p-0 rounded-lg transition-all",
+              "h-10 w-10 p-0 rounded-xl transition-all",
               permissionStatus === 'denied' && "opacity-50 cursor-not-allowed",
               showCurrentLocation
-                ? "bg-green-500 hover:bg-green-600 text-white"
-                : "text-foreground hover:bg-muted",
-              (locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied') && "hover:bg-muted"
+                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                : "text-white/75 hover:bg-white/10 hover:text-white",
+              (locationLoading || permissionStatus === 'unsupported' || permissionStatus === 'denied') && "hover:bg-white/10"
             )}
             title={
               locationLoading

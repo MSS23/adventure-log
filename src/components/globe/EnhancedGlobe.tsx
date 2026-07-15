@@ -87,6 +87,7 @@ const arcDashInitialGapAccessor = (d: object) => {
   const path = d as FlightPath
   return (path.index * 0.37) % 1
 }
+const emptyArcLabelAccessor = () => ''
 
 export interface WishlistPin {
   id: string
@@ -530,6 +531,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   arcEndLat="endLat"
                   arcEndLng="endLng"
                   arcColor={arcColorAccessor}
+                  arcLabel={emptyArcLabelAccessor}
                   arcAltitude={arcAltitudeAccessor}
                   arcStroke={arcStrokeAccessor}
                   arcDashLength={0.25}

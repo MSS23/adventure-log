@@ -1,13 +1,14 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Globe2, Plus, Camera } from 'lucide-react'
+import { Globe2, Plus, Camera, CircleHelp, House, CalendarRange, Route } from 'lucide-react'
 import { PrivateAccountMessage } from '@/components/social/PrivateAccountMessage'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { ErrorRetryState } from '@/components/ui/error-retry-state'
+import { WalkthroughTour, type TourStep } from '@/components/ui/walkthrough-tour'
 import type { Profile } from '@/types/database'
 
 // Extracted hook and sub-components
@@ -54,6 +55,39 @@ function GlobePageContent() {
     handleGlobeBackgroundClick, handleConfirmWishlist, handleWishlistItemClick,
     handleWishlistPinClick,
   } = data
+
+  const globeTourSteps = useMemo<TourStep[]>(
+    () => [
+      {
+        target: 'globe-journey-canvas',
+        title: 'Every journey starts at home',
+        description:
+          'Your home base anchors each separate trip. London to Paris is one route; a later Belgium trip starts from London again instead of being joined to Paris.',
+        icon: <House className="h-5 w-5" />,
+        placement: 'auto',
+        spotlightPadding: 8,
+      },
+      {
+        target: 'globe-controls',
+        title: 'Years stay separate',
+        description:
+          'Use the year filter to inspect one travel timeline. Paris in 2022 and Belgium in 2025 remain London → Paris and London → Belgium — never Paris → Belgium.',
+        icon: <CalendarRange className="h-5 w-5" />,
+        placement: 'bottom',
+        spotlightPadding: 8,
+      },
+      {
+        target: 'globe-filmstrip',
+        title: 'Link stops from the same trip',
+        description:
+          'If Paris and Belgium belong to one trip, set Belgium to “Continues from Paris” when creating the album. The globe then shows London → Paris → Belgium as one journey.',
+        icon: <Route className="h-5 w-5" />,
+        placement: 'top',
+        spotlightPadding: 10,
+      },
+    ],
+    []
+  )
 
   // Wishlist pins to render on the globe — only when toggled on, only items
   // that are still open (not yet completed). Drop any with missing coords.
@@ -135,9 +169,26 @@ function GlobePageContent() {
 
       {/* Main Content - Full-size Globe */}
       <div className="flex-1 bg-stone-900 relative overflow-hidden flex flex-row">
+        <WalkthroughTour
+          tourId="globe-flight-timeline-v2"
+          steps={globeTourSteps}
+          autoStart={isOwnProfile && albums.length > 0 && !exploreMode}
+        >
+          {(startTour) => (
+            <button
+              type="button"
+              onClick={startTour}
+              className="absolute left-3 top-3 z-30 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-stone-950/75 text-white shadow-lg backdrop-blur-md transition-colors duration-200 hover:bg-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950 active:bg-stone-800"
+              aria-label="Take a tour of flight timelines"
+              title="Flight timeline tour"
+            >
+              <CircleHelp className="h-5 w-5" aria-hidden="true" />
+            </button>
+          )}
+        </WalkthroughTour>
         {/* Globe Container — always full width; the preview card now docks
             to the bottom instead of reserving a right panel. */}
-        <div className="relative flex-1 w-full">
+        <div className="relative flex-1 w-full" data-tour-step="globe-journey-canvas">
         <div className="absolute inset-0">
           <ErrorBoundary>
             <EnhancedGlobe

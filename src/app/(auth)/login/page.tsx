@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/button'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { AuthStoryPanel } from '@/components/auth/AuthStoryPanel'
 
 // Friendly messages for error codes set by the auth callbacks:
 // `/auth/callback` redirects here with ?error=auth when the email link code
@@ -64,13 +65,13 @@ function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+    <div className="w-full max-w-md">
+      <div className="rounded-[24px] border border-border bg-card p-6 shadow-sm sm:p-8">
         <header className="space-y-1">
           <p className="al-eyebrow">Adventure Log</p>
           <h1 className="al-display text-3xl">Welcome back</h1>
           <p className="text-sm text-muted-foreground">
-            Sign in to your Adventure Log account
+            Open your globe, passport, and Travel Blends.
           </p>
         </header>
 
@@ -172,16 +173,21 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-background px-4 py-12">
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        }
-      >
-        <LoginForm />
-      </Suspense>
+    <div className="min-h-[100dvh] bg-background px-4 py-6 sm:px-6 lg:py-8">
+      <div className="mx-auto grid min-h-[calc(100dvh-3rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.08fr_0.92fr]">
+        <AuthStoryPanel />
+        <div className="flex items-center justify-center">
+          <Suspense
+            fallback={
+              <div className="flex min-h-64 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }
+          >
+            <LoginForm />
+          </Suspense>
+        </div>
+      </div>
     </div>
   )
 }

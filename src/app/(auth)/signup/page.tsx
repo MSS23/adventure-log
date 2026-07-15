@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Button } from '@/components/ui/button'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
+import { AuthStoryPanel } from '@/components/auth/AuthStoryPanel'
 import { calculateAge, MIN_AGE } from '@/lib/utils/age'
 import { markFirstPinStart } from '@/lib/utils/growth-events'
 
@@ -200,13 +201,13 @@ function SignupForm() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+    <div className="w-full max-w-md">
+      <div className="rounded-[24px] border border-border bg-card p-6 shadow-sm sm:p-8">
         <header className="space-y-1">
           <p className="al-eyebrow">Adventure Log</p>
           <h1 className="al-display text-3xl">Create your account</h1>
           <p className="text-sm text-muted-foreground">
-            Start logging your adventures
+            Build your globe and compare it with people you know.
           </p>
         </header>
 
@@ -339,16 +340,21 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-background px-4 py-12">
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        }
-      >
-        <SignupForm />
-      </Suspense>
+    <div className="min-h-[100dvh] bg-background px-4 py-6 sm:px-6 lg:py-8">
+      <div className="mx-auto grid min-h-[calc(100dvh-3rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.08fr_0.92fr]">
+        <AuthStoryPanel />
+        <div className="flex items-center justify-center py-4">
+          <Suspense
+            fallback={
+              <div className="flex min-h-64 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }
+          >
+            <SignupForm />
+          </Suspense>
+        </div>
+      </div>
     </div>
   )
 }

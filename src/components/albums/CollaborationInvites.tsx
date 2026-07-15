@@ -1,5 +1,7 @@
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useState } from 'react'
 import { useCollaborationInvites } from '@/lib/hooks/useCollaborativeAlbum'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -13,7 +15,6 @@ import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { toast } from 'sonner'
 import { log } from '@/lib/utils/logger'
 import Link from 'next/link'
-import Image from 'next/image'
 
 interface CollaborationInvitesProps {
   className?: string
@@ -72,12 +73,11 @@ export function CollaborationInvites({ className }: CollaborationInvitesProps) {
               {/* Album cover thumbnail */}
               <div className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-stone-200 dark:bg-stone-700 relative">
                 {coverUrl ? (
-                  <Image
+                  <img
                     src={coverUrl}
                     alt={album?.title || 'Album'}
-                    fill
-                    className="object-cover"
-                    sizes="56px"
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

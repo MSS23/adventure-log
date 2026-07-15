@@ -106,13 +106,20 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Image optimization
-  images: {
-    ...(isMobile && {
-      unoptimized: true, // Disable optimization for static export
-    }),
-    ...(!isMobile && {
-      remotePatterns: [
+    // Image optimization
+    images: {
+      // Static mobile exports have no optimizer. Development also renders
+      // originals so third-party fixture avatars cannot promote a local
+      // allowlist/HMR mismatch into a full page error. Production web keeps
+      // the optimized pipeline below.
+      unoptimized: isMobile || process.env.NODE_ENV === 'development',
+      ...(!isMobile && {
+        // Keep the explicit domain alongside remotePatterns. Next 15's dev
+        // client can retain the legacy domain list while hot reloading image
+        // config, which otherwise rejects seeded DiceBear avatars even though
+        // the equivalent remote pattern is present.
+        domains: ['api.dicebear.com'],
+        remotePatterns: [
         {
           protocol: 'https',
           hostname: '*.supabase.co',
@@ -130,6 +137,13 @@ const nextConfig: NextConfig = {
           // lh3.googleusercontent.com URL captured at signup — migration 79)
           protocol: 'https',
           hostname: '*.googleusercontent.com',
+          port: '',
+          pathname: '/**',
+        },
+        {
+          // Deterministic fallback avatars used by seeded/demo travelers.
+          protocol: 'https',
+          hostname: 'api.dicebear.com',
           port: '',
           pathname: '/**',
         },

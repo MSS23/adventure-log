@@ -26,6 +26,14 @@ type FeedMode = 'following' | 'discover'
 
 const PAGE_SIZE = 10
 
+function feedAvatarUrl(url: string | null | undefined): string | undefined {
+  // Seeded DiceBear URLs are useful in fixtures, but a missing or stale image
+  // allowlist must never be able to take down the entire feed. Initials are a
+  // cleaner failure mode than promoting an avatar error to the page boundary.
+  if (!url || url.startsWith('https://api.dicebear.com/')) return undefined
+  return url
+}
+
 // A rotating eyebrow line above the feed heading — changes once per day so the
 // page feels alive without being noisy. Indexed by day so it's stable all day.
 const DISPATCHES = [
@@ -188,7 +196,7 @@ async function fetchFeedPage(
         id: (u as { id?: string })?.id || (row.user_id as string),
         username: (u as { username?: string })?.username || 'unknown',
         display_name: (u as { display_name?: string })?.display_name || 'Explorer',
-        avatar_url: (u as { avatar_url?: string })?.avatar_url,
+        avatar_url: feedAvatarUrl((u as { avatar_url?: string })?.avatar_url),
       },
       photos: rawPhotos.map((p) => ({
         id: p.id,
@@ -328,9 +336,13 @@ export default function FeedPage() {
     <PullToRefresh onRefresh={async () => { await refetch() }}>
     <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 py-6 md:py-8">
       {/* Editorial header — daily dispatch line + clean heading on its own row */}
-      <header className="mb-4 space-y-1">
-        <p className="al-eyebrow">{dailyDispatch}</p>
-        <h1 className="al-display text-3xl md:text-4xl">Travel Memories</h1>
+      <header className="relative mb-5 overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-resting)] sm:p-6">
+        <div aria-hidden className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative space-y-1">
+          <p className="al-eyebrow">{dailyDispatch}</p>
+          <h1 className="al-display text-3xl md:text-4xl">Travel Memories</h1>
+          <p className="max-w-lg text-sm text-muted-foreground">A living journal of the places your circle has just returned from.</p>
+        </div>
       </header>
 
       {/* New email accounts carry a machine handle — offer the fix in place */}
@@ -346,39 +358,33 @@ export default function FeedPage() {
       <nav
         aria-label="Feed mode"
         role="tablist"
-        className="flex items-center gap-7 border-b border-border mb-6"
+        className="mb-4 grid grid-cols-2 rounded-2xl border border-border bg-muted/55 p-1"
       >
         <button
           type="button"
           role="tab"
           aria-selected={mode === 'following'}
           onClick={() => setMode('following')}
-          className={`relative pb-2.5 text-[13px] font-semibold tracking-wide transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+          className={`relative min-h-11 rounded-xl px-4 text-[13px] font-semibold tracking-wide transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
             mode === 'following'
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'bg-card text-foreground shadow-sm'
+              : 'text-muted-foreground hover:bg-card/50 hover:text-foreground'
           }`}
         >
           Friends
-          {mode === 'following' && (
-            <span className="absolute left-0 right-0 -bottom-px h-[2px] rounded-full bg-primary" />
-          )}
         </button>
         <button
           type="button"
           role="tab"
           aria-selected={mode === 'discover'}
           onClick={() => setMode('discover')}
-          className={`relative pb-2.5 text-[13px] font-semibold tracking-wide transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+          className={`relative min-h-11 rounded-xl px-4 text-[13px] font-semibold tracking-wide transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
             mode === 'discover'
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'bg-card text-foreground shadow-sm'
+              : 'text-muted-foreground hover:bg-card/50 hover:text-foreground'
           }`}
         >
           Discover
-          {mode === 'discover' && (
-            <span className="absolute left-0 right-0 -bottom-px h-[2px] rounded-full bg-primary" />
-          )}
         </button>
       </nav>
 
@@ -388,24 +394,24 @@ export default function FeedPage() {
           fold behind up to six stacked cards. */}
 
       {/* Discovery — single quiet row, only what matters */}
-      <div className="flex gap-2 mb-6 overflow-x-auto -mx-4 px-4 scrollbar-hide">
+      <div className="mb-6 grid grid-cols-3 gap-2">
         <Link
           href="/explore"
-          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+          className="inline-flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl border border-border bg-card px-2 py-2 text-[10px] font-semibold tracking-wide text-muted-foreground shadow-[var(--shadow-resting)] transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:text-primary"
         >
           <Compass className="h-3 w-3" strokeWidth={2} />
           Explore
         </Link>
         <Link
           href="/map"
-          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+          className="inline-flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl border border-border bg-card px-2 py-2 text-[10px] font-semibold tracking-wide text-muted-foreground shadow-[var(--shadow-resting)] transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:text-primary"
         >
           <MapPinned className="h-3 w-3" strokeWidth={2} />
           Your map
         </Link>
         <Link
           href="/travel-twins"
-          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap text-muted-foreground transition-colors duration-200 hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+          className="inline-flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl border border-border bg-card px-2 py-2 text-[10px] font-semibold tracking-wide text-muted-foreground shadow-[var(--shadow-resting)] transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:text-primary"
         >
           <Users className="h-3 w-3" strokeWidth={2} />
           Travel twins

@@ -11,7 +11,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       data-slot="input"
       className={cn(
         // Base layout
-        "h-10 w-full min-w-0 rounded-xl border px-3 py-1 text-base transition-[color,box-shadow] outline-none md:text-sm",
+        "h-11 w-full min-w-0 rounded-xl border px-3 py-1 text-base transition-[color,box-shadow] outline-none md:text-sm",
         // Semantic tokens — warm in both themes
         "border-border bg-card text-foreground placeholder:text-muted-foreground/80 selection:bg-primary selection:text-primary-foreground",
         // Dark mode — slightly raised warm surface so inputs read as fields,

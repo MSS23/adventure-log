@@ -1,8 +1,9 @@
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Sparkles, X } from 'lucide-react'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { log } from '@/lib/utils/logger'
@@ -66,12 +67,11 @@ export function MemoryLaneCard() {
           >
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted">
               {memory.cover_photo_url && (
-                <Image
+                <img
                   src={getPhotoUrl(memory.cover_photo_url) || ''}
                   alt={memory.title}
-                  fill
-                  sizes="176px"
-                  className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 />
               )}
               <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />

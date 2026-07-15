@@ -12,5 +12,7 @@ export const features = {
    * link" → /api/wishlist/extract). Requires ANTHROPIC_API_KEY in Vercel.
    * Manual place search does not depend on this and stays enabled.
    */
-  aiLinkExtract: false,
+  // The endpoint already degrades safely: Google Maps works without AI and
+  // TikTok opens the review/search fallback when ANTHROPIC_API_KEY is absent.
+  aiLinkExtract: true,
 } as const

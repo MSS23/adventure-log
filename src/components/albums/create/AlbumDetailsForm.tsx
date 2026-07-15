@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { FileText, Sparkles, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -82,6 +83,27 @@ export function AlbumDetailsForm({
 }: AlbumDetailsFormProps) {
   const { register, handleSubmit, formState: { errors }, watch, setValue } = fullForm
   const currentTitle = watch('title')
+  const eligiblePreviousAlbums = useMemo(
+    () => previousAlbums.filter((album) => {
+      if (selectedYear == null) return true
+      if (!album.date_start) return false
+      const albumYear = new Date(album.date_start).getFullYear()
+      return Number.isFinite(albumYear) && albumYear === selectedYear
+    }),
+    [previousAlbums, selectedYear]
+  )
+
+  // Changing the album year must not leave a hidden cross-year predecessor in
+  // form state. Each year is a separate flight timeline unless the stops are
+  // explicitly linked within that same trip year.
+  useEffect(() => {
+    if (
+      connectedFromAlbumId &&
+      !eligiblePreviousAlbums.some((album) => album.id === connectedFromAlbumId)
+    ) {
+      onConnectedFromChange(null)
+    }
+  }, [connectedFromAlbumId, eligiblePreviousAlbums, onConnectedFromChange])
 
   return (
     <motion.div
@@ -251,7 +273,7 @@ export function AlbumDetailsForm({
                 {/* Journey connection — link this trip to the one it continues
                     from, so the globe draws an explicit journey arc between
                     them (instead of guessing a route chronologically). */}
-                {previousAlbums.length > 0 && (
+                {eligiblePreviousAlbums.length > 0 && (
                   <div className="space-y-2">
                     <label
                       htmlFor="connected-from"
@@ -267,7 +289,7 @@ export function AlbumDetailsForm({
                       className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <option value="">Start of a new journey</option>
-                      {previousAlbums.map((a) => {
+                      {eligiblePreviousAlbums.map((a) => {
                         const year = a.date_start
                           ? new Date(a.date_start).getFullYear()
                           : null
@@ -283,7 +305,8 @@ export function AlbumDetailsForm({
                       })}
                     </select>
                     <p className="text-xs text-muted-foreground">
-                      Draws a line on your globe from that trip to this one.
+                      Link stops from the same trip and year. A different year
+                      always starts a new route from your home base.
                     </p>
                   </div>
                 )}

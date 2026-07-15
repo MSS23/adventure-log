@@ -277,6 +277,7 @@ export function GlobeAlbumFilmstrip({
 
   return (
     <div
+      data-tour-step="globe-filmstrip"
       className={cn(
         "absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] z-10",
         hideOnMobileWhenSelected ? "hidden md:block" : "block"

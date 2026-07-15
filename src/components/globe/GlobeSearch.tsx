@@ -1,17 +1,13 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Search, X, MapPin, Calendar, Camera, Navigation, Clock, ExternalLink } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Image from 'next/image'
+import { Calendar, Camera, ExternalLink, MapPin, Navigation, Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { log } from '@/lib/utils/logger'
-import Image from 'next/image'
 import { apiFetch } from '@/lib/api/client'
 
-// Response rows from /api/geocode?q= (normalized Nominatim shape).
 interface GeocodeSearchResult {
   display_name: string
   lat: string
@@ -48,55 +44,51 @@ export function GlobeSearch({
   data,
   onResultClick,
   onClearSearch,
-  placeholder = 'Search locations, countries, or years...',
+  placeholder = 'Fly to a city, country, or travel year',
   maxResults = 8,
-  className
+  className,
 }: GlobeSearchProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<GlobeSearchResult[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [searchingExternal, setSearchingExternal] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  // Search function with multiple criteria
+  const quickSuggestions = useMemo(() => {
+    const suggestions: string[] = []
+    for (const item of data) {
+      const candidate = item.country || item.name
+      if (candidate && !suggestions.includes(candidate)) suggestions.push(candidate)
+      if (suggestions.length === 4) break
+    }
+    return suggestions
+  }, [data])
+
   const searchData = useCallback((searchQuery: string): GlobeSearchResult[] => {
     if (!searchQuery.trim()) return []
+    const normalizedQuery = searchQuery.toLowerCase().trim()
 
-    const query = searchQuery.toLowerCase().trim()
-
-    // First, search local data
-    const localResults = data
-      .filter(item => {
-        // Search in name, country, and tags
-        const nameMatch = item.name.toLowerCase().includes(query)
-        const countryMatch = item.country.toLowerCase().includes(query)
-        const tagMatch = item.tags.some(tag => tag.toLowerCase().includes(query))
-        const yearMatch = item.visitDate.includes(query)
-
-        return nameMatch || countryMatch || tagMatch || yearMatch
-      })
+    return data
+      .filter((item) =>
+        item.name.toLowerCase().includes(normalizedQuery) ||
+        item.country.toLowerCase().includes(normalizedQuery) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(normalizedQuery)) ||
+        item.visitDate.includes(normalizedQuery)
+      )
       .sort((a, b) => {
-        // Prioritize exact name matches
-        const aNameMatch = a.name.toLowerCase().startsWith(query)
-        const bNameMatch = b.name.toLowerCase().startsWith(query)
-        if (aNameMatch && !bNameMatch) return -1
-        if (!aNameMatch && bNameMatch) return 1
-
-        // Then by photo count (more popular locations first)
+        const aStartsWith = a.name.toLowerCase().startsWith(normalizedQuery)
+        const bStartsWith = b.name.toLowerCase().startsWith(normalizedQuery)
+        if (aStartsWith && !bStartsWith) return -1
+        if (!aStartsWith && bStartsWith) return 1
         return b.photoCount - a.photoCount
       })
       .slice(0, maxResults)
-
-    return localResults
   }, [data, maxResults])
 
-  // External search for locations not in user data. Goes through
-  // /api/geocode (Mapbox → Photon/Nominatim fallback, works keyless in prod)
-  // via apiFetch so it also works inside the Capacitor app. The old path went
-  // through the weather service's geocoder, which needs OPENWEATHER_API_KEY
-  // and silently fell back to MOCK coordinates when unavailable.
   const searchExternalLocations = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim() || searchQuery.length < 3) return
 
@@ -104,18 +96,17 @@ export function GlobeSearch({
     try {
       const response = await apiFetch(`/api/geocode?q=${encodeURIComponent(searchQuery)}`)
       if (!response.ok) throw new Error(`Geocode API error: ${response.status}`)
-      const data: GeocodeSearchResult[] = await response.json()
-
-      const externals: GlobeSearchResult[] = data
+      const responseData: GeocodeSearchResult[] = await response.json()
+      const externalResults = responseData
         .slice(0, 3)
-        .map((r) => ({
-          id: `external-${r.place_id}`,
-          name: r.display_name.split(',')[0]?.trim() || searchQuery,
-          latitude: parseFloat(r.lat),
-          longitude: parseFloat(r.lon),
+        .map((result) => ({
+          id: `external-${result.place_id}`,
+          name: result.display_name.split(',')[0]?.trim() || searchQuery,
+          latitude: Number.parseFloat(result.lat),
+          longitude: Number.parseFloat(result.lon),
           country:
-            r.address?.country_code?.toUpperCase() ||
-            r.display_name.split(',').pop()?.trim() ||
+            result.address?.country_code?.toUpperCase() ||
+            result.display_name.split(',').pop()?.trim() ||
             'Unknown',
           visitDate: new Date().toISOString(),
           albumCount: 0,
@@ -124,27 +115,27 @@ export function GlobeSearch({
           type: 'external' as const,
           isExternal: true,
         }))
-        .filter((r) => Number.isFinite(r.latitude) && Number.isFinite(r.longitude))
+        .filter((result) => Number.isFinite(result.latitude) && Number.isFinite(result.longitude))
 
-      if (externals.length > 0) {
-        // Append after any local results, but keep within maxResults.
-        setResults(() => {
-          const localResults = searchData(searchQuery)
-          return [...localResults, ...externals].slice(0, maxResults)
-        })
+      if (externalResults.length > 0) {
+        setResults([...searchData(searchQuery), ...externalResults].slice(0, maxResults))
         setIsOpen(true)
       }
     } catch (error) {
-      log.error('External location search failed', { component: 'GlobeSearch', action: 'search-external' }, error as Error)
+      log.error(
+        'External location search failed',
+        { component: 'GlobeSearch', action: 'search-external' },
+        error as Error
+      )
     } finally {
       setSearchingExternal(false)
     }
-  }, [searchData, maxResults])
+  }, [maxResults, searchData])
 
-  // Event handlers
   const handleResultSelect = useCallback((result: GlobeSearchResult) => {
     setQuery('')
     setIsOpen(false)
+    setIsFocused(false)
     setSelectedIndex(-1)
     onResultClick(result)
     inputRef.current?.blur()
@@ -158,269 +149,176 @@ export function GlobeSearch({
     onClearSearch()
   }, [onClearSearch])
 
-  // Handle search input
   useEffect(() => {
-    if (query.length >= 2) {
-      const searchResults = searchData(query)
-      setResults(searchResults)
-      setIsOpen(searchResults.length > 0)
-      setSelectedIndex(-1)
-
-      // If no local results and query is long enough, search external locations
-      if (searchResults.length === 0 && query.length >= 3) {
-        const debounceTimeout = setTimeout(() => {
-          searchExternalLocations(query)
-        }, 500) // Debounce external API calls
-
-        return () => clearTimeout(debounceTimeout)
-      }
-    } else {
+    if (query.length < 2) {
       setResults([])
       setIsOpen(false)
+      return
     }
-  }, [query, data, searchData, searchExternalLocations])
 
-  // Keyboard navigation
+    const localResults = searchData(query)
+    setResults(localResults)
+    setIsOpen(localResults.length > 0)
+    setSelectedIndex(-1)
+
+    if (localResults.length === 0 && query.length >= 3) {
+      const timeout = window.setTimeout(() => searchExternalLocations(query), 450)
+      return () => window.clearTimeout(timeout)
+    }
+  }, [query, searchData, searchExternalLocations])
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (!isOpen || results.length === 0) return
-
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault()
-          setSelectedIndex(prev => Math.min(prev + 1, results.length - 1))
-          break
-        case 'ArrowUp':
-          e.preventDefault()
-          setSelectedIndex(prev => Math.max(prev - 1, -1))
-          break
-        case 'Enter':
-          e.preventDefault()
-          if (selectedIndex >= 0 && results[selectedIndex]) {
-            handleResultSelect(results[selectedIndex])
-          }
-          break
-        case 'Escape':
-          e.preventDefault()
-          handleClear()
-          break
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        setSelectedIndex((index) => Math.min(index + 1, results.length - 1))
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        setSelectedIndex((index) => Math.max(index - 1, -1))
+      } else if (event.key === 'Enter' && selectedIndex >= 0 && results[selectedIndex]) {
+        event.preventDefault()
+        handleResultSelect(results[selectedIndex])
+      } else if (event.key === 'Escape') {
+        event.preventDefault()
+        handleClear()
       }
     }
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown)
-      return () => document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isOpen, results, selectedIndex, handleResultSelect, handleClear])
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [handleClear, handleResultSelect, isOpen, results, selectedIndex])
 
-  // Scroll selected result into view
   useEffect(() => {
     if (selectedIndex >= 0 && resultsRef.current) {
-      const selectedElement = resultsRef.current.children[selectedIndex] as HTMLElement
-      if (selectedElement) {
-        selectedElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest'
-        })
-      }
+      const selectedElement = resultsRef.current.children[selectedIndex] as HTMLElement | undefined
+      selectedElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
   }, [selectedIndex])
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short'
-    })
-  }
+  useEffect(() => {
+    const handleOutsidePointer = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsFocused(false)
+        if (!query) setIsOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', handleOutsidePointer)
+    return () => document.removeEventListener('pointerdown', handleOutsidePointer)
+  }, [query])
+
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
 
   const getResultIcon = (result: GlobeSearchResult) => {
-    switch (result.type) {
-      case 'country':
-        return <Navigation className="h-4 w-4 text-olive-600" />
-      case 'year':
-        return <Calendar className="h-4 w-4 text-olive-600" />
-      case 'external':
-        return <ExternalLink className="h-4 w-4 text-olive-600" />
-      default:
-        return <MapPin className="h-4 w-4 text-green-600" />
-    }
+    if (result.type === 'country') return <Navigation className="h-4 w-4" />
+    if (result.type === 'year') return <Calendar className="h-4 w-4" />
+    if (result.type === 'external') return <ExternalLink className="h-4 w-4" />
+    return <MapPin className="h-4 w-4" />
   }
 
   return (
-    <div className={cn('relative w-full max-w-md', className)}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-700 dark:text-stone-300" />
+    <div ref={containerRef} className={cn('relative w-full max-w-lg', className)}>
+      <div className="relative rounded-2xl border border-white/15 bg-[#171a16]/94 p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+        <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/65" />
         <Input
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(event) => setQuery(event.target.value)}
+          onFocus={() => setIsFocused(true)}
           placeholder={placeholder}
-          className="pl-10 pr-10 bg-white/95 dark:bg-[#1B170E]/95 backdrop-blur-sm border-stone-200 dark:border-white/[0.10] focus:border-olive-500"
+          aria-label="Search the travel globe"
+          className="h-11 rounded-xl border-0 bg-white/[0.07] pl-11 pr-11 text-sm text-white shadow-none placeholder:text-white/45 focus-visible:ring-1 focus-visible:ring-white/35"
         />
         {searchingExternal && (
-          <div className="absolute right-10 top-1/2 -translate-y-1/2">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-olive-500 border-t-transparent"></div>
-          </div>
+          <div className="absolute right-12 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-white/25 border-t-white" />
         )}
         {query && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
+            type="button"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-stone-100 dark:hover:bg-white/[0.06] touch-manipulation"
+            className="absolute right-2.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl text-white/65 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
+            aria-label="Clear globe search"
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
         )}
       </div>
 
-      {/* Search Results */}
       {isOpen && results.length > 0 && (
-        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-stone-200 dark:border-white/[0.10] bg-white/98 dark:bg-[#1B170E]/98 backdrop-blur-sm">
-          <CardContent className="p-0">
-            <div
-              ref={resultsRef}
-              className="max-h-80 overflow-y-auto"
-              role="listbox"
-            >
-              {results.map((result, index) => (
-                <button
-                  type="button"
-                  key={result.id}
-                  onClick={() => handleResultSelect(result)}
-                  className={cn(
-                    'w-full p-3 sm:p-4 text-left hover:bg-stone-50 dark:hover:bg-white/[0.06] active:bg-stone-100 dark:active:bg-white/[0.08] border-b border-stone-100 dark:border-white/[0.08] last:border-b-0 transition-colors touch-manipulation min-h-16 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset',
-                    selectedIndex === index && 'bg-olive-50 dark:bg-olive-950/30'
+        <div className="absolute top-full z-40 mt-2 w-full overflow-hidden rounded-2xl border border-white/12 bg-[#171a16]/96 p-1.5 text-white shadow-[0_22px_60px_rgba(0,0,0,0.46)] backdrop-blur-xl">
+          <div ref={resultsRef} className="max-h-80 overflow-y-auto" role="listbox">
+            {results.map((result, index) => (
+              <button
+                type="button"
+                key={result.id}
+                onClick={() => handleResultSelect(result)}
+                className={cn(
+                  'flex min-h-16 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left outline-none transition-colors hover:bg-white/[0.08] focus-visible:ring-1 focus-visible:ring-white/35',
+                  selectedIndex === index && 'bg-white/[0.1]'
+                )}
+                role="option"
+                aria-selected={selectedIndex === index}
+              >
+                <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/[0.08] text-white/75">
+                  {result.coverPhotoUrl ? (
+                    <Image src={result.coverPhotoUrl} alt="" fill className="object-cover" sizes="48px" />
+                  ) : (
+                    getResultIcon(result)
                   )}
-                  role="option"
-                  aria-selected={selectedIndex === index}
-                >
-                  <div className="flex items-start gap-3">
-                    {result.coverPhotoUrl && (
-                      <div className="flex-shrink-0">
-                        <Image
-                          src={result.coverPhotoUrl}
-                          alt={result.name}
-                          width={48}
-                          height={48}
-                          className="rounded-lg object-cover"
-                        />
-                      </div>
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        {getResultIcon(result)}
-                        <span className="font-medium text-stone-900 dark:text-stone-100 truncate">
-                          {result.name}
-                        </span>
-                      </div>
-
-                      <div className="text-sm text-stone-800 dark:text-stone-200 mb-2">
-                        {result.country} {result.isExternal ? '• External location' : `• ${formatDate(result.visitDate)}`}
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {result.isExternal ? (
-                          <Badge variant="outline" className="text-sm">
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            Explore location
-                          </Badge>
-                        ) : (
-                          <>
-                            <Badge variant="secondary" className="text-sm">
-                              <Camera className="h-3 w-3 mr-1" />
-                              {result.photoCount}
-                            </Badge>
-
-                            <Badge variant="outline" className="text-sm">
-                              <Clock className="h-3 w-3 mr-1" />
-                              {result.albumCount} album{result.albumCount !== 1 ? 's' : ''}
-                            </Badge>
-
-                            {result.tags.slice(0, 2).map(tag => (
-                              <Badge key={tag} variant="secondary" className="text-sm">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </>
-                        )}
-                      </div>
-                    </div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-semibold text-white">{result.name}</span>
+                    {result.isExternal && <ExternalLink className="h-3 w-3 shrink-0 text-white/45" />}
                   </div>
-                </button>
-              ))}
-            </div>
-
-            {results.length === maxResults && (
-              <div className="p-3 text-center text-sm text-stone-800 dark:text-stone-200 border-t dark:border-white/[0.08]">
-                Showing first {maxResults} results. Try a more specific search.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* No Results */}
-      {isOpen && query.length >= 2 && results.length === 0 && (
-        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-stone-200 dark:border-white/[0.10] bg-white/98 dark:bg-[#1B170E]/98 backdrop-blur-sm">
-          <CardContent className="p-4 text-center text-stone-800 dark:text-stone-200">
-            <Search className="h-8 w-8 mx-auto mb-2 text-stone-300 dark:text-stone-600" />
-            <p className="font-medium">No locations found</p>
-            <p className="text-sm mt-1">
-              Try searching for a city, country, or year
+                  <p className="mt-0.5 truncate text-xs text-white/55">
+                    {result.country} · {result.isExternal ? 'Explore anywhere' : formatDate(result.visitDate)}
+                  </p>
+                  {!result.isExternal && (
+                    <p className="mt-1 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.1em] text-white/45">
+                      <span className="inline-flex items-center gap-1"><Camera className="h-3 w-3" />{result.photoCount} photos</span>
+                      <span>{result.albumCount} album{result.albumCount === 1 ? '' : 's'}</span>
+                    </p>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+          {results.length === maxResults && (
+            <p className="border-t border-white/10 px-3 py-2 text-center text-[11px] text-white/45">
+              Showing the closest {maxResults} matches
             </p>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       )}
 
-      {/* Search Suggestions */}
-      {!query && inputRef.current === document.activeElement && (
-        <Card className="absolute top-full mt-2 w-full z-40 shadow-lg border-stone-200 dark:border-white/[0.10] bg-white/98 dark:bg-[#1B170E]/98 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className="text-sm text-stone-800 dark:text-stone-200 mb-3">Quick search suggestions:</div>
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                variant="secondary"
-                className="cursor-pointer hover:bg-stone-200 dark:hover:bg-white/[0.08]"
-                onClick={() => setQuery('2024')}
+      {query.length >= 2 && results.length === 0 && !searchingExternal && (
+        <div className="absolute top-full z-40 mt-2 w-full rounded-2xl border border-white/12 bg-[#171a16]/96 px-5 py-6 text-center text-white shadow-[0_22px_60px_rgba(0,0,0,0.46)] backdrop-blur-xl">
+          <MapPin className="mx-auto mb-2 h-5 w-5 text-white/40" />
+          <p className="text-sm font-semibold">No place found</p>
+          <p className="mt-1 text-xs text-white/50">Try a nearby city, country, or travel year.</p>
+        </div>
+      )}
+
+      {!query && isFocused && quickSuggestions.length > 0 && (
+        <div className="absolute top-full z-40 mt-2 w-full rounded-2xl border border-white/12 bg-[#171a16]/96 p-4 text-white shadow-[0_22px_60px_rgba(0,0,0,0.46)] backdrop-blur-xl">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45">Jump back to</p>
+          <div className="flex flex-wrap gap-2">
+            {quickSuggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => setQuery(suggestion)}
+                className="min-h-9 rounded-full border border-white/12 bg-white/[0.06] px-3 text-xs font-medium text-white/75 transition-colors hover:bg-white/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
               >
-                2024
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="cursor-pointer hover:bg-stone-200 dark:hover:bg-white/[0.08]"
-                onClick={() => setQuery('Japan')}
-              >
-                Japan
-              </Badge>
-              <Badge
-                variant="outline"
-                className="cursor-pointer hover:bg-stone-200 dark:hover:bg-white/[0.08]"
-                onClick={() => setQuery('Lake Garda')}
-              >
-                <ExternalLink className="h-3 w-3 mr-1" />
-                Lake Garda
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="cursor-pointer hover:bg-stone-200 dark:hover:bg-white/[0.08]"
-                onClick={() => setQuery('beach')}
-              >
-                beach
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="cursor-pointer hover:bg-stone-200 dark:hover:bg-white/[0.08]"
-                onClick={() => setQuery('mountains')}
-              >
-                mountains
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )

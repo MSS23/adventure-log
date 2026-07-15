@@ -8,6 +8,7 @@ import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { localizePath } from '@/lib/utils/native-routes'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { buildJourneyFlightLegs } from '@/lib/globe/journey-flight-paths'
 
 // react-globe.gl compiles GLSL shaders at runtime (three.js) — must be
 // client-only. Loaded the same way the main globe and embed globe are.
@@ -88,6 +89,7 @@ const arcDashInitialGapAccessor = (d: object) => {
   const arc = d as ProfileArc
   return (arc.index * 0.37) % 1
 }
+const emptyArcLabelAccessor = () => ''
 
 /**
  * Embedded interactive travel globe for a user's profile.
@@ -245,88 +247,38 @@ export function ProfileGlobe({
     [locations],
   )
 
-  // Travel lines ("spider's web") — the same home-hub journey model as the
-  // main globe: explicit connected_from chains form journeys; with a public
-  // base every journey loops home (home→first, legs, last→home), without one
-  // only the explicit legs are drawn.
+  // Use the same tested journey builder as the main globe so profile previews
+  // cannot accidentally join trips from different years.
   const arcsData = useMemo<ProfileArc[]>(() => {
     if (locations.length === 0) return []
 
-    const byId = new Map(locations.map((loc) => [loc.id, loc]))
-    const timeOf = (loc: ProfileGlobeLocation) =>
-      loc.date ? new Date(loc.date).getTime() : 0
+    const legs = buildJourneyFlightLegs({
+      stops: locations.map((location) => ({
+        id: location.id,
+        name: location.location || location.title,
+        lat: location.lat,
+        lng: location.lng,
+        visitDate: location.date || '',
+        connectedFromAlbumId: location.connectedFromAlbumId,
+      })),
+      home: homeLocation,
+    })
 
-    const arcs: ProfileArc[] = []
-    const pushArc = (
-      from: { lat: number; lng: number },
-      to: { lat: number; lng: number },
-      kind: 'home' | 'journey',
-    ) => {
-      const dLat = to.lat - from.lat
-      const dLng = to.lng - from.lng
-      arcs.push({
-        startLat: from.lat,
-        startLng: from.lng,
-        endLat: to.lat,
-        endLng: to.lng,
-        kind,
+    const total = legs.length
+    return legs.map((leg, index) => {
+      const dLat = leg.endLat - leg.startLat
+      const dLng = leg.endLng - leg.startLng
+      return {
+        startLat: leg.startLat,
+        startLng: leg.startLng,
+        endLat: leg.endLat,
+        endLng: leg.endLng,
+        kind: leg.kind,
         distance: Math.sqrt(dLat * dLat + dLng * dLng),
-        index: arcs.length,
-        total: 0, // filled in below once the count is known
-      })
-    }
-
-    const predecessorInView = (loc: ProfileGlobeLocation) => {
-      const fromId = loc.connectedFromAlbumId
-      return !!(fromId && fromId !== loc.id && byId.has(fromId))
-    }
-
-    // successorsOf: predecessor id → trips that continue from it.
-    const successorsOf = new Map<string, ProfileGlobeLocation[]>()
-    for (const loc of locations) {
-      if (!predecessorInView(loc)) continue
-      const fromId = loc.connectedFromAlbumId as string
-      const list = successorsOf.get(fromId)
-      if (list) list.push(loc)
-      else successorsOf.set(fromId, [loc])
-    }
-
-    // Journey heads = trips with no predecessor in view, oldest first.
-    const heads = locations
-      .filter((loc) => !predecessorInView(loc))
-      .sort((a, b) => timeOf(a) - timeOf(b))
-
-    const visited = new Set<string>()
-    for (const head of heads) {
-      if (visited.has(head.id)) continue
-
-      const chain: ProfileGlobeLocation[] = []
-      let cur: ProfileGlobeLocation | undefined = head
-      while (cur && !visited.has(cur.id)) {
-        visited.add(cur.id)
-        chain.push(cur)
-        const next = (successorsOf.get(cur.id) || [])
-          .filter((s) => !visited.has(s.id))
-          .sort((a, b) => timeOf(a) - timeOf(b))
-        cur = next[0]
+        index,
+        total,
       }
-
-      const first = chain[0]
-      const last = chain[chain.length - 1]
-
-      if (homeLocation) {
-        pushArc(homeLocation, first, 'home')
-      }
-      for (let i = 0; i < chain.length - 1; i++) {
-        pushArc(chain[i], chain[i + 1], 'journey')
-      }
-      if (homeLocation && chain.length >= 2) {
-        pushArc(last, homeLocation, 'home')
-      }
-    }
-
-    for (const arc of arcs) arc.total = arcs.length
-    return arcs
+    })
   }, [locations, homeLocation])
 
   const openAlbum = useCallback(
@@ -408,6 +360,7 @@ export function ProfileGlobe({
             htmlElement={profilePinElement}
             arcsData={arcsData}
             arcColor={arcColorAccessor}
+            arcLabel={emptyArcLabelAccessor}
             arcAltitude={arcAltitudeAccessor}
             arcStroke={0.4}
             arcDashLength={0.25}

@@ -27,18 +27,13 @@ import {
   Users,
   Lock,
   MapPin,
-  Camera,
-  Loader2,
-  Image as ImageIcon,
   Bell,
   UserCog,
   ChevronRight,
   MessageSquarePlus,
   MessageCircle,
 } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { uploadCoverPhoto, deleteCoverPhoto } from '@/lib/utils/storage'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { FollowRequests } from '@/components/social/FollowRequests'
 import { FollowLists } from '@/components/social/FollowLists'
@@ -55,9 +50,6 @@ export default function SettingsPage() {
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [privacyLevel, setPrivacyLevel] = useState(profile?.privacy_level || 'public')
   const [homeLocationData, setHomeLocationData] = useState({ city: profile?.home_city || '', country: profile?.home_country || '' })
-  const [coverPhotoFile, setCoverPhotoFile] = useState<File | null>(null)
-  const [coverPhotoPreview, setCoverPhotoPreview] = useState<string | null>(null)
-  const [uploadingCover, setUploadingCover] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -315,54 +307,6 @@ export default function SettingsPage() {
     }
   }
 
-  const handleCoverPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { setError('Use JPEG, PNG, or WebP'); return }
-    if (file.size > 10 * 1024 * 1024) { setError('Max 10MB'); return }
-    setCoverPhotoFile(file)
-    setCoverPhotoPreview(URL.createObjectURL(file))
-  }
-
-  const handleCoverPhotoUpload = async () => {
-    if (!coverPhotoFile || !user?.id) return
-    try {
-      setUploadingCover(true)
-      setError(null)
-      const coverUrl = await uploadCoverPhoto(coverPhotoFile, user.id)
-      const { error } = await supabase.from('users').update({ cover_photo_url: coverUrl, updated_at: new Date().toISOString() }).eq('id', user.id)
-      if (error) throw error
-      await refreshProfile()
-      setCoverPhotoFile(null)
-      setCoverPhotoPreview(null)
-      setSuccess('Cover photo updated')
-      setTimeout(() => setSuccess(null), 3000)
-    } catch (err) {
-      log.error('Error uploading cover photo', { component: 'Settings' }, err)
-      setError('Failed to upload cover photo')
-    } finally {
-      setUploadingCover(false)
-    }
-  }
-
-  const handleRemoveCoverPhoto = async () => {
-    if (!user?.id || !profile?.cover_photo_url) return
-    try {
-      setUploadingCover(true)
-      try { await deleteCoverPhoto(profile.cover_photo_url) } catch { /* ok */ }
-      const { error } = await supabase.from('users').update({ cover_photo_url: null, updated_at: new Date().toISOString() }).eq('id', user.id)
-      if (error) throw error
-      await refreshProfile()
-      setSuccess('Cover photo removed')
-      setTimeout(() => setSuccess(null), 3000)
-    } catch (err) {
-      log.error('Error removing cover photo', { component: 'Settings' }, err)
-      setError('Failed to remove cover photo')
-    } finally {
-      setUploadingCover(false)
-    }
-  }
-
   const privacyOptions = [
     { value: 'public', label: 'Public', desc: 'Anyone can see your profile', icon: Globe },
     { value: 'friends', label: 'Followers only', desc: 'Only people who follow you can see your content', icon: Users },
@@ -411,52 +355,6 @@ export default function SettingsPage() {
           </span>
           <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
         </Link>
-
-        {/* Cover photo */}
-        <Card>
-          <CardHead icon={ImageIcon} title="Cover photo" subtitle="Shown across the top of your profile" />
-          <div className="p-5 space-y-4">
-            <div className="relative w-full h-32 rounded-xl overflow-hidden bg-muted">
-              {(coverPhotoPreview || profile?.cover_photo_url) ? (
-                <Image
-                  src={coverPhotoPreview || getPhotoUrl(profile?.cover_photo_url, 'covers') || ''}
-                  alt="Cover photo"
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Camera className="h-8 w-8 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {coverPhotoPreview ? (
-                <>
-                  <Button size="sm" onClick={handleCoverPhotoUpload} disabled={uploadingCover} className="min-h-[44px] px-5 cursor-pointer">
-                    {uploadingCover ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" />Uploading</> : 'Save'}
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => { setCoverPhotoFile(null); setCoverPhotoPreview(null) }} className="min-h-[44px] cursor-pointer">
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Label htmlFor="cover-input" className="inline-flex items-center min-h-[44px] px-4 rounded-xl border border-border bg-card hover:bg-muted cursor-pointer text-sm font-medium text-foreground transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                    <Camera className="h-4 w-4 mr-1.5" />
-                    {profile?.cover_photo_url ? 'Change photo' : 'Upload photo'}
-                  </Label>
-                  <input id="cover-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCoverPhotoSelect} className="hidden" />
-                  {profile?.cover_photo_url && (
-                    <Button size="sm" variant="outline" onClick={handleRemoveCoverPhoto} disabled={uploadingCover} className="min-h-[44px] text-destructive border-destructive/30 hover:bg-destructive/10 cursor-pointer">
-                      Remove
-                    </Button>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        </Card>
 
         {/* Home location */}
         <Card>

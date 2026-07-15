@@ -77,7 +77,16 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error || 'Something went wrong. Please try again.')
       }
-      toast.success('Thanks! Your feedback is on its way. 🙌')
+      const body = await res.json() as {
+        delivery?: { stored?: boolean; discord?: boolean }
+      }
+      if (body.delivery?.discord) {
+        toast.success('Thanks! Your feedback reached the team.')
+      } else if (body.delivery?.stored) {
+        toast.success('Thanks! Your feedback was saved for the team.')
+      } else {
+        toast.warning('Feedback received, but delivery could not be confirmed.')
+      }
       reset()
       onOpenChange(false)
     } catch (err) {

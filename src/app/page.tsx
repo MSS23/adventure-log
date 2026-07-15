@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getFlagEmoji } from '@/lib/utils/country'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -105,6 +106,7 @@ export default function HomePage() {
   const globeRef = useRef<any>(null)
   const router = useRouter()
   const { user, authLoading } = useAuth()
+  const prefersReducedMotion = useReducedMotion()
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [globeSize, setGlobeSize] = useState({ w: 1200, h: 800 })
@@ -155,7 +157,7 @@ export default function HomePage() {
     globeRef.current.pointOfView({ lat: 30, lng: 10, altitude: 2.2 }, 0)
     const controls = globeRef.current.controls()
     if (controls) {
-      controls.autoRotate = true
+      controls.autoRotate = !prefersReducedMotion
       controls.autoRotateSpeed = 0.4
       controls.enableZoom = false
     }
@@ -244,10 +246,10 @@ export default function HomePage() {
                 arcStroke={0.4}
                 arcDashLength={0.5}
                 arcDashGap={0.3}
-                arcDashAnimateTime={3000}
+                arcDashAnimateTime={prefersReducedMotion ? 0 : 3000}
                 arcAltitudeAutoScale={0.3}
                 enablePointerInteraction={false}
-                animateIn={true}
+                animateIn={!prefersReducedMotion}
                 width={globeSize.w}
                 height={globeSize.h}
               />
@@ -314,7 +316,7 @@ export default function HomePage() {
             aria-label="Scroll to learn more"
             className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 p-2.5 rounded-full opacity-40 hover:opacity-80 transition-opacity duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14] active:scale-[0.97]"
           >
-            <ChevronDown className="h-5 w-5 text-stone-400 animate-bounce" />
+            <ChevronDown className="h-5 w-5 animate-bounce text-stone-400 motion-reduce:animate-none" />
           </button>
         </section>
 

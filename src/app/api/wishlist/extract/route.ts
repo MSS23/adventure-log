@@ -46,8 +46,6 @@ const EXTRACT_LIMIT = { limit: 30, windowMs: 10 * 60 * 1000, keyPrefix: 'sp-extr
 // Counted against saved wishlist items (durable — the in-memory rate limiter
 // resets on deploy, so it can't back a monthly quota).
 const FREE_MONTHLY_IMPORTS = 10
-const IMPORT_PLATFORMS = ['tiktok', 'google_maps', 'instagram', 'other']
-
 export async function POST(request: NextRequest) {
   // Authenticate first so we can rate-limit on the user id.
   const supabase = await createClient()
@@ -58,49 +56,6 @@ export async function POST(request: NextRequest) {
 
   const limit = await rateLimitAsync(request, { ...EXTRACT_LIMIT, identifier: user.id })
   if (!limit.success) return rateLimitResponse(limit.reset)
-
-  // ── Pro gate: 10 link imports/month on the free plan ──────────────────────
-  const { data: planRow, error: planError } = await supabase
-    .from('users')
-    .select('plan')
-    .eq('id', user.id)
-    .single()
-
-  // Tolerate the plan column not existing yet (migration 69 not applied):
-  // Postgres 42703 = undefined_column → treat the user as free. Likewise
-  // 42501 = permission denied if migration 76's column-level grants are in
-  // place without `plan` in the allowlist — same free-plan degradation.
-  const plan = planError ? 'free' : (planRow?.plan ?? 'free')
-  if (planError && planError.code !== '42703') {
-    log.warn('Could not read user plan, treating as free', {
-      component: 'SavedPlacesExtract',
-      action: 'plan-check',
-      userId: user.id,
-    })
-  }
-
-  if (plan !== 'pro') {
-    const now = new Date()
-    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
-    const { count, error: countError } = await supabase
-      .from('wishlist_items')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .in('source_platform', IMPORT_PLATFORMS)
-      .gte('created_at', monthStart)
-
-    // Fail open on count errors — never block imports because of a bad query.
-    if (!countError && (count ?? 0) >= FREE_MONTHLY_IMPORTS) {
-      return NextResponse.json(
-        {
-          error: 'Free plan includes 10 link imports per month — upgrade to Pro for unlimited',
-          code: 'UPGRADE_REQUIRED',
-          upgradeUrl: '/pro',
-        },
-        { status: 402 }
-      )
-    }
-  }
 
   let body: { url?: string }
   try {
@@ -115,6 +70,52 @@ export async function POST(request: NextRequest) {
   }
 
   const platform = detectPlatform(rawUrl)
+
+  // Only AI-powered TikTok extraction is metered. Google Maps contains
+  // structured place data and stays available to every plan.
+  if (platform === 'tiktok') {
+    const { data: planRow, error: planError } = await supabase
+      .from('users')
+      .select('plan')
+      .eq('id', user.id)
+      .single()
+
+    // Tolerate the plan column not existing yet (migration 69 not applied):
+    // Postgres 42703 = undefined_column → treat the user as free. Likewise
+    // 42501 = permission denied if migration 76's column-level grants are in
+    // place without `plan` in the allowlist — same free-plan degradation.
+    const plan = planError ? 'free' : (planRow?.plan ?? 'free')
+    if (planError && planError.code !== '42703') {
+      log.warn('Could not read user plan, treating as free', {
+        component: 'SavedPlacesExtract',
+        action: 'plan-check',
+        userId: user.id,
+      })
+    }
+
+    if (plan !== 'pro') {
+      const now = new Date()
+      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
+      const { count, error: countError } = await supabase
+        .from('wishlist_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('source_platform', 'tiktok')
+        .gte('created_at', monthStart)
+
+      // Fail open on count errors — never block imports because of a bad query.
+      if (!countError && (count ?? 0) >= FREE_MONTHLY_IMPORTS) {
+        return NextResponse.json(
+          {
+            error: 'Free plan includes 10 TikTok imports per month — upgrade to Pro for unlimited',
+            code: 'UPGRADE_REQUIRED',
+            upgradeUrl: '/pro',
+          },
+          { status: 402 }
+        )
+      }
+    }
+  }
 
   try {
     if (platform === 'google_maps') {

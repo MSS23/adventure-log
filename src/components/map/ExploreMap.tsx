@@ -5,11 +5,10 @@
  * with ssr:false because Leaflet reads window at module scope.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   MapContainer,
   Marker,
-  Polyline,
   Popup,
   TileLayer,
   ZoomControl,
@@ -20,15 +19,11 @@ import 'leaflet/dist/leaflet.css'
 import Link from 'next/link'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { safeHttpUrl } from '@/lib/utils/input-validation'
-import { buildMapRouteSegments } from './map-routes'
 import { LAYER_META, type ExploreMapPin, type FlyTarget, type MapLayerKind } from './map-layers'
 
 const markerGlyphs: Record<MapLayerKind, string> = {
-  been: '<path d="M15 12v15M16 13h10l-2.6 3.5L26 20H16"/>',
   friends:
     '<circle cx="18" cy="16" r="3.2"/><circle cx="26" cy="17" r="2.5"/><path d="M12.5 26c.7-3.4 2.6-5.2 5.5-5.2s4.8 1.8 5.5 5.2M23.5 22.5c3.1-.5 5 .8 5.8 3.5"/>',
-  trips:
-    '<circle cx="15" cy="15" r="2.2"/><circle cx="27" cy="25" r="2.2"/><path d="M17.2 15h3.3c4.3 0 6.5 2 6.5 5.8V23"/>',
   wishlist: '<path d="m22 11.5 3.1 6.2 6.9 1-5 4.8 1.2 6.8-6.2-3.2-6.2 3.2 1.2-6.8-5-4.8 6.9-1z"/>',
   recs:
     '<path d="M13 13.5h18v12H21l-5.5 4v-4H13z"/><path d="M22 22s-4.2-2.3-4.2-5.1c0-2.2 2.8-2.8 4.2-.8 1.4-2 4.2-1.4 4.2.8C26.2 19.7 22 22 22 22z"/>',
@@ -122,7 +117,6 @@ export interface ExploreMapProps {
 export default function ExploreMap({ pins, me, flyTarget, loading = false }: ExploreMapProps) {
   const reduceMotion = useReducedMotion()
   const [selectedPin, setSelectedPin] = useState<string | null>(null)
-  const routeSegments = useMemo(() => buildMapRouteSegments(pins), [pins])
 
   return (
     <div className="adventure-map-shell relative h-full w-full overflow-hidden rounded-[24px] border border-stone-200/80 bg-[#E8EBE5] shadow-[0_18px_50px_-28px_rgba(28,25,23,0.45)] dark:border-white/10 dark:bg-stone-900">
@@ -144,27 +138,6 @@ export default function ExploreMap({ pins, me, flyTarget, loading = false }: Exp
         <ZoomControl position="bottomright" />
         <FitToPinsOnce pins={pins} />
         <FlyTo reduceMotion={reduceMotion} target={flyTarget} />
-
-        {routeSegments.map((segment) => {
-          const isPlanned = segment.kind === 'trips'
-          const color = LAYER_META[segment.kind].color
-          return (
-            <Polyline
-              key={segment.id}
-              interactive={false}
-              pathOptions={{
-                color,
-                dashArray: isPlanned ? '2 10' : undefined,
-                dashOffset: isPlanned ? '1' : undefined,
-                lineCap: 'round',
-                lineJoin: 'round',
-                opacity: isPlanned ? 0.78 : 0.66,
-                weight: isPlanned ? 3.5 : 3,
-              }}
-              positions={segment.positions}
-            />
-          )
-        })}
 
         {pins.map((pin) => {
           const markerKey = `${pin.kind}-${pin.id}`

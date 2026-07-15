@@ -1,24 +1,14 @@
 'use client'
 
-/**
- * SaveFromLinkCard — paste a TikTok / Google Maps / Instagram link, let AI
- * extract the place(s), review them, and save straight into the wishlist.
- *
- * This is the surviving half of the old SavedPlacesSection: the board that
- * used to render alongside it is gone — saved places ARE wishlist items now
- * (migration 67), so confirmed places land in the same grid as everything
- * else.
- */
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Link2, Loader2, MapPinned, Plus, Sparkles, Video } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Link2, Loader2, Sparkles, Plus } from 'lucide-react'
-import { toast } from 'sonner'
 import { apiFetch } from '@/lib/api/client'
 import { features } from '@/lib/config/features'
-import type { ExtractResult, AddPlaceParams } from '@/lib/links/place-types'
+import type { AddPlaceParams, ExtractResult } from '@/lib/links/place-types'
 import { ReviewPlacesModal } from './ReviewPlacesModal'
 
 const MANUAL_RESULT: ExtractResult = {
@@ -33,7 +23,6 @@ const MANUAL_RESULT: ExtractResult = {
 }
 
 interface SaveFromLinkCardProps {
-  /** Persist a confirmed place (wired to useWishlist().addItem). */
   onSave: (params: AddPlaceParams) => Promise<void>
 }
 
@@ -51,29 +40,30 @@ export function SaveFromLinkCard({ onSave }: SaveFromLinkCardProps) {
       toast.error('Paste a full link starting with http')
       return
     }
+
     setExtracting(true)
     try {
-      const res = await apiFetch('/api/wishlist/extract', {
+      const response = await apiFetch('/api/wishlist/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
       })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        // Pro gate: free plan is limited to 10 AI link imports per month.
-        if (res.status === 402 && err.code === 'UPGRADE_REQUIRED') {
-          toast.error(err.error || 'Upgrade to Pro for unlimited link imports', {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        if (response.status === 402 && errorData.code === 'UPGRADE_REQUIRED') {
+          toast.error(errorData.error || 'Upgrade to Pro for unlimited link imports', {
             action: {
               label: 'See Pro',
-              onClick: () => router.push(err.upgradeUrl || '/pro'),
+              onClick: () => router.push(errorData.upgradeUrl || '/pro'),
             },
             duration: 8000,
           })
           return
         }
-        throw new Error(err.error || 'Could not read that link')
+        throw new Error(errorData.error || 'Could not read that link')
       }
-      const result: ExtractResult = await res.json()
+
+      const result: ExtractResult = await response.json()
       setReviewResult(result)
       setReviewOpen(true)
       setLinkUrl('')
@@ -91,61 +81,71 @@ export function SaveFromLinkCard({ onSave }: SaveFromLinkCardProps) {
 
   return (
     <>
-      <div className="rounded-2xl border border-border bg-card p-4 sm:p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="h-4 w-4 text-[color:var(--color-coral)]" />
-          <h3 className="font-heading text-base font-semibold text-foreground">
-            Save a place from a link
-          </h3>
-          {!features.aiLinkExtract && (
-            <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-              Coming soon
+      <section className="relative overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-resting)] sm:p-6">
+        <div aria-hidden className="absolute -right-12 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="mb-1 flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-[color:var(--color-coral)]/10 text-[color:var(--color-coral)]">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                <h2 className="font-heading text-lg font-semibold text-foreground">Turn a link into a place</h2>
+              </div>
+              <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                Google Maps pins directly. TikTok uses AI to identify the place, then asks you to confirm it.
+              </p>
+            </div>
+            {!features.aiLinkExtract && (
+              <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">Coming soon</span>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2" aria-label="Supported links">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+              <MapPinned className="h-3.5 w-3.5 text-primary" /> Google Maps · instant
             </span>
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground mb-3">
-          {features.aiLinkExtract ? (
-            <>Paste a TikTok or Google Maps link — AI reads it and works out the place, then you
-            confirm before it&apos;s added to your wishlist. Do check the details.</>
-          ) : (
-            <>AI link import is coming soon — paste a TikTok or Google Maps link and it&apos;ll
-            work out the place for you. Until then, add places with the search below.</>
-          )}
-        </p>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handlePaste()
-                }
-              }}
-              placeholder="https://www.tiktok.com/@user/video/…  or  maps.app.goo.gl/…"
-              className="pl-9"
-              disabled={!features.aiLinkExtract}
-            />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+              <Video className="h-3.5 w-3.5 text-[color:var(--color-coral)]" /> TikTok · AI assisted
+            </span>
           </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={handlePaste}
-              disabled={!features.aiLinkExtract || extracting || !linkUrl.trim()}
-              variant="coral"
-              className="gap-2 shrink-0"
-            >
-              {extracting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {extracting ? 'Reading…' : 'Find place'}
-            </Button>
-            <Button onClick={openManual} variant="secondary" className="gap-2 shrink-0">
-              <Plus className="h-4 w-4" />
-              {features.aiLinkExtract ? 'Manual' : 'Add a place'}
-            </Button>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative flex-1">
+              <Link2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={linkUrl}
+                onChange={(event) => setLinkUrl(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                    handlePaste()
+                  }
+                }}
+                placeholder="Paste a TikTok or Google Maps link"
+                className="h-12 rounded-2xl pl-11"
+                disabled={!features.aiLinkExtract}
+                aria-label="TikTok or Google Maps link"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handlePaste}
+                disabled={!features.aiLinkExtract || extracting || !linkUrl.trim()}
+                variant="coral"
+                className="h-12 shrink-0 gap-2 rounded-2xl px-5"
+              >
+                {extracting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {extracting ? 'Reading…' : 'Find place'}
+              </Button>
+              <Button onClick={openManual} variant="secondary" className="h-12 shrink-0 gap-2 rounded-2xl px-4">
+                <Plus className="h-4 w-4" />
+                {features.aiLinkExtract ? 'Manual' : 'Add a place'}
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <ReviewPlacesModal
         result={reviewResult}

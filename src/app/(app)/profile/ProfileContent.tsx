@@ -15,6 +15,8 @@ import {
   Map as MapIcon,
   Users as UsersIcon,
   UserPlus,
+  ArrowUpRight,
+  Compass,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Album, User } from '@/types/database'
@@ -24,6 +26,7 @@ import { ProfileAlbumGrid } from '@/components/profile/ProfileAlbumGrid'
 import { InviteFriendsDialog } from '@/components/share/InviteFriendsDialog'
 import { AlbumGridShimmer } from '@/components/ui/shimmer-skeleton'
 import { cn } from '@/lib/utils'
+import { getCountryName, getFlagEmoji } from '@/lib/utils/country'
 
 type TabType = 'albums' | 'badges'
 
@@ -63,12 +66,19 @@ export default function ProfileContent({
   const [loading, setLoading] = useState(initialAlbums.length === 0)
   const [activeTab, setActiveTab] = useState<TabType>('albums')
   const [followStats, setFollowStats] = useState(initialFollowStats)
-  const [, setCountryCodes] = useState<string[]>(initialCountryCodes)
   const [travelStats, setTravelStats] = useState(initialTravelStats)
   const [showInvite, setShowInvite] = useState(false)
   const [referralCount, setReferralCount] = useState(0)
   const fetchingRef = useRef(false)
   const supabase = createClient()
+  const countryCodes = [
+    ...new Set([
+      ...initialCountryCodes.map((code) => code.toUpperCase()),
+      ...albums
+        .filter((album) => album.country_code)
+        .map((album) => (album.country_code as string).toUpperCase()),
+    ]),
+  ]
 
   // "Friends joined from your shares" — count of users whose referred_by is
   // this user (stamped by claim_referral, migration 71). SECURITY DEFINER
@@ -121,10 +131,15 @@ export default function ProfileContent({
         followingCount: followingResult.count || 0,
       })
 
-      const codes = [...new Set(publishedAlbums.filter(a => a.country_code).map(a => a.country_code as string))]
+      const codes = [
+        ...new Set(
+          publishedAlbums
+            .filter(a => a.country_code)
+            .map(a => (a.country_code as string).toUpperCase())
+        ),
+      ]
       const uniqueCities = new Set(publishedAlbums.filter(a => a.location_name).map(a => a.location_name?.split(',')[0]?.trim()))
 
-      setCountryCodes(codes)
       setTravelStats({ countries: codes.length, cities: uniqueCities.size, photos: totalPhotos })
     } catch (err) {
       // Supabase errors are plain objects — String(err) yields "[object Object]",
@@ -166,20 +181,49 @@ export default function ProfileContent({
       {/* Single section stack — consistent 32px rhythm, inherits app-shell padding */}
       <div className="mt-8 px-4 sm:px-6 space-y-8">
         {/* Travel snapshot — 3 calm stat tiles */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-border bg-card p-5 text-center shadow-[var(--shadow-resting)]">
-            <p className="al-eyebrow">Countries</p>
-            <p className="al-stat-value text-2xl sm:text-3xl mt-1">{travelStats.countries}</p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-5 text-center shadow-[var(--shadow-resting)]">
-            <p className="al-eyebrow">Cities</p>
-            <p className="al-stat-value text-2xl sm:text-3xl mt-1">{travelStats.cities}</p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-5 text-center shadow-[var(--shadow-resting)]">
-            <p className="al-eyebrow">Albums</p>
-            <p className="al-stat-value text-2xl sm:text-3xl mt-1">{albums.length}</p>
-          </div>
+        <div className="grid grid-cols-3 overflow-hidden rounded-3xl border border-border bg-card shadow-[var(--shadow-resting)]">
+          {[
+            { label: 'Countries', value: travelStats.countries },
+            { label: 'Cities', value: travelStats.cities },
+            { label: 'Albums', value: albums.length },
+          ].map((stat, index) => (
+            <div key={stat.label} className={cn('px-2 py-5 text-center sm:p-6', index > 0 && 'border-l border-border')}>
+              <p className="al-stat-value text-2xl sm:text-3xl">{stat.value}</p>
+              <p className="al-eyebrow mt-1 text-[9px] sm:text-[10px]">{stat.label}</p>
+            </div>
+          ))}
         </div>
+
+        {countryCodes.length > 0 && (
+          <section aria-labelledby="visited-countries-heading">
+            <div className="mb-3 flex items-end justify-between gap-3">
+              <div>
+                <p id="visited-countries-heading" className="al-eyebrow flex items-center gap-1.5">
+                  <Compass className="h-3.5 w-3.5 text-primary" aria-hidden />
+                  Visited countries
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  One pin for every country in your travel history.
+                </p>
+              </div>
+              <span className="rounded-full bg-muted px-2.5 py-1 font-mono text-[10px] tracking-wider text-muted-foreground">
+                {countryCodes.length} total
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {countryCodes.map((code) => (
+                <span
+                  key={code}
+                  title={getCountryName(code)}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-card px-3 text-sm font-semibold text-foreground shadow-[var(--shadow-resting)]"
+                >
+                  <span className="text-lg leading-none" aria-hidden>{getFlagEmoji(code)}</span>
+                  <span>{getCountryName(code)}</span>
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Quiet referral stat — only shows once at least one share converted */}
         {referralCount > 0 && (
@@ -208,26 +252,36 @@ export default function ProfileContent({
         </div>
 
         {/* Secondary tools — quiet, grouped, still one tap away */}
-        <div className="flex flex-wrap gap-2">
-          <QuietLink href="/wishlist" icon={<Star className="h-3.5 w-3.5" />} label="Wishlist" />
-          <QuietLink href="/saved" icon={<Bookmark className="h-3.5 w-3.5" />} label="Saved" />
-          <QuietLink href="/trips" icon={<MapIcon className="h-3.5 w-3.5" />} label="Trips" />
-          <QuietLink href="/analytics" icon={<BarChart3 className="h-3.5 w-3.5" />} label="Analytics" />
-          <QuietLink href="/travel-twins" icon={<UsersIcon className="h-3.5 w-3.5" />} label="Travel Twins" />
-          <button
-            type="button"
-            onClick={() => setShowInvite(true)}
-            className="group inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground cursor-pointer shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:bg-muted hover:text-foreground hover:shadow-[var(--shadow-hover)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            <span className="transition-colors duration-200 group-hover:text-primary">
-              <UserPlus className="h-3.5 w-3.5" />
-            </span>
-            Invite friends
-          </button>
-        </div>
+        <section>
+          <div className="mb-3">
+            <p className="al-eyebrow">Travel toolkit</p>
+            <p className="mt-1 text-xs text-muted-foreground">Plan, revisit, and compare your world.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <ProfileToolLink href="/wishlist" icon={<Star className="h-4 w-4" />} label="Wishlist" hint="Places you want to go" />
+            <ProfileToolLink href="/saved" icon={<Bookmark className="h-4 w-4" />} label="Saved" hint="Albums worth returning to" />
+            <ProfileToolLink href="/trips" icon={<MapIcon className="h-4 w-4" />} label="Trips" hint="Plan together with friends" />
+            <ProfileToolLink href="/analytics" icon={<BarChart3 className="h-4 w-4" />} label="Analytics" hint="See your travel patterns" />
+            <ProfileToolLink href="/travel-twins" icon={<UsersIcon className="h-4 w-4" />} label="Travel Twins" hint="Find people with your footprint" />
+            <button
+              type="button"
+              onClick={() => setShowInvite(true)}
+              className="group flex min-h-[64px] items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-left shadow-[var(--shadow-resting)] transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[var(--shadow-hover)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                <UserPlus className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-foreground">Invite friends</span>
+                <span className="mt-0.5 block truncate text-xs text-muted-foreground">Build your travel circle</span>
+              </span>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+            </button>
+          </div>
+        </section>
 
         {/* Simple tab pair — Adventures / Badges */}
-        <div role="tablist" aria-label="Profile sections" className="flex gap-1 border-b border-border">
+        <div role="tablist" aria-label="Profile sections" className="grid grid-cols-2 rounded-2xl border border-border bg-muted/55 p-1">
           {tabs.map((tab) => (
             <button
               type="button"
@@ -236,24 +290,17 @@ export default function ProfileContent({
               aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'relative px-5 py-3 text-sm font-medium cursor-pointer transition-colors duration-200',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-t-xl',
+                'relative min-h-11 rounded-xl px-5 py-2.5 text-sm font-medium cursor-pointer transition-all duration-200',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 activeTab === tab.id
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-card/50 hover:text-foreground'
               )}
             >
               <span className="inline-flex items-center gap-2">
                 <tab.icon className="h-3.5 w-3.5" />
                 {tab.label}
               </span>
-              {activeTab === tab.id && (
-                <motion.div
-                  layoutId="profileTab"
-                  className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-primary"
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                />
-              )}
             </button>
           ))}
         </div>
@@ -273,9 +320,7 @@ export default function ProfileContent({
               ) : activeTab === 'albums' ? (
                 <ProfileAlbumGrid albums={albums} isOwnProfile={true} />
               ) : activeTab === 'badges' && userId ? (
-                <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-resting)]">
-                  <AchievementsBadges userId={userId} showAll />
-                </div>
+                <AchievementsBadges userId={userId} showAll />
               ) : null}
             </motion.div>
           </AnimatePresence>
@@ -321,24 +366,30 @@ function FeatureTile({
 }
 
 /** Secondary tool — quiet pill, grouped below the primary pair. */
-function QuietLink({
+function ProfileToolLink({
   href,
   icon,
   label,
+  hint,
 }: {
   href: string
   icon: React.ReactNode
   label: string
+  hint: string
 }) {
   return (
     <Link
       href={href}
-      className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-muted-foreground cursor-pointer shadow-[var(--shadow-resting)] transition-all duration-200 ease-out hover:bg-muted hover:text-foreground hover:shadow-[var(--shadow-hover)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="group flex min-h-[64px] items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-[var(--shadow-resting)] transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-[var(--shadow-hover)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <span className="transition-colors duration-200 group-hover:text-primary">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
         {icon}
       </span>
-      {label}
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-foreground">{label}</span>
+        <span className="mt-0.5 block truncate text-xs text-muted-foreground">{hint}</span>
+      </span>
+      <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
     </Link>
   )
 }

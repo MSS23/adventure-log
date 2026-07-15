@@ -42,10 +42,10 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
   // Wishlist pins are a compact marker (not a full photo pin), so they get a
   // smaller dedicated size rather than the 50px album-pin minimum.
   const pinSize = data.isWishlist || data.isHome
-    ? Math.max(data.size * 14, 28)
+    ? Math.max(data.size * 11, 24)
     : data.isCheap
-      ? Math.max(data.size * 14, 28)
-      : Math.max(data.size * 24, 50)
+      ? Math.max(data.size * 10, 22)
+      : Math.max(data.size * 18, data.isActive ? 42 : 38)
 
   el.style.cssText = `
     position: relative;
@@ -69,11 +69,11 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
       <div class="globe-pin globe-wishlist-pin" style="
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle at 30% 30%, rgba(252, 211, 77, 0.55) 0%, rgba(217, 119, 6, 0.35) 70%, rgba(120, 53, 15, 0.25) 100%);
-        border: 2px dashed rgba(251, 191, 36, 0.95);
+        background: rgba(245, 158, 11, 0.88);
+        border: 1.5px dashed rgba(255, 255, 255, 0.92);
         border-radius: 50%;
         opacity: ${data.opacity};
-        box-shadow: 0 0 14px rgba(251, 191, 36, 0.45), 0 4px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16), 0 4px 12px rgba(0,0,0,0.34);
         cursor: pointer;
         position: relative;
         display: flex;
@@ -82,7 +82,7 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
         pointer-events: auto;
         will-change: transform;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        animation: pulse-wishlist 2.6s ease-in-out infinite;
+        animation: pulse-wishlist 3.2s ease-in-out infinite;
       ">
         <svg width="${Math.max(pinSize * 0.5, 13)}" height="${Math.max(pinSize * 0.5, 13)}" viewBox="0 0 24 24" fill="rgba(254, 243, 199, 0.95)" stroke="rgba(180, 83, 9, 0.9)" stroke-width="1.4" stroke-linejoin="round" style="pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -92,23 +92,24 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
           left: 50%;
           top: calc(100% + 6px);
           transform: translateX(-50%);
-          background: rgba(15, 15, 15, 0.85);
-          color: #fde68a;
+          background: rgba(17, 24, 39, 0.94);
+          color: #fff7df;
           font-size: 11px;
           font-weight: 600;
-          padding: 3px 8px;
-          border-radius: 6px;
+          padding: 5px 9px;
+          border-radius: 9px;
           white-space: nowrap;
           pointer-events: none;
           opacity: 0;
           transition: opacity 0.18s ease;
-          border: 1px solid rgba(251, 191, 36, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          box-shadow: 0 10px 28px rgba(0,0,0,0.3);
         ">${labelText}</div>
       </div>
       <style>
         @keyframes pulse-wishlist {
           0%, 100% { transform: scale(1); }
-          50%      { transform: scale(1.07); }
+          50%      { transform: scale(1.04); }
         }
       </style>
     `
@@ -130,8 +131,8 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
       const pin = el.querySelector('.globe-wishlist-pin') as HTMLElement | null
       const label = el.querySelector('.wishlist-pin-label') as HTMLElement | null
       if (pin) {
-        pin.style.transform = 'scale(1.18)'
-        pin.style.boxShadow = '0 0 22px rgba(251, 191, 36, 0.7), 0 6px 16px rgba(0,0,0,0.4)'
+        pin.style.transform = 'scale(1.1)'
+        pin.style.boxShadow = '0 0 0 4px rgba(245, 158, 11, 0.2), 0 8px 20px rgba(0,0,0,0.4)'
       }
       if (label) label.style.opacity = '1'
     })
@@ -141,7 +142,7 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
       const label = el.querySelector('.wishlist-pin-label') as HTMLElement | null
       if (pin) {
         pin.style.transform = 'scale(1)'
-        pin.style.boxShadow = '0 0 14px rgba(251, 191, 36, 0.45), 0 4px 10px rgba(0,0,0,0.3)'
+        pin.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.16), 0 4px 12px rgba(0,0,0,0.34)'
       }
       if (label) label.style.opacity = '0'
     })
@@ -161,18 +162,18 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
       <div class="globe-pin globe-home-pin" style="
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle at 30% 30%, rgba(253, 230, 138, 0.95) 0%, rgba(245, 158, 11, 0.9) 60%, rgba(180, 83, 9, 0.85) 100%);
-        border: 2.5px solid white;
+        background: linear-gradient(145deg, #f6c76f 0%, #d88924 100%);
+        border: 1.5px solid rgba(255,255,255,0.95);
         border-radius: 50%;
         opacity: ${data.opacity};
-        box-shadow: 0 0 16px rgba(245, 158, 11, 0.6), 0 4px 12px rgba(0,0,0,0.4);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18), 0 5px 15px rgba(0,0,0,0.38);
         position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
         pointer-events: auto;
       ">
-        <svg width="${Math.max(pinSize * 0.5, 16)}" height="${Math.max(pinSize * 0.5, 16)}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));">
+        <svg width="${Math.max(pinSize * 0.48, 14)}" height="${Math.max(pinSize * 0.48, 14)}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));">
           <path d="M3 10.5 12 3l9 7.5" />
           <path d="M5 9.5V21h14V9.5" />
           <path d="M9 21v-6h6v6" />
@@ -182,17 +183,18 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
           left: 50%;
           top: calc(100% + 6px);
           transform: translateX(-50%);
-          background: rgba(15, 15, 15, 0.85);
-          color: #fde68a;
+          background: rgba(17, 24, 39, 0.94);
+          color: #fff7df;
           font-size: 11px;
           font-weight: 600;
-          padding: 3px 8px;
-          border-radius: 6px;
+          padding: 5px 9px;
+          border-radius: 9px;
           white-space: nowrap;
           pointer-events: none;
           opacity: 0;
           transition: opacity 0.18s ease;
-          border: 1px solid rgba(245, 158, 11, 0.4);
+          border: 1px solid rgba(255,255,255,0.12);
+          box-shadow: 0 10px 28px rgba(0,0,0,0.3);
         ">${labelText}</div>
       </div>
     `
@@ -219,10 +221,10 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
         width: 100%;
         height: 100%;
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border: 3px solid white;
+        border: 2px solid white;
         border-radius: 50%;
         opacity: ${data.opacity};
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 4px 12px rgba(0,0,0,0.4);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2), 0 4px 12px rgba(0,0,0,0.38);
         cursor: default;
         position: relative;
         display: flex;
@@ -232,7 +234,7 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
         will-change: transform;
         animation: pulse-current-location 2s infinite;
       ">
-        <svg width="${Math.max(pinSize * 0.5, 28)}" height="${Math.max(pinSize * 0.5, 28)}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+        <svg width="${Math.max(pinSize * 0.46, 14)}" height="${Math.max(pinSize * 0.46, 14)}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
           <polygon points="3 11 22 2 13 21 11 13 3 11" />
         </svg>
         <div style="
@@ -307,10 +309,10 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
         width: 100%;
         height: 100%;
         background: ${pinColor};
-        border: ${data.isActive ? '3px' : '2px'} solid white;
+        border: ${data.isActive ? '2px' : '1.5px'} solid rgba(255,255,255,0.96);
         border-radius: 50%;
         opacity: ${data.opacity};
-        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        box-shadow: 0 0 0 3px ${data.isActive ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)'}, 0 5px 14px rgba(0,0,0,0.38);
         cursor: pointer;
         position: relative;
         display: flex;
@@ -320,27 +322,27 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
         will-change: transform;
         transition: transform 0.2s ease, box-shadow 0.2s ease, border-width 0.2s ease;
       ">
-        <div style="
-          font-size: ${Math.max(pinSize * 0.35, 26)}px;
-          pointer-events: none;
-        ">📍</div>
+        <svg width="${Math.max(pinSize * 0.46, 17)}" height="${Math.max(pinSize * 0.46, 17)}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.24));">
+          <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+          <circle cx="12" cy="10" r="2.5" />
+        </svg>
 
         ${data.isMultiCity ? `
           <div style="
             position: absolute;
-            top: -6px;
-            right: -6px;
+            top: -5px;
+            right: -5px;
             background: #f59e0b;
             color: white;
             border-radius: 50%;
-            width: ${Math.max(pinSize * 0.3, 20)}px;
-            height: ${Math.max(pinSize * 0.3, 20)}px;
+            width: ${Math.max(pinSize * 0.28, 18)}px;
+            height: ${Math.max(pinSize * 0.28, 18)}px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: ${Math.max(pinSize * 0.16, 11)}px;
+            font-size: ${Math.max(pinSize * 0.15, 10)}px;
             font-weight: 700;
-            border: 2px solid white;
+            border: 1.5px solid white;
             pointer-events: none;
           ">${escapeHtml(String(clusterCount))}</div>
         ` : ''}
@@ -349,140 +351,186 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
   }
 
   // Click handling
+  const activatePin = () => {
+    const pinData = data as GlobeHtmlElement
+    if (pinData && pinData.cluster) {
+      deps.cityPinSystem.handlePinClick(pinData)
+    } else {
+      const city = deps.cityPins.find(c =>
+        Math.abs(c.latitude - pinData.lat) < 0.001 &&
+        Math.abs(c.longitude - pinData.lng) < 0.001
+      )
+      if (city) {
+        deps.handleCityClick(city)
+      }
+    }
+  }
+
   const handleClick = (event: Event) => {
     if (event.target && (event.target as HTMLElement).closest('.globe-pin')) {
       event.preventDefault()
       event.stopPropagation()
-
-      const pinData = data as GlobeHtmlElement
-      if (pinData && pinData.cluster) {
-        deps.cityPinSystem.handlePinClick(pinData)
-      } else {
-        const city = deps.cityPins.find(c =>
-          Math.abs(c.latitude - pinData.lat) < 0.001 &&
-          Math.abs(c.longitude - pinData.lng) < 0.001
-        )
-        if (city) {
-          deps.handleCityClick(city)
-        }
-      }
+      activatePin()
     }
   }
 
   el.addEventListener('click', handleClick)
   el.addEventListener('touchend', handleClick)
 
-  // Enhanced hover effects with photo preview
-  el.addEventListener('mouseenter', () => {
+  const accessibleLabel = data.cluster ? formatPinTooltip(data.cluster) : data.label
+  el.setAttribute('role', 'button')
+  el.setAttribute('tabindex', '0')
+  el.setAttribute('aria-label', accessibleLabel.replace(/\n/g, '. '))
+  el.addEventListener('keydown', (event) => {
+    const keyboardEvent = event as KeyboardEvent
+    if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+      keyboardEvent.preventDefault()
+      activatePin()
+    }
+  })
+
+  const tooltipId = `globe-tooltip-${data.cluster?.id || `${data.lat}-${data.lng}`}`
+
+  const showPreview = () => {
     el.style.zIndex = '1000'
     const pinElement = el.querySelector('.globe-pin') as HTMLElement
     if (pinElement) {
-      pinElement.style.transform = 'scale(1.3)'
-      pinElement.style.boxShadow = `
-        0 10px 40px rgba(0,0,0,0.4),
-        0 5px 20px ${data.isActive ? '#D97706aa' : `${yearColor}aa`},
-        inset 0 -3px 8px rgba(0,0,0,0.2),
-        inset 0 3px 8px rgba(255,255,255,0.5)
-      `
-      pinElement.style.borderWidth = '4px'
+      pinElement.style.transform = 'scale(1.12)'
+      pinElement.style.boxShadow = `0 0 0 4px ${data.isActive ? 'rgba(245,158,11,0.22)' : `${yearColor}33`}, 0 10px 24px rgba(0,0,0,0.46)`
+      pinElement.style.borderWidth = '2px'
     }
 
-    const tooltipId = `globe-tooltip-${data.cluster?.id}`
     const existingTooltip = document.getElementById(tooltipId)
     if (existingTooltip) {
       existingTooltip.remove()
     }
 
     const city = data.cluster?.cities[0]
-    if (data.cluster && city && (city.coverPhotoUrl || city.favoritePhotoUrls?.length)) {
+    if (data.cluster && city) {
       const photoUrl = city.coverPhotoUrl || city.favoritePhotoUrls?.[0]
-      if (photoUrl) {
-        const rect = el.getBoundingClientRect()
+      const rect = el.getBoundingClientRect()
+      const tooltipWidth = 184
+      const halfWidth = tooltipWidth / 2
+      const left = Math.min(
+        window.innerWidth - halfWidth - 12,
+        Math.max(halfWidth + 12, rect.left + rect.width / 2)
+      )
+      const opensBelow = rect.top < (photoUrl ? 190 : 110)
+      const verticalPosition = opensBelow
+        ? `top: ${rect.bottom + 12}px;`
+        : `bottom: ${window.innerHeight - rect.top + 12}px;`
+      const eyebrow = data.cluster.cities.length > 1
+        ? `${data.cluster.cities.length} nearby places`
+        : `Visited ${new Date(city.visitDate).getFullYear()}`
 
-        const tooltip = document.createElement('div')
-        tooltip.id = tooltipId
-        tooltip.className = 'photo-preview-tooltip'
-        tooltip.innerHTML = `
-          <div style="
-            position: fixed;
-            left: ${rect.left + rect.width / 2}px;
-            bottom: ${window.innerHeight - rect.top + 15}px;
-            transform: translateX(-50%);
-            background: white;
-            border-radius: 16px;
-            padding: 6px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-            border: 3px solid ${data.isActive ? '#D97706' : '#ef4444'};
-            z-index: 9999;
-            pointer-events: none;
-            opacity: 0;
-            transition: all 0.25s ease;
-          ">
-            <img src="${escapeAttr(photoUrl)}" alt="${escapeAttr(city.name)}" style="
-              width: 140px;
-              height: 90px;
-              object-fit: cover;
-              border-radius: 12px;
-              display: block;
-            " />
+      const tooltip = document.createElement('div')
+      tooltip.id = tooltipId
+      tooltip.className = 'photo-preview-tooltip'
+      tooltip.innerHTML = `
+        <div style="
+          position: fixed;
+          left: ${left}px;
+          ${verticalPosition}
+          width: ${tooltipWidth}px;
+          transform: translateX(-50%) translateY(${opensBelow ? '-4px' : '4px'});
+          background: rgba(17, 24, 39, 0.96);
+          border-radius: 15px;
+          padding: 6px;
+          box-shadow: 0 18px 48px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.12);
+          z-index: 9999;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 160ms ease, transform 160ms ease;
+        ">
+          ${photoUrl ? `<img src="${escapeAttr(photoUrl)}" alt="" style="
+            width: 172px;
+            height: 104px;
+            object-fit: cover;
+            border-radius: 11px;
+            display: block;
+          " />` : ''}
+          <div style="padding: ${photoUrl ? '9px 8px 7px' : '8px'};">
             <div style="
-              text-align: center;
-              margin-top: 8px;
-              padding: 0 4px;
-              font-size: 12px;
+              color: rgba(255,255,255,0.58);
+              font-size: 9px;
               font-weight: 700;
-              color: #1f2937;
-              max-width: 140px;
+              letter-spacing: 0.12em;
+              text-transform: uppercase;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            ">${escapeHtml(eyebrow)}</div>
+            <div style="
+              margin-top: 3px;
+              color: white;
+              font-size: 13px;
+              line-height: 1.25;
+              font-weight: 700;
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
             ">${escapeHtml(city.name)}</div>
             <div style="
-              text-align: center;
-              font-size: 11px;
-              color: #6b7280;
-              margin-top: 3px;
+              display: flex;
+              align-items: center;
+              gap: 7px;
+              margin-top: 6px;
+              color: rgba(255,255,255,0.66);
+              font-size: 10px;
               font-weight: 600;
-            ">${escapeHtml(String(data.cluster?.totalPhotos || 0))} photo${data.cluster?.totalPhotos === 1 ? '' : 's'}</div>
+            ">
+              <span>${escapeHtml(String(data.cluster.totalAlbums))} album${data.cluster.totalAlbums === 1 ? '' : 's'}</span>
+              <span style="width:3px;height:3px;border-radius:50%;background:${data.isActive ? '#f59e0b' : yearColor};"></span>
+              <span>${escapeHtml(String(data.cluster.totalPhotos))} photo${data.cluster.totalPhotos === 1 ? '' : 's'}</span>
+            </div>
           </div>
-        `
-        document.body.appendChild(tooltip)
+        </div>
+      `
+      document.body.appendChild(tooltip)
 
-        requestAnimationFrame(() => {
-          const tooltipElement = tooltip.querySelector('div') as HTMLElement
-          if (tooltipElement) {
-            tooltipElement.style.opacity = '1'
-            tooltipElement.style.transform = 'translateX(-50%) translateY(-8px)'
-          }
-        })
-      }
+      requestAnimationFrame(() => {
+        const tooltipElement = tooltip.querySelector('div') as HTMLElement
+        if (tooltipElement) {
+          tooltipElement.style.opacity = '1'
+          tooltipElement.style.transform = 'translateX(-50%) translateY(0)'
+        }
+      })
     }
-  })
+  }
 
-  el.addEventListener('mouseleave', () => {
+  const hidePreview = () => {
     el.style.zIndex = String(data.isCurrentLocation ? 20 : 10)
     const pinElement = el.querySelector('.globe-pin') as HTMLElement
     if (pinElement) {
       pinElement.style.transform = 'scale(1)'
-      pinElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)'
-      pinElement.style.borderWidth = data.isActive ? '4px' : '3px'
+      pinElement.style.boxShadow = data.isCheap
+        ? '0 2px 8px rgba(0,0,0,0.45)'
+        : `0 0 0 3px ${data.isActive ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)'}, 0 5px 14px rgba(0,0,0,0.38)`
+      pinElement.style.borderWidth = data.isCheap
+        ? (data.isActive ? '2.5px' : '1.5px')
+        : (data.isActive ? '2px' : '1.5px')
     }
 
-    const tooltipId = `globe-tooltip-${data.cluster?.id}`
     const existingTooltip = document.getElementById(tooltipId)
     if (existingTooltip) {
       const tooltipElement = existingTooltip.querySelector('div') as HTMLElement
       if (tooltipElement) {
         tooltipElement.style.opacity = '0'
-        tooltipElement.style.transform = 'translateX(-50%) translateY(0)'
+        tooltipElement.style.transform = 'translateX(-50%) translateY(4px)'
         setTimeout(() => {
           existingTooltip.remove()
-        }, 250)
+        }, 170)
       } else {
         existingTooltip.remove()
       }
     }
-  })
+  }
+
+  el.addEventListener('mouseenter', showPreview)
+  el.addEventListener('mouseleave', hidePreview)
+  el.addEventListener('focus', showPreview)
+  el.addEventListener('blur', hidePreview)
 
   if (data.cluster) {
     el.title = formatPinTooltip(data.cluster)

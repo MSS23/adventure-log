@@ -7,11 +7,9 @@ import type { CapacitorConfig } from '@capacitor/cli';
 // Deep-link scheme for the native OAuth bridge (custom URL scheme + system
 // browser handshake). Google sign-in on native uses it: GoogleSignInButton
 // opens the provider URL via @capacitor/browser, Supabase redirects to
-// `${OAUTH_REDIRECT_SCHEME}://auth/callback`, and NativeAppShell's appUrlOpen
+// `com.adventurelog.app://auth/callback`, and NativeAppShell's appUrlOpen
 // listener exchanges the PKCE code (src/lib/auth/native-oauth.ts). The exact
 // callback URL must be allow-listed in Supabase Auth → Redirect URLs.
-const OAUTH_REDIRECT_SCHEME = 'com.adventurelog.app';
-
 // Hostnames the WebView is allowed to navigate to without leaving the app.
 // SSO providers (Google/Apple/Discord) need to be reachable for the OAuth
 // redirect; Supabase for queries/auth; Mapbox for the tile API.
@@ -64,20 +62,20 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true,
     },
     // The App plugin emits the `appUrlOpen` event whenever the OS hands a
-    // deep link to our app (scheme: OAUTH_REDIRECT_SCHEME, registered in
+    // deep link to our app (scheme: com.adventurelog.app, registered in
     // Info.plist / AndroidManifest.xml). NativeAppShell also uses it for the
     // Android hardware back button.
     App: {},
   },
   android: {
-    allowMixedContent: true,
+    // HTTP/mixed content is only needed for an explicitly configured local
+    // development server. Release WebViews remain HTTPS-only.
+    allowMixedContent: Boolean(process.env.DEV_SERVER_URL),
     captureInput: true,
     // Enable Chrome remote debugging of the WebView (chrome://inspect). The
-    // mobile bundle is compiled with NODE_ENV=production, so gating on
-    // 'development' left it permanently off and made on-device issues (e.g. a
-    // blank screen) impossible to inspect. Debug APKs are for debugging; a
-    // hardened release build should turn this back off.
-    webContentsDebuggingEnabled: true,
+    // The mobile bundle always uses NODE_ENV=production, so DEV_SERVER_URL is
+    // the reliable signal for a live-reload/debug build.
+    webContentsDebuggingEnabled: Boolean(process.env.DEV_SERVER_URL),
     // Light-only app — WebView background must match or rotation/keyboard
     // resizes flash dark.
     backgroundColor: '#F7F9FB',

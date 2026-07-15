@@ -29,16 +29,9 @@ import { formatDistanceKm } from '@/lib/utils/geoCalculations'
 import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
 import { FoundingExplorerBadge } from '@/components/profile/FoundingExplorerBadge'
 import { trackGrowthEvent } from '@/lib/utils/growth-events'
-import { parseLocalDate } from '@/lib/utils/travel-date'
+import { formatTravelDate } from '@/lib/utils/travel-date'
 import Image from 'next/image'
 import Link from 'next/link'
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return ''
-  const d = parseLocalDate(dateStr)
-  if (!d) return ''
-  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-}
 
 interface PublicAlbum {
   id: string
@@ -280,8 +273,11 @@ export function PublicProfileContent({
           >
             <h2 className="al-eyebrow mb-4 flex items-center gap-2">
               <Map className="h-4 w-4" />
-              Travel Globe
+              Travel Footprint
             </h2>
+            <p className="-mt-2 mb-3 text-xs text-muted-foreground">
+              Select a pin for an album, or tap the globe to explore their world.
+            </p>
             <ProfileGlobe
               username={user.username}
               targetUserId={user.id}
@@ -374,7 +370,10 @@ export function PublicProfileContent({
                           {album.date_start && (
                             <span className="text-xs text-muted-foreground font-mono tracking-wide flex items-center gap-1 flex-shrink-0">
                               <CalendarDays className="h-3 w-3" />
-                              {formatDate(album.date_start)}
+                              {formatTravelDate(album.date_start, {
+                                view: 'fuzzy',
+                                latitude: album.latitude ?? undefined,
+                              })}
                             </span>
                           )}
                         </div>

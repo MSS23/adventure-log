@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { MapPin, Users, Loader2, Calendar, ArrowRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getAvatarUrl } from '@/lib/utils/avatar'
-import { parseLocalDate } from '@/lib/utils/travel-date'
+import { formatTravelDateRange } from '@/lib/utils/travel-date'
 import type { Trip, TripMember, TripPin } from '@/types/trips'
 
 const TripMap = dynamic(() => import('@/components/trips/TripMap'), {
@@ -38,20 +38,7 @@ export default function PublicTripView({ trip, members, pins }: Props) {
   }, [members])
 
   const dateRange = useMemo(() => {
-    if (!trip.start_date) return null
-    const start = parseLocalDate(trip.start_date)?.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    })
-    if (!start) return null
-    if (!trip.end_date) return start
-    const end = parseLocalDate(trip.end_date)?.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-    if (!end) return start
-    return `${start} – ${end}`
+    return formatTravelDateRange(trip.start_date, trip.end_date, { view: 'fuzzy' }) || null
   }, [trip.start_date, trip.end_date])
 
   return (
@@ -81,12 +68,6 @@ export default function PublicTripView({ trip, members, pins }: Props) {
             <Users className="h-4 w-4" />
             {members.length} {members.length === 1 ? 'planner' : 'planners'}
           </span>
-          {trip.status === 'live' && (
-            <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium bg-destructive/10 text-destructive border border-destructive/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
-              LIVE NOW
-            </span>
-          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

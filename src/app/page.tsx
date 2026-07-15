@@ -90,8 +90,8 @@ const FEATURES = [
   },
   {
     icon: Users,
-    title: 'Collaborative Albums',
-    desc: 'Travel with friends? Everyone contributes their photos to the same album.',
+    title: 'Compare Your Globes',
+    desc: 'Connect passports, compare where you have both been, and discover the places only one of you knows.',
   },
   {
     icon: Share2,
@@ -269,8 +269,8 @@ export default function HomePage() {
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-stone-300 max-w-lg mx-auto leading-relaxed mb-10">
-              Turn your adventures into a living, interactive 3D globe.
-              See everywhere you&apos;ve been. Share who you are as a traveler.
+              Build a living 3D globe of everywhere you&apos;ve been, connect with
+              travelers worldwide, and compare the places your journeys cross.
             </p>
 
             {/* CTAs */}
@@ -347,8 +347,8 @@ export default function HomePage() {
                 Not just another travel app
               </h2>
               <p className="text-base text-stone-400 max-w-prose mx-auto leading-relaxed">
-                A 3D globe of everywhere you&apos;ve been. Cinematic flyover reels of your year in motion.
-                Your travel identity, beautifully captured. Nothing else does this.
+                Your globe is the profile: map every journey, watch cinematic flyovers,
+                then compare passports with friends without exposing exact travel dates.
               </p>
             </div>
 
@@ -412,7 +412,8 @@ export default function HomePage() {
                 </h2>
                 <p className="text-base text-stone-400 leading-relaxed mb-8">
                   Countries visited, continents explored, distance traveled, and your unique
-                  travel personality — all on a beautiful page you can share anywhere.
+                  travel personality — all on a shareable profile that shows seasons and years,
+                  never another traveler&apos;s exact trip dates.
                 </p>
                 <div className="flex flex-wrap gap-2 mb-8">
                   {['Globe Trotter', 'Cultural Nomad', 'World Explorer', 'Weekend Warrior'].map(type => (

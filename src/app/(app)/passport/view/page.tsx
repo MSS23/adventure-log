@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { PublicPassportContent } from '@/components/passport/PublicPassportContent'
+import { PrivatePassportConnect } from '@/components/passport/PrivatePassportConnect'
 import { computeTravelStats } from '@/lib/utils/travel-stats'
 import { log } from '@/lib/utils/logger'
 
@@ -33,7 +34,7 @@ function PassportViewInner() {
   const [state, setState] = useState<
     | { status: 'loading' }
     | { status: 'not-found' }
-    | { status: 'private' }
+    | { status: 'private'; user: PassportUser }
     | {
         status: 'ready'
         user: PassportUser
@@ -59,7 +60,7 @@ function PassportViewInner() {
           return
         }
         if (user.privacy_level === 'private') {
-          if (!cancelled) setState({ status: 'private' })
+          if (!cancelled) setState({ status: 'private', user })
           return
         }
 
@@ -109,6 +110,7 @@ function PassportViewInner() {
                   title: stats.firstTrip.title,
                   location: stats.firstTrip.location_name ?? null,
                   date: stats.firstTrip.date_start || stats.firstTrip.created_at,
+                  latitude: stats.firstTrip.latitude,
                 }
               : null,
             latestTrip: stats.latestTrip
@@ -116,6 +118,7 @@ function PassportViewInner() {
                   title: stats.latestTrip.title,
                   location: stats.latestTrip.location_name ?? null,
                   date: stats.latestTrip.date_start || stats.latestTrip.created_at,
+                  latitude: stats.latestTrip.latitude,
                 }
               : null,
             memberSince: user.created_at,
@@ -147,6 +150,15 @@ function PassportViewInner() {
   }
 
   if (state.status === 'private') {
+    if (searchParams.get('connect') === 'true') {
+      return (
+        <PrivatePassportConnect
+          owner={state.user}
+          qrToken={searchParams.get('t')}
+          shouldConnect
+        />
+      )
+    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
         <div className="text-center space-y-1">

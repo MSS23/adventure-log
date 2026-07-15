@@ -152,3 +152,29 @@ export function formatTravelDateForViewer(
     latitude,
   })
 }
+
+/** Format a date range without revealing more precision than `view` allows. */
+export function formatTravelDateRange(
+  startDate: string | Date | null | undefined,
+  endDate: string | Date | null | undefined,
+  opts: { view: TravelDateView; latitude?: number },
+): string {
+  const start = formatTravelDate(startDate, opts)
+  if (!start) return ''
+
+  const end = formatTravelDate(endDate, opts)
+  if (!end || end === start) return start
+  return `${start} – ${end}`
+}
+
+export function formatTravelDateRangeForViewer(
+  startDate: string | Date | null | undefined,
+  endDate: string | Date | null | undefined,
+  isOwnProfile: boolean,
+  latitude?: number,
+): string {
+  return formatTravelDateRange(startDate, endDate, {
+    view: isOwnProfile ? 'precise' : 'fuzzy',
+    latitude,
+  })
+}

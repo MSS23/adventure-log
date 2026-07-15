@@ -285,6 +285,7 @@ export default function PublicAlbumPage() {
         photoCount={photos.length}
         latitude={album.latitude}
         longitude={album.longitude}
+        dateView="fuzzy"
       />
 
       {/* Floating Explore Button — /discover is the public surface

@@ -21,7 +21,7 @@ import { apiFetch } from '@/lib/api/client'
 import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { log } from '@/lib/utils/logger'
-import { useToast } from '@/components/ui/toast-provider'
+import { toast } from 'sonner'
 
 interface Collaborator {
   id: string
@@ -49,7 +49,6 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
   const [inviteEmail, setInviteEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
-  const { success, error: showError } = useToast()
   const supabase = createClient()
 
   useEffect(() => {
@@ -110,20 +109,20 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
       const json = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        showError('Invitation failed', json.error || 'Could not send invitation. Please try again.')
+        toast.error('Invitation failed', { description: json.error || 'Could not send invitation. Please try again.' })
         return
       }
 
       const invitedName =
         json.collaborator?.user?.display_name || json.collaborator?.user?.username || 'them'
-      success('Invitation sent', `Invited ${invitedName} to collaborate`)
+      toast.success('Invitation sent', { description: `Invited ${invitedName} to collaborate` })
       setInviteEmail('')
       fetchCollaborators()
     } catch (err) {
       log.error('Failed to send invitation', {
         component: 'CollaborativeAlbum'
       }, err instanceof Error ? err : new Error(String(err)))
-      showError('Invitation failed', 'Could not send invitation. Please try again.')
+      toast.error('Invitation failed', { description: 'Could not send invitation. Please try again.' })
     } finally {
       setSending(false)
     }
@@ -140,13 +139,13 @@ export function CollaborativeAlbum({ albumId, albumTitle, isOwner, trigger }: Co
 
       if (error) throw error
 
-      success('Collaborator removed', 'They can no longer edit this album')
+      toast.success('Collaborator removed', { description: 'They can no longer edit this album' })
       fetchCollaborators()
     } catch (err) {
       log.error('Failed to remove collaborator', {
         component: 'CollaborativeAlbum'
       }, err instanceof Error ? err : new Error(String(err)))
-      showError('Remove failed', 'Could not remove collaborator')
+      toast.error('Remove failed', { description: 'Could not remove collaborator' })
     }
   }
 

@@ -182,6 +182,7 @@ export default function SharedAlbumPage() {
         photoCount={photos.length}
         latitude={album.latitude}
         longitude={album.longitude}
+        dateView="fuzzy"
       />
 
       {/* Floating Explore Button — keeps logged-out visitors inside the

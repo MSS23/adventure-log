@@ -15,8 +15,10 @@ export default async function globalSetup() {
   try {
     const state = await seedFixture()
     if (state) {
+      // eslint-disable-next-line no-console
       console.log(`[e2e] fixture seeded: ${state.mainUsername} + ${state.friendUsername}`)
     } else {
+      // eslint-disable-next-line no-console
       console.log('[e2e] no service-role key — fixture specs will be skipped')
     }
   } catch (err) {

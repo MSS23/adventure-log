@@ -58,7 +58,7 @@ export function useGlobeState(options: UseGlobeStateOptions) {
   const [progressionMode, setProgressionMode] = useState<'auto' | 'manual'>('auto')
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0)
   const [isJourneyPaused, setIsJourneyPaused] = useState(false)
-  const autoRotateRef = useRef<NodeJS.Timeout | null>(null)
+  const autoRotateRef = useRef<number | null>(null)
   const initialNavigationHandled = useRef(false)
 
   // Store navigation handler in ref to avoid dependency issues
@@ -318,13 +318,24 @@ export function useGlobeState(options: UseGlobeStateOptions) {
   }, [handleEffectiveYearChange, setActiveCityId, setSelectedCluster, reset, getYearData, calculateOptimalCameraPosition, animateCameraToPosition])
 
   const handlePlayPause = useCallback(() => {
+    if (prefersReducedMotion) {
+      const destination = locations[locations.length - 1]
+      if (destination && globeRef.current) {
+        globeRef.current.pointOfView(
+          { lat: destination.latitude, lng: destination.longitude, altitude: 1.8 },
+          250,
+        )
+        setActiveCityId(destination.id)
+      }
+      return
+    }
     if (isPlaying) {
       pause()
       setUserInteracting(false)
     } else {
       play()
     }
-  }, [isPlaying, pause, play])
+  }, [prefersReducedMotion, locations, setActiveCityId, isPlaying, pause, play])
 
   const handleReset = useCallback(() => {
     reset()
@@ -730,9 +741,12 @@ export function useGlobeState(options: UseGlobeStateOptions) {
   // Update camera position from flight animation
   useEffect(() => {
     if (cameraPosition && globeRef.current) {
-      animateCameraToPosition(cameraPosition, 1500, 'easeInOutCubic')
+      // The engine already supplies a smooth position every frame. Starting a
+      // fresh 1.5s tween on each update made the camera permanently lag and
+      // fight itself; apply the sampled chase-camera pose directly instead.
+      globeRef.current.pointOfView(cameraPosition, 0)
     }
-  }, [cameraPosition, animateCameraToPosition])
+  }, [cameraPosition])
 
   // Handle destination camera movement when flight segment completes
   useEffect(() => {
@@ -747,7 +761,7 @@ export function useGlobeState(options: UseGlobeStateOptions) {
   useEffect(() => {
     if (!globeRef.current || !isAutoRotating || userInteracting || prefersReducedMotion) {
       if (autoRotateRef.current) {
-        cancelAnimationFrame(autoRotateRef.current as unknown as number)
+        cancelAnimationFrame(autoRotateRef.current)
         autoRotateRef.current = null
       }
       return
@@ -770,15 +784,15 @@ export function useGlobeState(options: UseGlobeStateOptions) {
           lng: (pov.lng + rotationAmount) % 360
         }, 0)
 
-        autoRotateRef.current = requestAnimationFrame(animate) as unknown as NodeJS.Timeout
+        autoRotateRef.current = requestAnimationFrame(animate)
       }
     }
 
-    autoRotateRef.current = requestAnimationFrame(animate) as unknown as NodeJS.Timeout
+    autoRotateRef.current = requestAnimationFrame(animate)
 
     return () => {
       if (autoRotateRef.current) {
-        cancelAnimationFrame(autoRotateRef.current as unknown as number)
+        cancelAnimationFrame(autoRotateRef.current)
         autoRotateRef.current = null
       }
     }
@@ -814,7 +828,7 @@ export function useGlobeState(options: UseGlobeStateOptions) {
   useEffect(() => {
     return () => {
       if (autoRotateRef.current) {
-        cancelAnimationFrame(autoRotateRef.current as unknown as number)
+        cancelAnimationFrame(autoRotateRef.current)
         autoRotateRef.current = null
       }
       if (cameraAnimationRef.current) {

@@ -43,7 +43,10 @@ import { YouWereHereBadge } from '@/components/albums/YouWereHereBadge'
 import { AlbumQualityNudges } from '@/components/albums/AlbumQualityNudges'
 import { FavoriteAlbumToggle } from '@/components/albums/FavoriteAlbumToggle'
 import { placeSlug } from '@/lib/utils/places'
-import { parseLocalDate } from '@/lib/utils/travel-date'
+import {
+  formatTravelDateForViewer,
+  formatTravelDateRangeForViewer,
+} from '@/lib/utils/travel-date'
 
 /**
  * Everything the album page needs for first paint, resolved by ONE React
@@ -605,17 +608,11 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
 
   // Format date for mobile header
   const formatDate = () => {
-    const dateStr = album.date_start
-    if (!dateStr) return null
-    try {
-      // WHY: date_start is a plain DATE string ("YYYY-MM-DD"); new Date()
-      // parses it as UTC midnight, which renders a day early for viewers west
-      // of UTC. parseLocalDate builds the date in the local timezone instead.
-      const parsed = parseLocalDate(dateStr)
-      return parsed
-        ? parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        : null
-    } catch { return null }
+    return formatTravelDateForViewer(
+      album.date_start,
+      isOwner,
+      album.latitude ?? undefined,
+    ) || null
   }
 
   return (
@@ -788,11 +785,12 @@ export function AlbumDetailView({ albumId }: { albumId: string }) {
                 {album.date_start && album.date_end && album.date_start !== album.date_end && (
                   <span className="inline-flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-primary" />
-                    {/* WHY: parse DATE strings via parseLocalDate — new Date()
-                        treats them as UTC midnight and shifts a day west of UTC */}
-                    {parseLocalDate(album.date_start)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    {' - '}
-                    {parseLocalDate(album.date_end)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {formatTravelDateRangeForViewer(
+                      album.date_start,
+                      album.date_end,
+                      isOwner,
+                      album.latitude ?? undefined,
+                    )}
                   </span>
                 )}
                 {/* photo count intentionally omitted here — the gallery below

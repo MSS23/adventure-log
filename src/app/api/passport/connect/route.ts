@@ -97,6 +97,16 @@ export async function POST(request: NextRequest) {
     const hasValidToken =
       typeof qrToken === 'string' && verifyPassportQrToken(qrToken, targetUserId)
 
+    // A QR that carried a token was intended to prove an in-person scan. If
+    // that proof has expired or been altered, never silently fall through to
+    // a weaker follow outcome — tell the scanner to refresh the owner's QR.
+    if (typeof qrToken === 'string' && !hasValidToken) {
+      return NextResponse.json(
+        { error: 'This passport QR code expired. Ask its owner to refresh it and scan again.' },
+        { status: 410 },
+      )
+    }
+
     const targetIsPublic =
       targetUser.privacy_level == null || targetUser.privacy_level === 'public'
 

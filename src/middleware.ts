@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import type { AuthError, User } from '@supabase/supabase-js'
+import { shouldValidateCookieSession } from '@/lib/auth/middleware-auth'
 import { rateLimit as redisRateLimit } from '@/lib/utils/rate-limit-redis'
 
 // ============================================
@@ -299,30 +301,54 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
-  // Refresh the Supabase session (sets cookies on `response`) and read the user.
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          )
+  const isApiRoute = pathname.startsWith('/api/')
+  const apiIsPublic = isApiRoute && isPublicApiPath(pathname)
+  const hasBearerAuth =
+    isApiRoute && (request.headers.get('authorization')?.startsWith('Bearer ') ?? false)
+  const hasSessionCookies = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('auth-token'))
+
+  // Only validate a cookie session when middleware needs the result to make an
+  // authorization or auth-page redirect decision. Public pages and public API
+  // routes otherwise paid for a Supabase network round trip on every request.
+  const needsCookieAuth = shouldValidateCookieSession({
+    pathname,
+    isApiRoute,
+    apiIsPublic,
+    hasBearerAuth,
+    hasSessionCookies,
+    isProtectedPage: isProtectedPage(pathname),
+  })
+
+  let user: User | null = null
+  let authError: AuthError | null = null
+
+  if (needsCookieAuth) {
+    // Refresh the Supabase session (sets cookies on `response`) and read the user.
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+            response = NextResponse.next({ request })
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options),
+            )
+          },
         },
       },
-    },
-  )
+    )
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+    const result = await supabase.auth.getUser()
+    user = result.data.user
+    authError = result.error
+  }
 
   // A getUser() failure with session cookies present is a transient Supabase
   // problem (network blip, 5xx, statement timeout), not a logged-out user —
@@ -330,9 +356,6 @@ export async function middleware(request: NextRequest) {
   // case. Bouncing a logged-in user to /login on a blip logs them out
   // mid-session; let the request through instead and rely on the page's own
   // client-side auth gate (ProtectedRoute) / the API route's own auth check.
-  const hasSessionCookies = request.cookies
-    .getAll()
-    .some((c) => c.name.startsWith('sb-') && c.name.includes('auth-token'))
   const authIsTransientFailure =
     !user &&
     !!authError &&
@@ -341,17 +364,11 @@ export async function middleware(request: NextRequest) {
     authError.status !== 401 &&
     authError.status !== 403
 
-  const isApiRoute = pathname.startsWith('/api/')
-  const apiIsPublic = isApiRoute && isPublicApiPath(pathname)
-
   // Native (Capacitor) callers authenticate via Authorization bearer headers,
   // not cookies — the middleware client above can't see them. Let the request
   // through to the route handler, whose own `supabase.auth.getUser()`
   // validates the token (see src/lib/supabase/server.ts). An invalid token
   // still yields the handler's 401; this only skips the cookie-based gate.
-  const hasBearerAuth =
-    isApiRoute && (request.headers.get('authorization')?.startsWith('Bearer ') ?? false)
-
   // ----------------------------------------------------------------
   // Auth gate
   // ----------------------------------------------------------------

@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { parseLocalDate } from '@/lib/utils/travel-date'
+import { formatTravelDateForViewer } from '@/lib/utils/travel-date'
 import Link from 'next/link'
 import type { SearchResult, SearchFilters } from './useSearchState'
 
@@ -273,7 +273,13 @@ function SearchResultCard({ result }: SearchResultCardProps) {
               {result.type === 'album' && result.date && (
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  <span>{parseLocalDate(result.date)?.toLocaleDateString()}</span>
+                  <span>
+                    {formatTravelDateForViewer(
+                      result.date,
+                      isOwnContent,
+                      result.latitude,
+                    )}
+                  </span>
                 </div>
               )}
             </div>

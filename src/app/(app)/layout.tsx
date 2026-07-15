@@ -14,6 +14,7 @@ import { PageTransition } from '@/components/animations/PageTransition'
 import { PWAProvider } from '@/components/pwa'
 import { UnreadCountProvider } from '@/components/activity/UnreadCountProvider'
 import { PassportConnectListener } from '@/components/passport/PassportConnectListener'
+import { AchievementProvider } from '@/components/achievements/AchievementProvider'
 import { APP_SCROLL_ID } from '@/lib/utils/app-scroll'
 
 const FloatingActionButton = dynamic(
@@ -51,8 +52,9 @@ export default function AppLayout({
 
   return (
     <ProtectedRoute>
-      <PWAProvider>
-        <UnreadCountProvider>
+      <AchievementProvider>
+        <PWAProvider>
+          <UnreadCountProvider>
         {/* App shell — locked to the viewport height (dynamic vh so mobile
             browser chrome is accounted for). Header + bottom tab bar stay
             pinned to the screen edges; only the middle region scrolls. */}
@@ -105,8 +107,9 @@ export default function AppLayout({
           {/* 18+ backstop for OAuth accounts, which sign up without a DOB */}
           <AgeGate />
         </div>
-        </UnreadCountProvider>
-      </PWAProvider>
+          </UnreadCountProvider>
+        </PWAProvider>
+      </AchievementProvider>
     </ProtectedRoute>
   )
 }

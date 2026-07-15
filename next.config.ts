@@ -35,6 +35,8 @@ function stampServiceWorkerVersion(): void {
     );
     if (stamped !== src) {
       writeFileSync(swPath, stamped);
+      // Build-time deployment diagnostic; intentionally visible in CI logs.
+      // eslint-disable-next-line no-console
       console.log(`[sw-stamp] service worker cache version → ${version}`);
     }
   } catch {
@@ -158,14 +160,21 @@ const nextConfig: NextConfig = {
     }),
   },
 
-  // Bundle optimization
+  // Next.js' App Router already performs route-aware chunking. The legacy
+  // cache groups below are retained only as an opt-in diagnostic escape hatch:
+  // enabling them forces a named `vendor` and `common` chunk into every route,
+  // which adds hundreds of kilobytes to the initial client payload.
   webpack: (config, { isServer, dev }) => {
     // Optimize bundle size — PRODUCTION ONLY. Overriding splitChunks in dev
     // corrupts HMR's chunk map: routes intermittently request a CSS asset as
     // a script ("Refused to execute script … vendor.css") or hit
     // "Cannot read properties of undefined (reading 'call')" in the webpack
     // factory, and the route error-boundaries with "We hit a detour".
-    if (!isServer && !dev) {
+    if (
+      !isServer &&
+      !dev &&
+      process.env.CUSTOM_SPLIT_CHUNKS === 'true'
+    ) {
       config.optimization = {
         ...config.optimization,
         splitChunks: {

@@ -85,13 +85,9 @@ export class FlightPathCalculator {
     // Calculate realistic flight time (commercial aviation average speed: 900 km/h)
     const estimatedFlightTime = distance / 900
 
-    // Animation duration based on distance (longer flights animate faster)
-    const baseDuration = 3000 // 3 seconds for short flights
-    const maxDuration = 8000 // 8 seconds for long flights
-    const duration = Math.min(
-      maxDuration,
-      Math.max(baseDuration, distance * 50)
-    )
+    // Match the live engine: quick short hops, enough breathing room for a
+    // long-haul route, and no eight-second stall on every ordinary flight.
+    const duration = 2400 + Math.min(distance / 14000, 1) * 3000
 
     const waypoints = this.generateGreatCircleWaypoints(start, end, segments)
 

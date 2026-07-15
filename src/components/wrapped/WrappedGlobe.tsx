@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import * as THREE from 'three'
 import type { GlobeMethods } from 'react-globe.gl'
 import { gcInterpolate, gcBearing, easeInOutCubic } from '@/lib/utils/geoCalculations'
+import { createAirplaneModel } from '@/components/globe/createAirplaneModel'
 
 const Globe = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -47,60 +48,8 @@ interface FlightSceneObjects {
   trail: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>
 }
 
-/** Paper dart, nose along +Z, up +Y (so up.copy(normal) + lookAt(ahead)
- *  orients it tangent to the globe, and rotateZ banks it).
- *
- *  Three folds, like the real thing: two swept wing panels raised into a
- *  dihedral V, and a brand-orange keel hanging under the spine. Both
- *  materials carry a touch of emissive so the dart stays readable against
- *  the blacked-out globe regardless of where the scene lights sit. */
-function buildPlaneMesh(): THREE.Group {
-  const g = new THREE.Group()
-  const paperMat = new THREE.MeshLambertMaterial({
-    color: 0xfff6ee,
-    emissive: 0x3a2418,
-    side: THREE.DoubleSide,
-  })
-  const keelMat = new THREE.MeshLambertMaterial({
-    color: 0xff6b35,
-    emissive: 0x7a2c0c,
-    side: THREE.DoubleSide,
-  })
-
-  const NOSE = 2.6
-  const TAIL = -2.2
-  const SPINE_Y = 0.18
-
-  // Wing panel: nose tip → swept-back raised wingtip → tail end of the spine.
-  const wing = (dir: 1 | -1) => {
-    const geom = new THREE.BufferGeometry()
-    geom.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(
-        [0, SPINE_Y, NOSE, dir * 3.1, 0.8, TAIL, 0, SPINE_Y, TAIL + 0.4],
-        3
-      )
-    )
-    geom.computeVertexNormals()
-    return new THREE.Mesh(geom, paperMat)
-  }
-  g.add(wing(1), wing(-1))
-
-  // Center keel: the fold you pinch to throw it.
-  const keelGeom = new THREE.BufferGeometry()
-  keelGeom.setAttribute(
-    'position',
-    new THREE.Float32BufferAttribute(
-      [0, SPINE_Y, NOSE, 0, -0.9, TAIL + 0.7, 0, SPINE_Y, TAIL + 0.4],
-      3
-    )
-  )
-  keelGeom.computeVertexNormals()
-  g.add(new THREE.Mesh(keelGeom, keelMat))
-
-  return g
-}
-
+/** The shared aircraft model points along +Z, so up.copy(normal) plus
+ *  lookAt(ahead) keeps it tangent to the globe while rotateZ supplies bank. */
 function disposeObject(obj: THREE.Object3D) {
   obj.traverse((child) => {
     const mesh = child as THREE.Mesh
@@ -140,12 +89,11 @@ function frameAllLocations(locations: WrappedLocation[]): { lat: number; lng: nu
 /** Sampling density of the live trail tube (and its drawRange step). */
 const TRAIL_SEGMENTS = 128
 const TRAIL_RADIAL = 8
-/** Tube radius in globe units — matched to the stamped arc stroke below so
- *  the landing swap (live trail → arcs layer) doesn't visibly change width
- *  (three-globe arcStroke is a diameter in angular degrees; 1.5° ≈ 2.6u). */
-const TRAIL_RADIUS = 1.3
+/** Tube radius in globe units: visible in exports without overpowering the
+ *  smaller aircraft or the destination pins. */
+const TRAIL_RADIUS = 0.55
 /** Base plane size in globe units (globe radius = 100). */
-const PLANE_SCALE = 1.9
+const PLANE_SCALE = 0.78
 
 interface WrappedGlobeProps {
   locations: WrappedLocation[]
@@ -416,7 +364,7 @@ export function WrappedGlobe({
     if (!globe) return
     const scene = globe.scene()
 
-    const plane = buildPlaneMesh()
+    const plane = createAirplaneModel()
     plane.visible = false
     scene.add(plane)
 
@@ -672,7 +620,7 @@ export function WrappedGlobe({
         lastBearingRef.current = bearingNow
         scene3.plane.rotateZ(rollRef.current)
 
-        scene3.plane.scale.setScalar(PLANE_SCALE * (1 + 0.35 * breathe))
+        scene3.plane.scale.setScalar(PLANE_SCALE * (1 + 0.12 * breathe))
 
         // Trail paints itself under the plane (drawRange over the tube's
         // index buffer: TRAIL_RADIAL * 6 indices per tubular segment).
@@ -774,7 +722,7 @@ export function WrappedGlobe({
 
   const pointLabel = useCallback((d: object) => {
     const p = d as { name: string }
-    return `<div style="background:rgba(0,0,0,0.85);color:white;padding:6px 10px;border-radius:6px;font-size:13px;font-weight:500">📍 ${p.name}<div style="font-size:10px;opacity:0.8;margin-top:2px">Click to explore</div></div>`
+    return `<div style="background:rgba(0,0,0,0.85);color:white;padding:6px 10px;border-radius:6px;font-size:13px;font-weight:500">${p.name}<div style="font-size:10px;opacity:0.8;margin-top:2px">Click to explore</div></div>`
   }, [])
 
   const arcColor = useCallback(
@@ -792,7 +740,7 @@ export function WrappedGlobe({
       const arc = d as FlightArc
       // Latest matches the live trail's width (see TRAIL_RADIUS) so the
       // landing handoff between the two is seamless.
-      return arc.index === revealedArcs - 1 ? 1.5 : 1.0
+      return arc.index === revealedArcs - 1 ? 1.0 : 0.65
     },
     [revealedArcs]
   )

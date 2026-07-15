@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { Plane, Calendar, MapPin } from 'lucide-react'
 import { getFlagEmoji } from '@/lib/utils/country'
-import { parseLocalDate } from '@/lib/utils/travel-date'
+import { formatTravelDate } from '@/lib/utils/travel-date'
 
 interface ReelLocation {
   lat: number
@@ -42,16 +42,6 @@ interface FlightReelOverlayProps {
   progress: number
 }
 
-function formatDate(iso: string): string {
-  const d = parseLocalDate(iso)
-  if (!d) return ''
-  return d.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
 export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightReelOverlayProps) {
   // The card showcases the *arrival* — the destination of the current arc.
   // Before the first arc starts, segmentIndex is -1 and we show the first
@@ -70,7 +60,7 @@ export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightR
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -16, scale: 0.96 }}
-          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
           className="pointer-events-auto w-full max-w-[14rem] sm:max-w-md"
         >
           {/* Compact on mobile (max-w-[14rem]) so the card stays in the lower
@@ -101,7 +91,7 @@ export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightR
               <motion.div
                 initial={{ opacity: 0, x: -60, y: -10, rotate: -5 }}
                 animate={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
-                transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.42, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
                 className="absolute left-3 top-3"
               >
                 <div className="flex items-center gap-1.5 rounded-full bg-coral-600/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white shadow-lg">
@@ -136,7 +126,7 @@ export function FlightReelOverlay({ locations, segmentIndex, progress }: FlightR
                 {active.date && (
                   <span className="inline-flex items-center gap-1">
                     <Calendar className="h-3 w-3" aria-hidden />
-                    {formatDate(active.date)}
+                    {formatTravelDate(active.date, { view: 'fuzzy', latitude: active.lat })}
                   </span>
                 )}
               </div>

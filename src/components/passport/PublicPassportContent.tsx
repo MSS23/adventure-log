@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Globe, MapPin, Camera, Plane, Users, Share2, Copy, Check, ArrowRight,
-  Trophy, Compass, Route, UserCheck, Landmark, Mountain, TreePine, Waves, Sun,
+  Trophy, Route, UserCheck, Landmark, Mountain, TreePine, Waves, Sun,
   AlertCircle,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -14,8 +14,7 @@ import { getAvatarUrl } from '@/lib/utils/avatar'
 import { getDisplayName, getDisplayInitial } from '@/lib/utils/display-name'
 import { getFlagEmoji, getCountryName } from '@/lib/utils/country'
 import { formatDistanceKm } from '@/lib/utils/geoCalculations'
-import { parseLocalDate } from '@/lib/utils/travel-date'
-import Image from 'next/image'
+import { formatTravelDate } from '@/lib/utils/travel-date'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { log } from '@/lib/utils/logger'
 import { apiFetch } from '@/lib/api/client'
@@ -24,48 +23,13 @@ import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { MutualTravelPanel } from './MutualTravelPanel'
+import { PassportQrCode } from './PassportQrCode'
 
 const continentIcon: Record<string, React.ComponentType<{ className?: string }>> = {
   'Europe': Landmark, 'Asia': Mountain, 'North America': TreePine,
   'South America': TreePine, 'Africa': Sun, 'Oceania': Waves,
 }
 
-
-// ---------------------------------------------------------------------------
-// QR Code component
-// ---------------------------------------------------------------------------
-function ProfileQRCode({ url, size = 160 }: { url: string; size?: number }) {
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!url) return
-    // qrcode is lazy-loaded so it stays out of the shared vendor bundle.
-    import('qrcode')
-      .then(({ default: QRCode }) =>
-        QRCode.toDataURL(url, {
-          width: size * 2,
-          margin: 2,
-          color: { dark: '#2d3a1a', light: '#ffffff' },
-          errorCorrectionLevel: 'M',
-        })
-      )
-      .then(setQrDataUrl)
-      .catch(() => {})
-  }, [url, size])
-
-  if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-muted rounded-xl animate-pulse" />
-
-  return (
-    <div className="relative">
-      <div className="rounded-2xl overflow-hidden bg-card p-3 border border-border">
-        <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-xl" />
-      </div>
-      <div className="absolute -bottom-2 -right-2 size-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-background">
-        <Compass className="size-3.5 text-primary-foreground" />
-      </div>
-    </div>
-  )
-}
 
 // ---------------------------------------------------------------------------
 // Globe Coverage Ring
@@ -109,8 +73,8 @@ interface Props {
   followerCount: number
   continentsVisited: string[]
   personality: string
-  firstTrip: { title: string; location: string | null; date: string } | null
-  latestTrip: { title: string; location: string | null; date: string } | null
+  firstTrip: { title: string; location: string | null; date: string; latitude?: number | null } | null
+  latestTrip: { title: string; location: string | null; date: string; latitude?: number | null } | null
   memberSince: string
 }
 
@@ -631,7 +595,7 @@ export function PublicPassportContent({
                     </p>
                   )}
                   <p className="font-mono text-xs tracking-wide text-muted-foreground mt-1">
-                    {parseLocalDate(firstTrip.date)?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    {formatTravelDate(firstTrip.date, { view: 'fuzzy', latitude: firstTrip.latitude ?? undefined })}
                   </p>
                 </div>
               )}
@@ -651,7 +615,7 @@ export function PublicPassportContent({
                     </p>
                   )}
                   <p className="font-mono text-xs tracking-wide text-muted-foreground mt-1">
-                    {parseLocalDate(latestTrip.date)?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    {formatTravelDate(latestTrip.date, { view: 'fuzzy', latitude: latestTrip.latitude ?? undefined })}
                   </p>
                 </div>
               )}
@@ -674,7 +638,7 @@ export function PublicPassportContent({
               </p>
 
               <div className="mb-6">
-                <ProfileQRCode url={shareUrl} size={160} />
+                <PassportQrCode url={shareUrl} size={160} label={`${displayName}'s passport QR code`} />
               </div>
 
               <div className="flex gap-3">

@@ -1,6 +1,8 @@
 import {
   formatTravelDate,
   formatTravelDateForViewer,
+  formatTravelDateRange,
+  formatTravelDateRangeForViewer,
 } from '@/lib/utils/travel-date'
 
 /**
@@ -161,5 +163,31 @@ describe('formatTravelDateForViewer', () => {
     expect(formatTravelDateForViewer(null, true)).toBe('')
     expect(formatTravelDateForViewer(undefined, false)).toBe('')
     expect(formatTravelDateForViewer('bad', false, -10)).toBe('')
+  })
+})
+
+describe('formatTravelDateRange', () => {
+  it('collapses two dates in the same season for a public viewer', () => {
+    expect(
+      formatTravelDateRange('2025-06-08', '2025-08-19', { view: 'fuzzy' })
+    ).toBe('Summer 2025')
+  })
+
+  it('shows season-to-season ranges without revealing months or days', () => {
+    expect(
+      formatTravelDateRange('2025-03-08', '2025-07-19', { view: 'fuzzy' })
+    ).toBe('Spring 2025 – Summer 2025')
+  })
+
+  it('keeps precise ranges available to the owner', () => {
+    expect(
+      formatTravelDateRangeForViewer('2025-06-08', '2025-06-10', true)
+    ).toBe('June 8, 2025 – June 10, 2025')
+  })
+
+  it('applies southern-hemisphere seasons to both ends', () => {
+    expect(
+      formatTravelDateRangeForViewer('2025-06-08', '2025-10-10', false, -34)
+    ).toBe('Winter 2025 – Spring 2025')
   })
 })

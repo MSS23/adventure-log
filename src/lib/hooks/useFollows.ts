@@ -458,7 +458,7 @@ export function useFollows(
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user?.id, supabase, refreshStats, refreshFollowLists])
+  }, [user?.id, supabase, refreshStats, refreshFollowLists, statusOnly])
 
   return {
     stats,

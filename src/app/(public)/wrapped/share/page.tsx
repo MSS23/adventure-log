@@ -29,6 +29,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useWrappedData } from '@/lib/hooks/useWrappedData'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { FlightReelOverlay } from '@/components/wrapped/FlightReelOverlay'
 import { createClient } from '@/lib/supabase/client'
 import { getAvatarUrl } from '@/lib/utils/avatar'
@@ -119,6 +120,7 @@ export default function PublicWrappedSharePage() {
 
 function PublicWrappedExperience() {
   const router = useRouter()
+  const prefersReducedMotion = useReducedMotion()
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const currentYear = new Date().getFullYear()
@@ -209,12 +211,12 @@ function PublicWrappedExperience() {
   const globeLocations = useMemo(() => data.locations, [data.locations])
 
   const startWrapped = useCallback(() => {
-    if (data.locations.length < 2) {
+    if (prefersReducedMotion || data.locations.length < 2) {
       setPhase('stats')
     } else {
       setPhase('globe')
     }
-  }, [data.locations.length])
+  }, [data.locations.length, prefersReducedMotion])
 
   const handleGlobeProgress = useCallback((progress: number, idx: number) => {
     setFlightProgress(progress)

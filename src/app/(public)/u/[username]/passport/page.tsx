@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { PublicPassportContent } from '@/components/passport/PublicPassportContent'
+import { PrivatePassportConnect } from '@/components/passport/PrivatePassportConnect'
 import { computeTravelStats } from '@/lib/utils/travel-stats'
 
 
@@ -37,10 +38,13 @@ export async function generateMetadata({
 
 export default async function PublicPassportPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ username: string }>
+  searchParams: Promise<{ connect?: string; t?: string }>
 }) {
   const { username } = await params
+  const query = await searchParams
   const supabase = await createClient()
 
   const { data: user } = await supabase
@@ -61,6 +65,15 @@ export default async function PublicPassportPage({
   }
 
   if (user.privacy_level === 'private') {
+    if (query.connect === 'true') {
+      return (
+        <PrivatePassportConnect
+          owner={user}
+          qrToken={query.t}
+          shouldConnect
+        />
+      )
+    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
         <div className="text-center space-y-1">
@@ -116,8 +129,8 @@ export default async function PublicPassportPage({
       followerCount={followerCount || 0}
       continentsVisited={stats.continentsVisited}
       personality={stats.personality.type}
-      firstTrip={stats.firstTrip ? { title: stats.firstTrip.title, location: stats.firstTrip.location_name ?? null, date: stats.firstTrip.date_start || stats.firstTrip.created_at } : null}
-      latestTrip={stats.latestTrip ? { title: stats.latestTrip.title, location: stats.latestTrip.location_name ?? null, date: stats.latestTrip.date_start || stats.latestTrip.created_at } : null}
+      firstTrip={stats.firstTrip ? { title: stats.firstTrip.title, location: stats.firstTrip.location_name ?? null, date: stats.firstTrip.date_start || stats.firstTrip.created_at, latitude: stats.firstTrip.latitude } : null}
+      latestTrip={stats.latestTrip ? { title: stats.latestTrip.title, location: stats.latestTrip.location_name ?? null, date: stats.latestTrip.date_start || stats.latestTrip.created_at, latitude: stats.latestTrip.latitude } : null}
       memberSince={user.created_at}
     />
   )

@@ -139,10 +139,10 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     globeRef, modalOpenRef, navigationHandlerRef, availableYearsRef,
     rendererRef, globeContainerRef,
     globeReady, setGlobeReady, selectedCluster, setSelectedCluster,
-    showAlbumModal, setShowAlbumModal, setActiveCityId,
-    isAutoRotating, setIsAutoRotating,
+    showAlbumModal, setShowAlbumModal,
+    setIsAutoRotating,
     prefersReducedMotion,
-    userInteracting, setUserInteracting,
+    setUserInteracting,
     showSearch, setShowSearch,
     showStaticConnections, setShowStaticConnections, setArcsKey,
     currentLocationIndex,
@@ -154,7 +154,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     availableYears, timelineLoading, timelineError,
     effectiveSelectedYear, handleEffectiveYearChange, refreshData, getYearData,
     locations,
-    isPlaying, currentFlightState, destinationCameraPosition,
+    isPlaying, currentFlightState,
     handleYearChange, handlePlayPause, handleSearchResult,
     handleCityClick, handleClusterClick, handleLocationToggle,
     searchData, travelStats, getYearColor, cityPins, staticConnections,
@@ -625,16 +625,15 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   globe={globeRef.current as GlobeInstance | null}
                   airplaneState={currentFlightState ? {
                     isFlying: isPlaying,
-                    fromLat: currentFlightState.position.lat,
-                    fromLng: currentFlightState.position.lng,
-                    toLat: destinationCameraPosition?.lat || currentFlightState.position.lat,
-                    toLng: destinationCameraPosition?.lng || currentFlightState.position.lng,
-                    progress: currentFlightState.progress,
-                    altitude: currentFlightState.position.altitude
+                    lat: currentFlightState.position.lat,
+                    lng: currentFlightState.position.lng,
+                    altitude: currentFlightState.position.altitude,
+                    heading: currentFlightState.rotation.heading,
+                    pitch: currentFlightState.rotation.pitch,
+                    bank: currentFlightState.rotation.bank,
                   } : null}
                   isActive={isPlaying}
-                  trailColor="#00ff88"
-                  airplaneScale={0.005}
+                  airplaneScale={0.62}
                 />
 
                 <ArcPlanes

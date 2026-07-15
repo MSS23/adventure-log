@@ -1,4 +1,7 @@
-import { Redis } from '@upstash/redis'
+// The middleware runs on the Edge runtime. The package root resolves to the
+// Node build, while this fetch-based build avoids Node-only globals and also
+// works in ordinary route handlers.
+import { Redis } from '@upstash/redis/cloudflare'
 import { log } from '@/lib/utils/logger'
 
 // Initialize Redis client (only if environment variables are set)

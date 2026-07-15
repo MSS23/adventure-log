@@ -143,11 +143,8 @@ Regenerate the hooks table, API table, state-management, and migration sections 
   m59/m73 hardening standard.
 
 ### Quick code-quality wins (hours each)
-- `npm uninstall` the ~11 dead dependencies: `zustand`, `groq-sdk`, `@google/generative-ai`, `svix`,
-  `file-saver` (+types), `react-markdown`, `@react-spring/web`, `@use-gesture/react`,
-  `@formkit/auto-animate`, `@vercel/og`, `react-loading-skeleton`.
-- Fix the `useGlobeState` rAF ref typing (`useRef<number | null>`) — removes 5 of the 35
-  `as unknown as` casts in one line.
+- **Completed (July 2026):** removed the unused direct dependencies and fixed
+  `useGlobeState`'s animation-frame ref to use the browser's numeric handle.
 - Decide `error-handler.ts`'s fate: 464 lines, exactly one consumer, `withRetry`/`getUserFriendlyMessage`
   have zero call sites while 126 catch blocks and 46 raw `toast.error`s roll their own. Either wire it
   into the toast sites or delete it and codify a ~30-line `log.error → toast(friendly)` helper.

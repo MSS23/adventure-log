@@ -4,10 +4,13 @@ import { useRef } from 'react'
 import Image from 'next/image'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { MapPin, Calendar, Camera } from 'lucide-react'
-import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
-import { parseLocalDate } from '@/lib/utils/travel-date'
+import {
+  formatTravelDate,
+  formatTravelDateRange,
+  type TravelDateView,
+} from '@/lib/utils/travel-date'
 
 interface AlbumHeroProps {
   title: string
@@ -20,6 +23,7 @@ interface AlbumHeroProps {
   photoCount?: number
   latitude?: number | null
   longitude?: number | null
+  dateView?: TravelDateView
   className?: string
 }
 
@@ -32,6 +36,8 @@ export function AlbumHero({
   dateStart,
   dateEnd,
   photoCount = 0,
+  latitude,
+  dateView = 'precise',
   className
 }: AlbumHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -50,23 +56,10 @@ export function AlbumHero({
     : getPhotoUrl(coverPhotoUrl)
 
   const formatDateRange = () => {
-    if (!dateStart) return null
-    const start = parseLocalDate(dateStart)
-    if (!start) return null
-    const end = dateEnd ? parseLocalDate(dateEnd) : null
-
-    if (!end || start.getTime() === end.getTime()) {
-      return format(start, 'MMMM d, yyyy')
-    }
-
-    if (start.getFullYear() === end.getFullYear()) {
-      if (start.getMonth() === end.getMonth()) {
-        return `${format(start, 'MMMM d')} - ${format(end, 'd, yyyy')}`
-      }
-      return `${format(start, 'MMMM d')} - ${format(end, 'MMMM d, yyyy')}`
-    }
-
-    return `${format(start, 'MMMM d, yyyy')} - ${format(end, 'MMMM d, yyyy')}`
+    return formatTravelDateRange(dateStart, dateEnd, {
+      view: dateView,
+      latitude: latitude ?? undefined,
+    }) || null
   }
 
   return (
@@ -201,6 +194,8 @@ export function AlbumHeroCompact({
   coverYOffset,
   locationName,
   dateStart,
+  latitude,
+  dateView = 'precise',
   className
 }: AlbumHeroProps) {
   const imageUrl = coverPhotoUrl?.startsWith('http')
@@ -257,10 +252,13 @@ export function AlbumHeroCompact({
               {locationName}
             </span>
           )}
-          {dateStart && parseLocalDate(dateStart) && (
+          {dateStart && (
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
-              {format(parseLocalDate(dateStart)!, 'MMM yyyy')}
+              {formatTravelDate(dateStart, {
+                view: dateView,
+                latitude: latitude ?? undefined,
+              })}
             </span>
           )}
         </motion.div>

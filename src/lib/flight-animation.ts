@@ -9,13 +9,6 @@ interface FlightPoint {
   altitude?: number
 }
 
-interface FlightPath {
-  points: FlightPoint[]
-  distance: number
-  duration: number
-  bearing: number
-}
-
 interface AirplaneState {
   position: FlightPoint
   rotation: {
@@ -41,10 +34,7 @@ interface TravelTimelineEntry {
 }
 
 const EARTH_RADIUS_KM = 6371
-const CRUISING_ALTITUDE = 0.02
-const MIN_FLIGHT_SPEED = 0.005
-const MAX_FLIGHT_SPEED = 0.02
-const BANK_ANGLE_FACTOR = 30
+const MAX_BANK_DEGREES = 24
 
 export function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180)
@@ -55,154 +45,111 @@ export function toDegrees(radians: number): number {
 }
 
 export function calculateDistance(coord1: Coordinates, coord2: Coordinates): number {
-  const lat1Rad = toRadians(coord1.latitude)
-  const lng1Rad = toRadians(coord1.longitude)
-  const lat2Rad = toRadians(coord2.latitude)
-  const lng2Rad = toRadians(coord2.longitude)
-
-  const dlat = lat2Rad - lat1Rad
-  const dlng = lng2Rad - lng1Rad
-
-  const a = Math.sin(dlat / 2) ** 2 +
-            Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-            Math.sin(dlng / 2) ** 2
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return EARTH_RADIUS_KM * c
+  const lat1 = toRadians(coord1.latitude)
+  const lat2 = toRadians(coord2.latitude)
+  const deltaLat = lat2 - lat1
+  const deltaLng = toRadians(coord2.longitude - coord1.longitude)
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) ** 2
+  return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
 export function calculateBearing(from: Coordinates, to: Coordinates): number {
   const lat1 = toRadians(from.latitude)
   const lat2 = toRadians(to.latitude)
-  const dlng = toRadians(to.longitude - from.longitude)
+  const deltaLng = toRadians(to.longitude - from.longitude)
+  const y = Math.sin(deltaLng) * Math.cos(lat2)
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng)
+  return (toDegrees(Math.atan2(y, x)) + 360) % 360
+}
 
-  const y = Math.sin(dlng) * Math.cos(lat2)
-  const x = Math.cos(lat1) * Math.sin(lat2) -
-            Math.sin(lat1) * Math.cos(lat2) * Math.cos(dlng)
-
-  const bearing = Math.atan2(y, x)
-  return (toDegrees(bearing) + 360) % 360
+/** Distance-aware cinematic duration: short hops feel quick, long routes breathe. */
+export function calculateFlightDurationMs(distanceKm: number): number {
+  return 2400 + Math.min(Math.max(distanceKm, 0) / 14000, 1) * 3000
 }
 
 export function interpolateGreatCircle(
   from: Coordinates,
   to: Coordinates,
-  progress: number
+  progress: number,
 ): FlightPoint {
+  const t = Math.max(0, Math.min(1, progress))
   const lat1 = toRadians(from.latitude)
   const lng1 = toRadians(from.longitude)
   const lat2 = toRadians(to.latitude)
   const lng2 = toRadians(to.longitude)
+  const angularDistance = calculateDistance(from, to) / EARTH_RADIUS_KM
 
-  const distance = calculateDistance(from, to) / EARTH_RADIUS_KM
+  let lat: number
+  let lng: number
+  if (angularDistance < 1e-7) {
+    lat = lat1 + (lat2 - lat1) * t
+    lng = lng1 + (lng2 - lng1) * t
+  } else {
+    const sinDistance = Math.sin(angularDistance)
+    const a = Math.sin((1 - t) * angularDistance) / sinDistance
+    const b = Math.sin(t * angularDistance) / sinDistance
+    const x = a * Math.cos(lat1) * Math.cos(lng1) + b * Math.cos(lat2) * Math.cos(lng2)
+    const y = a * Math.cos(lat1) * Math.sin(lng1) + b * Math.cos(lat2) * Math.sin(lng2)
+    const z = a * Math.sin(lat1) + b * Math.sin(lat2)
+    lat = Math.atan2(z, Math.sqrt(x * x + y * y))
+    lng = Math.atan2(y, x)
+  }
 
-  const a = Math.sin((1 - progress) * distance) / Math.sin(distance)
-  const b = Math.sin(progress * distance) / Math.sin(distance)
-
-  const x = a * Math.cos(lat1) * Math.cos(lng1) + b * Math.cos(lat2) * Math.cos(lng2)
-  const y = a * Math.cos(lat1) * Math.sin(lng1) + b * Math.cos(lat2) * Math.sin(lng2)
-  const z = a * Math.sin(lat1) + b * Math.sin(lat2)
-
-  const lat = Math.atan2(z, Math.sqrt(x * x + y * y))
-  const lng = Math.atan2(y, x)
-
-  const altitudeMultiplier = Math.sin(progress * Math.PI)
-  const altitude = CRUISING_ALTITUDE * altitudeMultiplier
-
+  const distanceKm = angularDistance * EARTH_RADIUS_KM
+  const peakAltitude = 0.09 + Math.min(distanceKm / 14000, 1) * 0.24
   return {
     lat: toDegrees(lat),
     lng: toDegrees(lng),
-    altitude
+    altitude: peakAltitude * Math.sin(t * Math.PI),
   }
 }
 
-export function generateFlightPath(
-  from: Coordinates,
-  to: Coordinates,
-  segments: number = 50
-): FlightPath {
-  const points: FlightPoint[] = []
-  const distance = calculateDistance(from, to)
-  const bearing = calculateBearing(from, to)
-
-  for (let i = 0; i <= segments; i++) {
-    const progress = i / segments
-    const point = interpolateGreatCircle(from, to, progress)
-    points.push(point)
-  }
-
-  const estimatedDuration = Math.max(
-    distance / 800,
-    2
-  )
-
-  return {
-    points,
-    distance,
-    duration: estimatedDuration,
-    bearing
-  }
-}
-
-export function calculateFlightSpeed(distance: number): number {
-  const normalizedDistance = Math.min(distance / 15000, 1)
-  return MIN_FLIGHT_SPEED + (MAX_FLIGHT_SPEED - MIN_FLIGHT_SPEED) * normalizedDistance
+export function smoothEaseInOut(t: number): number {
+  const clamped = Math.max(0, Math.min(1, t))
+  return clamped < 0.5
+    ? 4 * clamped * clamped * clamped
+    : 1 - Math.pow(-2 * clamped + 2, 3) / 2
 }
 
 export function calculateAirplaneRotation(
   currentPoint: FlightPoint,
   nextPoint: FlightPoint,
-  prevBearing: number
+  previousHeading: number,
 ): { heading: number; pitch: number; bank: number } {
   const heading = calculateBearing(
     { latitude: currentPoint.lat, longitude: currentPoint.lng },
-    { latitude: nextPoint.lat, longitude: nextPoint.lng }
+    { latitude: nextPoint.lat, longitude: nextPoint.lng },
   )
+  let headingDelta = heading - previousHeading
+  if (headingDelta > 180) headingDelta -= 360
+  if (headingDelta < -180) headingDelta += 360
 
-  const bearingDiff = ((heading - prevBearing + 540) % 360) - 180
-  const bank = Math.max(-BANK_ANGLE_FACTOR, Math.min(BANK_ANGLE_FACTOR, bearingDiff * 0.5))
-
-  const altitudeDiff = (nextPoint.altitude || 0) - (currentPoint.altitude || 0)
-  const pitch = Math.atan2(altitudeDiff, 0.1) * (180 / Math.PI)
-
+  const altitudeDelta = (nextPoint.altitude || 0) - (currentPoint.altitude || 0)
   return {
     heading,
-    pitch: Math.max(-15, Math.min(15, pitch)),
-    bank
+    pitch: Math.max(-12, Math.min(12, altitudeDelta * 900)),
+    bank: Math.max(-MAX_BANK_DEGREES, Math.min(MAX_BANK_DEGREES, headingDelta * 2.4)),
   }
 }
 
-export function smoothEaseInOut(t: number): number {
-  return t * t * (3.0 - 2.0 * t)
-}
-
 export function calculateOptimalCameraPosition(
-  airplanePos: FlightPoint,
-  targetPos: FlightPoint,
-  progress: number
+  airplanePosition: FlightPoint,
+  destination: FlightPoint,
+  progress: number,
 ): { lat: number; lng: number; altitude: number } {
-  const midProgress = 0.5
-  const isApproaching = progress < midProgress
-
-  if (isApproaching) {
-    const lookAheadProgress = Math.min(progress + 0.1, 1)
-    const lookAheadPoint = interpolateGreatCircle(
-      { latitude: airplanePos.lat, longitude: airplanePos.lng },
-      { latitude: targetPos.lat, longitude: targetPos.lng },
-      lookAheadProgress
-    )
-
-    return {
-      lat: lookAheadPoint.lat,
-      lng: lookAheadPoint.lng,
-      altitude: Math.max(0.15, lookAheadPoint.altitude || 0.1)
-    }
-  } else {
-    return {
-      lat: targetPos.lat,
-      lng: targetPos.lng,
-      altitude: 0.12
-    }
+  const lookAhead = interpolateGreatCircle(
+    { latitude: airplanePosition.lat, longitude: airplanePosition.lng },
+    { latitude: destination.lat, longitude: destination.lng },
+    0.12,
+  )
+  return {
+    lat: lookAhead.lat,
+    lng: lookAhead.lng,
+    altitude: 1.05 + Math.sin(Math.PI * progress) * 0.5,
   }
 }
 
@@ -212,140 +159,145 @@ export class FlightAnimationEngine {
   private segmentProgress = 0
   private isPlaying = false
   private animationSpeed = 1
-  private currentYear: number | null = null
-  private onPositionUpdate?: (state: AirplaneState) => void
-  private onCameraUpdate?: (position: { lat: number; lng: number; altitude: number }) => void
-  private onSegmentComplete?: (segment: TravelTimelineEntry) => void
+  private animationFrame: number | null = null
+  private lastFrameTime: number | null = null
+  private previousHeading = 0
 
   constructor(
-    onPositionUpdate?: (state: AirplaneState) => void,
-    onCameraUpdate?: (position: { lat: number; lng: number; altitude: number }) => void,
-    onSegmentComplete?: (segment: TravelTimelineEntry) => void
-  ) {
-    this.onPositionUpdate = onPositionUpdate
-    this.onCameraUpdate = onCameraUpdate
-    this.onSegmentComplete = onSegmentComplete
-  }
+    private readonly onPositionUpdate?: (state: AirplaneState) => void,
+    private readonly onCameraUpdate?: (position: { lat: number; lng: number; altitude: number }) => void,
+    private readonly onSegmentComplete?: (segment: TravelTimelineEntry) => void,
+  ) {}
 
   setTimeline(timeline: TravelTimelineEntry[], year: number): void {
-    this.timeline = timeline.filter(entry => entry.year === year)
+    this.timeline = timeline
+      .filter((entry) => entry.year === year)
       .sort((a, b) => a.sequenceOrder - b.sequenceOrder)
-    this.currentYear = year
     this.reset()
   }
 
   play(): void {
+    if (this.timeline.length < 2 || this.isPlaying) return
+    if (this.currentSegmentIndex >= this.timeline.length - 1) {
+      this.currentSegmentIndex = 0
+      this.segmentProgress = 0
+    }
     this.isPlaying = true
-    this.animate()
+    this.lastFrameTime = null
+    this.animationFrame = requestAnimationFrame(this.animate)
   }
 
   pause(): void {
     this.isPlaying = false
+    this.lastFrameTime = null
+    if (this.animationFrame !== null) cancelAnimationFrame(this.animationFrame)
+    this.animationFrame = null
   }
 
   reset(): void {
+    this.pause()
     this.currentSegmentIndex = 0
     this.segmentProgress = 0
-    this.isPlaying = false
+    this.previousHeading = 0
   }
 
   setSpeed(speed: number): void {
-    this.animationSpeed = Math.max(0.1, Math.min(5, speed))
+    this.animationSpeed = Math.max(0.25, Math.min(3, speed))
   }
 
   seekToSegment(index: number): void {
-    this.currentSegmentIndex = Math.max(0, Math.min(index, this.timeline.length - 2))
+    this.currentSegmentIndex = Math.max(0, Math.min(index, Math.max(0, this.timeline.length - 2)))
     this.segmentProgress = 0
+    this.lastFrameTime = null
   }
 
-  private animate(): void {
+  private animate = (timestamp: number): void => {
     if (!this.isPlaying || this.timeline.length < 2) return
 
-    const deltaTime = 0.016
-    const currentSegment = this.timeline[this.currentSegmentIndex]
-    const nextSegment = this.timeline[this.currentSegmentIndex + 1]
-
-    if (!currentSegment || !nextSegment) {
-      this.isPlaying = false
+    const current = this.timeline[this.currentSegmentIndex]
+    const next = this.timeline[this.currentSegmentIndex + 1]
+    if (!current || !next) {
+      this.pause()
       return
     }
 
-    const from = { latitude: currentSegment.latitude, longitude: currentSegment.longitude }
-    const to = { latitude: nextSegment.latitude, longitude: nextSegment.longitude }
+    const deltaSeconds = this.lastFrameTime === null
+      ? 0
+      : Math.min((timestamp - this.lastFrameTime) / 1000, 0.05)
+    this.lastFrameTime = timestamp
+
+    const from = { latitude: current.latitude, longitude: current.longitude }
+    const to = { latitude: next.latitude, longitude: next.longitude }
     const distance = calculateDistance(from, to)
-    const speed = calculateFlightSpeed(distance) * this.animationSpeed
-
-    this.segmentProgress = Math.min(this.segmentProgress + speed * deltaTime, 1)
-
-    const smoothProgress = smoothEaseInOut(this.segmentProgress)
-    const currentPosition = interpolateGreatCircle(from, to, smoothProgress)
-
-    const nextPosition = this.segmentProgress < 0.99
-      ? interpolateGreatCircle(from, to, smoothProgress + 0.01)
-      : currentPosition
-
-    const rotation = calculateAirplaneRotation(
-      currentPosition,
-      nextPosition,
-      calculateBearing(from, to)
+    const durationSeconds = calculateFlightDurationMs(distance) / 1000
+    this.segmentProgress = Math.min(
+      1,
+      this.segmentProgress + (deltaSeconds * this.animationSpeed) / durationSeconds,
     )
 
-    const airplaneState: AirplaneState = {
-      position: currentPosition,
+    const easedProgress = smoothEaseInOut(this.segmentProgress)
+    const position = interpolateGreatCircle(from, to, easedProgress)
+    const ahead = interpolateGreatCircle(from, to, Math.min(1, easedProgress + 0.008))
+    const rotation = calculateAirplaneRotation(position, ahead, this.previousHeading)
+    this.previousHeading = rotation.heading
+
+    this.onPositionUpdate?.({
+      position,
       rotation,
-      speed: speed * this.animationSpeed
-    }
-
-    this.onPositionUpdate?.(airplaneState)
-
-    const cameraPosition = calculateOptimalCameraPosition(
-      currentPosition,
-      { lat: to.latitude, lng: to.longitude, altitude: 0 },
-      smoothProgress
+      speed: this.animationSpeed / durationSeconds,
+    })
+    this.onCameraUpdate?.(
+      calculateOptimalCameraPosition(
+        position,
+        { lat: to.latitude, lng: to.longitude, altitude: 0 },
+        easedProgress,
+      ),
     )
-    this.onCameraUpdate?.(cameraPosition)
 
     if (this.segmentProgress >= 1) {
-      this.onSegmentComplete?.(nextSegment)
-      this.currentSegmentIndex++
+      this.onSegmentComplete?.(next)
+      this.currentSegmentIndex += 1
       this.segmentProgress = 0
+      this.previousHeading = 0
 
       if (this.currentSegmentIndex >= this.timeline.length - 1) {
         this.isPlaying = false
+        this.animationFrame = null
         return
       }
     }
 
-    if (this.isPlaying) {
-      requestAnimationFrame(() => this.animate())
-    }
+    this.animationFrame = requestAnimationFrame(this.animate)
   }
 
-  getCurrentSegment(): TravelTimelineEntry | null {
-    return this.timeline[this.currentSegmentIndex] || null
-  }
-
-  getProgress(): { segment: number; total: number; percentage: number } {
+  getProgress(): {
+    segment: number
+    total: number
+    percentage: number
+    segmentPercentage: number
+  } {
     const total = Math.max(this.timeline.length - 1, 1)
-    const current = this.currentSegmentIndex + this.segmentProgress
+    const completed = Math.min(this.currentSegmentIndex, total)
     return {
-      segment: this.currentSegmentIndex,
+      segment: Math.min(this.currentSegmentIndex, total - 1),
       total,
-      percentage: (current / total) * 100
+      percentage: ((completed + this.segmentProgress) / total) * 100,
+      segmentPercentage: this.currentSegmentIndex >= total ? 100 : this.segmentProgress * 100,
     }
   }
 
   getTotalDuration(): number {
-    let totalDuration = 0
-    for (let i = 0; i < this.timeline.length - 1; i++) {
-      const from = this.timeline[i]
-      const to = this.timeline[i + 1]
-      const distance = calculateDistance(
-        { latitude: from.latitude, longitude: from.longitude },
-        { latitude: to.latitude, longitude: to.longitude }
+    let totalMs = 0
+    for (let index = 0; index < this.timeline.length - 1; index += 1) {
+      const from = this.timeline[index]
+      const to = this.timeline[index + 1]
+      totalMs += calculateFlightDurationMs(
+        calculateDistance(
+          { latitude: from.latitude, longitude: from.longitude },
+          { latitude: to.latitude, longitude: to.longitude },
+        ),
       )
-      totalDuration += Math.max(distance / 800, 2)
     }
-    return totalDuration / this.animationSpeed
+    return totalMs / this.animationSpeed
   }
 }

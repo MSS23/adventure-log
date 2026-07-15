@@ -53,7 +53,7 @@ export default function PrivacyPage() {
 
         <Section title="5. Who can see your content">
           <p>Every album has a visibility setting you control: <strong>Public</strong> (anyone), <strong>Friends</strong> (people you follow mutually), or <strong>Private</strong> (only you). You can change it any time.</p>
-          <p>Your globe, passport, and stats visibility mirror the visibility of the albums that feed into them.</p>
+          <p>Your globe, passport, and stats visibility mirror the visibility of the albums that feed into them. Other travelers see trip timing as a season and year, never your exact travel day or month.</p>
         </Section>
 
         <Section title="6. Analytics, error monitoring &amp; cookies">

@@ -3,79 +3,92 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import type { GlobeInstance } from '@/types/globe'
-import { gcInterpolate, latLngToGlobeXYZ } from '@/lib/utils/geoCalculations'
+import { latLngToGlobeXYZ } from '@/lib/utils/geoCalculations'
+import { createAirplaneModel, disposeAirplaneModel } from './createAirplaneModel'
 
 export interface FlightState {
   isFlying: boolean
-  fromLat: number
-  fromLng: number
-  toLat: number
-  toLng: number
-  progress: number
+  lat: number
+  lng: number
   altitude: number
+  heading: number
+  pitch: number
+  bank: number
 }
 
 interface FlightAnimationProps {
   globe: GlobeInstance | null
   airplaneState: FlightState | null
   isActive: boolean
-  trailColor?: string
   airplaneScale?: number
 }
 
+function toVector(lat: number, lng: number, altitude: number): THREE.Vector3 {
+  const { x, y, z } = latLngToGlobeXYZ(lat, lng, altitude)
+  return new THREE.Vector3(x, y, z)
+}
+
+/** Imperative in-scene aircraft: React never rebuilds the mesh per frame. */
 export function FlightAnimation({
   globe,
   airplaneState,
   isActive,
-  trailColor = '#00ff88',
-  airplaneScale = 0.005
+  airplaneScale = 0.62,
 }: FlightAnimationProps) {
-  const airplaneRef = useRef<THREE.Mesh | null>(null)
-  const trailRef = useRef<THREE.Line | null>(null)
+  const airplaneRef = useRef<THREE.Group | null>(null)
 
   useEffect(() => {
-    if (!globe || !isActive || !airplaneState?.isFlying) {
-      // Cleanup
-      if (airplaneRef.current && globe) {
-        globe.scene().remove(airplaneRef.current)
-        airplaneRef.current = null
-      }
-      if (trailRef.current && globe) {
-        globe.scene().remove(trailRef.current)
-        trailRef.current = null
-      }
+    if (!globe || !isActive) return
+
+    const airplane = createAirplaneModel()
+    airplane.visible = false
+    globe.scene().add(airplane)
+    airplaneRef.current = airplane
+
+    return () => {
+      globe.scene().remove(airplane)
+      disposeAirplaneModel(airplane)
+      if (airplaneRef.current === airplane) airplaneRef.current = null
+    }
+  }, [globe, isActive])
+
+  useEffect(() => {
+    const airplane = airplaneRef.current
+    if (!airplane || !airplaneState?.isFlying) {
+      if (airplane) airplane.visible = false
       return
     }
 
-    // Simple airplane visualization using a cone
-    if (!airplaneRef.current) {
-      const geometry = new THREE.ConeGeometry(5, 20, 8)
-      const material = new THREE.MeshBasicMaterial({ color: 0xff6b35 })
-      airplaneRef.current = new THREE.Mesh(geometry, material)
-      globe.scene().add(airplaneRef.current)
-    }
+    const altitude = Math.max(0.01, airplaneState.altitude)
+    const position = toVector(airplaneState.lat, airplaneState.lng, altitude)
+    airplane.position.copy(position)
 
-    // Update airplane position based on flight state
-    const { fromLat, fromLng, toLat, toLng, progress, altitude } = airplaneState
+    // Build a tangent heading from local north/east vectors. This keeps the
+    // aircraft flush with the globe and prevents the old cone from pointing
+    // into the planet or drifting away from the visible route.
+    const radialUp = position.clone().normalize()
+    const north = toVector(
+      Math.min(89.99, airplaneState.lat + 0.1),
+      airplaneState.lng,
+      altitude,
+    ).sub(position).projectOnPlane(radialUp).normalize()
+    const east = toVector(
+      airplaneState.lat,
+      airplaneState.lng + 0.1,
+      altitude,
+    ).sub(position).projectOnPlane(radialUp).normalize()
+    const heading = THREE.MathUtils.degToRad(airplaneState.heading)
+    const forward = north.multiplyScalar(Math.cos(heading))
+      .add(east.multiplyScalar(Math.sin(heading)))
+      .normalize()
 
-    // Ride the great circle (matching the rendered arc) — linear lat/lng
-    // interpolation cuts the corner on long routes and drifts off the arc.
-    const { lat, lng } = gcInterpolate(
-      { lat: fromLat, lng: fromLng },
-      { lat: toLat, lng: toLng },
-      progress
-    )
-    const alt = altitude * 0.01 // Convert to globe units
-
-    const { x, y, z } = latLngToGlobeXYZ(lat, lng, alt)
-
-    if (airplaneRef.current) {
-      airplaneRef.current.position.set(x, y, z)
-      airplaneRef.current.lookAt(0, 0, 0)
-      airplaneRef.current.scale.set(airplaneScale, airplaneScale, airplaneScale)
-    }
-
-  }, [globe, airplaneState, isActive, airplaneScale, trailColor])
+    airplane.up.copy(radialUp)
+    airplane.lookAt(position.clone().add(forward))
+    airplane.rotateZ(THREE.MathUtils.degToRad(-airplaneState.bank))
+    airplane.rotateX(THREE.MathUtils.degToRad(airplaneState.pitch * 0.35))
+    airplane.scale.setScalar(airplaneScale)
+    airplane.visible = true
+  }, [airplaneState, airplaneScale])
 
   return null
 }

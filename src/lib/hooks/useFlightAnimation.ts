@@ -283,9 +283,11 @@ export function useFlightAnimation(
 
     // Auto-play if enabled
     if (autoPlayEnabled && newLocations.length > 1) {
-      play()
+      setIsPlaying(true)
+      setIsPaused(false)
+      animationEngineRef.current?.play()
     }
-  }, [generateFlightPaths, initializeEngine, autoPlayEnabled, play])
+  }, [generateFlightPaths, initializeEngine, autoPlayEnabled])
 
   /**
    * Pause flight animation
@@ -413,7 +415,7 @@ export function useFlightAnimation(
       setProgress({
         currentSegment: engineProgress.segment,
         totalSegments: engineProgress.total,
-        segmentProgress: engineProgress.percentage - (engineProgress.segment / engineProgress.total) * 100,
+        segmentProgress: engineProgress.segmentPercentage,
         overallProgress: engineProgress.percentage,
         currentLocation,
         nextLocation,

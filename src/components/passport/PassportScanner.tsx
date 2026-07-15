@@ -2,15 +2,15 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { X } from 'lucide-react'
+import { RefreshCw, X } from 'lucide-react'
 import { decodeQrFromImageData, extractPassportConnectPath } from '@/lib/utils/qr-decode'
 import { localizePath } from '@/lib/utils/native-routes'
 import { log } from '@/lib/utils/logger'
 
 /** Max dimension (px) we downscale frames to before QR decoding, for performance. */
-const MAX_FRAME_DIMENSION = 640
+const MAX_FRAME_DIMENSION = 960
 /** Scan cadence in ms. */
-const SCAN_INTERVAL_MS = 250
+const SCAN_INTERVAL_MS = 180
 /** How long the "not a passport" hint stays visible / is debounced. */
 const HINT_DURATION_MS = 2200
 
@@ -21,6 +21,7 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const dialogRef = useRef<HTMLDivElement | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement | null>(null)
 
   // Lifecycle refs — never trigger re-renders, safe to read in async callbacks.
@@ -33,6 +34,7 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
 
   const [status, setStatus] = useState<ScannerStatus>('initializing')
   const [hint, setHint] = useState<string | null>(null)
+  const [retryKey, setRetryKey] = useState(0)
 
   /** Stop every track and tear down the scan loop. Idempotent. */
   const teardown = useCallback(() => {
@@ -144,7 +146,11 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
           audio: false,
         })
 
@@ -192,7 +198,7 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
       }
       teardown()
     }
-  }, [scanFrame, teardown])
+  }, [scanFrame, teardown, retryKey])
 
   // Focus the close button on mount + Esc to close.
   useEffect(() => {
@@ -202,6 +208,20 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
       if (e.key === 'Escape') {
         e.preventDefault()
         onClose()
+      } else if (e.key === 'Tab') {
+        const controls = Array.from(
+          dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]') ?? [],
+        )
+        if (controls.length === 0) return
+        const first = controls[0]
+        const last = controls[controls.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
       }
     }
     window.addEventListener('keydown', onKeyDown)
@@ -210,6 +230,7 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="Scan a passport"
@@ -250,10 +271,14 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
             </p>
             <button
               type="button"
-              onClick={onClose}
-              className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-[var(--color-coral)] px-6 text-sm font-semibold text-white outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
+              onClick={() => {
+                setStatus('initializing')
+                setRetryKey((key) => key + 1)
+              }}
+              className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--color-coral)] px-6 text-sm font-semibold text-white outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[var(--color-coral)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card)]"
             >
-              Close
+              <RefreshCw className="size-4" aria-hidden />
+              Try camera again
             </button>
           </div>
         ) : (
@@ -277,6 +302,15 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
 
               {/* Coral corner accents */}
               <CornerAccents />
+
+              {/* A restrained scan line makes the active state obvious while
+                  staying out of the captured canvas. */}
+              {status === 'scanning' && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-5 top-1/2 h-px bg-gradient-to-r from-transparent via-[var(--color-coral-soft)] to-transparent shadow-[0_0_12px_var(--color-coral)] motion-safe:animate-pulse motion-reduce:hidden"
+                />
+              )}
             </div>
 
             {/* Inline hint (non-passport QR). aria-live so SRs announce it. */}
@@ -291,8 +325,13 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
         )}
       </main>
 
-      {/* Footer spacer keeps the layout balanced + respects safe area */}
-      <footer className="w-full pb-[max(1.5rem,env(safe-area-inset-bottom))]" />
+      <footer className="w-full pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center">
+        {status === 'scanning' && (
+          <p className="text-xs text-white/55" aria-live="polite">
+            Hold steady — scanning automatically
+          </p>
+        )}
+      </footer>
     </div>
   )
 }

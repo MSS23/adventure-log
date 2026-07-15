@@ -9,16 +9,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
 import {
-  Globe, MapPin, Camera, Route, Share2, Loader2, Compass, Plane,
-  Copy, Check, ScanLine,
+  Globe, MapPin, Camera, Route, Share2, Loader2, Plane,
+  Copy, Check, ScanLine, RefreshCw,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { StreakBadge } from '@/components/profile/StreakBadge'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
+import { PassportQrCode } from '@/components/passport/PassportQrCode'
 import { getCountryName } from '@/lib/utils/country'
 import { parseLocalDate } from '@/lib/utils/travel-date'
 import { CONTINENT_EMOJI, type Continent } from '@/lib/utils/continents'
@@ -137,40 +137,6 @@ function buildJourneyStatements(d: {
 // ---------------------------------------------------------------------------
 // QR Code component — premium passport style
 // ---------------------------------------------------------------------------
-function PassportQRCode({ url, size = 180 }: { url: string; size?: number }) {
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!url) return
-    // qrcode is lazy-loaded: QR generation only happens on this page, so the
-    // library shouldn't ride in the shared vendor bundle on every route.
-    import('qrcode')
-      .then(({ default: QRCode }) =>
-        QRCode.toDataURL(url, {
-          width: size * 2,
-          margin: 2,
-          color: { dark: '#2d3a1a', light: '#ffffff' },
-          errorCorrectionLevel: 'M',
-        })
-      )
-      .then(setQrDataUrl)
-      .catch(() => {})
-  }, [url, size])
-
-  if (!qrDataUrl) return <div style={{ width: size, height: size }} className="bg-muted rounded-xl animate-pulse" />
-
-  return (
-    <div className="relative">
-      <div className="rounded-2xl overflow-hidden bg-card p-3 border border-border">
-        <Image src={qrDataUrl} alt="QR Code" width={size} height={size} className="block rounded-xl" />
-      </div>
-      <div className="absolute -bottom-2 -right-2 size-9 rounded-full bg-primary flex items-center justify-center ring-2 ring-background">
-        <Compass className="size-4 text-primary-foreground" />
-      </div>
-    </div>
-  )
-}
-
 // ---------------------------------------------------------------------------
 // Globe Coverage Ring
 // ---------------------------------------------------------------------------
@@ -209,24 +175,26 @@ export default function TravelPassportPage() {
   const [copied, setCopied] = useState(false)
   const [scannerOpen, setScannerOpen] = useState(false)
   const [qrToken, setQrToken] = useState<string | null>(null)
+  const [qrRefreshKey, setQrRefreshKey] = useState(0)
   // 'pending' until the first mint resolves — the QR is NOT rendered in that
   // window. A tokenless QR scanned by a private/friends account silently
   // downgrades the mutual connect to a one-way follow request, which is the
-  // "first scan didn't connect us, second did" bug. 'failed' still renders
-  // the tokenless QR (degraded but functional) so an API outage doesn't
-  // blank the sharing card.
+  // "first scan didn't connect us, second did" bug. A failed mint never
+  // renders a tokenless connection QR: the owner gets a clear retry instead.
   const [qrTokenState, setQrTokenState] = useState<'pending' | 'ready' | 'failed'>('pending')
 
   // Best-effort mint of a short-lived signed connect token for the on-screen
   // QR ONLY. It proves to /api/passport/connect that the scanner physically
   // scanned THIS owner's QR, which authorizes the instant mutual connect even
-  // for private/friends accounts. On any failure we quietly fall back to the
-  // tokenless URL (private/friends scans then downgrade to a follow request).
+  // for private/friends accounts. On failure the QR stays hidden so a scan
+  // can never silently downgrade to a different social outcome.
   // Re-mint every 10 minutes so a QR sheet left open past the 15-minute token
   // TTL (e.g. at a meetup) keeps authorizing instant connects.
   useEffect(() => {
     if (!profile?.username) return
     let cancelled = false
+    setQrToken(null)
+    setQrTokenState('pending')
     const mint = () => {
       apiFetch('/api/passport/qr-token')
         .then(async (res) => (res.ok ? res.json() : null))
@@ -236,12 +204,15 @@ export default function TravelPassportPage() {
             setQrToken(data.token)
             setQrTokenState('ready')
           } else {
+            setQrToken(null)
             setQrTokenState('failed')
           }
         })
         .catch(() => {
-          // Tokenless QR still works, just without the instant-connect path.
-          if (!cancelled) setQrTokenState('failed')
+          if (!cancelled) {
+            setQrToken(null)
+            setQrTokenState('failed')
+          }
         })
     }
     mint()
@@ -250,7 +221,7 @@ export default function TravelPassportPage() {
       cancelled = true
       clearInterval(interval)
     }
-  }, [profile?.username])
+  }, [profile?.username, qrRefreshKey])
 
   // Share links must resolve to /u/[username] — the public passport looks the
   // user up by username, and the QR scanner's validator rejects anything that
@@ -260,11 +231,10 @@ export default function TravelPassportPage() {
     if (typeof window === 'undefined' || !profile?.username) return ''
     // getWebOrigin(): on native, window.location.origin is capacitor://localhost
     // — a QR/share link encoding that would be unopenable on other devices.
-    // withRef: the scanner only validates the pathname (and re-forces
-    // connect=true itself), so the extra ref param is QR-safe, and anyone who
-    // follows the link in a browser and signs up auto-follows the owner.
+    // Ordinary share links open the passport without taking a social action.
+    // Only the short-lived QR variant below carries connect=true.
     return withRef(
-      `${getWebOrigin()}/u/${profile.username}/passport?connect=true`,
+      `${getWebOrigin()}/u/${profile.username}/passport`,
       profile.username
     )
   }, [profile?.username])
@@ -273,8 +243,9 @@ export default function TravelPassportPage() {
   // Copy-link and the share sheet keep the tokenless shareUrl — those links
   // are long-lived and must not embed a 15-minute credential.
   const qrUrl = useMemo(() => {
-    if (!shareUrl) return ''
-    return qrToken ? `${shareUrl}&t=${qrToken}` : shareUrl
+    if (!shareUrl || !qrToken) return ''
+    const separator = shareUrl.includes('?') ? '&' : '?'
+    return `${shareUrl}${separator}connect=true&t=${encodeURIComponent(qrToken)}`
   }, [shareUrl, qrToken])
 
   const handleShare = useCallback(async () => {
@@ -772,8 +743,27 @@ export default function TravelPassportPage() {
                     >
                       <Loader2 className="size-6 animate-spin text-muted-foreground" />
                     </div>
+                  ) : qrTokenState === 'ready' && qrUrl ? (
+                    <PassportQrCode url={qrUrl} size={180} />
                   ) : (
-                    <PassportQRCode url={qrUrl} size={180} />
+                    <div
+                      className="flex flex-col items-center justify-center rounded-2xl border border-border bg-muted/40 p-4 text-center"
+                      style={{ width: 180, height: 180 }}
+                      role="alert"
+                    >
+                      <p className="text-sm font-medium text-foreground">QR code needs a refresh</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Check your connection, then try again.</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setQrRefreshKey((key) => key + 1)}
+                        className="mt-3 gap-2"
+                      >
+                        <RefreshCw className="size-3.5" aria-hidden />
+                        Retry
+                      </Button>
+                    </div>
                   )}
                 </div>
 

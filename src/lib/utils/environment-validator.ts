@@ -149,8 +149,7 @@ export function validateEnvironment(): ValidationResult {
 
   // Distributed rate limiting (Upstash Redis) — expected in production.
   // Without it, rate limiting degrades to per-instance in-memory maps (the
-  // effective limit multiplies across serverless instances) and the
-  // middleware's Redis limiter fails open entirely.
+  // effective limit multiplies across serverless instances).
   //
   // Deliberately NON-FATAL even in production: initializeEnvironmentValidation
   // exits the process on `errors`, and taking every request down over a
@@ -161,7 +160,7 @@ export function validateEnvironment(): ValidationResult {
   if (missingUpstashVars.length > 0) {
     const message =
       `Missing ${missingUpstashVars.join(' and ')} — distributed rate limiting is disabled ` +
-      `and rate limiting fails open without it. Create a free Upstash Redis database at ` +
+      `and limits are enforced per server instance only. Create an Upstash Redis database at ` +
       `https://console.upstash.com, then set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN ` +
       `in your environment (Vercel: Project Settings > Environment Variables).`
     if (envInfo.isProduction) {

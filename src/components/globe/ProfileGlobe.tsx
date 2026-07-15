@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { Globe as GlobeIcon, MapPin, ArrowRight, Maximize2 } from 'lucide-react'
+import { Globe as GlobeIcon, MapPin, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
 import { localizePath } from '@/lib/utils/native-routes'
@@ -238,8 +238,6 @@ export function ProfileGlobe({
       locations.map((loc) => ({
         lat: loc.lat,
         lng: loc.lng,
-        size: 0.55,
-        color: '#F2A179',
         id: loc.id,
         label: loc.title,
         location: loc.location,
@@ -331,15 +329,53 @@ export function ProfileGlobe({
     return arcs
   }, [locations, homeLocation])
 
-  const handlePointClick = useCallback(
-    (point: object) => {
-      const p = point as { id?: string }
-      if (!p.id) return
+  const openAlbum = useCallback(
+    (albumId: string) => {
       // Signed-in viewers get the in-app album page; anonymous visitors the
       // public share view (the in-app route would bounce them to /login).
-      router.push(localizePath(user ? `/albums/${p.id}` : `/albums/${p.id}/public`))
+      router.push(localizePath(user ? `/albums/${albumId}` : `/albums/${albumId}/public`))
     },
     [router, user],
+  )
+
+  // DOM-backed pins have a dependable 44px hit target. The old WebGL points
+  // were visually small and did not expose useful keyboard semantics.
+  const profilePinElement = useCallback(
+    (point: object) => {
+      const pin = point as { id: string; label: string; location: string }
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'profile-globe-pin'
+      button.setAttribute(
+        'aria-label',
+        `Open album: ${pin.label}${pin.location ? `, ${pin.location}` : ''}`,
+      )
+      button.title = pin.location ? `${pin.label} · ${pin.location}` : pin.label
+
+      const marker = document.createElement('span')
+      marker.className = 'profile-globe-pin__marker'
+      marker.innerHTML = `
+        <svg width="34" height="38" viewBox="0 0 34 38" aria-hidden="true" focusable="false">
+          <path d="M17 1.5C8.3 1.5 2 7.8 2 15.8 2 25.5 17 36.5 17 36.5s15-11 15-20.7C32 7.8 25.7 1.5 17 1.5Z" fill="white" stroke="rgba(242,161,121,.95)" stroke-width="2"/>
+          <circle cx="17" cy="15.5" r="8.5" fill="#F2A179"/>
+          <circle cx="17" cy="15.5" r="2.5" fill="white"/>
+        </svg>
+      `
+
+      const tooltip = document.createElement('span')
+      tooltip.className = 'profile-globe-pin__label'
+      tooltip.textContent = pin.location ? `${pin.label} · ${pin.location}` : pin.label
+
+      button.append(marker, tooltip)
+      button.addEventListener('pointerdown', (event) => event.stopPropagation())
+      button.addEventListener('click', (event) => {
+        event.stopPropagation()
+        openAlbum(pin.id)
+      })
+
+      return button
+    },
+    [openAlbum],
   )
 
   const hasLocations = locations.length > 0
@@ -351,9 +387,9 @@ export function ProfileGlobe({
       {/* Globe canvas */}
       <div
         ref={containerRef}
-        className="relative h-72 md:h-96 bg-[#0a0a0a]"
-        role="img"
-        aria-label={`Interactive travel globe: ${locations.length} ${locations.length === 1 ? 'location' : 'locations'} pinned`}
+        className="relative h-72 cursor-pointer bg-[#0a0a0a] md:h-96"
+        role="group"
+        aria-label={`Travel footprint for @${username}: ${locations.length} ${locations.length === 1 ? 'place' : 'places'}. Select a pin to open its album, or select the globe to explore the full view.`}
       >
         {mounted && hasLocations && dimensions.width > 0 ? (
           <GlobeGL
@@ -365,10 +401,11 @@ export function ProfileGlobe({
             showAtmosphere={true}
             atmosphereColor="rgb(135, 206, 250)"
             atmosphereAltitude={0.15}
-            pointsData={pinData}
-            pointAltitude={0.02}
-            pointRadius={0.45}
-            pointColor={() => '#F2A179'}
+            htmlElementsData={pinData}
+            htmlLat="lat"
+            htmlLng="lng"
+            htmlAltitude={0.025}
+            htmlElement={profilePinElement}
             arcsData={arcsData}
             arcColor={arcColorAccessor}
             arcAltitude={arcAltitudeAccessor}
@@ -381,27 +418,6 @@ export function ProfileGlobe({
                 : arcDashAnimateTimeAccessor
             }
             arcDashInitialGap={arcDashInitialGapAccessor}
-            pointLabel={(d: object) => {
-              const point = d as { label: string; location: string }
-              return `<div style="
-                background: rgba(10,10,10,0.92);
-                padding: 8px 14px;
-                border-radius: 10px;
-                font-size: 13px;
-                color: white;
-                border: 1px solid rgba(242,161,121,0.5);
-                backdrop-filter: blur(12px);
-                font-family: system-ui, -apple-system, sans-serif;
-                line-height: 1.4;
-                max-width: 220px;
-                cursor: pointer;
-              ">
-                <div style="font-weight: 600;">${point.label}</div>
-                ${point.location ? `<div style="color: rgba(255,255,255,0.55); font-size: 11px; margin-top: 2px;">${point.location}</div>` : ''}
-                <div style="color: rgba(242,161,121,0.9); font-size: 10px; margin-top: 4px;">Open album →</div>
-              </div>`
-            }}
-            onPointClick={handlePointClick}
             onGlobeClick={goToFullGlobe}
             enablePointerInteraction={true}
             animateIn={true}
@@ -441,8 +457,8 @@ export function ProfileGlobe({
             <div className="absolute top-3 left-3">
               <div className="bg-black/70 backdrop-blur-2xl rounded-lg px-2.5 py-1.5 border border-white/[0.08] flex items-center gap-1.5 shadow-xl">
                 <MapPin className="h-3 w-3 text-[#F2A179]" />
-                <span className="text-[12px] font-medium text-white/70 tabular-nums">
-                  {locations.length}
+                <span className="text-[12px] font-medium text-white/75 tabular-nums">
+                  {locations.length} mapped {locations.length === 1 ? 'place' : 'places'}
                 </span>
               </div>
             </div>
@@ -452,7 +468,7 @@ export function ProfileGlobe({
           {hasLocations && (
             <div className="absolute bottom-3 left-3">
               <p className="text-[11px] text-white/45 bg-black/40 backdrop-blur-md rounded-md px-2 py-1">
-                Tap a pin to open the album
+                Pins open albums · Tap the globe for the full view
               </p>
             </div>
           )}
@@ -462,16 +478,80 @@ export function ProfileGlobe({
             <button
               type="button"
               onClick={goToFullGlobe}
-              className="cursor-pointer flex items-center gap-1.5 bg-primary text-primary-foreground text-[12px] font-semibold rounded-xl px-3 py-2 shadow-lg transition-opacity duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none active:scale-[0.97]"
+              className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lg transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white active:scale-[0.98]"
               aria-label={`Explore ${username}'s full travel globe`}
             >
-              <Maximize2 className="h-3.5 w-3.5" />
-              Explore globe
-              <ArrowRight className="h-3.5 w-3.5" />
+              <GlobeIcon className="h-4 w-4" aria-hidden />
+              View full globe
+              <ArrowRight className="h-4 w-4" aria-hidden />
             </button>
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        .profile-globe-pin {
+          position: relative;
+          display: grid;
+          width: 44px;
+          height: 44px;
+          cursor: pointer;
+          place-items: center;
+          border: 0;
+          background: transparent;
+          padding: 0;
+          pointer-events: auto;
+        }
+        .profile-globe-pin__marker {
+          display: grid;
+          place-items: center;
+          filter: drop-shadow(0 7px 7px rgba(0, 0, 0, 0.42));
+          transform-origin: 50% 100%;
+          transition: filter 160ms ease, transform 160ms ease;
+        }
+        .profile-globe-pin:hover .profile-globe-pin__marker,
+        .profile-globe-pin:focus-visible .profile-globe-pin__marker {
+          filter: drop-shadow(0 9px 10px rgba(0, 0, 0, 0.58));
+          transform: scale(1.12) translateY(-2px);
+        }
+        .profile-globe-pin:focus-visible {
+          border-radius: 999px;
+          outline: 2px solid white;
+          outline-offset: 2px;
+        }
+        .profile-globe-pin__label {
+          position: absolute;
+          bottom: 46px;
+          left: 50%;
+          z-index: 2;
+          width: max-content;
+          max-width: 190px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: 10px;
+          background: rgba(10, 10, 10, 0.9);
+          padding: 7px 10px;
+          color: white;
+          font: 600 11px/1.35 system-ui, sans-serif;
+          opacity: 0;
+          pointer-events: none;
+          text-overflow: ellipsis;
+          transform: translate(-50%, 4px);
+          transition: opacity 140ms ease, transform 140ms ease;
+          white-space: nowrap;
+        }
+        .profile-globe-pin:hover .profile-globe-pin__label,
+        .profile-globe-pin:focus-visible .profile-globe-pin__label {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .profile-globe-pin__marker,
+          .profile-globe-pin__label {
+            transition: none;
+          }
+        }
+      `}</style>
     </div>
   )
 }

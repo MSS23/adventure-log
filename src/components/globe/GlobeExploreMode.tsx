@@ -30,7 +30,7 @@ interface GlobeExploreModeProps {
 export function GlobeExploreStrip({
   exploreAlbums,
   exploreLoading,
-  exploreStats,
+  exploreStats: _exploreStats,
 }: GlobeExploreModeProps) {
   return (
     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] bg-card/80 backdrop-blur-xl rounded-2xl border border-border px-3 py-2.5 z-10 shadow-2xl">

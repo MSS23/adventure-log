@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { useToast } from '@/components/ui/toast-provider'
+import { toast } from 'sonner'
 import { apiFetch } from '@/lib/api/client'
 import { log } from '@/lib/utils/logger'
 
@@ -96,7 +96,6 @@ export function NotificationSettings() {
   const [emailEnabled, setEmailEnabled] = useState<boolean | null>(null)
   const [emailSaving, setEmailSaving] = useState(false)
   const { user, profile, refreshProfile } = useAuth()
-  const { success, error: showError } = useToast()
   const supabase = createClient()
 
   useEffect(() => {
@@ -127,7 +126,7 @@ export function NotificationSettings() {
         body: JSON.stringify({ email_notifications: next }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      success('Saved!', next ? 'Email notifications enabled' : 'You will no longer receive notification emails')
+      toast.success('Saved!', { description: next ? 'Email notifications enabled' : 'You will no longer receive notification emails' })
       void refreshProfile()
     } catch (error) {
       setEmailEnabled(!next)
@@ -135,7 +134,7 @@ export function NotificationSettings() {
         component: 'NotificationSettings',
         action: 'toggle-email'
       }, error instanceof Error ? error : new Error(String(error)))
-      showError('Save failed', 'Could not update email notifications. Please try again.')
+      toast.error('Save failed', { description: 'Could not update email notifications. Please try again.' })
     } finally {
       setEmailSaving(false)
     }
@@ -192,7 +191,7 @@ export function NotificationSettings() {
 
       if (error) throw error
 
-      success('Saved!', 'Your notification preferences have been updated')
+      toast.success('Saved!', { description: 'Your notification preferences have been updated' })
 
       log.info('Notification preferences saved', {
         component: 'NotificationSettings'
@@ -201,7 +200,7 @@ export function NotificationSettings() {
       log.error('Failed to save preferences', {
         component: 'NotificationSettings'
       }, error instanceof Error ? error : new Error(String(error)))
-      showError('Save failed', 'Could not save your preferences. Please try again.')
+      toast.error('Save failed', { description: 'Could not save your preferences. Please try again.' })
     } finally {
       setSaving(false)
     }

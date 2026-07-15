@@ -212,7 +212,7 @@ export const environmentValidation = {
     'SUPABASE_SERVICE_ROLE_KEY',
     'NEXT_PUBLIC_SITE_URL',
     'OPENWEATHER_API_KEY',
-    'GEMINI_API_KEY',
+    'ANTHROPIC_API_KEY',
     'CRON_SECRET',
     'VERCEL_URL',
     // Required for mobile (Capacitor) builds — deployed web origin that the
@@ -229,7 +229,7 @@ export const environmentValidation = {
   sensitive: [
     'SUPABASE_SERVICE_ROLE_KEY',
     'OPENWEATHER_API_KEY',
-    'GEMINI_API_KEY',
+    'ANTHROPIC_API_KEY',
     'CRON_SECRET',
     'UPSTASH_REDIS_REST_TOKEN',
   ],

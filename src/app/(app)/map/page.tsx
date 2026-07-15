@@ -28,8 +28,13 @@ import {
   Globe as GlobeIcon,
   HelpCircle,
   Map as MapIcon,
+  MapPinned,
   Layers,
   MessageCircleHeart,
+  Route,
+  Star,
+  UsersRound,
+  type LucideIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { WalkthroughTour, type TourStep } from '@/components/ui/walkthrough-tour'
@@ -68,6 +73,16 @@ interface FriendAlbumRow {
     | null
 }
 
+interface BeenAlbumRow {
+  id: string
+  title: string | null
+  location_name: string | null
+  latitude: number | null
+  longitude: number | null
+  date_start: string | null
+  created_at: string
+}
+
 interface TripListEntry {
   id: string
   title: string
@@ -79,6 +94,7 @@ interface TripPinRow {
   name: string
   latitude: number
   longitude: number
+  sort_order: number | null
 }
 
 interface WishlistItemRow {
@@ -112,6 +128,14 @@ const PLATFORM_LABEL: Record<string, string> = {
   other: 'a link',
 }
 
+const LAYER_ICONS: Record<MapLayerKind, LucideIcon> = {
+  been: MapPinned,
+  friends: UsersRound,
+  trips: Route,
+  wishlist: Star,
+  recs: MessageCircleHeart,
+}
+
 function displayNameOf(user: FriendAlbumRow['user']): string {
   const u = Array.isArray(user) ? user[0] : user
   return u?.display_name || u?.username || 'A friend'
@@ -143,7 +167,7 @@ export default function MapPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('albums')
-        .select('id, title, location_name, latitude, longitude')
+        .select('id, title, location_name, latitude, longitude, date_start, created_at')
         .eq('user_id', userId!)
         .or('status.is.null,status.neq.draft')
         .not('latitude', 'is', null)
@@ -151,16 +175,25 @@ export default function MapPage() {
         .limit(500)
       if (error) throw error
 
-      return ((data || []) as Omit<FriendAlbumRow, 'user'>[]).filter(hasCoords).map((a) => ({
-        id: a.id,
-        kind: 'been' as const,
-        latitude: a.latitude!,
-        longitude: a.longitude!,
-        title: a.title || 'Untitled album',
-        subtitle: a.location_name ? `You were here · ${a.location_name}` : 'You were here',
-        href: `/albums/${a.id}`,
-        hrefLabel: 'View album',
-      }))
+      return ((data || []) as BeenAlbumRow[])
+        .filter(hasCoords)
+        .sort((a, b) => {
+          const aTime = Date.parse(a.date_start || a.created_at)
+          const bTime = Date.parse(b.date_start || b.created_at)
+          return (Number.isFinite(aTime) ? aTime : 0) - (Number.isFinite(bTime) ? bTime : 0)
+        })
+        .map((album, routeOrder) => ({
+          id: album.id,
+          kind: 'been' as const,
+          latitude: album.latitude!,
+          longitude: album.longitude!,
+          title: album.title || 'Untitled album',
+          subtitle: album.location_name ? `You were here · ${album.location_name}` : 'You were here',
+          href: `/albums/${album.id}`,
+          hrefLabel: 'View album',
+          routeGroup: `been-${userId}`,
+          routeOrder,
+        }))
     },
   })
 
@@ -250,17 +283,26 @@ export default function MapPage() {
         })
       )
 
-      return details.flatMap((d, i) =>
-        (d?.pins || []).filter(hasCoords).map((p) => ({
-          id: p.id,
-          kind: 'trips' as const,
-          latitude: p.latitude,
-          longitude: p.longitude,
-          title: p.name,
-          subtitle: `Trip: ${withPins[i].title}`,
-          href: `/trips/${withPins[i].id}`,
-          hrefLabel: 'Open trip',
-        }))
+      return details.flatMap((detail, tripIndex) =>
+        (detail?.pins || [])
+          .filter(hasCoords)
+          .sort(
+            (a, b) =>
+              (a.sort_order ?? Number.MAX_SAFE_INTEGER) -
+              (b.sort_order ?? Number.MAX_SAFE_INTEGER)
+          )
+          .map((pin, routeOrder) => ({
+            id: pin.id,
+            kind: 'trips' as const,
+            latitude: pin.latitude,
+            longitude: pin.longitude,
+            title: pin.name,
+            subtitle: `Trip: ${withPins[tripIndex].title}`,
+            href: `/trips/${withPins[tripIndex].id}`,
+            hrefLabel: 'Open trip',
+            routeGroup: `trip-${withPins[tripIndex].id}`,
+            routeOrder,
+          }))
       )
     },
   })
@@ -357,7 +399,7 @@ export default function MapPage() {
         target: 'map-recs-pill',
         title: 'Friends recommend',
         description:
-          'Pink pins are places people you follow recommend — each one says who suggested it and their tip. Like having a mate’s list for every city.',
+          'Recommendation pins use the speech-and-heart marker. Open one to see who suggested it and their tip.',
         icon: <MessageCircleHeart className="h-5 w-5" />,
         placement: 'bottom' as const,
       },
@@ -382,7 +424,7 @@ export default function MapPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3" data-tour-step="map-header">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">Map</h1>
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">Your map</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Where you&apos;ve been, where you&apos;re going, and what friends recommend.
           </p>
@@ -391,7 +433,7 @@ export default function MapPage() {
           <button
             type="button"
             onClick={() => document.getElementById('map-tour-restart-trigger')?.click()}
-            className="inline-flex items-center justify-center rounded-xl border border-border bg-card p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             title="Take a tour"
             aria-label="Take a tour of the map"
           >
@@ -400,7 +442,7 @@ export default function MapPage() {
           {/* Sibling 3D view — mirrors the Map link in the globe's header. */}
           <Link
             href="/globe"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <GlobeIcon className="h-4 w-4" />
             Globe
@@ -409,7 +451,7 @@ export default function MapPage() {
             type="button"
             onClick={handleLocate}
             disabled={locating}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors disabled:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {locating ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -422,9 +464,13 @@ export default function MapPage() {
       </div>
 
       {/* Layer toggles */}
-      <div className="flex flex-wrap items-center gap-2" data-tour-step="map-layer-pills">
+      <div
+        className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border/80 bg-card/80 p-1.5 shadow-sm backdrop-blur-xl"
+        data-tour-step="map-layer-pills"
+      >
         {(Object.keys(LAYER_META) as MapLayerKind[]).map((kind) => {
           const meta = LAYER_META[kind]
+          const LayerIcon = LAYER_ICONS[kind]
           const query = layerQueries[kind]
           const count = query.data?.length ?? 0
           const on = enabled[kind]
@@ -436,17 +482,30 @@ export default function MapPage() {
               aria-pressed={on}
               {...(kind === 'recs' ? { 'data-tour-step': 'map-recs-pill' } : {})}
               className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all cursor-pointer',
+                'inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition-colors cursor-pointer',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 on
-                  ? 'border-transparent text-white shadow-sm'
-                  : 'border-border bg-card text-muted-foreground hover:text-foreground'
+                  ? 'shadow-sm'
+                  : 'border-transparent bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
               )}
-              style={on ? { backgroundColor: meta.color } : undefined}
+              style={
+                on
+                  ? {
+                      backgroundColor: `${meta.color}14`,
+                      borderColor: `${meta.color}40`,
+                      color: meta.color,
+                    }
+                  : undefined
+              }
             >
-              <span aria-hidden>{meta.glyph}</span>
+              <LayerIcon className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
               {meta.label}
-              <span className={cn('text-xs', on ? 'text-white/80' : 'text-muted-foreground')}>
+              <span
+                className={cn(
+                  'inline-flex min-w-6 justify-center rounded-full px-1.5 py-0.5 text-[11px] tabular-nums',
+                  on ? 'bg-background/70' : 'bg-muted text-muted-foreground'
+                )}
+              >
                 {query.isPending ? '…' : count}
               </span>
             </button>
@@ -473,7 +532,7 @@ export default function MapPage() {
 
       {/* The map */}
       <div className="h-[calc(100dvh-330px)] min-h-[420px] lg:h-[calc(100dvh-280px)]">
-        <ExploreMap pins={pins} me={me} flyTarget={flyTarget} />
+        <ExploreMap pins={pins} me={me} flyTarget={flyTarget} loading={anyLoading} />
       </div>
 
       {allEmpty && (

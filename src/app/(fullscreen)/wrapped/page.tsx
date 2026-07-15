@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useWrappedData } from '@/lib/hooks/useWrappedData'
+import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
 import { FlightReelOverlay } from '@/components/wrapped/FlightReelOverlay'
 import { useWrappedVideoExport } from '@/components/wrapped/useWrappedVideoExport'
 import { log } from '@/lib/utils/logger'
@@ -111,6 +112,7 @@ export default function WrappedPage() {
 
 function WrappedExperience() {
   const router = useRouter()
+  const prefersReducedMotion = useReducedMotion()
   const { user, profile } = useAuth()
   const searchParams = useSearchParams()
   const currentYear = new Date().getFullYear()
@@ -294,12 +296,12 @@ function WrappedExperience() {
     // One geolocated trip still gets a globe moment (WrappedGlobe runs a
     // single-pin "spotlight" cinematic). Only skip to stats when there is
     // literally nothing to place on the globe.
-    if (data.locations.length < 1) {
+    if (prefersReducedMotion || data.locations.length < 1) {
       setPhase('stats')
     } else {
       setPhase('globe')
     }
-  }, [data.locations.length])
+  }, [data.locations.length, prefersReducedMotion])
 
   const handleGlobeProgress = useCallback((progress: number, idx: number) => {
     setFlightProgress(progress)

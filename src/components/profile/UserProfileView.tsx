@@ -532,7 +532,19 @@ export function UserProfileView({ userIdOrUsername }: { userIdOrUsername: string
         {/* ───────── Footprint ───────── */}
         {(footprint.length > 0 || countryCodes.length > 0) && (
           <div>
-            <p className="al-eyebrow mb-3">Footprint</p>
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <p className="al-eyebrow">Footprint</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Select a pin for an album, or tap the globe to explore their world.
+                </p>
+              </div>
+              {footprint.length > 0 && (
+                <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium tabular-nums text-muted-foreground">
+                  {footprint.length} mapped {footprint.length === 1 ? 'place' : 'places'}
+                </span>
+              )}
+            </div>
 
             {footprint.length > 0 && (
               <ProfileGlobe

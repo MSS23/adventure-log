@@ -49,7 +49,10 @@ export async function decodeQrFromImageData(
 
   const { default: jsQR } = await import('jsqr')
   const result = jsQR(imageData.data, imageData.width, imageData.height, {
-    inversionAttempts: 'dontInvert',
+    // Phone-to-phone scans often invert under dark mode, glare, or camera
+    // exposure. Trying both polarities costs a little CPU but removes a major
+    // source of "it only scans sometimes" behaviour on iOS.
+    inversionAttempts: 'attemptBoth',
   })
   return result ? result.data : null
 }

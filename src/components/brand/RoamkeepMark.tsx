@@ -33,10 +33,9 @@ export function RoamkeepMark({
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z" />
-          <path d="M9.2 10.3c1.5-1.9 4.1-1.9 5.6 0" />
-          <path d="M10.3 12.5c1-.9 2.4-.9 3.4 0" />
-          <circle cx="12" cy="9" r="1" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M3.8 12h16.4M5.2 8.1c4.5 2 9.1 2 13.6 0M5.2 15.9c4.5-2 9.1-2 13.6 0" />
+          <path d="M12 3.5c-3 2.7-3 14.3 0 17M12 3.5c3 2.7 3 14.3 0 17" />
         </svg>
       </span>
 

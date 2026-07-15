@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/nextjs'
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
+  enabled: Boolean(process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN),
 
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
@@ -10,8 +11,8 @@ Sentry.init({
   debug: false,
 
   // Configure the environment
-  environment: process.env.NODE_ENV || 'development',
+  environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'development',
 
   // Release tracking
-  release: process.env.npm_package_version || '1.1.0',
+  release: process.env.SENTRY_RELEASE || process.env.VERCEL_GIT_COMMIT_SHA || process.env.npm_package_version,
 })

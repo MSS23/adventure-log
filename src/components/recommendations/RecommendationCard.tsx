@@ -1,12 +1,12 @@
 'use client'
 
-import { ChevronUp, MapPin } from 'lucide-react'
+import { Check, ChevronUp, MapPin } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { getPhotoUrl } from '@/lib/utils/photo-url'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { useToggleBump } from '@/lib/hooks/usePlaceRecommendations'
+import { useToggleBump, useToggleRecommendationCompletion } from '@/lib/hooks/usePlaceRecommendations'
 import { getDisplayInitial } from '@/lib/utils/display-name'
 import { PLACE_TYPE_CONFIG } from './place-type'
 import type { PlaceRecommendation } from '@/types/database'
@@ -23,6 +23,7 @@ function getCreator(rec: PlaceRecommendation) {
 export function RecommendationCard({ recommendation }: RecommendationCardProps) {
   const reduceMotion = useReducedMotion()
   const toggleBump = useToggleBump()
+  const toggleCompletion = useToggleRecommendationCompletion()
   const { user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
@@ -31,6 +32,7 @@ export function RecommendationCard({ recommendation }: RecommendationCardProps) 
   const TypeIcon = config.icon
   const creator = getCreator(recommendation)
   const bumped = !!recommendation.has_bumped
+  const completed = !!recommendation.has_completed
 
   const creatorName =
     creator?.display_name || creator?.username || 'A traveler'
@@ -50,6 +52,14 @@ export function RecommendationCard({ recommendation }: RecommendationCardProps) 
     }
     if (toggleBump.isPending) return
     toggleBump.mutate({ id: recommendation.id })
+  }
+
+  const handleCompletion = () => {
+    if (!user) {
+      router.push(`/login?redirectTo=${encodeURIComponent(pathname || '/explore/recommendations')}`)
+      return
+    }
+    if (!toggleCompletion.isPending) toggleCompletion.mutate({ id: recommendation.id })
   }
 
   return (
@@ -131,8 +141,9 @@ export function RecommendationCard({ recommendation }: RecommendationCardProps) 
           </p>
         )}
 
-        {/* Creator */}
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          {/* Creator */}
+          <div className="flex items-center gap-2">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -155,6 +166,25 @@ export function RecommendationCard({ recommendation }: RecommendationCardProps) 
               {creatorName}
             </span>
           </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleCompletion}
+            disabled={toggleCompletion.isPending}
+            aria-pressed={completed}
+            className={cn(
+              'inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3 text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]/40',
+              completed
+                ? 'border-[color:var(--color-forest)] bg-[color:var(--color-forest)] text-white'
+                : 'border-[color:var(--color-line-warm)] bg-white text-[color:var(--color-ink-soft)] hover:border-[color:var(--color-forest)]/40 hover:text-[color:var(--color-forest)] dark:bg-white/[0.04] dark:border-white/[0.1]'
+            )}
+          >
+            <Check className="h-3.5 w-3.5" aria-hidden />
+            {completed ? 'Done' : 'I did this'}
+            {(recommendation.completion_count || 0) > 0 && (
+              <span className="tabular-nums opacity-75">{recommendation.completion_count}</span>
+            )}
+          </button>
         </div>
       </div>
     </article>

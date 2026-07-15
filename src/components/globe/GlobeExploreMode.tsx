@@ -24,6 +24,8 @@ interface GlobeExploreModeProps {
   exploreAlbums: ExploreAlbum[]
   exploreLoading: boolean
   exploreStats: { travelers: number; albums: number }
+  period: 'month' | 'year' | 'all'
+  onPeriodChange: (period: 'month' | 'year' | 'all') => void
 }
 
 /** Explore mode filmstrip shown at the bottom of the globe */
@@ -31,6 +33,8 @@ export function GlobeExploreStrip({
   exploreAlbums,
   exploreLoading,
   exploreStats: _exploreStats,
+  period,
+  onPeriodChange,
 }: GlobeExploreModeProps) {
   return (
     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-[1200px] bg-card/80 backdrop-blur-xl rounded-2xl border border-border px-3 py-2.5 z-10 shadow-2xl">
@@ -46,9 +50,24 @@ export function GlobeExploreStrip({
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-1.5 mb-2 px-0.5">
-            <Compass className="h-3 w-3 text-olive-500" />
-            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Community</span>
+          <div className="mb-2 flex items-center justify-between gap-3 px-0.5">
+            <span className="flex items-center gap-1.5">
+              <Compass className="h-3 w-3 text-olive-500" />
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">World pulse</span>
+            </span>
+            <span className="flex rounded-full border border-border bg-background/60 p-0.5" role="group" aria-label="Popularity period">
+              {(['month', 'year', 'all'] as const).map(option => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => onPeriodChange(option)}
+                  aria-pressed={period === option}
+                  className={`min-h-7 rounded-full px-2.5 text-[10px] font-semibold capitalize transition-colors ${period === option ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  {option === 'all' ? 'All time' : option}
+                </button>
+              ))}
+            </span>
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             {exploreAlbums.map((album) => (

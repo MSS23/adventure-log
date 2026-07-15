@@ -6,7 +6,7 @@
  * always allowed and is NOT represented here.
  *
  * This module has no React dependency so it can be read at module-init time
- * (e.g. in sentry.client.config.ts) as well as from hooks/components.
+ * (e.g. in instrumentation-client.ts) as well as from hooks/components.
  */
 
 export const CONSENT_STORAGE_KEY = 'adventure-log-consent'

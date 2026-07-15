@@ -75,14 +75,14 @@
   --secondary-foreground: #17201C;
   --muted: #EFEEE8;
   --muted-foreground: #626B65;
-  --accent: #B94A3A;
+  --accent: #2F876E;
   --accent-foreground: #FFFFFF;
   --destructive: #DC2626;
   --border: #E2E0D8;
   --input: #EFEEE8;
   --ring: #1F6B57;
   --chart-1: #1F6B57;
-  --chart-2: #B94A3A;
+  --chart-2: #2F876E;
   --chart-3: #7FA078;
   --chart-4: #0EA5E9;
   --chart-5: #17201C;
@@ -111,9 +111,9 @@
   --color-forest-tint: #E5EFE9;
 
   /* Coral → Mint — secondary accent (location pin / likes) */
-  --color-coral: #B94A3A;
-  --color-coral-soft: #DD8879;
-  --color-coral-tint: #F8E7E3;
+  --color-coral: #2F876E;
+  --color-coral-soft: #73AA98;
+  --color-coral-tint: #E2F1EB;
 
   /* Gold — tertiary accent (compass / camera flash) */
   --color-gold: #D4A24A;
@@ -122,7 +122,7 @@
 
   --color-sky: #0EA5E9;
   --color-sky-tint: #DBEFFB;
-  --color-stamp: #B94A3A;
+  --color-stamp: #2F876E;
 
   /* Elevation ramp — "Soft UI Evolution": resting → hover → overlay.
      One consistent scale for every card/sheet/popover so depth never drifts.
@@ -146,14 +146,14 @@
   --secondary-foreground: #F7F4EC;
   --muted: #202B25;
   --muted-foreground: #A7B1A9;
-  --accent: #DD8879;
-  --accent-foreground: #24100C;
+  --accent: #A9BE9A;
+  --accent-foreground: #101813;
   --destructive: #F87171;
   --border: rgba(226, 232, 240, 0.10);
   --input: rgba(226, 232, 240, 0.08);
   --ring: #91B18B;
   --chart-1: #91B18B;
-  --chart-2: #DD8879;
+  --chart-2: #A9BE9A;
   --chart-3: #A9BE9A;
   --chart-4: #38BDF8;
   --chart-5: #F7F4EC;
@@ -182,9 +182,9 @@
   --color-forest-tint: rgba(145, 177, 139, 0.18);
 
   /* Coral → Mint — secondary accent */
-  --color-coral: #DD8879;
-  --color-coral-soft: #E8A89E;
-  --color-coral-tint: rgba(221, 136, 121, 0.18);
+  --color-coral: #A9BE9A;
+  --color-coral-soft: #CCD8C1;
+  --color-coral-tint: rgba(169, 190, 154, 0.18);
 
   /* Gold — tertiary accent */
   --color-gold: #E0B961;
@@ -193,7 +193,7 @@
 
   --color-sky: #38BDF8;
   --color-sky-tint: rgba(56, 189, 248, 0.14);
-  --color-stamp: #F87171;
+  --color-stamp: #A9BE9A;
 
   /* Elevation ramp (dark) — deeper cast + faint cool top inner-highlight so
      cards still read as raised against the near-black slate background. */

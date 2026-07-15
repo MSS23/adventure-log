@@ -18,9 +18,11 @@ const FOREST = '#1F6B57'
 const CREAM = '#FFFDF8'
 
 const markPaths = `
-  <path d="M256 420s116-101 116-218a116 116 0 1 0-232 0c0 117 116 218 116 218Z" fill="none" stroke="${CREAM}" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M202 208c29-37 79-37 108 0M224 251c19-17 45-17 64 0" fill="none" stroke="${CREAM}" stroke-width="30" stroke-linecap="round"/>
-  <circle cx="256" cy="182" r="17" fill="${CREAM}"/>`
+  <g fill="none" stroke="${CREAM}" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="256" cy="256" r="142"/>
+    <path d="M114 256h284M135 190c78 36 164 36 242 0M135 322c78-36 164-36 242 0"/>
+    <path d="M256 114c-54 45-54 239 0 284M256 114c54 45 54 239 0 284"/>
+  </g>`
 
 const fullIconSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="${FOREST}"/>${markPaths}</svg>`)
 const roundIconSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><circle cx="256" cy="256" r="256" fill="${FOREST}"/>${markPaths}</svg>`)

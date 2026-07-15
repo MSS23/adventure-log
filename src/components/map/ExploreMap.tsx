@@ -273,7 +273,7 @@ export default function ExploreMap({ pins, me, flyTarget, loading = false }: Exp
           height: 14px;
           border: 3px solid white;
           border-radius: 999px;
-          background: #0ea5e9;
+          background: #2F876E;
           box-shadow: 0 2px 6px rgba(3, 105, 161, 0.35);
         }
         .adventure-map-popup .leaflet-popup-content-wrapper {

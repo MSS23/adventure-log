@@ -63,25 +63,71 @@ async function resolveShortUrl(url: string): Promise<string | null> {
   }
 }
 
-async function geocodeText(origin: string, text: string): Promise<ParsedPlace | null> {
+export interface PlaceRequestAuth {
+  cookie?: string | null
+  authorization?: string | null
+  refreshToken?: string | null
+}
+
+/**
+ * Build progressively broader searches for pasted, human-formatted addresses.
+ * Google Maps shares often contain a venue plus a long (and occasionally
+ * machine-translated) address. Geocoders can miss the whole string while
+ * knowing the venue perfectly, especially for Japanese POIs.
+ */
+export function buildGeocodeQueries(text: string): string[] {
+  const normalized = text.replace(/\s+/g, ' ').trim()
+  const firstPart = normalized.split(',')[0]?.trim() || normalized
+  const venueOnly = firstPart
+    // Common category suffixes are often appended to the canonical Japanese
+    // POI name in copied text, e.g. よみうりランド遊園 -> よみうりランド.
+    .replace(/(?:遊園地?|テーマパーク)$/u, '')
+    .trim()
+
+  return [...new Set([normalized, venueOnly, firstPart].filter(query => query.length >= 2))]
+}
+
+async function geocodeText(
+  origin: string,
+  text: string,
+  auth: PlaceRequestAuth = {}
+): Promise<ParsedPlace | null> {
   try {
-    const res = await fetch(`${origin}/api/geocode?q=${encodeURIComponent(text)}`, {
-      headers: { 'Content-Type': 'application/json' },
-    })
-    if (!res.ok) return null
-    const data = await res.json()
-    if (!Array.isArray(data) || data.length === 0) return null
-    const first = data[0]
-    const lat = parseFloat(first.lat)
-    const lng = parseFloat(first.lon)
-    if (!isFinite(lat) || !isFinite(lng)) return null
-    return {
-      name: text.length > 60 ? text.slice(0, 60) : text,
-      latitude: lat,
-      longitude: lng,
-      address: first.display_name || null,
-      source_url: null,
+    const headers = new Headers({ Accept: 'application/json' })
+    if (auth.cookie) headers.set('cookie', auth.cookie)
+    if (auth.authorization) headers.set('authorization', auth.authorization)
+    if (auth.refreshToken) headers.set('x-refresh-token', auth.refreshToken)
+
+    const queries = buildGeocodeQueries(text)
+    for (let index = 0; index < queries.length; index += 1) {
+      const query = queries[index]
+      const res = await fetch(`${origin}/api/geocode?q=${encodeURIComponent(query)}`, { headers })
+      if (res.ok) {
+        const data = await res.json()
+        if (Array.isArray(data) && data.length > 0) {
+          const first = data[0]
+          const lat = parseFloat(first.lat)
+          const lng = parseFloat(first.lon)
+          if (isFinite(lat) && isFinite(lng)) {
+            const resolvedName = String(first.display_name || query).split(',')[0]?.trim()
+            return {
+              name: (resolvedName || query).slice(0, 200),
+              latitude: lat,
+              longitude: lng,
+              address: first.display_name || null,
+              source_url: null,
+            }
+          }
+        }
+      }
+
+      // Nominatim's public service allows at most one request per second.
+      // Only pause when broadening a failed search; successful searches stay fast.
+      if (index < queries.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1100))
+      }
     }
+    return null
   } catch {
     return null
   }
@@ -92,7 +138,8 @@ async function geocodeText(origin: string, text: string): Promise<ParsedPlace | 
  */
 export async function parsePlaceInput(
   input: string,
-  originUrl: string
+  originUrl: string,
+  auth: PlaceRequestAuth = {}
 ): Promise<ParsedPlace | null> {
   const trimmed = input.trim()
   if (!trimmed) return null
@@ -134,7 +181,7 @@ export async function parsePlaceInput(
 
     // URL but no coords — try geocoding the extracted name
     if (nameFromUrl) {
-      const geo = await geocodeText(originUrl, nameFromUrl)
+      const geo = await geocodeText(originUrl, nameFromUrl, auth)
       if (geo) return { ...geo, source_url: trimmed }
     }
 
@@ -142,5 +189,5 @@ export async function parsePlaceInput(
   }
 
   // Case 3: plain text → geocode
-  return geocodeText(originUrl, trimmed)
+  return geocodeText(originUrl, trimmed, auth)
 }

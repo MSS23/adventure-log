@@ -440,7 +440,7 @@ async function main() {
       '\n[mobile-build] WARNING: NEXT_PUBLIC_API_BASE_URL is not set.\n' +
         '  The static bundle will be built, but /api/* calls from the\n' +
         '  Capacitor WebView will fail at runtime. Set it to the deployed\n' +
-        '  web URL, e.g. https://adventurelog.com\n',
+        '  web URL, e.g. https://roamkeep.net\n',
     )
   }
 

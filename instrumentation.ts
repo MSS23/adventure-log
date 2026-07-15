@@ -28,7 +28,7 @@ export const onRequestError = async (
   context: { routerKind: string; routePath: string; routeType: string; renderSource: string }
 ) => {
   // Only import Sentry if DSN is configured
-  if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  if (process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN) {
     const Sentry = await import('@sentry/nextjs')
     Sentry.captureRequestError(err, request, context)
   }

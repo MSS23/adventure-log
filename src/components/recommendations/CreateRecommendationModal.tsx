@@ -184,6 +184,10 @@ export function CreateRecommendationModal({
 
   const handlePick = (result: GeocodeResult) => {
     setPicked(toPickedPlace(result))
+    // The selected POI already has the best canonical name. Fill it for the
+    // traveler so creating a recommendation is one search + one useful tip,
+    // while preserving any title they deliberately typed first.
+    if (!title.trim()) setTitle(result.display_name.split(',')[0]?.trim() || '')
     setShowResults(false)
     setResults([])
     setActiveIndex(-1)

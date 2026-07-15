@@ -35,7 +35,7 @@ export interface FlyTarget {
 // 'saved' layer removed in migration 67 — saved places ARE wishlist items now.
 // Iteration order here is also the pill order on /map.
 export const LAYER_META: Record<MapLayerKind, { label: string; color: string }> = {
-  friends: { label: 'Friends', color: '#5B5BD6' },
-  wishlist: { label: 'Wishlist', color: '#B96800' },
-  recs: { label: 'Friends recommend', color: '#C2416C' },
+  friends: { label: 'Friends', color: '#174C3F' },
+  wishlist: { label: 'Wishlist', color: '#4F8F72' },
+  recs: { label: 'Friends recommend', color: '#86A96F' },
 }

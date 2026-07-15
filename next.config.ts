@@ -431,7 +431,7 @@ const nextConfig: NextConfig = {
 // to run them. In `output: 'export'` mode there isn't one, and the wrapper's
 // instrumentation hook generation conflicts with the static exporter. Skip
 // it for mobile builds — error reporting on the Capacitor app is handled
-// client-side via `instrumentation-client` / sentry.client.config.
+// client-side via `instrumentation-client.ts`.
 //
 // Additionally: even on the web target, withSentryConfig pulls in
 // @opentelemetry/* and Sentry instrumentation. When no Sentry env vars are
@@ -450,6 +450,9 @@ const sentryEnabled = Boolean(
 const finalConfig = isMobile || !sentryEnabled
   ? withBundleAnalyzer(nextConfig)
   : withSentryConfig(withBundleAnalyzer(nextConfig), {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
       // Suppresses source map upload logs during build
       silent: true,
 
@@ -457,6 +460,10 @@ const finalConfig = isMobile || !sentryEnabled
       sourcemaps: {
         deleteSourcemapsAfterUpload: true,
       },
+
+      // More client chunks means slightly longer builds, but substantially
+      // more readable production stack traces when a lazy route fails.
+      widenClientFileUpload: true,
 
       // Automatically tree-shake Sentry debug statements to reduce bundle size.
       // The replay iframe/shadow-DOM recorders are excluded too: replay is

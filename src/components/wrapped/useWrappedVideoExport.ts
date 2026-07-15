@@ -33,7 +33,7 @@ interface ActiveSession {
   startedAt: number
 }
 
-const FALLBACK_ORIGIN = 'https://adventure-log-azure.vercel.app'
+const FALLBACK_ORIGIN = 'https://roamkeep.net'
 
 export function useWrappedVideoExport({ year }: { year: number | 'all' }) {
   const [supported, setSupported] = useState(false)

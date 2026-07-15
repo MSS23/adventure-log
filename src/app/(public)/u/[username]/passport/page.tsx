@@ -20,7 +20,7 @@ export async function generateMetadata({
     .single()
 
   const displayName = user?.display_name || user?.username || 'Traveler'
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventure-log-azure.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://roamkeep.net'
 
   return {
     title: `${displayName}'s Travel Passport | Roamkeep`,

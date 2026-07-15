@@ -81,9 +81,10 @@ async function mapboxSearch(query: string): Promise<NormalizedResult[]> {
     new URLSearchParams({
       access_token: MAPBOX_TOKEN!,
       limit: '8',
-      language: 'en',
-      // Travel-relevant result types; keeps noise (addresses, POI spam) down.
-      types: 'country,region,place,locality,district',
+      language: 'ja,en',
+      // Pins and friend recommendations need exact venues and street addresses,
+      // not only city-level results (e.g. theme parks and restaurants in Japan).
+      types: 'poi,address,country,region,place,locality,district',
     }).toString()
 
   const response = await fetch(url)
@@ -118,7 +119,7 @@ async function nominatimFetch(nominatimUrl: string): Promise<unknown> {
   const contact =
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    'https://adventure-log-azure.vercel.app'
+    'https://roamkeep.net'
   const response = await fetch(nominatimUrl, {
     headers: { 'User-Agent': `AdventureLog/1.0 (+${contact})` },
   })
@@ -193,9 +194,6 @@ async function photonSearch(query: string): Promise<NormalizedResult[]> {
       q: query,
       limit: '8',
       lang: 'en',
-      // Same intent as the Mapbox `types` filter: places (countries, cities,
-      // towns, villages), not street addresses or POI noise.
-      osm_tag: 'place',
     }).toString()
   const response = await fetch(url)
   if (!response.ok) throw new Error(`Photon search error: ${response.status}`)
@@ -263,7 +261,13 @@ export async function GET(request: NextRequest) {
       const data = isReverse
         ? await mapboxReverse(lat!, lon!)
         : await mapboxSearch(query!)
-      return NextResponse.json(data ?? (isReverse ? {} : []), { headers: cacheHeaders })
+      if (isReverse || (Array.isArray(data) && data.length > 0)) {
+        return NextResponse.json(data ?? {}, { headers: cacheHeaders })
+      }
+      log.info('Mapbox returned no geocoding matches; trying OpenStreetMap', {
+        component: 'GeocodeAPI',
+        action: 'search-empty-fallback',
+      })
     } catch (error) {
       log.warn('Mapbox geocoding failed, falling back to Nominatim', {
         component: 'GeocodeAPI',
@@ -279,7 +283,13 @@ export async function GET(request: NextRequest) {
     const data = await nominatimFetch(
       isReverse ? nominatimReverseUrl(lat!, lon!) : nominatimSearchUrl(query!)
     )
-    return NextResponse.json(data, { headers: cacheHeaders })
+    if (isReverse || (Array.isArray(data) && data.length > 0)) {
+      return NextResponse.json(data, { headers: cacheHeaders })
+    }
+    log.info('OpenStreetMap returned no geocoding matches; trying Photon', {
+      component: 'GeocodeAPI',
+      action: 'search-empty-fallback',
+    })
   } catch (error) {
     log.warn('Nominatim geocoding failed, falling back to Photon', {
       component: 'GeocodeAPI',

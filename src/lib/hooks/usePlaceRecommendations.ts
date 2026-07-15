@@ -32,6 +32,8 @@ export interface RecommendationFilters {
   q?: string
   sort?: RecommendationSort
   limit?: number
+  scope?: 'all' | 'friends'
+  createdBy?: string
 }
 
 export interface RecommendationCity {
@@ -64,6 +66,8 @@ function filtersKey(filters: RecommendationFilters) {
     q: filters.q?.trim() || null,
     sort: filters.sort || 'top',
     limit: filters.limit || null,
+    scope: filters.scope || 'all',
+    createdBy: filters.createdBy || null,
   }
 }
 
@@ -75,6 +79,8 @@ function buildListQuery(filters: RecommendationFilters): string {
   if (filters.q?.trim()) params.set('q', filters.q.trim())
   params.set('sort', filters.sort || 'top')
   if (filters.limit) params.set('limit', String(filters.limit))
+  if (filters.scope === 'friends') params.set('scope', 'friends')
+  if (filters.createdBy) params.set('created_by', filters.createdBy)
   const qs = params.toString()
   return qs ? `?${qs}` : ''
 }
@@ -249,6 +255,71 @@ export function useToggleBump() {
               : rec
           )
         )
+      }
+    },
+  })
+}
+
+/** Toggle "I've done this" with the same instant checklist feel as bumps. */
+export function useToggleRecommendationCompletion() {
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+
+  return useMutation<
+    { completed: boolean; completion_count: number },
+    Error,
+    { id: string },
+    { snapshots: Array<[readonly unknown[], PlaceRecommendation[] | undefined]> }
+  >({
+    mutationFn: async ({ id }) => {
+      const res = await apiFetch(`/api/place-recommendations/${id}/complete`, { method: 'POST' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to update your checklist')
+      }
+      return res.json()
+    },
+    onMutate: async ({ id }) => {
+      await queryClient.cancelQueries({ queryKey: [RECOMMENDATIONS_KEY] })
+      const queries = queryClient.getQueriesData<PlaceRecommendation[]>({
+        queryKey: [RECOMMENDATIONS_KEY],
+      })
+      const snapshots = queries.map(([key, value]) =>
+        [key, value] as [readonly unknown[], PlaceRecommendation[] | undefined]
+      )
+      for (const [key, value] of queries) {
+        if (!value) continue
+        queryClient.setQueryData<PlaceRecommendation[]>(key, value.map(rec => {
+          if (rec.id !== id) return rec
+          const wasCompleted = !!rec.has_completed
+          return {
+            ...rec,
+            has_completed: !wasCompleted,
+            completion_count: Math.max(0, (rec.completion_count || 0) + (wasCompleted ? -1 : 1)),
+          }
+        }))
+      }
+      return { snapshots }
+    },
+    onError: (error, _variables, context) => {
+      context?.snapshots.forEach(([key, value]) => queryClient.setQueryData(key, value))
+      log.error('Error toggling recommendation completion', {
+        component: 'usePlaceRecommendations',
+        action: 'complete',
+        userId: user?.id,
+      }, error)
+    },
+    onSuccess: (result, { id }) => {
+      const queries = queryClient.getQueriesData<PlaceRecommendation[]>({
+        queryKey: [RECOMMENDATIONS_KEY],
+      })
+      for (const [key, value] of queries) {
+        if (!value) continue
+        queryClient.setQueryData<PlaceRecommendation[]>(key, value.map(rec =>
+          rec.id === id
+            ? { ...rec, has_completed: result.completed, completion_count: result.completion_count }
+            : rec
+        ))
       }
     },
   })

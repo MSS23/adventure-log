@@ -37,9 +37,11 @@ jest.mock('@/components/auth/AuthProvider', () => ({
 
 // The bump mutation — we don't exercise React Query here, just the call.
 const mockMutate = jest.fn()
+const mockComplete = jest.fn()
 let mockIsPending = false
 jest.mock('@/lib/hooks/usePlaceRecommendations', () => ({
   useToggleBump: () => ({ mutate: mockMutate, isPending: mockIsPending }),
+  useToggleRecommendationCompletion: () => ({ mutate: mockComplete, isPending: false }),
 }))
 
 // getPhotoUrl — return null so the card renders the initial-avatar fallback.

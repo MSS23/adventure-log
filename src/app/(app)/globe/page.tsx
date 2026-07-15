@@ -49,7 +49,7 @@ function GlobePageContent() {
     friends, handleViewFriendGlobe, handlePrefetchFriendGlobe,
     selectedYear, setSelectedYear, availableYears,
     hideEmptyCta, setHideEmptyCta,
-    exploreMode, setExploreMode, exploreAlbums, exploreLoading, exploreStats,
+    exploreMode, setExploreMode, explorePeriod, setExplorePeriod, exploreAlbums, exploreLoading, exploreStats,
     wishlistItems, showWishlist, setShowWishlist,
     wishlistPrompt, setWishlistPrompt,
     handleGlobeBackgroundClick, handleConfirmWishlist, handleWishlistItemClick,
@@ -101,6 +101,24 @@ function GlobePageContent() {
           location_name: w.location_name,
         }))
     : []
+
+  const communityGlobePins = useMemo(() => {
+    if (!exploreMode) return []
+    const groups = new Map<string, typeof exploreAlbums>()
+    for (const album of exploreAlbums) {
+      if (album.latitude == null || album.longitude == null) continue
+      const country = album.country_code || album.location_name?.split(',').at(-1)?.trim() || 'Worldwide'
+      groups.set(country, [...(groups.get(country) || []), album])
+    }
+    return [...groups.entries()].map(([country, countryAlbums]) => ({
+      id: country,
+      albumId: countryAlbums[0].id,
+      latitude: countryAlbums.reduce((sum, album) => sum + album.latitude!, 0) / countryAlbums.length,
+      longitude: countryAlbums.reduce((sum, album) => sum + album.longitude!, 0) / countryAlbums.length,
+      label: country,
+      albumCount: countryAlbums.length,
+    }))
+  }, [exploreAlbums, exploreMode])
 
   // Load failed with nothing to show — offer a retry instead of an empty globe
   // with a "0 adventures" header that looks like the user has no travels.
@@ -206,6 +224,9 @@ function GlobePageContent() {
               onGlobeBackgroundClick={handleGlobeBackgroundClick}
               wishlistPins={wishlistGlobePins}
               onWishlistPinClick={handleWishlistPinClick}
+              communityPins={communityGlobePins}
+              showCommunityLayer={exploreMode}
+              onCommunityPinClick={(albumId) => router.push(`/albums/${albumId}`)}
             />
           </ErrorBoundary>
         </div>
@@ -248,6 +269,8 @@ function GlobePageContent() {
             exploreAlbums={exploreAlbums}
             exploreLoading={exploreLoading}
             exploreStats={exploreStats}
+            period={explorePeriod}
+            onPeriodChange={setExplorePeriod}
           />
         )}
 

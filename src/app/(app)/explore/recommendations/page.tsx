@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { MapPinned, Plus, Compass, MapPin } from 'lucide-react'
+import { MapPinned, Plus, Compass, MapPin, UsersRound, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import {
@@ -33,6 +33,7 @@ export default function RecommendationsPage() {
   const reduceMotion = useReducedMotion()
   const [modalOpen, setModalOpen] = useState(false)
   const [filters, setFilters] = useState<RecommendationFilterState>({ sort: 'top' })
+  const [listOwner, setListOwner] = useState<string | undefined>()
 
   const { data: cities } = useRecommendationCities()
   const {
@@ -46,7 +47,37 @@ export default function RecommendationsPage() {
     type: filters.type,
     q: filters.q,
     sort: filters.sort,
+    createdBy: listOwner,
   })
+  const { data: friendRecommendations } = useRecommendations({ scope: 'friends', limit: 100 })
+
+  // A list is formed automatically from author + country. Friends only add a
+  // recommendation once; Roamkeep handles the collection and progress layer.
+  const friendLists = useMemo(() => {
+    const groups = new Map<string, {
+      ownerId: string
+      ownerName: string
+      countryCode: string
+      count: number
+      completed: number
+    }>()
+    for (const rec of friendRecommendations || []) {
+      if (!rec.country_code) continue
+      const creator = rec.user || rec.users || rec.profiles
+      const key = `${rec.created_by}:${rec.country_code}`
+      const group = groups.get(key) || {
+        ownerId: rec.created_by,
+        ownerName: creator?.display_name || creator?.username || 'A friend',
+        countryCode: rec.country_code,
+        count: 0,
+        completed: 0,
+      }
+      group.count += 1
+      if (rec.has_completed) group.completed += 1
+      groups.set(key, group)
+    }
+    return [...groups.values()].sort((a, b) => b.count - a.count).slice(0, 8)
+  }, [friendRecommendations])
 
   // Lead with a handful of the busiest destinations for quick browsing.
   const topCities = useMemo(
@@ -81,6 +112,65 @@ export default function RecommendationsPage() {
           </button>
         </div>
       </header>
+
+      {friendLists.length > 0 && (
+        <section className="mb-6 rounded-2xl border border-[color:var(--color-forest)]/20 bg-[color:var(--color-forest)]/[0.055] p-4 sm:p-5" aria-labelledby="friend-lists-heading">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <p className="al-eyebrow text-[color:var(--color-forest)]">From people you trust</p>
+              <h2 id="friend-lists-heading" className="font-heading text-lg font-semibold text-[color:var(--color-ink)] dark:text-stone-100">
+                Friends&apos; place lists
+              </h2>
+              <p className="mt-1 text-xs text-[color:var(--color-muted-warm)]">
+                Built automatically when friends recommend places. Check them off as you go.
+              </p>
+            </div>
+            <UsersRound className="h-5 w-5 shrink-0 text-[color:var(--color-forest)]" aria-hidden />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {friendLists.map(list => {
+              const selected = listOwner === list.ownerId && filters.countryCode === list.countryCode
+              return (
+                <button
+                  key={`${list.ownerId}:${list.countryCode}`}
+                  type="button"
+                  onClick={() => {
+                    setListOwner(selected ? undefined : list.ownerId)
+                    setFilters(current => ({
+                      ...current,
+                      countryCode: selected ? undefined : list.countryCode,
+                      city: undefined,
+                    }))
+                  }}
+                  className={cn(
+                    'min-w-[180px] rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]/40',
+                    selected
+                      ? 'border-[color:var(--color-forest)] bg-[color:var(--color-forest)] text-white'
+                      : 'border-[color:var(--color-forest)]/15 bg-white/80 hover:border-[color:var(--color-forest)]/40 dark:bg-white/[0.04]'
+                  )}
+                >
+                  <span className="block text-sm font-semibold">{list.ownerName}&apos;s {list.countryCode} list</span>
+                  <span className={cn('mt-1 block text-xs', selected ? 'text-white/75' : 'text-[color:var(--color-muted-warm)]')}>
+                    {list.completed}/{list.count} tried
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {listOwner && (
+            <button
+              type="button"
+              onClick={() => {
+                setListOwner(undefined)
+                setFilters(current => ({ ...current, countryCode: undefined }))
+              }}
+              className="mt-3 inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-[color:var(--color-forest)]"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden /> Clear friend list
+            </button>
+          )}
+        </section>
+      )}
 
       {/* Browse by destination */}
       {topCities.length > 0 && (

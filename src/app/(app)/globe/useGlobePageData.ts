@@ -27,6 +27,7 @@ export interface AlbumPreview {
 
 export interface ExploreAlbum extends AlbumPreview {
   user_id: string
+  popularity_score?: number
   owner?: {
     username: string
     display_name: string
@@ -95,6 +96,7 @@ export function useGlobePageData() {
 
   // Explore mode state
   const [exploreMode, setExploreMode] = useState(false)
+  const [explorePeriod, setExplorePeriod] = useState<'month' | 'year' | 'all'>('month')
 
   // Wishlist layer state
   const { items: wishlistItems, addItem: addWishlistItem } = useWishlist()
@@ -444,43 +446,71 @@ export function useGlobePageData() {
   // via `enabled` so the query only runs (and caches) once the user opens
   // explore mode.
   const exploreQuery = useQuery({
-    queryKey: ['globe-data', 'explore', user?.id ?? null],
+    queryKey: ['globe-data', 'explore', user?.id ?? null, explorePeriod],
     enabled: exploreMode,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let exploreAlbumsQuery = supabase
         .from('albums')
         .select(`
-          id, title, cover_photo_url, location_name, latitude, longitude, created_at, user_id,
+          id, title, cover_photo_url, cover_image_url, location_name, country_code, latitude, longitude, created_at, user_id,
           users!albums_user_id_fkey(username, display_name, avatar_url)
         `)
         .eq('visibility', 'public')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
-        .neq('status', 'draft')
+        .or('status.is.null,status.neq.draft')
         .neq('user_id', user?.id || '')
         .order('created_at', { ascending: false })
-        .limit(100)
+        .limit(200)
+
+      if (explorePeriod !== 'all') {
+        const cutoff = new Date()
+        cutoff.setDate(cutoff.getDate() - (explorePeriod === 'month' ? 30 : 365))
+        exploreAlbumsQuery = exploreAlbumsQuery.gte('created_at', cutoff.toISOString())
+      }
+
+      const { data, error } = await exploreAlbumsQuery
 
       if (error) throw error
+
+      const albumIds = (data || []).map(item => item.id)
+      const [likesResult, commentsResult] = albumIds.length
+        ? await Promise.all([
+            supabase.from('likes').select('target_id').eq('target_type', 'album').in('target_id', albumIds),
+            supabase.from('comments').select('target_id').eq('target_type', 'album').in('target_id', albumIds),
+          ])
+        : [{ data: [] }, { data: [] }]
+      const engagement = new Map<string, number>()
+      for (const row of likesResult.data || []) {
+        engagement.set(row.target_id, (engagement.get(row.target_id) || 0) + 3)
+      }
+      for (const row of commentsResult.data || []) {
+        engagement.set(row.target_id, (engagement.get(row.target_id) || 0) + 5)
+      }
 
       const mapped: ExploreAlbum[] = (data || []).map((item: Record<string, unknown>) => {
         const usersData = item.users as Record<string, unknown> | null
         return {
           id: item.id as string,
           title: item.title as string,
-          cover_photo_url: item.cover_photo_url as string | undefined,
+          cover_photo_url: (item.cover_photo_url || item.cover_image_url) as string | undefined,
           location_name: item.location_name as string | undefined,
+          country_code: item.country_code as string | undefined,
           latitude: item.latitude as number | undefined,
           longitude: item.longitude as number | undefined,
           created_at: item.created_at as string,
           user_id: item.user_id as string,
+          popularity_score: engagement.get(item.id as string) || 0,
           owner: usersData ? {
             username: usersData.username as string,
             display_name: usersData.display_name as string,
             avatar_url: usersData.avatar_url as string | undefined,
           } : undefined,
         }
-      })
+      }).sort((a, b) =>
+        (b.popularity_score || 0) - (a.popularity_score || 0) ||
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
 
       const uniqueUsers = new Set(mapped.map(a => a.user_id))
 
@@ -567,6 +597,8 @@ export function useGlobePageData() {
     // Explore mode
     exploreMode,
     setExploreMode,
+    explorePeriod,
+    setExplorePeriod,
     exploreAlbums,
     exploreLoading,
     exploreStats,

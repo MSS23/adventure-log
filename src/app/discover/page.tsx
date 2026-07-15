@@ -193,7 +193,7 @@ export default function DiscoverPage() {
                 pointsData={pins}
                 pointLat="lat"
                 pointLng="lng"
-                pointColor={() => '#E2553A'}
+                pointColor={() => '#2F876E'}
                 pointAltitude={0.012}
                 pointRadius={0.32}
                 pointsMerge={true}

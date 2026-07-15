@@ -29,6 +29,10 @@ export async function GET(request: NextRequest) {
     // these places in Greece" on YOUR map. Plain app-level filter — the table
     // is public-read by design (RLS USING true), this just narrows authorship.
     const scope = searchParams.get('scope')?.trim() === 'friends' ? 'friends' : 'all'
+    const createdByParam = searchParams.get('created_by')?.trim() || null
+    const createdBy = createdByParam && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(createdByParam)
+      ? createdByParam
+      : null
 
     let limit = DEFAULT_LIMIT
     const limitParam = searchParams.get('limit')
@@ -59,6 +63,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (city) query = query.ilike('city', city) // case-insensitive exact match
+    if (createdBy) query = query.eq('created_by', createdBy)
     if (countryCode) query = query.eq('country_code', countryCode)
     if (type && PLACE_TYPES.includes(type as PlaceType)) {
       query = query.eq('place_type', type)
@@ -107,15 +112,33 @@ export async function GET(request: NextRequest) {
 
     // has_bumped: a single query over the current user's bumps for these recs.
     const bumpedSet = new Set<string>()
+    const completedSet = new Set<string>()
     if (userId && recIds.length > 0) {
-      const { data: bumps, error: bumpsError } = await supabase
-        .from('place_recommendation_bumps')
-        .select('recommendation_id')
-        .eq('user_id', userId)
-        .in('recommendation_id', recIds)
-      if (bumpsError) throw bumpsError
+      const [bumpsResult, completionsResult] = await Promise.all([
+        supabase
+          .from('place_recommendation_bumps')
+          .select('recommendation_id')
+          .eq('user_id', userId)
+          .in('recommendation_id', recIds),
+        supabase
+          .from('place_recommendation_completions')
+          .select('recommendation_id')
+          .eq('user_id', userId)
+          .in('recommendation_id', recIds),
+      ])
+      if (bumpsResult.error) throw bumpsResult.error
+      // Keep recommendations usable during a rolling deploy before migration
+      // 80 reaches Supabase; the checklist appears as soon as the table exists.
+      if (
+        completionsResult.error &&
+        !['42P01', 'PGRST205'].includes(completionsResult.error.code || '')
+      ) throw completionsResult.error
+      const bumps = bumpsResult.data
       for (const b of bumps || []) {
         bumpedSet.add(b.recommendation_id)
+      }
+      for (const completion of completionsResult.data || []) {
+        completedSet.add(completion.recommendation_id)
       }
     }
 
@@ -123,6 +146,7 @@ export async function GET(request: NextRequest) {
       ...r,
       user: userMap.get(r.created_by),
       has_bumped: bumpedSet.has(r.id),
+      has_completed: completedSet.has(r.id),
     }))
 
     return NextResponse.json({ recommendations: enriched })

@@ -62,7 +62,7 @@ export async function generateMetadata({
       user.bio ||
       `Explore ${displayName}'s travel adventures and destinations on Roamkeep`
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventure-log-azure.vercel.app'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://roamkeep.net'
 
     return {
       title,

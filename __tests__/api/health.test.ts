@@ -51,7 +51,7 @@ describe('/api/health', () => {
     expect(response.status).toBe(200)
     expect(data.status).toBe('healthy')
     expect(data.version).toBeDefined()
-    expect(data.platform).toBe('adventure-log')
+    expect(data.platform).toBe('roamkeep')
     expect(data.checks.database).toBe(true)
     expect(data.checks.memory).toBeDefined()
     expect(data.uptime).toBeGreaterThanOrEqual(0)

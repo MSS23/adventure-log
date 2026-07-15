@@ -261,10 +261,13 @@ export interface PlaceRecommendation {
   latitude: number;
   longitude: number;
   bump_count: number;
+  completion_count?: number;
   created_at: string;
   updated_at: string;
   // Derived per-request (not columns): whether the current viewer has bumped
   has_bumped?: boolean;
+  // Derived per-request: whether the current viewer has tried this place.
+  has_completed?: boolean;
   // Relations - multiple possible relation names for compatibility
   user?: User;
   users?: User;

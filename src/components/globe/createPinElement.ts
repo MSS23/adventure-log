@@ -18,6 +18,8 @@ interface PinData {
   isCurrentLocation?: boolean
   isWishlist?: boolean
   wishlistId?: string
+  isCommunity?: boolean
+  communityAlbumId?: string
   isHome?: boolean
   label: string
   albumCount: number
@@ -32,6 +34,7 @@ interface CreatePinElementDeps {
   cityPinSystem: { handlePinClick: (data: GlobeHtmlElement) => void }
   handleCityClick: (city: CityPin) => void
   onWishlistPinClick?: (wishlistId: string) => void
+  onCommunityPinClick?: (albumId: string) => void
 }
 
 export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLElement {
@@ -41,7 +44,7 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
   // full photo pins — a dot + count badge, no emoji, no photo thumbnail.
   // Wishlist pins are a compact marker (not a full photo pin), so they get a
   // smaller dedicated size rather than the 50px album-pin minimum.
-  const pinSize = data.isWishlist || data.isHome
+  const pinSize = data.isWishlist || data.isHome || data.isCommunity
     ? Math.max(data.size * 11, 24)
     : data.isCheap
       ? Math.max(data.size * 10, 22)
@@ -58,6 +61,26 @@ export function createPinElement(d: object, deps: CreatePinElementDeps): HTMLEle
     -webkit-user-select: none;
     -webkit-touch-callout: none;
   `
+
+  if (data.isCommunity) {
+    const label = escapeHtml(`${data.label} · ${data.albumCount} ${data.albumCount === 1 ? 'album' : 'albums'}`)
+    el.innerHTML = `
+      <button type="button" aria-label="${escapeAttr(label)}" style="
+        width:100%;height:100%;border-radius:50%;border:2px solid rgba(255,255,255,.94);
+        background:linear-gradient(145deg,#4F9A7D,#174C3F);color:white;font:700 11px/1 system-ui;
+        box-shadow:0 0 0 4px rgba(47,135,110,.2),0 7px 20px rgba(0,0,0,.4);
+        cursor:pointer;display:grid;place-items:center;transition:transform .18s ease;
+      ">${data.albumCount}</button>`
+    const button = el.firstElementChild as HTMLButtonElement
+    button.addEventListener('click', event => {
+      event.stopPropagation()
+      if (data.communityAlbumId) deps.onCommunityPinClick?.(data.communityAlbumId)
+    })
+    button.addEventListener('mouseenter', () => { button.style.transform = 'scale(1.12)' })
+    button.addEventListener('mouseleave', () => { button.style.transform = 'scale(1)' })
+    el.title = label
+    return el
+  }
 
   // Handle wishlist pin — visually distinct from album pins:
   // amber, semi-transparent, dashed outline, star icon, gentle pulse.

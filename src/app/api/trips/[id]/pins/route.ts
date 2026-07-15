@@ -37,7 +37,14 @@ export async function POST(
     } | null = null
 
     if (body.input && typeof body.input === 'string') {
-      parsed = await parsePlaceInput(body.input, originUrl)
+      parsed = await parsePlaceInput(body.input, originUrl, {
+        // The parser calls our authenticated geocode endpoint server-to-server.
+        // Forward both web cookies and native bearer-session headers; without
+        // this, every plain-text/POI pin was answered with a hidden 401.
+        cookie: request.headers.get('cookie'),
+        authorization: request.headers.get('authorization'),
+        refreshToken: request.headers.get('x-refresh-token'),
+      })
       if (!parsed) {
         return NextResponse.json(
           { error: 'Could not identify a location from that input' },

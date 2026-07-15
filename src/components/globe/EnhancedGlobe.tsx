@@ -96,6 +96,15 @@ export interface WishlistPin {
   location_name: string
 }
 
+export interface CommunityPin {
+  id: string
+  albumId: string
+  latitude: number
+  longitude: number
+  label: string
+  albumCount: number
+}
+
 interface EnhancedGlobeProps {
   className?: string
   initialAlbumId?: string
@@ -108,6 +117,9 @@ interface EnhancedGlobeProps {
   onGlobeBackgroundClick?: (coords: { lat: number; lng: number; screenX: number; screenY: number }) => void
   wishlistPins?: WishlistPin[]
   onWishlistPinClick?: (wishlistId: string) => void
+  communityPins?: CommunityPin[]
+  onCommunityPinClick?: (albumId: string) => void
+  showCommunityLayer?: boolean
   /** Whether the signed-in viewer owns this globe. The "current location"
    *  (device GPS) pin + toggle are only ever available on your OWN globe, so a
    *  current location is never shown to anyone else. Defaults to false so any
@@ -123,7 +135,7 @@ export interface EnhancedGlobeRef {
 }
 
 export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
-  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp, onGlobeBackgroundClick, wishlistPins, onWishlistPinClick, isOwnProfile = false }, ref) {
+  function EnhancedGlobe({ className, initialAlbumId, initialLat, initialLng, filterUserId, hideHeader = false, selectedYear: selectedYearProp, onYearChange: onYearChangeProp, onGlobeBackgroundClick, wishlistPins, onWishlistPinClick, communityPins, onCommunityPinClick, showCommunityLayer = false, isOwnProfile = false }, ref) {
 
   const state = useGlobeState({
     filterUserId,
@@ -222,7 +234,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
 
   // Combine city pins with current location pin and any wishlist pins
   const allPinData = useMemo(() => {
-    const pins = [...cityPinSystem.pinData] as Array<{
+    const pins = (showCommunityLayer ? [] : [...cityPinSystem.pinData]) as Array<{
       lat: number;
       lng: number;
       size: number;
@@ -236,6 +248,8 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       isCurrentLocation?: boolean;
       isWishlist?: boolean;
       wishlistId?: string;
+      isCommunity?: boolean;
+      communityAlbumId?: string;
       isHome?: boolean;
       label: string;
       albumCount: number;
@@ -246,7 +260,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     // Home hub pin — the base every travel line radiates from. Present on your
     // own globe whenever you've set a home; on someone else's globe only when
     // they opted in (homeLocation is already gated by the RPC upstream).
-    if (homeLocation) {
+    if (homeLocation && !showCommunityLayer) {
       pins.push({
         lat: homeLocation.latitude,
         lng: homeLocation.longitude,
@@ -260,7 +274,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       })
     }
 
-    if (currentLocation && showCurrentLocation && isOwnProfile) {
+    if (currentLocation && showCurrentLocation && isOwnProfile && !showCommunityLayer) {
       pins.push({
         lat: currentLocation.latitude,
         lng: currentLocation.longitude,
@@ -278,7 +292,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     // Wishlist pins — always rendered with the dashed amber star style so they
     // never get visually confused with album pins. Coordinates colliding with
     // an existing album pin are skipped to avoid stacking.
-    if (wishlistPins && wishlistPins.length > 0) {
+    if (wishlistPins && wishlistPins.length > 0 && !showCommunityLayer) {
       const epsilon = 0.001
       const occupied = pins.map(p => ({ lat: p.lat, lng: p.lng }))
       for (const item of wishlistPins) {
@@ -302,10 +316,29 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
       }
     }
 
+
+    // Explore mode intentionally shows one representative pin per country at
+    // world zoom. The count communicates depth; clicking opens that country's
+    // highest-ranked album for the selected period.
+    for (const item of communityPins || []) {
+      pins.push({
+        lat: item.latitude,
+        lng: item.longitude,
+        size: 2.3,
+        color: '#2F876E',
+        opacity: 0.96,
+        isCommunity: true,
+        communityAlbumId: item.albumId,
+        label: item.label,
+        albumCount: item.albumCount,
+        photoCount: 0,
+      })
+    }
+
     return pins
     // isOwnProfile gates the current-location pin above — omitting it here
     // left a stale GPS pin visible after switching to someone else's globe.
-  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation, wishlistPins, isOwnProfile, homeLocation])
+  }, [cityPinSystem.pinData, currentLocation, showCurrentLocation, wishlistPins, communityPins, showCommunityLayer, isOwnProfile, homeLocation])
 
   // Pin DOM factory — memoized so three-globe doesn't regenerate every pin
   // element whenever this component re-renders for unrelated reasons.
@@ -315,8 +348,9 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
     cityPins,
     cityPinSystem,
     handleCityClick,
-    onWishlistPinClick
-  }), [locations, getYearColor, cityPins, cityPinSystem, handleCityClick, onWishlistPinClick])
+    onWishlistPinClick,
+    onCommunityPinClick,
+  }), [locations, getYearColor, cityPins, cityPinSystem, handleCityClick, onWishlistPinClick, onCommunityPinClick])
 
   const arcStrokeAccessor = useCallback((d: object) => {
     const path = d as FlightPath
@@ -525,7 +559,7 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                   ringColor={ringColorAccessor}
 
                   // Animated travel arcs with moving dash
-                  arcsData={performanceConfig.showArcs && showStaticConnections ? staticConnections : EMPTY_DATA}
+                  arcsData={!showCommunityLayer && performanceConfig.showArcs && showStaticConnections ? staticConnections : EMPTY_DATA}
                   arcStartLat="startLat"
                   arcStartLng="startLng"
                   arcEndLat="endLat"
@@ -634,14 +668,14 @@ export const EnhancedGlobe = forwardRef<EnhancedGlobeRef, EnhancedGlobeProps>(
                     pitch: currentFlightState.rotation.pitch,
                     bank: currentFlightState.rotation.bank,
                   } : null}
-                  isActive={isPlaying}
+                  isActive={!showCommunityLayer && isPlaying}
                   airplaneScale={0.62}
                 />
 
                 <ArcPlanes
                   globe={globeRef.current as GlobeInstance | null}
-                  arcs={performanceConfig.showArcs && showStaticConnections ? staticConnections : EMPTY_ARC_PLANES}
-                  visible={globeReady && !isPlaying}
+                  arcs={!showCommunityLayer && performanceConfig.showArcs && showStaticConnections ? staticConnections : EMPTY_ARC_PLANES}
+                  visible={globeReady && !isPlaying && !showCommunityLayer}
                 />
 
                 {!globeReady && (

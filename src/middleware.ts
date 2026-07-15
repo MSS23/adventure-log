@@ -4,23 +4,6 @@ import type { AuthError, User } from '@supabase/supabase-js'
 import { shouldValidateCookieSession } from '@/lib/auth/middleware-auth'
 import { rateLimit as redisRateLimit } from '@/lib/utils/rate-limit-redis'
 
-// Keep one public origin for links, authentication callbacks, analytics, and
-// search indexing. Vercel keeps its generated domains for deployment plumbing,
-// but visitors using a stable legacy alias should always land on Roamkeep.
-const CANONICAL_HOST = 'roamkeep.net'
-const LEGACY_PUBLIC_HOSTS = new Set([
-  'www.roamkeep.net',
-  'adventure-log-azure.vercel.app',
-  'adventure-log-mss23s-projects.vercel.app',
-  'adventure-log-mss23-mss23s-projects.vercel.app',
-])
-
-function requestHostname(request: NextRequest): string {
-  const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim()
-  const host = forwardedHost || request.headers.get('host') || request.nextUrl.hostname
-  return host.split(':')[0].toLowerCase()
-}
-
 // ============================================
 // Expired-session log noise filter
 // ============================================
@@ -298,14 +281,6 @@ function applyNativeCors(response: NextResponse, origin: string): NextResponse {
 // Middleware
 // ============================================
 export async function middleware(request: NextRequest) {
-  if (LEGACY_PUBLIC_HOSTS.has(requestHostname(request))) {
-    const canonicalUrl = request.nextUrl.clone()
-    canonicalUrl.protocol = 'https:'
-    canonicalUrl.hostname = CANONICAL_HOST
-    canonicalUrl.port = ''
-    return NextResponse.redirect(canonicalUrl, 308)
-  }
-
   let response = NextResponse.next({ request })
   const pathname = request.nextUrl.pathname
 

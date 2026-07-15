@@ -1,5 +1,5 @@
 /**
- * Age gate — Adventure Log is an adults-only (18+) service.
+ * Age gate — Roamkeep is an adults-only (18+) service.
  *
  * The DOB is self-declared; we make reasonable efforts (a hard 18+ block at
  * sign-up), not biometric verification.

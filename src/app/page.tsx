@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import {
   Globe as GlobeIcon,
   ArrowRight,
-  Compass,
   MapPin,
   Camera,
   Users,
@@ -23,6 +22,7 @@ import {
 import { cn } from '@/lib/utils'
 import { getFlagEmoji } from '@/lib/utils/country'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
+import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
 
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -71,18 +71,18 @@ const DEMO_ARCS = [
 const FEATURES = [
   {
     icon: GlobeIcon,
-    title: 'Interactive 3D Globe',
-    desc: 'Every trip pinned on a beautiful 3D globe. Spin, zoom, relive your journeys.',
+    title: 'Living Memory Globe',
+    desc: 'Scrub through years, replay routes, and open the photos behind every place.',
   },
   {
     icon: Film,
-    title: 'Flyover Videos',
-    desc: 'Cinematic flyover reels — watch your year in motion on the globe.',
+    title: 'Cinematic Trip Replays',
+    desc: 'Turn routes and photos into flyovers made to relive and share.',
   },
   {
     icon: Upload,
     title: 'Smart Photo Import',
-    desc: 'Drop photos — GPS and dates extracted automatically. Albums create themselves.',
+    desc: 'Choose photos and Roamkeep groups dates and places into trips for your approval.',
   },
   {
     icon: Stamp,
@@ -91,13 +91,13 @@ const FEATURES = [
   },
   {
     icon: Users,
-    title: 'Compare Your Globes',
-    desc: 'Connect passports, compare where you have both been, and discover the places only one of you knows.',
+    title: 'Trusted Discovery',
+    desc: 'Find places through friends and travel twins whose taste actually matches yours.',
   },
   {
     icon: Share2,
-    title: 'Embeddable Globe',
-    desc: 'Put your interactive travel globe on any website with one line of code.',
+    title: 'Private by Default',
+    desc: 'Choose private, friends-only, approximate location, or public before anything is shared.',
   },
 ]
 
@@ -188,11 +188,8 @@ export default function HomePage() {
             : "bg-transparent"
         )}>
           <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xl bg-olive-600 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                <Compass className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-lg font-heading font-bold text-white tracking-tight">Adventure Log</span>
+            <Link href="/" className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-400">
+              <RoamkeepMark inverted />
             </Link>
             <nav className="flex items-center gap-1 sm:gap-2">
               <Link href="/discover" className="hidden sm:inline-flex">
@@ -261,25 +258,25 @@ export default function HomePage() {
             {/* Pill badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-olive-500/10 border border-olive-500/15 text-olive-300 text-xs sm:text-sm font-medium mb-8 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5" />
-              Your travel life, on a globe
+              A private-first social memory map
             </div>
 
             {/* Main headline */}
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-[-0.04em] leading-[0.92] mb-7 !text-white">
-              <span className="block">Every Trip.</span>
-              <span className="block text-olive-400">One Globe.</span>
+              <span className="block">Keep the places</span>
+              <span className="block text-olive-400">that made you.</span>
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-stone-300 max-w-lg mx-auto leading-relaxed mb-10">
-              Build a living 3D globe of everywhere you&apos;ve been, connect with
-              travelers worldwide, and compare the places your journeys cross.
+              Capture trips from your camera roll, relive them on a living globe,
+              and discover where to go next through people you trust.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
               <Link href="/signup">
                 <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-8 h-13 text-base rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
-                  Start Your Globe
+                  Start your Roamkeep
                   <ArrowRight className="h-5 w-5 ml-1.5" />
                 </Button>
               </Link>
@@ -344,13 +341,13 @@ export default function HomePage() {
 
           <div className="max-w-6xl mx-auto relative">
             <div className="text-center mb-16">
-              <p className="text-olive-400 text-sm font-medium uppercase tracking-[0.15em] mb-4">Why Adventure Log</p>
+              <p className="text-olive-400 text-sm font-medium uppercase tracking-[0.15em] mb-4">Why Roamkeep</p>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold !text-white tracking-tight mb-5">
                 Not just another travel app
               </h2>
               <p className="text-base text-stone-400 max-w-prose mx-auto leading-relaxed">
-                Your globe is the profile: map every journey, watch cinematic flyovers,
-                then compare passports with friends without exposing exact travel dates.
+                Your globe is your travel story: capture memories quickly, return to them often,
+                and trade meaningful recommendations without broadcasting your life.
               </p>
             </div>
 
@@ -383,9 +380,9 @@ export default function HomePage() {
 
             <div className="grid md:grid-cols-3 gap-10 md:gap-8">
               {[
-                { step: '01', icon: Camera, title: 'Upload Photos', desc: 'Drop your travel photos. GPS coordinates and dates are extracted automatically from EXIF data.' },
-                { step: '02', icon: MapPin, title: 'Albums Appear', desc: 'Photos are grouped into trip albums by location and date. Rename, merge, or reorganize freely.' },
-                { step: '03', icon: GlobeIcon, title: 'Globe Lights Up', desc: 'Every album pins a location on your 3D globe. Watch your travel map grow with each adventure.' },
+                { step: '01', icon: Camera, title: 'Choose your photos', desc: 'Select a camera-roll batch. Dates and locations are read locally and precise photo GPS is stripped before upload.' },
+                { step: '02', icon: MapPin, title: 'Trips take shape', desc: 'Photos group into suggested memories by place and date. Rename, merge, remove, and approve every group.' },
+                { step: '03', icon: GlobeIcon, title: 'Relive and share', desc: 'Your globe lights up with routes, photos, flashbacks, and privacy-safe stories you choose to share.' },
               ].map(item => (
                 <div key={item.step} className="text-center md:text-left">
                   <div className="inline-flex md:flex items-center gap-3 mb-4">
@@ -476,11 +473,11 @@ export default function HomePage() {
         <section className="py-24 sm:py-32 px-6 lg:px-10 border-t border-white/[0.04] relative z-10">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold !text-white tracking-tight mb-5">
-              Start mapping your
-              <br />adventures today
+              Your world is
+              <br />worth keeping
             </h2>
             <p className="text-base text-stone-400 mb-10 max-w-prose mx-auto leading-relaxed">
-              Free to start. No ads. Your travel story deserves better than a flat map.
+              Free to start. Private by default. Made for the memories you never want to lose.
             </p>
             <Link href="/signup">
               <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-10 h-14 text-lg rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
@@ -494,15 +491,7 @@ export default function HomePage() {
         {/* ── Footer ── */}
         <footer className="py-12 px-6 lg:px-10 border-t border-white/[0.04]">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-olive-600 flex items-center justify-center">
-                <Compass className="h-3.5 w-3.5 text-white" />
-              </div>
-              <div className="text-left">
-                <div className="text-sm font-semibold text-stone-300 leading-tight">Adventure Log</div>
-                <div className="text-[11px] text-stone-600 leading-tight">Your travel life, on a globe.</div>
-              </div>
-            </div>
+            <RoamkeepMark inverted showTagline markClassName="h-7 w-7 rounded-lg" />
             <nav className="flex gap-6 text-sm text-stone-500">
               <Link href="/discover" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Discover</Link>
               <Link href="/privacy" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Privacy</Link>
@@ -512,7 +501,7 @@ export default function HomePage() {
               <Link href="/contact" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Contact</Link>
             </nav>
             <div className="text-xs text-stone-600">
-              &copy; {new Date().getFullYear()} Adventure Log
+              &copy; {new Date().getFullYear()} Roamkeep
             </div>
           </div>
         </footer>

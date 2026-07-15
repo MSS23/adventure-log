@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!trip) return { title: 'Trip not found' }
   return {
-    title: `${trip.cover_emoji || '🗺️'} ${trip.title} — Adventure Log`,
-    description: trip.description || `A trip shared on Adventure Log`,
+    title: `${trip.cover_emoji || '🗺️'} ${trip.title} — Roamkeep`,
+    description: trip.description || `A trip shared on Roamkeep`,
   }
 }
 
@@ -57,7 +57,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ slu
             href="/"
             className="text-lg font-heading font-bold text-primary tracking-tight hover:opacity-80 transition-opacity"
           >
-            Adventure Log
+            Roamkeep
           </Link>
           <Link
             href="/signup"

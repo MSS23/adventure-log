@@ -3,8 +3,8 @@ import { LegalBackLink } from '@/components/legal/LegalBackLink'
 import { ManageCookiesButton } from '@/components/legal/ManageCookiesButton'
 
 export const metadata = {
-  title: 'Cookie Policy — Adventure Log',
-  description: 'How Adventure Log uses cookies and local storage, and how to control them.',
+  title: 'Cookie Policy — Roamkeep',
+  description: 'How Roamkeep uses cookies and local storage, and how to control them.',
 }
 
 export default function CookiesPage() {
@@ -16,7 +16,7 @@ export default function CookiesPage() {
         <p className="al-eyebrow mt-8 mb-1">Last updated · July 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Cookie Policy</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
-          This policy explains the cookies and similar local-storage technologies Adventure Log uses, and how you can control them. It complements our <Link href="/privacy" className="text-primary underline">Privacy Policy</Link>.
+          This policy explains the cookies and similar local-storage technologies Roamkeep uses, and how you can control them. It complements our <Link href="/privacy" className="text-primary underline">Privacy Policy</Link>.
         </p>
 
         <Section title="1. What we use">

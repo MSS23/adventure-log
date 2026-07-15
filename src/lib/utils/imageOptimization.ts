@@ -1,5 +1,5 @@
 /**
- * Image optimization and compression utilities for Adventure Log
+ * Image optimization and compression utilities for Roamkeep
  * Provides client-side image processing and optimization
  */
 

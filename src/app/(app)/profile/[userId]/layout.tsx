@@ -37,7 +37,7 @@ export async function generateMetadata({
     const title = `${displayName}'s Adventures`
     const avatarUrl = getServerPhotoUrl(user.avatar_url)
     const description = user.bio
-      || `Check out ${displayName}'s travel adventures on Adventure Log`
+      || `Check out ${displayName}'s travel adventures on Roamkeep`
 
     return {
       title,
@@ -58,7 +58,7 @@ export async function generateMetadata({
       },
     }
   } catch {
-    return { title: 'Traveler Profile | Adventure Log' }
+    return { title: 'Traveler Profile | Roamkeep' }
   }
 }
 

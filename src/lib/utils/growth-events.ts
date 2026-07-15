@@ -21,6 +21,7 @@ export type GrowthEvent =
   | 'video_export'
   | 'card_export'
   | 'share_link_created'
+  | 'wishlist_item_added'
   | 'share_link_visit'
   | 'wrapped_public_view'
 

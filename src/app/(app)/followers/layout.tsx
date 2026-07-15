@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Followers - Adventure Log',
+  title: 'Followers - Roamkeep',
   description: 'Manage your followers and the travelers you follow.',
 }
 

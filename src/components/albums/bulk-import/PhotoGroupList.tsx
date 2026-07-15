@@ -63,7 +63,7 @@ export function PhotoGroupList({
             <p className="al-stat-value text-2xl">
               {groups.length}
             </p>
-            <p className="text-xs text-muted-foreground">Albums</p>
+            <p className="text-xs text-muted-foreground">Memories</p>
           </CardContent>
         </Card>
         <Card>
@@ -84,7 +84,7 @@ export function PhotoGroupList({
         </Card>
       </div>
 
-      {/* Album Groups */}
+      {/* Suggested memory groups */}
       <div className="space-y-4">
         {groups.map((group) => (
           <PhotoGroupCard
@@ -105,8 +105,8 @@ export function PhotoGroupList({
       {groups.length > 0 && (
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-sm text-muted-foreground">
-            {groups.length} album{groups.length !== 1 ? 's' : ''} with{' '}
-            {groups.reduce((sum, g) => sum + g.photos.length, 0)} photos will be created
+            {groups.length} memor{groups.length === 1 ? 'y' : 'ies'} with{' '}
+            {groups.reduce((sum, g) => sum + g.photos.length, 0)} photos will be kept privately
           </div>
           <div className="flex gap-3">
             <Button
@@ -122,7 +122,7 @@ export function PhotoGroupList({
               className="cursor-pointer"
             >
               <Upload className="h-4 w-4 mr-2" />
-              Create {groups.length} Album{groups.length !== 1 ? 's' : ''}
+              Keep {groups.length} Memor{groups.length === 1 ? 'y' : 'ies'}
             </Button>
           </div>
         </div>

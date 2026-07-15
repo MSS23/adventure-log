@@ -57,11 +57,17 @@ import {
 import { join, resolve, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readdir, rm } from 'node:fs/promises'
+import { config as loadEnv } from 'dotenv'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const RENAMES_FILE = join(ROOT, '.mobile-build-renames.json')
 const SUFFIX = '.mobile-skip'
+
+// Next.js loads .env.local inside its own process, but this orchestrator also
+// needs the values so it can validate NEXT_PUBLIC_API_BASE_URL and forward the
+// same environment to the static-export child process.
+loadEnv({ path: join(ROOT, '.env.local'), quiet: true })
 
 /**
  * Path patterns to take out of the build entirely. Matches are evaluated

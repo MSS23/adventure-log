@@ -30,7 +30,7 @@ export function LegalFooter() {
           </Link>
         ))}
         <span className="text-muted-foreground/50">·</span>
-        <span className="text-muted-foreground/60">© Adventure Log</span>
+        <span className="text-muted-foreground/60">© Roamkeep</span>
       </nav>
     </footer>
   )

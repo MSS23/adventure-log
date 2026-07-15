@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Globe - Adventure Log',
+  title: 'Globe - Roamkeep',
   description: 'Explore your travels on an interactive 3D globe visualization.',
 }
 

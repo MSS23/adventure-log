@@ -3,8 +3,8 @@ import { ArrowLeft, MessageSquare, MessageCircle, Mail } from 'lucide-react'
 import { FeedbackLauncher } from '@/components/feedback/FeedbackLauncher'
 
 export const metadata = {
-  title: 'Contact — Adventure Log',
-  description: 'Get in touch with the Adventure Log team — support, bugs, and feature requests.',
+  title: 'Contact — Roamkeep',
+  description: 'Get in touch with the Roamkeep team — support, bugs, and feature requests.',
 }
 
 // Optional channels — only rendered when configured, so we never advertise a

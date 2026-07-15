@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { Upload, FileImage, MapPin, FolderPlus, Globe2 } from 'lucide-react'
+import { Upload, FileImage, MapPin, FolderPlus, Globe2, ShieldCheck, LockKeyhole } from 'lucide-react'
 
 interface DropZoneProps {
   getRootProps: () => Record<string, unknown>
@@ -64,13 +64,13 @@ export function DropZone({
               className="font-heading text-xl md:text-2xl font-semibold mb-1"
               style={{ color: 'var(--color-ink)', letterSpacing: '-0.01em' }}
             >
-              Drop photos or tap to upload
+              Choose photos from your camera roll
             </p>
             <p
               className="text-[13px] mb-5"
               style={{ color: 'var(--color-muted-warm)' }}
             >
-              We&apos;ll read EXIF, GPS and dates automatically
+              Dates and places are grouped automatically — you approve every memory
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               <Chip icon={<FileImage className="h-3 w-3" />} label="JPG · PNG · WebP" />
@@ -87,18 +87,18 @@ export function DropZone({
         {[
           {
             icon: Upload,
-            title: 'Drop photos',
-            desc: 'Select up to 200 photos from camera roll or file system.',
+            title: 'Choose photos',
+            desc: 'Select up to 200 moments from one trip or several.',
           },
           {
             icon: Globe2,
-            title: 'Auto-group',
-            desc: 'Photos cluster by date and GPS into trip-sized albums.',
+            title: 'Trips take shape',
+            desc: 'Photos cluster by date and place into suggested memories.',
           },
           {
             icon: FolderPlus,
-            title: 'Create albums',
-            desc: 'Review groups, rename, upload — albums created automatically.',
+            title: 'You stay in control',
+            desc: 'Rename, merge, remove, and approve before anything is kept.',
           },
         ].map((step, i) => (
           <div
@@ -136,6 +136,34 @@ export function DropZone({
           </div>
         ))}
       </div>
+
+      <aside
+        className="mt-4 grid gap-3 rounded-2xl border border-primary/15 bg-primary/[0.06] p-4 sm:grid-cols-2"
+        aria-label="Import privacy"
+      >
+        <div className="flex items-start gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-card text-primary shadow-sm" aria-hidden>
+            <ShieldCheck className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Precise photo GPS is stripped</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+              Location helps group the trip, then metadata is removed from uploaded photos.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-card text-primary shadow-sm" aria-hidden>
+            <LockKeyhole className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Private until you say otherwise</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+              Imported memories start private. Sharing is always a separate choice.
+            </p>
+          </div>
+        </div>
+      </aside>
     </motion.div>
   )
 }

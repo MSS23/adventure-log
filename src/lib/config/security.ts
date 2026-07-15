@@ -1,5 +1,5 @@
 /**
- * Security Configuration for Adventure Log
+ * Security Configuration for Roamkeep
  *
  * Centralized security settings and utilities for the application
  */

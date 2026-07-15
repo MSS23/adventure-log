@@ -75,9 +75,9 @@ export function AgeGate() {
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
         {underage ? (
           <div className="text-center space-y-4">
-            <h2 className="text-lg font-semibold text-foreground">Adventure Log is {MIN_AGE}+</h2>
+            <h2 className="text-lg font-semibold text-foreground">Roamkeep is {MIN_AGE}+</h2>
             <p className="text-sm text-muted-foreground">
-              You must be at least {MIN_AGE} years old to use Adventure Log. Your account will be signed out.
+              You must be at least {MIN_AGE} years old to use Roamkeep. Your account will be signed out.
             </p>
             <Button onClick={() => signOut()} className="w-full">
               Sign out
@@ -90,7 +90,7 @@ export function AgeGate() {
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Confirm your age</h2>
                 <p className="text-sm text-muted-foreground">
-                  Adventure Log is an {MIN_AGE}+ service. Please confirm your date of birth to continue.
+                  Roamkeep is an {MIN_AGE}+ service. Please confirm your date of birth to continue.
                 </p>
               </div>
             </div>

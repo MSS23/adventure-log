@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Adventure Log - Your travel life, on a globe'
+export const alt = 'Roamkeep - Your travel life, on a globe'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -52,7 +52,7 @@ export default async function Image() {
             display: 'flex',
           }}
         >
-          Adventure Log
+          Roamkeep
         </div>
 
         {/* Subtitle */}

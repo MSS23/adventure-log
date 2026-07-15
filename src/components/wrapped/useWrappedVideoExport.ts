@@ -95,7 +95,7 @@ export function useWrappedVideoExport({ year }: { year: number | 'all' }) {
       }
       const label = year === 'all' ? 'All-Time' : String(year)
       const compositor = mod.createWatermarkCompositor(canvas, {
-        title: 'Adventure Log',
+        title: 'Roamkeep',
         subtitle: `${host} · ${label} Wrapped`,
       })
       if (!compositor) return false

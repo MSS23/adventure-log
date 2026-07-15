@@ -308,7 +308,7 @@ function AlbumsPageContent() {
 
       if (error) throw error
 
-      toast.success(`${selectedAlbums.size} album${selectedAlbums.size === 1 ? '' : 's'} deleted`)
+      toast.success(`${selectedAlbums.size} memor${selectedAlbums.size === 1 ? 'y' : 'ies'} deleted`)
       await reloadAlbums()
       // Refresh server cache so deleted albums disappear from globe, feed, explore, etc.
       router.refresh()
@@ -361,20 +361,20 @@ function AlbumsPageContent() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <header className="space-y-1">
             <p className="al-eyebrow">Library</p>
-            <h1 className="al-display text-3xl md:text-4xl">Albums</h1>
+            <h1 className="al-display text-3xl md:text-4xl">Memories</h1>
             <p className="text-sm text-muted-foreground">Organize your travel memories</p>
           </header>
           <Link href="/albums/new">
             <Button size="sm">
               <Plus className="h-4 w-4 mr-1" />
-              New
+              Add memory
             </Button>
           </Link>
         </div>
 
         <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-6">
           <div className="text-center">
-            <p className="font-medium text-destructive">Failed to load albums</p>
+            <p className="font-medium text-destructive">Failed to load memories</p>
             <p className="mt-1 text-sm text-destructive">{error}</p>
             <Button
               variant="outline"
@@ -398,12 +398,12 @@ function AlbumsPageContent() {
         <header className="space-y-1">
           <p className="al-eyebrow">Library</p>
           <h1 className="al-display text-3xl md:text-4xl">
-            {isViewingOtherUser ? "User's Albums" : 'Albums'}
+            {isViewingOtherUser ? "Traveler's memories" : 'Your memories'}
           </h1>
           <p className="text-sm text-muted-foreground">
             {albums.length === 0
-              ? 'Start creating albums'
-              : `${albums.length} album${albums.length === 1 ? '' : 's'}`
+              ? 'Keep your first travel memory'
+              : `${albums.length} memor${albums.length === 1 ? 'y' : 'ies'}`
             }
           </p>
         </header>
@@ -438,7 +438,7 @@ function AlbumsPageContent() {
             <Link href="/albums/new" className="hidden sm:block">
               <Button size="sm" className="cursor-pointer">
                 <Plus className="h-4 w-4 mr-1" />
-                New
+                Add memory
               </Button>
             </Link>
           )}
@@ -452,7 +452,7 @@ function AlbumsPageContent() {
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search albums..."
+              placeholder="Search memories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 h-10 rounded-xl"
@@ -490,7 +490,7 @@ function AlbumsPageContent() {
                 Drafts
               </h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {drafts.length} album{drafts.length === 1 ? '' : 's'} waiting for photos
+                {drafts.length} memor{drafts.length === 1 ? 'y' : 'ies'} waiting for photos
               </p>
             </div>
           </div>
@@ -636,9 +636,9 @@ function AlbumsPageContent() {
                   </AlertDialogTrigger>
                   <AlertDialogContent className="rounded-2xl">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete {selectedAlbums.size} album{selectedAlbums.size === 1 ? '' : 's'}?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete {selectedAlbums.size} memor{selectedAlbums.size === 1 ? 'y' : 'ies'}?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This will permanently delete {selectedAlbums.size === 1 ? 'this album' : 'these albums'} and all associated photos. This cannot be undone.
+                          This will permanently delete {selectedAlbums.size === 1 ? 'this memory' : 'these memories'} and all associated photos. This cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

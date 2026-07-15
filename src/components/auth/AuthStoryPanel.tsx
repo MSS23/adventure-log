@@ -1,16 +1,17 @@
 import Link from 'next/link'
-import { Compass, GitCompareArrows, Globe2, MapPinned, ShieldCheck } from 'lucide-react'
+import { GitCompareArrows, Globe2, MapPinned, ShieldCheck } from 'lucide-react'
+import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
 
 const highlights = [
   {
     icon: MapPinned,
-    title: 'Build your travel footprint',
-    description: 'Turn albums and places into one living map of where you have been.',
+    title: 'Keep trips without the work',
+    description: 'Turn camera-roll moments into a living map of where you have been.',
   },
   {
     icon: GitCompareArrows,
-    title: 'Compare your worlds',
-    description: 'See shared countries and the places that make each traveler unique.',
+    title: 'Discover through people',
+    description: 'Save meaningful places from friends and travelers who share your taste.',
   },
   {
     icon: ShieldCheck,
@@ -23,7 +24,7 @@ const highlights = [
 export function AuthStoryPanel() {
   return (
     <aside
-      aria-label="What you can do with Adventure Log"
+      aria-label="What you can do with Roamkeep"
       className="relative hidden min-h-[650px] overflow-hidden rounded-[28px] border border-olive-700/40 bg-olive-950 p-10 text-white shadow-[0_24px_70px_-38px_rgba(20,31,18,0.8)] lg:flex lg:flex-col"
     >
       <div
@@ -44,25 +45,22 @@ export function AuthStoryPanel() {
         href="/"
         className="relative z-10 inline-flex w-fit min-h-11 items-center gap-2.5 rounded-xl text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-300"
       >
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-olive-500 text-white shadow-lg shadow-black/20">
-          <Compass className="h-4 w-4" aria-hidden />
-        </span>
-        Adventure Log
+        <RoamkeepMark inverted />
       </Link>
 
       <div className="relative z-10 mt-auto max-w-lg pt-24">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-olive-300">
-          Your travel identity
+          Keep the places that made you
         </p>
         <h2 className="mt-4 max-w-md font-heading text-4xl font-bold leading-[1.05] tracking-tight text-white">
-          One globe for every place that shaped you.
+          Your memories have a place in the world.
         </h2>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-olive-100/70">
-          Remember your journeys, explore friends&apos; footprints, and discover where your worlds
-          overlap.
+          Capture trips, return to the moments that mattered, and find your next place through
+          people you trust.
         </p>
 
-        <ul className="mt-8 space-y-3" aria-label="Adventure Log highlights">
+        <ul className="mt-8 space-y-3" aria-label="Roamkeep highlights">
           {highlights.map(({ icon: Icon, title, description }) => (
             <li
               key={title}
@@ -84,7 +82,7 @@ export function AuthStoryPanel() {
 
       <div className="relative z-10 mt-8 flex items-center gap-2 text-xs text-olive-200/60">
         <ShieldCheck className="h-4 w-4" aria-hidden />
-        You control who can see each album and profile.
+        You control who can see each memory and exactly how much location is shared.
       </div>
     </aside>
   )

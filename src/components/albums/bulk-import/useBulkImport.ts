@@ -151,7 +151,7 @@ export function useBulkImport() {
         updatedGroups[i] = {
           ...group,
           locationName: 'No location data',
-          name: group.name || `Album ${i + 1}`,
+          name: group.name || `Memory ${i + 1}`,
         }
         continue
       }
@@ -192,7 +192,7 @@ export function useBulkImport() {
           } else if (locationName) {
             albumName = locationName.split(',')[0]
           } else {
-            albumName = `Album ${i + 1}`
+            albumName = `Memory ${i + 1}`
           }
 
           updatedGroups[i] = {
@@ -205,14 +205,14 @@ export function useBulkImport() {
           updatedGroups[i] = {
             ...group,
             locationName: 'Location unavailable',
-            name: group.name || `Album ${i + 1}`,
+            name: group.name || `Memory ${i + 1}`,
           }
         }
       } catch {
         updatedGroups[i] = {
           ...group,
           locationName: 'Location unavailable',
-          name: group.name || `Album ${i + 1}`,
+          name: group.name || `Memory ${i + 1}`,
         }
       }
 
@@ -352,8 +352,8 @@ export function useBulkImport() {
         // Create album
         const albumData: Record<string, unknown> = {
           user_id: user.id,
-          title: group.name || 'Imported Album',
-          caption: `Imported ${group.photos.length} photos`,
+          title: group.name || 'Imported Memory',
+          caption: `Kept from ${group.photos.length} photos`,
           // Album privacy is stored in the `visibility` column (RLS reads it).
           visibility: 'private',
           // The status column has no DB default; leaving it NULL makes the

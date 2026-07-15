@@ -24,7 +24,7 @@ const PUBLIC = join(ROOT, 'public')
 const ICON_SVG = join(PUBLIC, 'icon.svg')
 
 // Brand palette
-const CREAM = '#F7F2E7'
+const CREAM = '#F8F7F3'
 
 /** Rasterize the brand SVG to a PNG buffer at the requested square size. */
 async function logoBuffer(size) {
@@ -50,6 +50,19 @@ async function splash(width, height, logoFraction, outPath) {
 
 async function main() {
   const made = []
+
+  // Keep every install surface on the same vector brand mark.
+  for (const size of [72, 96, 128, 144, 152, 192, 384, 512]) {
+    const out = join(PUBLIC, 'icons', `icon-${size}x${size}.png`)
+    await sharp(ICON_SVG, { density: 300 }).resize(size, size).png().toFile(out)
+    made.push(out)
+  }
+
+  {
+    const out = join(PUBLIC, 'apple-touch-icon.png')
+    await sharp(ICON_SVG, { density: 300 }).resize(180, 180).png().toFile(out)
+    made.push(out)
+  }
 
   // 1. Notification badge — transparent background, simple solid render.
   {

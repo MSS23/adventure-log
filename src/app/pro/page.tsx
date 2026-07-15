@@ -2,7 +2,7 @@ import { LegalBackLink } from '@/components/legal/LegalBackLink'
 import { Sparkles, BarChart3, Images } from 'lucide-react'
 
 export const metadata = {
-  title: 'Adventure Log Pro — $29/year',
+  title: 'Roamkeep Pro — $29/year',
   description: 'Unlimited AI link imports, deep travel insights, and 4× photo capacity. Everything social stays free, forever.',
 }
 
@@ -38,7 +38,7 @@ export default function ProPage() {
 
         <p className="al-eyebrow mt-8 mb-1">Upgrade</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">
-          Adventure Log Pro — $29/year
+          Roamkeep Pro — $29/year
         </h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
           One flat price for the power features. No tiers, no add-ons — just more room for

@@ -1,7 +1,17 @@
 'use client'
 
 import { useState, memo } from 'react'
-import { MessageCircle, MapPin, Share2, Bookmark, BookmarkCheck, Globe as GlobeIcon } from 'lucide-react'
+import {
+  MessageCircle,
+  MapPin,
+  Share2,
+  Bookmark,
+  BookmarkCheck,
+  Globe as GlobeIcon,
+  MapPinPlus,
+  Check,
+  Loader2,
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OptimizedAvatar } from '@/components/ui/optimized-avatar'
 import Link from 'next/link'
@@ -16,6 +26,8 @@ import { trackGrowthEvent } from '@/lib/utils/growth-events'
 import { formatTravelDate } from '@/lib/utils/travel-date'
 import { formatLocationLabel, getFlagEmoji } from '@/lib/utils/country'
 import { cn } from '@/lib/utils'
+import { apiFetch } from '@/lib/api/client'
+import { log } from '@/lib/utils/logger'
 
 export interface FeedAlbum {
   id: string
@@ -61,16 +73,19 @@ const ActionButton = memo(
     children,
     label,
     className,
+    disabled = false,
   }: {
     onClick?: () => void
     isActive?: boolean
     children: React.ReactNode
     label: string
     className?: string
+    disabled?: boolean
   }) => (
     <motion.button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       whileTap={{ scale: 0.92 }}
       aria-label={label}
       className={cn(
@@ -79,6 +94,7 @@ const ActionButton = memo(
         isActive
           ? 'text-accent'
           : 'text-muted-foreground hover:text-primary hover:bg-muted',
+        disabled && 'cursor-not-allowed opacity-55',
         className,
       )}
     >
@@ -110,7 +126,8 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
     targetId: album.id,
   })
   const isBookmarked = isFavorited(album.id, 'album')
-  const [showShareToast, setShowShareToast] = useState(false)
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null)
+  const [placeState, setPlaceState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   // Local, optimistic like count: the footer shows a server-provided count, so
   // it must move the instant the user taps the heart (the LikeButton reports
   // the toggle), not wait for a refetch.
@@ -128,7 +145,7 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
     ? formatLocationLabel(album.location, album.country_code)
     : ''
 
-  const hasGeo = !!(album.latitude && album.longitude)
+  const hasGeo = album.latitude != null && album.longitude != null
   // Location chip routes to that user's globe view (filtered globe page).
   const userGlobeHref = hasGeo
     ? `/globe?user=${album.user_id}&album=${album.id}&lat=${album.latitude}&lng=${album.longitude}`
@@ -156,8 +173,8 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
       }
     } else {
       await navigator.clipboard.writeText(shareUrl)
-      setShowShareToast(true)
-      setTimeout(() => setShowShareToast(false), 2000)
+      setFeedbackMessage('Link copied')
+      setTimeout(() => setFeedbackMessage(null), 2400)
     }
   }
 
@@ -169,6 +186,53 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
       title: album.title,
       photo_url: album.cover_image_url,
     }).catch(() => {})
+  }
+
+  const handleSavePlace = async () => {
+    if (!hasGeo || !album.location || placeState === 'saving' || placeState === 'saved') return
+
+    setPlaceState('saving')
+    try {
+      const publicAlbumUrl = withRef(
+        `${getWebOrigin()}/albums/${album.id}/public`,
+        profile?.username,
+      )
+      const res = await apiFetch('/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location_name: album.location,
+          country_code: album.country_code,
+          latitude: album.latitude,
+          longitude: album.longitude,
+          notes: `Saved from ${user.display_name || user.username}'s memory “${album.title}”.`,
+          source: 'from_album',
+          source_url: publicAlbumUrl,
+          thumbnail_url: album.cover_image_url,
+        }),
+      })
+
+      if (!res.ok && res.status !== 409) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || 'Failed to save place')
+      }
+
+      setPlaceState('saved')
+      setFeedbackMessage(res.status === 409 ? 'Already in Want to go' : 'Saved to Want to go')
+      trackGrowthEvent('wishlist_item_added', {
+        meta: { surface: 'feed_post', source: 'from_album' },
+      })
+      setTimeout(() => setFeedbackMessage(null), 2400)
+    } catch (error) {
+      setPlaceState('error')
+      setFeedbackMessage('Couldn’t save this place. Try again.')
+      setTimeout(() => setFeedbackMessage(null), 3000)
+      log.error(
+        'Failed to save feed place to wishlist',
+        { component: 'FeedPost', action: 'save-place', albumId: album.id },
+        error as Error,
+      )
+    }
   }
 
   return (
@@ -292,6 +356,26 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
           <ActionButton onClick={handleShare} label="Share">
             <Share2 className="h-5 w-5" strokeWidth={1.7} />
           </ActionButton>
+          {hasGeo && album.location && (
+            <ActionButton
+              onClick={() => void handleSavePlace()}
+              isActive={placeState === 'saved'}
+              disabled={placeState === 'saving' || placeState === 'saved'}
+              label={
+                placeState === 'saved'
+                  ? `${album.location} saved to Want to go`
+                  : `Save ${album.location} to Want to go`
+              }
+            >
+              {placeState === 'saving' ? (
+                <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.7} />
+              ) : placeState === 'saved' ? (
+                <Check className="h-5 w-5" strokeWidth={2} />
+              ) : (
+                <MapPinPlus className="h-5 w-5" strokeWidth={1.7} />
+              )}
+            </ActionButton>
+          )}
         </div>
 
         <ActionButton onClick={handleBookmark} isActive={isBookmarked} label="Bookmark">
@@ -341,16 +425,16 @@ export const FeedItem = memo(({ album, priority = false }: { album: FeedAlbum; c
         </div>
       )}
 
-      {/* Share toast */}
+      {/* Share/save feedback */}
       <AnimatePresence>
-        {showShareToast && (
+        {feedbackMessage && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs font-medium px-4 py-2 rounded-full shadow-lg z-10"
           >
-            Link copied
+            {feedbackMessage}
           </motion.div>
         )}
       </AnimatePresence>

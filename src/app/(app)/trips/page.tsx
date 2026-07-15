@@ -181,9 +181,9 @@ export default function TripsPage() {
             <p className="al-eyebrow">Plan · Together</p>
             <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary">Collaborative beta</span>
           </div>
-          <h1 className="al-display text-3xl md:text-4xl">Trip Planner</h1>
+          <h1 className="al-display text-3xl md:text-4xl">Trip Capsules</h1>
           <p className="text-sm text-muted-foreground max-w-xl">
-            One shared board for everyone&apos;s ideas, links, and must-do places.
+            A private shared space for the map, ideas, people, and memories behind a trip.
           </p>
         </header>
 
@@ -191,12 +191,12 @@ export default function TripsPage() {
           <DialogTrigger asChild>
             <Button variant="coral" size="pill" className="shrink-0 w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              New Trip
+              New Capsule
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create a new trip</DialogTitle>
+              <DialogTitle>Create a trip capsule</DialogTitle>
             </DialogHeader>
             <div className="space-y-3">
               <div>
@@ -242,16 +242,16 @@ export default function TripsPage() {
                 disabled={creating || !title.trim()}
               >
                 {creating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Create
+                Create capsule
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
         </div>
         <div className="relative mt-6 grid grid-cols-1 gap-2 border-t border-border pt-5 sm:grid-cols-3">
-          <PlannerFeature icon={<Link2 className="h-4 w-4" />} title="Paste places" copy="Google Maps links become pins" />
-          <PlannerFeature icon={<UsersRound className="h-4 w-4" />} title="Plan together" copy="Everyone adds in their own colour" />
-          <PlannerFeature icon={<MapPinned className="h-4 w-4" />} title="Keep the route" copy="Turn the finished trip into an album" />
+          <PlannerFeature icon={<Link2 className="h-4 w-4" />} title="Build one shared map" copy="Links and ideas become pins for everyone" />
+          <PlannerFeature icon={<UsersRound className="h-4 w-4" />} title="Decide together" copy="Invite companions and shape the route as a group" />
+          <PlannerFeature icon={<MapPinned className="h-4 w-4" />} title="Keep what happened" copy="Turn the finished capsule into a shared memory" />
         </div>
       </section>
 
@@ -283,12 +283,11 @@ export default function TripsPage() {
             <MapIcon className="h-6 w-6" />
           </div>
           <h3 className="font-heading text-lg font-semibold text-foreground">
-            Trip Planner is launching soon
+            Trip Capsules are launching soon
           </h3>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            We&apos;re putting the finishing touches on collaborative trip
-            planning. In the meantime, you can still build albums and
-            wishlists from your dashboard.
+            We&apos;re putting the finishing touches on private collaborative trips.
+            In the meantime, keep memories and save places from Home.
           </p>
           <div className="mt-5">
             <Link href="/feed">
@@ -304,15 +303,15 @@ export default function TripsPage() {
             <MapIcon className="h-6 w-6" />
           </div>
           <h3 className="font-heading text-lg font-semibold text-foreground">
-            No trips yet
+            No trip capsules yet
           </h3>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            Create a trip, invite friends, and paste Google Maps links to see everyone&apos;s picks on one map.
+            Create a private capsule, invite companions, and bring everyone&apos;s places together on one map.
           </p>
           <div className="mt-5">
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create your first trip
+              Create your first capsule
             </Button>
           </div>
         </div>

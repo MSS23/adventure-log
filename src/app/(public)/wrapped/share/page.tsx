@@ -198,7 +198,7 @@ function PublicWrappedExperience() {
   useEffect(() => {
     if (typeof document === 'undefined') return
     const prev = document.title
-    document.title = `${displayName}'s ${label} Travel Wrapped · Adventure Log`
+    document.title = `${displayName}'s ${label} Travel Wrapped · Roamkeep`
     return () => {
       document.title = prev
     }
@@ -248,7 +248,7 @@ function PublicWrappedExperience() {
             <GlobeIcon className="h-4 w-4" aria-hidden />
           </span>
           <span className="font-heading text-sm font-semibold hidden sm:inline">
-            Adventure Log
+            Roamkeep
           </span>
         </Link>
         <Link href={ctaHref}>
@@ -740,7 +740,7 @@ function PublicWrappedExperience() {
               >
                 Replay
               </button>
-              <p className="al-eyebrow !text-white/55 mt-1">Adventure Log</p>
+              <p className="al-eyebrow !text-white/55 mt-1">Roamkeep</p>
             </motion.div>
           </div>
           </div>

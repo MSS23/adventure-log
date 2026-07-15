@@ -47,7 +47,7 @@ export function UpdateNotification() {
                   Update available
                 </h3>
                 <p className="text-xs text-[color:var(--color-muted-warm)] mt-1">
-                  A new version of Adventure Log is ready
+                  A new version of Roamkeep is ready
                 </p>
 
                 <div className="flex gap-2 mt-3">

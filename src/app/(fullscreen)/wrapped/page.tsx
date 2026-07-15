@@ -326,7 +326,7 @@ function WrappedExperience() {
   const cardYearQuery = mode === 'year' ? `&year=${currentYear}` : ''
 
   const handleShare = async () => {
-    const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" — make yours free on Adventure Log:`
+    const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" — make yours free on Roamkeep:`
     const shareTitle = `${displayName}'s ${label} Travel Wrapped`
     // Share a public landing surface, not this auth-gated /wrapped route —
     // recipients land on /wrapped/share?u=…&year=… where they can WATCH the
@@ -1215,7 +1215,7 @@ function WrappedExperience() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.5 }}
                 >
-                  Adventure Log
+                  Roamkeep
                 </motion.p>
               </motion.div>
             </div>

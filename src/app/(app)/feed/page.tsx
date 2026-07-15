@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { Loader2, Compass, Users, MapPinned } from 'lucide-react'
+import { Loader2, Compass, Users, MapPinned, Images, ArrowUpRight } from 'lucide-react'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/auth/AuthProvider'
@@ -338,10 +338,22 @@ export default function FeedPage() {
       {/* Editorial header — daily dispatch line + clean heading on its own row */}
       <header className="relative mb-5 overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-[var(--shadow-resting)] sm:p-6">
         <div aria-hidden className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-3xl" />
-        <div className="relative space-y-1">
-          <p className="al-eyebrow">{dailyDispatch}</p>
-          <h1 className="al-display text-3xl md:text-4xl">Travel Memories</h1>
-          <p className="max-w-lg text-sm text-muted-foreground">A living journal of the places your circle has just returned from.</p>
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-1">
+            <p className="al-eyebrow">{dailyDispatch}</p>
+            <h1 className="al-display text-3xl md:text-4xl">Your world, worth keeping.</h1>
+            <p className="max-w-lg text-sm text-muted-foreground">
+              New stories from people you trust, old memories worth returning to, and your next place.
+            </p>
+          </div>
+          <Link
+            href="/albums/import"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-4 text-sm font-semibold text-accent-foreground shadow-[0_6px_18px_rgba(185,74,58,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <Images className="h-4 w-4" aria-hidden />
+            Add memories
+            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
         </div>
       </header>
 
@@ -400,14 +412,14 @@ export default function FeedPage() {
           className="inline-flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl border border-border bg-card px-2 py-2 text-[10px] font-semibold tracking-wide text-muted-foreground shadow-[var(--shadow-resting)] transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:text-primary"
         >
           <Compass className="h-3 w-3" strokeWidth={2} />
-          Explore
+          Trusted places
         </Link>
         <Link
-          href="/map"
+          href="/globe"
           className="inline-flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl border border-border bg-card px-2 py-2 text-[10px] font-semibold tracking-wide text-muted-foreground shadow-[var(--shadow-resting)] transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:text-primary"
         >
           <MapPinned className="h-3 w-3" strokeWidth={2} />
-          Your map
+          Your world
         </Link>
         <Link
           href="/travel-twins"

@@ -9,11 +9,11 @@ import {
   Upload,
   CheckCircle,
   AlertTriangle,
+  Check,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { UserNav } from '@/components/layout/UserNav'
 import { useBulkImport } from './bulk-import/useBulkImport'
 import { localizePath } from '@/lib/utils/native-routes'
 import { DropZone } from './bulk-import/DropZone'
@@ -52,16 +52,23 @@ export function BulkPhotoImport() {
   } = useBulkImport()
 
   const { getRootProps, getInputProps, isDragActive } = dropzone
+  const stageIndex = {
+    dropzone: 0,
+    processing: 0,
+    review: 1,
+    uploading: 2,
+    complete: 3,
+  }[stage]
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-40">
-        <div className="flex items-center justify-between h-16 px-4 md:px-6 max-w-7xl mx-auto">
+      <header className="mb-6 rounded-3xl border border-border bg-card p-4 shadow-[var(--shadow-resting)] sm:p-5">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
+              aria-label="Go back"
               onClick={() => {
                 if (stage === 'review') {
                   if (confirm('Go back? Your grouping changes will be lost.')) {
@@ -78,22 +85,47 @@ export function BulkPhotoImport() {
             </Button>
             <div>
               <h1 className="font-heading text-lg font-semibold text-foreground">
-                Bulk Photo Import
+                Turn photos into memories
               </h1>
               <p className="text-xs text-muted-foreground">
-                {stage === 'dropzone' && 'Drop your photos to get started'}
-                {stage === 'processing' && 'Extracting photo data...'}
-                {stage === 'review' && `${groups.length} album${groups.length !== 1 ? 's' : ''} ready for review`}
-                {stage === 'uploading' && 'Creating albums...'}
-                {stage === 'complete' && 'Import complete'}
+                {stage === 'dropzone' && 'Choose a camera-roll batch to begin'}
+                {stage === 'processing' && 'Reading dates and places on this device...'}
+                {stage === 'review' && `${groups.length} memor${groups.length === 1 ? 'y' : 'ies'} ready for your review`}
+                {stage === 'uploading' && 'Keeping your memories privately...'}
+                {stage === 'complete' && 'Your memories are ready'}
               </p>
             </div>
           </div>
-          <UserNav />
         </div>
+
+        <ol aria-label="Import progress" className="mt-5 grid grid-cols-4 gap-2">
+          {['Select', 'Review', 'Keep', 'Done'].map((label, index) => {
+            const isComplete = index < stageIndex
+            const isCurrent = index === stageIndex
+            return (
+              <li key={label} className="min-w-0">
+                <div
+                  className={`h-1 rounded-full transition-colors duration-200 ${
+                    index <= stageIndex ? 'bg-primary' : 'bg-muted'
+                  }`}
+                  aria-hidden
+                />
+                <span
+                  className={`mt-1.5 flex items-center gap-1 truncate text-[10px] font-semibold uppercase tracking-wider ${
+                    isCurrent || isComplete ? 'text-foreground' : 'text-muted-foreground'
+                  }`}
+                  aria-current={isCurrent ? 'step' : undefined}
+                >
+                  {isComplete && <Check className="h-3 w-3 text-primary" aria-hidden />}
+                  {label}
+                </span>
+              </li>
+            )
+          })}
+        </ol>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
+      <main>
         {/* Error Banner */}
         <AnimatePresence>
           {error && (
@@ -162,10 +194,10 @@ export function BulkPhotoImport() {
                   <Loader2 className="h-8 w-8 text-primary animate-spin" />
                 </div>
                 <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
-                  Processing Photos
+                  Finding the shape of your trip
                 </h2>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Extracting GPS coordinates and dates from EXIF data
+                  Reading dates and locations so related moments stay together
                 </p>
 
                 <div className="space-y-3">
@@ -233,10 +265,10 @@ export function BulkPhotoImport() {
                   <Upload className="h-8 w-8 text-primary animate-pulse" />
                 </div>
                 <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
-                  Creating Albums
+                  Keeping Your Memories
                 </h2>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Uploading photos and creating album records
+                  Uploading your approved groups as private memories
                 </p>
                 {uploadingGroup && (
                   <p className="text-xs text-primary mb-6">
@@ -270,10 +302,10 @@ export function BulkPhotoImport() {
                 <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
                   {groups.some(g => g.centerLat !== null)
                     ? 'Your globe just lit up'
-                    : 'Import Complete'}
+                    : 'Your memories are ready'}
                 </h2>
                 <p className="text-sm text-muted-foreground mb-6">
-                  {createdAlbumIds.length} album{createdAlbumIds.length !== 1 ? 's' : ''} created
+                  {createdAlbumIds.length} memor{createdAlbumIds.length === 1 ? 'y' : 'ies'} kept
                   with {groups.reduce((sum, g) => sum + g.photos.length, 0)} photos
                 </p>
 
@@ -284,7 +316,7 @@ export function BulkPhotoImport() {
                     className="cursor-pointer"
                   >
                     <Globe2 className="h-4 w-4 mr-2" />
-                    See Your Globe
+                    Open Your Globe
                   </Button>
                   {createdAlbumIds.length > 0 && (
                     <Button
@@ -293,7 +325,7 @@ export function BulkPhotoImport() {
                       className="cursor-pointer"
                     >
                       <ArrowRight className="h-4 w-4 mr-2" />
-                      View First Album
+                      Open First Memory
                     </Button>
                   )}
                   <Button
@@ -302,7 +334,7 @@ export function BulkPhotoImport() {
                     onClick={resetAll}
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Import More
+                    Keep More Photos
                   </Button>
                 </div>
               </CardContent>

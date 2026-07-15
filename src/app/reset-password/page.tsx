@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
           ) : (
             <>
               <header className="space-y-1">
-                <p className="al-eyebrow">Adventure Log</p>
+                <p className="al-eyebrow">Roamkeep</p>
                 <h1 className="al-display text-3xl">Reset password</h1>
                 <p className="text-sm text-muted-foreground">
                   Enter your email and we&apos;ll send you a reset link.

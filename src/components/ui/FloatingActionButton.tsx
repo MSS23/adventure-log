@@ -17,8 +17,8 @@ const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 // is the everyday Instagram-style single-album composer; "Import many" is the
 // bulk multi-trip importer.
 const actions = [
-  { id: 'new-post', label: 'New post', icon: Camera, href: '/albums/new' },
-  { id: 'import-photos', label: 'Import many', icon: Images, href: '/albums/import' },
+  { id: 'new-post', label: 'Create a memory', icon: Camera, href: '/albums/new' },
+  { id: 'import-photos', label: 'Import camera roll', icon: Images, href: '/albums/import' },
 ]
 
 export function FloatingActionButton({ className }: FloatingActionButtonProps) {
@@ -89,7 +89,7 @@ export function FloatingActionButton({ className }: FloatingActionButtonProps) {
         whileTap={{ scale: 0.92 }}
         whileHover={{ scale: 1.05 }}
         transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-        aria-label={isExpanded ? 'Close upload menu' : 'Open upload menu'}
+        aria-label={isExpanded ? 'Close capture menu' : 'Add a travel memory'}
         aria-expanded={isExpanded}
         className={cn(
           'fixed right-4 md:right-6 z-[52] fab-position',

@@ -37,8 +37,8 @@ export async function generateMetadata({
     const ownerName = owner?.display_name || owner?.username || 'a traveler'
     const description = album.description
       || (album.location_name
-        ? `${title} - ${album.location_name} by ${ownerName} on Adventure Log`
-        : `Travel album by ${ownerName} on Adventure Log`)
+        ? `${title} - ${album.location_name} by ${ownerName} on Roamkeep`
+        : `Travel album by ${ownerName} on Roamkeep`)
 
     return {
       title: `${title} | ${ownerName}`,
@@ -59,7 +59,7 @@ export async function generateMetadata({
       },
     }
   } catch {
-    return { title: 'Travel Album | Adventure Log' }
+    return { title: 'Travel Album | Roamkeep' }
   }
 }
 

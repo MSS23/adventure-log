@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { useAuth } from '@/components/auth/AuthProvider'
+import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
 
 /**
  * Public layout for routes that don't require authentication
@@ -28,26 +29,8 @@ export default function PublicLayout({
       ) : (
         <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6 lg:px-8 xl:px-12">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--color-ink)] text-[color:var(--color-ivory)]">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M3 12h18M12 3a14 14 0 010 18" />
-                </svg>
-              </span>
-              <span className="font-heading text-lg font-semibold text-foreground">
-                Adventure Log
-              </span>
+            <Link href="/" className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <RoamkeepMark />
             </Link>
             <Link
               href="/login"

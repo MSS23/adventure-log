@@ -1,5 +1,5 @@
 /**
- * Bundle Optimization Configuration for Adventure Log
+ * Bundle Optimization Configuration for Roamkeep
  *
  * This file contains optimizations to reduce bundle sizes and improve loading performance
  */

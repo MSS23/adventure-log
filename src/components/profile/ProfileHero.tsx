@@ -36,7 +36,7 @@ export function ProfileHero({
   const handleShare = async () => {
     if (!profile.username) return
     const url = withRef(`${getWebOrigin()}/u/${profile.username}`, profile.username)
-    const title = `${displayName} on Adventure Log`
+    const title = `${displayName} on Roamkeep`
     trackGrowthEvent('share_link_created', { meta: { surface: 'profile_hero' } })
 
     const copyToClipboard = async () => {

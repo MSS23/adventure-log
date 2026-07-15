@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { LegalBackLink } from '@/components/legal/LegalBackLink'
 
 export const metadata = {
-  title: 'Privacy Policy — Adventure Log',
-  description: 'How Adventure Log collects, uses, and protects your data.',
+  title: 'Privacy Policy — Roamkeep',
+  description: 'How Roamkeep collects, uses, and protects your data.',
 }
 
 export default function PrivacyPage() {
@@ -15,11 +15,11 @@ export default function PrivacyPage() {
         <p className="al-eyebrow mt-8 mb-1">Last updated · July 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Privacy Policy</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
-          Adventure Log helps you document and share your travels. This policy explains what we collect, why, and what your rights are. We wrote it to be readable — no dark patterns. It works alongside our <Link href="/terms" className="text-primary underline">Terms of Service</Link> and <Link href="/cookies" className="text-primary underline">Cookie Policy</Link>.
+          Roamkeep helps you document and share your travels. This policy explains what we collect, why, and what your rights are. We wrote it to be readable — no dark patterns. It works alongside our <Link href="/terms" className="text-primary underline">Terms of Service</Link> and <Link href="/cookies" className="text-primary underline">Cookie Policy</Link>.
         </p>
 
         <Section title="1. Who we are">
-          <p>Adventure Log (&quot;we&quot;, &quot;us&quot;) is the data controller for the personal data described in this policy. For any privacy question or to exercise your rights, contact <a className="text-primary underline" href="mailto:msidhu861@gmail.com?subject=Privacy%20Request">msidhu861@gmail.com</a>.</p>
+          <p>Roamkeep (&quot;we&quot;, &quot;us&quot;) is the data controller for the personal data described in this policy. For any privacy question or to exercise your rights, contact <a className="text-primary underline" href="mailto:msidhu861@gmail.com?subject=Privacy%20Request">msidhu861@gmail.com</a>.</p>
         </Section>
 
         <Section title="2. What we collect">
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="10. Age — adults only (18+)">
-          <p>Adventure Log is an adults-only service. <strong>You must be 18 or older to create an account or use it.</strong> We ask for your date of birth at sign-up to confirm this and record that you confirmed you are 18+. The service is not directed at children, and we do not knowingly collect personal data from anyone under 18. If we learn that an account holder is under 18, we will close the account and delete their data.</p>
+          <p>Roamkeep is an adults-only service. <strong>You must be 18 or older to create an account or use it.</strong> We ask for your date of birth at sign-up to confirm this and record that you confirmed you are 18+. The service is not directed at children, and we do not knowingly collect personal data from anyone under 18. If we learn that an account holder is under 18, we will close the account and delete their data.</p>
         </Section>
 
         <Section title="11. Retention">

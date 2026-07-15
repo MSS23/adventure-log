@@ -118,8 +118,8 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
         router.push(localizePath(path))
         onClose()
       } else {
-        // A QR was found but it isn't an Adventure Log passport.
-        showHint("That's not an Adventure Log passport — try again")
+        // A QR was found but it isn't an Roamkeep passport.
+        showHint("That's not an Roamkeep passport — try again")
       }
     } catch (error) {
       log.error(
@@ -245,7 +245,7 @@ export function PassportScanner({ onClose }: { onClose: () => void }) {
           Scan a passport
         </h2>
         <p className="mt-1 text-sm text-white/60">
-          Point at a friend&apos;s Adventure Log passport
+          Point at a friend&apos;s Roamkeep passport
         </p>
 
         <button

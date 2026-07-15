@@ -1,5 +1,5 @@
 /**
- * PWA utilities for Adventure Log
+ * PWA utilities for Roamkeep
  * Handles service worker registration, installation prompts, and offline functionality
  * Cross-platform compatible for web, iOS, and Android
  */

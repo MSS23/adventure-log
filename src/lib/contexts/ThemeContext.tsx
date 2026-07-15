@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect } from 'react'
 
-// Adventure Log is light-only. The theme surface below is kept so existing
+// Roamkeep is light-only. The theme surface below is kept so existing
 // consumers (useTheme) keep compiling, but every value is pinned to 'light'
 // and the setters are no-ops. This removes the old behavior where a saved
 // 'dark'/'system' preference in Supabase flipped the app to dark right after

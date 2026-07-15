@@ -254,7 +254,7 @@ export default function TravelPassportPage() {
       try {
         await navigator.share({
           title: `${profile?.display_name || profile?.username || 'My'} Travel Passport`,
-          text: 'Check out my Travel Passport on Adventure Log!',
+          text: 'Check out my Travel Passport on Roamkeep!',
           url: shareUrl,
         })
       } catch { /* cancelled */ }

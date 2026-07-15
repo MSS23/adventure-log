@@ -52,18 +52,18 @@ export function FirstRunGuide() {
   const loop = [
     {
       icon: <Camera className="h-5 w-5" strokeWidth={1.8} />,
-      title: 'Log a trip',
-      body: 'Add photos, a place, and a date. That’s an album.',
+      title: 'Capture in a minute',
+      body: 'Choose photos. Roamkeep groups them by date and place for you to approve.',
     },
     {
       icon: <GlobeIcon className="h-5 w-5" strokeWidth={1.8} />,
-      title: 'See it on your globe',
-      body: 'Every album drops a pin on your own 3D world.',
+      title: 'Relive it on your globe',
+      body: 'Every memory becomes a place, route, and moment you can return to.',
     },
     {
       icon: <Share2 className="h-5 w-5" strokeWidth={1.8} />,
-      title: 'Share the journey',
-      body: 'Build a passport, get your year Wrapped, share it.',
+      title: 'Keep the loop going',
+      body: 'Share with friends, save their places, and turn discoveries into a trip.',
     },
   ]
 
@@ -80,12 +80,12 @@ export function FirstRunGuide() {
         <MotionReveal>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="al-eyebrow mb-0.5">How Adventure Log works</p>
+              <p className="al-eyebrow mb-0.5">How Roamkeep works</p>
               <h3 id="how-it-works-heading" className="al-display text-xl md:text-2xl">
-                Three steps to your map of the world
+                From camera roll to living memory
               </h3>
               <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-                Turn your travels into a living atlas. It starts with a single album.
+                Capture → relive → share → discover → plan → travel → capture.
               </p>
             </div>
             <button
@@ -132,16 +132,16 @@ export function FirstRunGuide() {
             <MapPin className="h-6 w-6" strokeWidth={1.8} />
           </motion.div>
           <h3 className="al-display text-xl md:text-2xl">
-            Add your travels — watch your globe light up
+            Bring your camera roll to life
           </h3>
           <p className="mx-auto mt-1 mb-5 max-w-md text-sm text-muted-foreground">
-            Pick a batch of trip photos. We read the location and dates, group
-            them into albums, and pin each one on your globe — in about a minute.
+            Pick a batch of trip photos. We read dates and locations, suggest
+            memory groups, and let you approve everything before it is kept.
           </p>
           <Button variant="coral" asChild>
             <Link href="/albums/import">
               <Camera className="h-4 w-4" strokeWidth={1.8} />
-              Import photos to your globe
+              Import from camera roll
             </Link>
           </Button>
           <p className="mt-3 text-xs text-muted-foreground">
@@ -150,7 +150,7 @@ export function FirstRunGuide() {
               href="/albums/new"
               className="font-medium text-primary underline-offset-2 hover:underline"
             >
-              Create an album manually
+              Create from scratch
             </Link>
           </p>
 

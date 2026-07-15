@@ -35,7 +35,7 @@ function SignupForm() {
   const [resendMessage, setResendMessage] = useState<string | null>(null)
   const [resendError, setResendError] = useState<string | null>(null)
 
-  // Adventure Log is 18+. Derive age from the self-declared DOB to drive the
+  // Roamkeep is 18+. Derive age from the self-declared DOB to drive the
   // under-18 block; the value is also stored server-side for an audit record.
   const age = dob ? calculateAge(dob) : null
   const isUnderAge = age !== null && age < MIN_AGE
@@ -83,7 +83,7 @@ function SignupForm() {
     }
 
     if (isUnderAge) {
-      setError(`You must be at least ${MIN_AGE} to use Adventure Log.`)
+      setError(`You must be at least ${MIN_AGE} to use Roamkeep.`)
       return
     }
 
@@ -204,10 +204,10 @@ function SignupForm() {
     <div className="w-full max-w-md">
       <div className="rounded-[24px] border border-border bg-card p-6 shadow-sm sm:p-8">
         <header className="space-y-1">
-          <p className="al-eyebrow">Adventure Log</p>
+          <p className="al-eyebrow">Roamkeep</p>
           <h1 className="al-display text-3xl">Create your account</h1>
           <p className="text-sm text-muted-foreground">
-            Build your globe and compare it with people you know.
+            Keep your travel memories and discover places through people you trust.
           </p>
         </header>
 
@@ -280,11 +280,11 @@ function SignupForm() {
             />
             {isUnderAge ? (
               <p className="text-xs text-destructive">
-                You must be at least {MIN_AGE} to use Adventure Log.
+                You must be at least {MIN_AGE} to use Roamkeep.
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Adventure Log is for adults aged {MIN_AGE} and over.
+                Roamkeep is for adults aged {MIN_AGE} and over.
               </p>
             )}
           </div>

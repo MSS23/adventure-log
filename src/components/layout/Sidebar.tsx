@@ -17,7 +17,6 @@ import {
   Bookmark,
   Star,
   MapPin,
-  MapPinned,
   MessageSquarePlus,
 } from 'lucide-react'
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog'
@@ -28,6 +27,7 @@ import { log } from '@/lib/utils/logger'
 import { useUnreadCount } from '@/components/activity/UnreadCountProvider'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
+import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
 
 interface NavItem {
   name: string
@@ -39,20 +39,18 @@ const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
 // "Browse" — outward-facing discovery: other people's adventures and places.
 const browseNavItems: NavItem[] = [
-  { name: 'Feed', href: '/feed', icon: Home },
-  { name: 'Explore', href: '/explore', icon: Compass },
-  { name: 'Places', href: '/places', icon: MapPinned },
+  { name: 'Home', href: '/feed', icon: Home },
+  { name: 'Discover', href: '/explore', icon: Compass },
 ]
 
 // "Yours" — everything about the signed-in traveler: their overview, maps,
 // albums, trips, and personal collections.
 const yoursNavItems: NavItem[] = [
   { name: 'Your Globe', href: '/globe', icon: Globe },
-  { name: 'Your Map', href: '/map', icon: MapPinned },
-  { name: 'Your Albums', href: '/albums', icon: BookOpen },
-  { name: 'Your Trips', href: '/trips', icon: MapIcon },
-  { name: 'Saved', href: '/saved', icon: Bookmark },
-  { name: 'Wishlist', href: '/wishlist', icon: Star },
+  { name: 'Trips', href: '/trips', icon: MapIcon },
+  { name: 'Memories', href: '/albums', icon: BookOpen },
+  { name: 'Want to go', href: '/wishlist', icon: Star },
+  { name: 'Saved stories', href: '/saved', icon: Bookmark },
   { name: 'Passport', href: '/passport', icon: MapPin },
 ]
 
@@ -201,35 +199,8 @@ export function Sidebar() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: EDITORIAL_EASE }}
           >
-            <Link href="/feed" className="flex items-center gap-2.5 group">
-              <motion.div
-                whileHover={{ rotate: -8, scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 18 }}
-                className="w-[30px] h-[30px] rounded-[9px] bg-[color:var(--color-forest)] flex items-center justify-center text-[color:var(--color-ivory)]"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M3 12h18M12 3a14 14 0 010 18" />
-                </svg>
-              </motion.div>
-              <div className="leading-none">
-                <div className="font-heading text-[17px] font-semibold text-[color:var(--color-ink)] leading-none">
-                  Adventure Log
-                </div>
-                <div className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-[color:var(--color-muted-warm)] mt-1">
-                  est. 2025
-                </div>
-              </div>
+            <Link href="/feed" className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <RoamkeepMark showTagline />
             </Link>
           </motion.div>
 
@@ -245,25 +216,25 @@ export function Sidebar() {
               className="al-btn-accent flex items-center justify-center gap-2 w-full px-4 py-2.5 text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-coral)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-ivory)]"
             >
               <Plus className="h-[18px] w-[18px]" strokeWidth={2.2} />
-              New album
+              Add a memory
             </Link>
           </motion.div>
 
           {/* Browse — outward-facing discovery (other travelers / places) */}
-          <nav aria-label="Browse navigation" className="px-3 space-y-0.5">
+          <nav aria-label="Roam navigation" className="px-3 space-y-0.5">
             <motion.p
               className="al-eyebrow px-3 pb-1.5 text-[color:var(--color-muted-warm)]"
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, ease: EDITORIAL_EASE, delay: 0.03 }}
             >
-              Browse
+              Roam
             </motion.p>
             {browseNavItems.map((item, i) => renderNavItem(item, i))}
           </nav>
 
           {/* Yours — the signed-in traveler's own content & collections */}
-          <nav aria-label="Your navigation" className="px-3 space-y-0.5 mt-5">
+          <nav aria-label="Keep navigation" className="px-3 space-y-0.5 mt-5">
             <motion.p
               className="al-eyebrow px-3 pb-1.5 text-[color:var(--color-muted-warm)]"
               initial={{ opacity: 0, x: -8 }}
@@ -274,7 +245,7 @@ export function Sidebar() {
                 delay: 0.05 + browseNavItems.length * 0.04,
               }}
             >
-              Yours
+              Keep
             </motion.p>
             {yoursNavItems.map((item, i) =>
               renderNavItem(item, browseNavItems.length + i),

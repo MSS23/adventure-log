@@ -23,11 +23,11 @@ export async function generateMetadata({
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventure-log-azure.vercel.app'
 
   return {
-    title: `${displayName}'s Travel Passport | Adventure Log`,
+    title: `${displayName}'s Travel Passport | Roamkeep`,
     description: `See ${displayName}'s travel passport - countries visited, distances traveled, and travel personality.`,
     openGraph: {
       title: `${displayName}'s Travel Passport`,
-      description: `Explore ${displayName}'s travel history on Adventure Log`,
+      description: `Explore ${displayName}'s travel history on Roamkeep`,
       type: 'profile',
       url: `${appUrl}/u/${username}/passport`,
       // The travel-card endpoint resolves the profile by user id, not username.

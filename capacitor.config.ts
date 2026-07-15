@@ -23,7 +23,9 @@ const ALLOWED_NAVIGATION = [
 
 const config: CapacitorConfig = {
   appId: 'com.adventurelog.app',
-  appName: 'Adventure Log',
+  // Keep the established bundle ID/deep-link scheme during the brand rollout;
+  // changing it would break existing installs and OAuth callbacks.
+  appName: 'Roamkeep',
   webDir: 'out',
   server: {
     // Enable live reload during development (set DEV_SERVER_URL when running `npm run dev`)
@@ -46,9 +48,9 @@ const config: CapacitorConfig = {
       // (SplashScreen.hide() in NativeAppShell) so the launch screen never
       // disappears before first paint.
       launchAutoHide: false,
-      // App is light-only — match the app background (--background / themeColor
-      // #F7F9FB) so launch doesn't flash dark before the WebView paints.
-      backgroundColor: '#F7F9FB',
+      // App is light-only — match the Roamkeep paper background so launch
+      // doesn't flash a different colour before the WebView paints.
+      backgroundColor: '#F8F7F3',
       showSpinner: false,
       androidScaleType: 'CENTER_CROP',
       splashFullScreen: true,
@@ -78,14 +80,14 @@ const config: CapacitorConfig = {
     webContentsDebuggingEnabled: Boolean(process.env.DEV_SERVER_URL),
     // Light-only app — WebView background must match or rotation/keyboard
     // resizes flash dark.
-    backgroundColor: '#F7F9FB',
+    backgroundColor: '#F8F7F3',
     useLegacyBridge: false,
   },
   ios: {
     contentInset: 'automatic',
     allowsLinkPreview: true,
     scrollEnabled: true,
-    backgroundColor: '#F7F9FB',
+    backgroundColor: '#F8F7F3',
     // Handle the safe area automatically
     preferredContentMode: 'mobile',
   },

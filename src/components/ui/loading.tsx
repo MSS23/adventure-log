@@ -1,5 +1,5 @@
 /**
- * Standardized loading UI components for Adventure Log
+ * Standardized loading UI components for Roamkeep
  * Provides consistent loading indicators across the application
  */
 

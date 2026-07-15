@@ -302,21 +302,21 @@ function GlobeEmptyCta({ onDismiss, onExplore }: { onDismiss: () => void; onExpl
         <div className="w-14 h-14 rounded-2xl bg-olive-900/40 flex items-center justify-center mx-auto mb-3">
           <Globe2 className="h-7 w-7 text-olive-400" />
         </div>
-        <h3 className="text-lg font-bold text-foreground mb-2">Add your travels — watch your globe light up</h3>
+        <h3 className="text-lg font-bold text-foreground mb-2">Keep a trip — watch your world light up</h3>
         <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-          Import a batch of trip photos and we&apos;ll read their locations, group them into albums, and pin each one right here.
+          Choose a batch of trip photos and we&apos;ll suggest private memories by date and place for you to review.
         </p>
         <div className="flex flex-col gap-2">
           <Link href="/albums/import">
             <Button className="w-full bg-olive-600 hover:bg-olive-700 text-white rounded-xl h-10 gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200">
               <Camera className="h-4 w-4" />
-              Import Photos
+              Import Camera Roll
             </Button>
           </Link>
           <Link href="/albums/new">
             <Button variant="outline" className="w-full rounded-xl h-10 gap-2 cursor-pointer active:scale-[0.97] transition-all duration-200">
               <Plus className="h-4 w-4" />
-              Create Album Manually
+              Create From Scratch
             </Button>
           </Link>
           <button

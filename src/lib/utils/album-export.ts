@@ -138,7 +138,7 @@ function generateAlbumMetadata(album: Album, photos: Photo[]): string {
 
   lines.push('');
   lines.push(`Exported: ${new Date().toLocaleString()}`);
-  lines.push(`From: Adventure Log`);
+  lines.push(`From: Roamkeep`);
 
   return lines.join('\n');
 }

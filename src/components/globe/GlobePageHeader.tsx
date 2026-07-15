@@ -85,12 +85,12 @@ export function GlobePageHeader({
               <Globe2 className="h-6 w-6 md:h-8 md:w-8 text-olive-700 dark:text-olive-400" />
               <span className="hidden md:inline truncate max-w-[200px] lg:max-w-none">
                 {exploreMode
-                  ? 'Explore Globe'
+                  ? 'Discover the World'
                   : isOwnProfile
-                    ? 'Travel Globe'
+                    ? 'Your Memory Globe'
                     : profileUser?.display_name || profileUser?.username
                       ? `${profileUser.display_name || profileUser.username}'s Globe`
-                      : 'Travel Globe' /* profileUser not loaded yet — never render "undefined's Globe" */}
+                      : 'Memory Globe' /* profileUser not loaded yet — never render "undefined's Globe" */}
               </span>
             </h1>
 
@@ -146,7 +146,7 @@ export function GlobePageHeader({
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-olive-50 dark:bg-olive-900/30 rounded-md border border-olive-100 dark:border-olive-800/50">
                   <MapPin className="h-3 w-3 text-olive-600 dark:text-olive-400" />
                   <span className="text-xs font-bold text-stone-900 dark:text-stone-100">{stats.totalAlbums}</span>
-                  <span className="text-[11px] text-stone-500 dark:text-stone-400">adventures</span>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">memories</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-olive-50 dark:bg-olive-900/30 rounded-md border border-olive-100 dark:border-olive-800/50">
                   <Globe2 className="h-3 w-3 text-olive-600 dark:text-olive-400" />
@@ -180,7 +180,7 @@ export function GlobePageHeader({
             {availableYears.length > 0 && !exploreMode && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" aria-label="Filter albums by year" className="inline-flex items-center gap-1 px-2 lg:gap-1.5 lg:px-3 h-8 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-white/[0.06] hover:bg-stone-200 dark:hover:bg-white/[0.1] text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97] flex-shrink-0">
+                  <button type="button" aria-label="Filter memories by year" className="inline-flex items-center gap-1 px-2 lg:gap-1.5 lg:px-3 h-8 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-white/[0.06] hover:bg-stone-200 dark:hover:bg-white/[0.1] text-stone-700 dark:text-stone-300 transition-all duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-olive-500 active:scale-[0.97] flex-shrink-0">
                     <Calendar className="h-3.5 w-3.5" />
                     {/* Compact label on mobile (icon + year), full label on lg+ */}
                     <span className="lg:hidden tabular-nums">{selectedYear ? selectedYear : 'All'}</span>
@@ -279,7 +279,7 @@ export function GlobePageHeader({
                 ) : (
                   <StarOff className="h-4 w-4" />
                 )}
-                <span className="hidden sm:inline">Wishlist</span>
+                <span className="hidden sm:inline">Want to go</span>
                 {wishlistItemsCount > 0 && (
                   <span className={cn(
                     "ml-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold px-1 tabular-nums",
@@ -294,14 +294,14 @@ export function GlobePageHeader({
             )}
 
             {isOwnProfile && !exploreMode && (
-              <Link href="/albums/new" aria-label="Create new album">
+              <Link href="/albums/new" aria-label="Add a new memory">
                 <Button
                   size="sm"
                   className="gap-1.5 h-9 bg-olive-600 hover:bg-olive-700 text-white"
-                  title="Create new album"
+                  title="Add a new memory"
                 >
                   <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">New album</span>
+                  <span className="hidden sm:inline">Add memory</span>
                 </Button>
               </Link>
             )}

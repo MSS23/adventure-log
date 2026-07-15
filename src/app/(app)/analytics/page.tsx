@@ -490,7 +490,7 @@ export default function AnalyticsPage() {
                 Deep stats, heatmaps, and year-by-year charts — $29/year.
               </p>
               <Button onClick={() => router.push('/pro')} className="w-full cursor-pointer">
-                See Adventure Log Pro
+                See Roamkeep Pro
               </Button>
             </div>
           </div>

@@ -45,75 +45,75 @@
   /* Slate + Emerald palette — cool neutral base, emerald brand accent.
      (Var names kept as `olive-*` for compatibility with 250+ existing
      references; values remapped to the new sleek/modern scheme.) */
-  --color-olive-50:  #F1F5F9;  /* cool light bg */
-  --color-olive-100: #E2E8F0;  /* surface alt (card-in-card) */
-  --color-olive-200: #CBD5E1;  /* cool line */
-  --color-olive-300: #94A3B8;  /* deeper cool line / muted */
-  --color-olive-400: #34D399;  /* bright emerald (mint accent) */
-  --color-olive-500: #10B981;  /* emerald */
-  --color-olive-600: #059669;  /* emerald deep (primary actions) */
-  --color-olive-700: #047857;  /* emerald darker */
-  --color-olive-800: #065F46;  /* emerald hover */
-  --color-olive-900: #1E293B;  /* slate ink-soft */
-  --color-olive-950: #0C1014;  /* slate ink (near-black) */
+  --color-olive-50:  #F2F5EE;
+  --color-olive-100: #E5EBDD;
+  --color-olive-200: #CCD8C1;
+  --color-olive-300: #A9BE9A;
+  --color-olive-400: #7FA078;
+  --color-olive-500: #557F67;
+  --color-olive-600: #276749;
+  --color-olive-700: #1F5A40;
+  --color-olive-800: #184632;
+  --color-olive-900: #21312A;
+  --color-olive-950: #101813;
 }
 
 :root {
   --radius: 0.875rem;
   /* Slate + Emerald — cool off-white base, emerald primary + mint accent */
-  --background: #F7F9FB;
-  --foreground: #0C1014;
+  --background: #F8F7F3;
+  --foreground: #17201C;
   --card: #FFFFFF;
-  --card-foreground: #0C1014;
+  --card-foreground: #17201C;
   --popover: #FFFFFF;
-  --popover-foreground: #0C1014;
+  --popover-foreground: #17201C;
   /* WCAG AA: #059669 was 3.77:1 on white; #047857 (emerald-700) hits 5.48:1
      while staying inside the brand's emerald ramp. Dark mode already passes. */
-  --primary: #047857;
+  --primary: #1F6B57;
   --primary-foreground: #FFFFFF;
-  --secondary: #EEF2F6;
-  --secondary-foreground: #0C1014;
-  --muted: #EEF2F6;
-  --muted-foreground: #5B6770;
-  --accent: #10B981;
+  --secondary: #EFEEE8;
+  --secondary-foreground: #17201C;
+  --muted: #EFEEE8;
+  --muted-foreground: #626B65;
+  --accent: #B94A3A;
   --accent-foreground: #FFFFFF;
   --destructive: #DC2626;
-  --border: #E2E8F0;
-  --input: #EEF2F6;
-  --ring: #059669;
-  --chart-1: #059669;
-  --chart-2: #10B981;
-  --chart-3: #34D399;
+  --border: #E2E0D8;
+  --input: #EFEEE8;
+  --ring: #1F6B57;
+  --chart-1: #1F6B57;
+  --chart-2: #B94A3A;
+  --chart-3: #7FA078;
   --chart-4: #0EA5E9;
-  --chart-5: #0C1014;
-  --sidebar: #F2F5F8;
-  --sidebar-foreground: #0C1014;
-  --sidebar-primary: #059669;
+  --chart-5: #17201C;
+  --sidebar: #F4F2EC;
+  --sidebar-foreground: #17201C;
+  --sidebar-primary: #1F6B57;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #FFFFFF;
-  --sidebar-accent-foreground: #0C1014;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #059669;
+  --sidebar-accent-foreground: #17201C;
+  --sidebar-border: #E2E0D8;
+  --sidebar-ring: #1F6B57;
 
   /* Editorial palette extensions */
-  --color-ivory: #F7F9FB;
-  --color-ivory-alt: #EEF2F6;
-  --color-ink: #0C1014;
-  --color-ink-soft: #2A333B;
-  --color-muted-warm: #5B6770;
-  --color-line-warm: #E2E8F0;
+  --color-ivory: #F8F7F3;
+  --color-ivory-alt: #EFEEE8;
+  --color-ink: #17201C;
+  --color-ink-soft: #36413B;
+  --color-muted-warm: #626B65;
+  --color-line-warm: #E2E0D8;
 
   /* Forest → Emerald — primary brand */
-  --color-forest: #059669;
-  --color-forest-deep: #047857;
-  --color-forest-soft: #34D399;
-  --color-forest-bright: #6EE7B7;
-  --color-forest-tint: #D1FAE5;
+  --color-forest: #1F6B57;
+  --color-forest-deep: #174C3F;
+  --color-forest-soft: #7FA078;
+  --color-forest-bright: #A9BE9A;
+  --color-forest-tint: #E5EFE9;
 
   /* Coral → Mint — secondary accent (location pin / likes) */
-  --color-coral: #10B981;
-  --color-coral-soft: #6EE7B7;
-  --color-coral-tint: #D1FAE5;
+  --color-coral: #B94A3A;
+  --color-coral-soft: #DD8879;
+  --color-coral-tint: #F8E7E3;
 
   /* Gold — tertiary accent (compass / camera flash) */
   --color-gold: #D4A24A;
@@ -122,7 +122,7 @@
 
   --color-sky: #0EA5E9;
   --color-sky-tint: #DBEFFB;
-  --color-stamp: #DC2626;
+  --color-stamp: #B94A3A;
 
   /* Elevation ramp — "Soft UI Evolution": resting → hover → overlay.
      One consistent scale for every card/sheet/popover so depth never drifts.
@@ -134,57 +134,57 @@
 
 .dark {
   /* Slate + Emerald (dark) — near-black slate base, emerald + mint accents */
-  --background: #0C1014;
-  --foreground: #E8EDF1;
-  --card: #151B22;
-  --card-foreground: #E8EDF1;
-  --popover: #151B22;
-  --popover-foreground: #E8EDF1;
-  --primary: #10B981;
-  --primary-foreground: #022C22;
-  --secondary: #1B232B;
-  --secondary-foreground: #E8EDF1;
-  --muted: #1B232B;
-  --muted-foreground: #9AA7B2;
-  --accent: #34D399;
-  --accent-foreground: #022C22;
+  --background: #101813;
+  --foreground: #F7F4EC;
+  --card: #18221D;
+  --card-foreground: #F7F4EC;
+  --popover: #18221D;
+  --popover-foreground: #F7F4EC;
+  --primary: #91B18B;
+  --primary-foreground: #101813;
+  --secondary: #202B25;
+  --secondary-foreground: #F7F4EC;
+  --muted: #202B25;
+  --muted-foreground: #A7B1A9;
+  --accent: #DD8879;
+  --accent-foreground: #24100C;
   --destructive: #F87171;
   --border: rgba(226, 232, 240, 0.10);
   --input: rgba(226, 232, 240, 0.08);
-  --ring: #10B981;
-  --chart-1: #10B981;
-  --chart-2: #34D399;
-  --chart-3: #6EE7B7;
+  --ring: #91B18B;
+  --chart-1: #91B18B;
+  --chart-2: #DD8879;
+  --chart-3: #A9BE9A;
   --chart-4: #38BDF8;
-  --chart-5: #E8EDF1;
-  --sidebar: #0C1014;
-  --sidebar-foreground: #E8EDF1;
-  --sidebar-primary: #10B981;
-  --sidebar-primary-foreground: #022C22;
-  --sidebar-accent: #1B232B;
-  --sidebar-accent-foreground: #E8EDF1;
+  --chart-5: #F7F4EC;
+  --sidebar: #101813;
+  --sidebar-foreground: #F7F4EC;
+  --sidebar-primary: #91B18B;
+  --sidebar-primary-foreground: #101813;
+  --sidebar-accent: #202B25;
+  --sidebar-accent-foreground: #F7F4EC;
   --sidebar-border: rgba(226, 232, 240, 0.10);
-  --sidebar-ring: #10B981;
+  --sidebar-ring: #91B18B;
 
   /* Editorial palette extensions (dark) */
-  --color-ivory: #0C1014;
-  --color-ivory-alt: #1B232B;
-  --color-ink: #E8EDF1;
-  --color-ink-soft: #C2CCD4;
-  --color-muted-warm: #9AA7B2;
+  --color-ivory: #101813;
+  --color-ivory-alt: #202B25;
+  --color-ink: #F7F4EC;
+  --color-ink-soft: #D1D8D2;
+  --color-muted-warm: #A7B1A9;
   --color-line-warm: rgba(226, 232, 240, 0.10);
 
   /* Forest → Emerald — primary brand (brighter on dark) */
-  --color-forest: #10B981;
-  --color-forest-deep: #059669;
-  --color-forest-soft: #34D399;
-  --color-forest-bright: #6EE7B7;
-  --color-forest-tint: rgba(16, 185, 129, 0.18);
+  --color-forest: #91B18B;
+  --color-forest-deep: #7FA078;
+  --color-forest-soft: #A9BE9A;
+  --color-forest-bright: #CCD8C1;
+  --color-forest-tint: rgba(145, 177, 139, 0.18);
 
   /* Coral → Mint — secondary accent */
-  --color-coral: #34D399;
-  --color-coral-soft: #6EE7B7;
-  --color-coral-tint: rgba(52, 211, 153, 0.18);
+  --color-coral: #DD8879;
+  --color-coral-soft: #E8A89E;
+  --color-coral-tint: rgba(221, 136, 121, 0.18);
 
   /* Gold — tertiary accent */
   --color-gold: #E0B961;
@@ -230,13 +230,13 @@
 
   /* Text selection */
   ::selection {
-    background-color: rgba(16, 185, 129, 0.18);
-    color: #0C1014;
+    background-color: rgba(185, 74, 58, 0.18);
+    color: #17201C;
   }
 
   .dark ::selection {
-    background-color: rgba(52, 211, 153, 0.26);
-    color: #E8EDF1;
+    background-color: rgba(221, 136, 121, 0.28);
+    color: #F7F4EC;
   }
 
   /* Editorial heading hierarchy */
@@ -303,9 +303,9 @@
   select:-webkit-autofill,
   select:-webkit-autofill:hover,
   select:-webkit-autofill:focus {
-    -webkit-text-fill-color: #0C1014 !important;
-    -webkit-box-shadow: 0 0 0px 1000px #F7F9FB inset !important;
-    box-shadow: 0 0 0px 1000px #F7F9FB inset !important;
+    -webkit-text-fill-color: #17201C !important;
+    -webkit-box-shadow: 0 0 0px 1000px #F8F7F3 inset !important;
+    box-shadow: 0 0 0px 1000px #F8F7F3 inset !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 
@@ -651,12 +651,12 @@
 
   /* Focus visibility — forest ring */
   :focus-visible {
-    outline: 2px solid #059669;
+    outline: 2px solid #1F6B57;
     outline-offset: 2px;
   }
 
   .dark :focus-visible {
-    outline-color: #10B981;
+    outline-color: #91B18B;
   }
 
   /* Skip to content link for keyboard nav */
@@ -900,12 +900,12 @@
   background: var(--color-forest);
   color: #fff;
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.33);
+  box-shadow: 0 6px 18px rgba(31, 107, 87, 0.28);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .al-btn-coral:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.38);
+  box-shadow: 0 8px 24px rgba(31, 107, 87, 0.34);
   background: var(--color-forest-deep, #047857);
 }
 
@@ -914,12 +914,12 @@
   background: var(--color-coral);
   color: #fff;
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(52, 211, 153, 0.33);
+  box-shadow: 0 6px 18px rgba(185, 74, 58, 0.30);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .al-btn-accent:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(52, 211, 153, 0.42);
+  box-shadow: 0 8px 24px rgba(185, 74, 58, 0.38);
 }
 
 /* Pill badge with tint */

@@ -61,7 +61,7 @@ export async function decodeQrFromImageData(
  * Security-critical: validate UNTRUSTED scanned QR content before using it to
  * navigate the app, preventing open redirects and script-scheme injection.
  *
- * Accepts ONLY an Adventure Log passport URL whose path is exactly
+ * Accepts ONLY an Roamkeep passport URL whose path is exactly
  * `/u/<username>/passport`, where `<username>` matches `^[A-Za-z0-9_]{1,40}$`.
  * The QR may embed any origin (e.g. the production https origin) or be a bare
  * path starting with `/u/`. We parse with a placeholder base so relative paths

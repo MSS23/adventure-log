@@ -20,7 +20,7 @@ interface PassportQrCodeProps {
 export function PassportQrCode({
   url,
   size = 180,
-  label = 'Roamkeep passport QR code',
+  label = 'Adventure Log passport QR code',
   className,
 }: PassportQrCodeProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)

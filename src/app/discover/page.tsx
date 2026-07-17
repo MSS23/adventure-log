@@ -155,7 +155,7 @@ export default function DiscoverPage() {
                 <Compass className="h-4 w-4 text-white" />
               </div>
               <span className="text-lg font-heading font-bold text-white tracking-tight">
-                Roamkeep
+                Adventure Log
               </span>
             </Link>
             <nav className="flex items-center gap-2">

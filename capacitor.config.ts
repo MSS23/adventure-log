@@ -25,7 +25,7 @@ const config: CapacitorConfig = {
   appId: 'com.adventurelog.app',
   // Keep the established bundle ID/deep-link scheme during the brand rollout;
   // changing it would break existing installs and OAuth callbacks.
-  appName: 'Roamkeep',
+  appName: 'Adventure Log',
   webDir: 'out',
   server: {
     // Enable live reload during development (set DEV_SERVER_URL when running `npm run dev`)
@@ -48,7 +48,7 @@ const config: CapacitorConfig = {
       // (SplashScreen.hide() in NativeAppShell) so the launch screen never
       // disappears before first paint.
       launchAutoHide: false,
-      // App is light-only — match the Roamkeep paper background so launch
+      // App is light-only — match the Adventure Log paper background so launch
       // doesn't flash a different colour before the WebView paints.
       backgroundColor: '#F8F7F3',
       showSpinner: false,

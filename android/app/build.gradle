@@ -7,11 +7,10 @@ android {
         applicationId "com.adventurelog.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // Roamkeep native rollout. Keep applicationId/namespace stable so an
-        // existing Adventure Log install upgrades in place and OAuth links
-        // continue to use com.adventurelog.app://auth/callback.
-        versionCode 3
-        versionName "1.3.0"
+        // Keep the established package ID so existing installs upgrade in
+        // place and OAuth links continue to use the same callback scheme.
+        versionCode 4
+        versionName "1.3.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

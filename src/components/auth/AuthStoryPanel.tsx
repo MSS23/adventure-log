@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { GitCompareArrows, Globe2, MapPinned, ShieldCheck } from 'lucide-react'
-import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
+import { AdventureLogMark } from '@/components/brand/AdventureLogMark'
 
 const highlights = [
   {
@@ -24,7 +24,7 @@ const highlights = [
 export function AuthStoryPanel() {
   return (
     <aside
-      aria-label="What you can do with Roamkeep"
+      aria-label="What you can do with Adventure Log"
       className="relative hidden min-h-[650px] overflow-hidden rounded-[28px] border border-olive-700/40 bg-olive-950 p-10 text-white shadow-[0_24px_70px_-38px_rgba(20,31,18,0.8)] lg:flex lg:flex-col"
     >
       <div
@@ -45,7 +45,7 @@ export function AuthStoryPanel() {
         href="/"
         className="relative z-10 inline-flex w-fit min-h-11 items-center gap-2.5 rounded-xl text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-300"
       >
-        <RoamkeepMark inverted />
+        <AdventureLogMark inverted />
       </Link>
 
       <div className="relative z-10 mt-auto max-w-lg pt-24">
@@ -60,7 +60,7 @@ export function AuthStoryPanel() {
           people you trust.
         </p>
 
-        <ul className="mt-8 space-y-3" aria-label="Roamkeep highlights">
+        <ul className="mt-8 space-y-3" aria-label="Adventure Log highlights">
           {highlights.map(({ icon: Icon, title, description }) => (
             <li
               key={title}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
+import Link from 'next/link'
 import { useWishlist, type WishlistItem, type TravelPartner } from '@/lib/hooks/useWishlist'
 import { Button } from '@/components/ui/button'
 import { WalkthroughTour, type TourStep } from '@/components/ui/walkthrough-tour'
@@ -15,6 +16,8 @@ import {
   Filter,
   ListChecks,
   HelpCircle,
+  ArrowRight,
+  CheckCircle2,
 } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import { EnhancedEmptyState } from '@/components/ui/enhanced-empty-state'
@@ -28,6 +31,8 @@ import { TravelPartnersSection } from './_components/TravelPartnersSection'
 import { SaveFromLinkCard } from './_components/SaveFromLinkCard'
 import { AddToTripDialog } from './_components/AddToTripDialog'
 import type { AddPlaceParams } from '@/lib/links/place-types'
+import { countryCodeToFlag } from '@/lib/countries'
+import { getCountryName } from '@/lib/utils/country'
 
 interface WishlistContentProps {
   initialItems: WishlistItem[]
@@ -75,6 +80,26 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
     }),
     [items]
   )
+
+  const countryGroups = useMemo(() => {
+    const groups = new Map<string, WishlistItem[]>()
+    for (const item of filteredItems) {
+      const code = item.country_code?.toUpperCase() || 'OTHER'
+      groups.set(code, [...(groups.get(code) ?? []), item])
+    }
+
+    return [...groups.entries()]
+      .map(([code, groupItems]) => ({
+        code,
+        label: code === 'OTHER' ? 'Other plans' : getCountryName(code),
+        items: groupItems,
+      }))
+      .sort((a, b) => {
+        if (a.code === 'OTHER') return 1
+        if (b.code === 'OTHER') return -1
+        return a.label.localeCompare(b.label)
+      })
+  }, [filteredItems])
 
   const handleAddDestination = async (dest: NewDestination) => {
     try {
@@ -279,6 +304,28 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
         {/* ── Save from a link (TikTok / Google Maps → wishlist) ── */}
         <SaveFromLinkCard onSave={handleSavePlaceFromLink} />
 
+        {/* Social country checklists are derived from friends' place
+            recommendations. Keep the entry point beside the personal list so
+            the connection is obvious on small screens. */}
+        <Link
+          href="/explore/recommendations"
+          className="group flex min-h-24 items-center gap-3 rounded-2xl border border-primary/20 bg-primary/[0.055] p-4 text-foreground shadow-[var(--shadow-resting)] transition-colors hover:border-primary/40 hover:bg-primary/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-4 sm:p-5"
+        >
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground">
+            <CheckCircle2 className="h-5 w-5" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="al-eyebrow text-primary">Friends&apos; country lists</span>
+            <span className="mt-0.5 block font-heading text-base font-semibold sm:text-lg">
+              See what friends recommend â€” and tick off what you&apos;ve done
+            </span>
+            <span className="mt-1 block text-xs leading-relaxed text-muted-foreground sm:text-sm">
+              John&apos;s Japan list, Sam&apos;s New York picks, and your progress across them.
+            </span>
+          </span>
+          <ArrowRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" aria-hidden />
+        </Link>
+
         {/* ── Add Destination Form ──────────────────────────────── */}
         <AddDestinationForm open={showAddForm} onSubmit={handleAddDestination} />
 
@@ -309,20 +356,39 @@ export default function WishlistContent({ initialItems, initialPartners }: Wishl
               }
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
-              <AnimatePresence mode="popLayout">
-                {filteredItems.map((item, index) => (
-                  <WishlistCard
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    onMarkCompleted={handleMarkCompleted}
-                    onEdit={setEditingItem}
-                    onRemove={handleRemoveItem}
-                    onAddToTrip={setTripItem}
-                  />
-                ))}
-              </AnimatePresence>
+            <div className="space-y-7">
+              {countryGroups.map((group) => (
+                <section key={group.code} aria-labelledby={`wishlist-country-${group.code}`}>
+                  <div className="mb-3 flex items-center gap-2 px-1">
+                    {group.code !== 'OTHER' && (
+                      <span className="text-xl leading-none" aria-hidden>
+                        {countryCodeToFlag(group.code)}
+                      </span>
+                    )}
+                    <h2 id={`wishlist-country-${group.code}`} className="font-heading text-lg font-semibold text-foreground">
+                      {group.label}
+                    </h2>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold tabular-nums text-muted-foreground">
+                      {group.items.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <AnimatePresence mode="popLayout">
+                      {group.items.map((item, index) => (
+                        <WishlistCard
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          onMarkCompleted={handleMarkCompleted}
+                          onEdit={setEditingItem}
+                          onRemove={handleRemoveItem}
+                          onAddToTrip={setTripItem}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </section>
+              ))}
             </div>
           )}
         </div>

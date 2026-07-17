@@ -5,7 +5,7 @@ import { getWebOrigin, withRef } from '@/lib/utils/native-routes'
  * SSR/prerender, or a native build missing NEXT_PUBLIC_API_BASE_URL.
  * A share URL must never be relative or capacitor://localhost.
  */
-const FALLBACK_ORIGIN = 'https://roamkeep.net'
+const FALLBACK_ORIGIN = 'https://adventure-log-azure.vercel.app'
 
 /**
  * Canonical URL for sharing someone's Travel Wrapped. Lands recipients on

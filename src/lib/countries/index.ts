@@ -1,5 +1,5 @@
 /**
- * Country utilities for Roamkeep
+ * Country utilities for Adventure Log
  * Provides ISO-3166-1 alpha-2 country data, flag emojis, and search functionality
  * Optimized for travel destinations and tree-shakable exports
  */

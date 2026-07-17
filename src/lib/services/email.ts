@@ -5,8 +5,8 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'Roamkeep <noreply@adventurelog.app>'
-const APP_NAME = 'Roamkeep'
+const FROM_EMAIL = process.env.EMAIL_FROM || 'Adventure Log <noreply@adventurelog.app>'
+const APP_NAME = 'Adventure Log'
 
 export function getAppUrl(): string {
   const url = process.env.NEXT_PUBLIC_APP_URL

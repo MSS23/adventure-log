@@ -20,14 +20,14 @@ export async function generateMetadata({
     .single()
 
   const displayName = user?.display_name || user?.username || 'Traveler'
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://roamkeep.net'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventure-log-azure.vercel.app'
 
   return {
-    title: `${displayName}'s Travel Passport | Roamkeep`,
+    title: `${displayName}'s Travel Passport | Adventure Log`,
     description: `See ${displayName}'s travel passport - countries visited, distances traveled, and travel personality.`,
     openGraph: {
       title: `${displayName}'s Travel Passport`,
-      description: `Explore ${displayName}'s travel history on Roamkeep`,
+      description: `Explore ${displayName}'s travel history on Adventure Log`,
       type: 'profile',
       url: `${appUrl}/u/${username}/passport`,
       // The travel-card endpoint resolves the profile by user id, not username.

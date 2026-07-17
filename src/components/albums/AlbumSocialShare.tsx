@@ -84,7 +84,7 @@ export function AlbumSocialShare({
       try {
         await navigator.share({
           title,
-          text: description || `Check out "${title}" on Roamkeep!`,
+          text: description || `Check out "${title}" on Adventure Log!`,
           url
         })
         trackShare()
@@ -104,7 +104,7 @@ export function AlbumSocialShare({
       icon: Twitter,
       color: 'hover:bg-sky-500 hover:text-white',
       bgColor: 'bg-sky-100 dark:bg-sky-950/30 text-sky-600',
-      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out "${title}" on Roamkeep!`)}&url=${encodeURIComponent(url)}`
+      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out "${title}" on Adventure Log!`)}&url=${encodeURIComponent(url)}`
     },
     {
       name: 'Facebook',
@@ -118,7 +118,7 @@ export function AlbumSocialShare({
       icon: MessageCircle,
       color: 'hover:bg-green-500 hover:text-white',
       bgColor: 'bg-green-100 dark:bg-green-950/30 text-green-600',
-      url: `https://wa.me/?text=${encodeURIComponent(`Check out "${title}" on Roamkeep! ${url}`)}`
+      url: `https://wa.me/?text=${encodeURIComponent(`Check out "${title}" on Adventure Log! ${url}`)}`
     },
     {
       name: 'Email',

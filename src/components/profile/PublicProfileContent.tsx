@@ -128,8 +128,8 @@ export function PublicProfileContent({
   // lowest-friction way for a visitor to pass the profile along.
   const handleShareProfile = async () => {
     const shareData = {
-      title: `${displayName} on Roamkeep`,
-      text: `Check out ${displayName}'s travels on Roamkeep 🌍`,
+      title: `${displayName} on Adventure Log`,
+      text: `Check out ${displayName}'s travels on Adventure Log 🌍`,
       url: getShareableProfileUrl(),
     }
     if (typeof navigator !== 'undefined' && 'share' in navigator) {
@@ -418,7 +418,7 @@ export function PublicProfileContent({
           transition={{ duration: 0.45 }}
         >
           <div className="rounded-2xl border border-border bg-card px-6 py-10 md:px-10 md:py-12 text-center">
-            <span className="al-eyebrow mb-3 block">Roamkeep</span>
+            <span className="al-eyebrow mb-3 block">Adventure Log</span>
             <h2 className="al-display text-2xl md:text-3xl mb-3">
               Map your own journey
             </h2>
@@ -548,12 +548,12 @@ export function PublicProfileContent({
               href="/"
               className="font-semibold text-primary transition-colors"
             >
-              Roamkeep
+              Adventure Log
             </Link>
           </p>
           <Link href="/signup">
             <Button className="cursor-pointer px-8">
-              Start Your Roamkeep
+              Start Your Adventure Log
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>

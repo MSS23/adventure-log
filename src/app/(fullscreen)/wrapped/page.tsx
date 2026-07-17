@@ -326,7 +326,7 @@ function WrappedExperience() {
   const cardYearQuery = mode === 'year' ? `&year=${currentYear}` : ''
 
   const handleShare = async () => {
-    const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" — make yours free on Roamkeep:`
+    const shareText = `My ${label} Travel Wrapped: ${data.totalTrips} trips, ${data.countryCodes.length} countries, ${data.totalPhotos} photos, ${data.totalDistanceKm.toLocaleString()} km traveled! I'm a "${data.personality}" — make yours free on Adventure Log:`
     const shareTitle = `${displayName}'s ${label} Travel Wrapped`
     // Share a public landing surface, not this auth-gated /wrapped route —
     // recipients land on /wrapped/share?u=…&year=… where they can WATCH the
@@ -913,11 +913,11 @@ function WrappedExperience() {
                 wrapper: justify-center directly on the scroll container pushes
                 overflow above the scroll start edge, clipping the top
                 unreachably on phone-height viewports. */}
-            <div className="absolute inset-0 z-20 overflow-y-auto">
-            <div className="min-h-full flex flex-col items-center justify-center px-5 pt-[max(4rem,calc(env(safe-area-inset-top)+3rem))] pb-[max(2rem,env(safe-area-inset-bottom))]">
+            <div className="absolute inset-0 z-20 overflow-y-auto overscroll-contain">
+            <div className="mx-auto flex min-h-full w-full max-w-lg flex-col items-center justify-start px-4 pt-[max(4.5rem,calc(env(safe-area-inset-top)+3.5rem))] pb-[max(2.5rem,calc(env(safe-area-inset-bottom)+1rem))] sm:px-5 min-[720px]:justify-center">
               {/* Personality */}
               <motion.div
-                className="text-center mb-5"
+                className="w-full text-center mb-4 sm:mb-5"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, type: 'spring' }}
@@ -933,7 +933,7 @@ function WrappedExperience() {
 
               {/* Stat grid */}
               <motion.div
-                className="grid grid-cols-3 gap-2.5 sm:gap-3 max-w-md w-full mb-5"
+                className="grid w-full grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-5"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
@@ -973,7 +973,7 @@ function WrappedExperience() {
               {/* Country flags */}
               {data.countryCodes.length > 0 && (
                 <motion.div
-                  className="flex flex-wrap items-center justify-center gap-1.5 mb-5 max-w-sm"
+                  className="flex w-full flex-wrap items-center justify-center gap-1.5 mb-4 sm:mb-5"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7 }}
@@ -1036,7 +1036,7 @@ function WrappedExperience() {
                   Tapping one dives into it on the globe. */}
               {data.topAlbums.length > 0 && (
                 <motion.div
-                  className="w-full max-w-md mb-6"
+                  className="w-full mb-5 sm:mb-6"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.05 }}
@@ -1091,7 +1091,7 @@ function WrappedExperience() {
               {/* Share actions — the viral moment. Lead with a prominent
                   primary CTA; download + replay are secondary. */}
               <motion.div
-                className="flex flex-col items-center gap-3 w-full max-w-md"
+                className="flex w-full flex-col items-center gap-3"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.2 }}
@@ -1106,7 +1106,7 @@ function WrappedExperience() {
                     <Button
                       onClick={() => router.push('/wrapped')}
                       size="lg"
-                      className="al-btn-coral cursor-pointer w-full sm:w-auto text-white font-semibold px-10 py-6 text-base rounded-full gap-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                      className="al-btn-coral cursor-pointer w-full sm:w-auto text-white font-semibold px-6 sm:px-10 py-6 text-sm sm:text-base rounded-full gap-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
                       <Plane className="h-5 w-5" />
                       Watch Your Wrapped
@@ -1115,7 +1115,7 @@ function WrappedExperience() {
                     <Button
                       onClick={handleShare}
                       size="lg"
-                      className="al-btn-coral cursor-pointer w-full sm:w-auto text-white font-semibold px-10 py-6 text-base rounded-full gap-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                      className="al-btn-coral cursor-pointer w-full sm:w-auto text-white font-semibold px-6 sm:px-10 py-6 text-sm sm:text-base rounded-full gap-2 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
                       <Share2 className="h-5 w-5" />
                       Share My Wrapped
@@ -1123,7 +1123,7 @@ function WrappedExperience() {
                   )}
                 </motion.div>
 
-                <div className="flex gap-3 flex-wrap justify-center">
+                <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-center sm:gap-3">
                 {/* Flyover video export — own view only, and only when the
                     browser can actually record a canvas (Safari/older
                     WebViews hide it). One geolocated trip is enough: the
@@ -1133,7 +1133,7 @@ function WrappedExperience() {
                     onClick={startVideoExport}
                     disabled={videoStatus !== 'idle'}
                     variant="outline"
-                    className="cursor-pointer border-white/30 text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                    className="w-full cursor-pointer border-white/30 px-2 text-xs text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 sm:w-auto sm:px-4 sm:text-sm"
                   >
                     {videoStatus !== 'idle' ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1179,7 +1179,7 @@ function WrappedExperience() {
                       }
                     }}
                     variant="outline"
-                    className="cursor-pointer border-white/30 text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                    className="w-full cursor-pointer border-white/30 px-2 text-xs text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 sm:w-auto sm:px-4 sm:text-sm"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download Card
@@ -1192,15 +1192,15 @@ function WrappedExperience() {
                     setSegmentIndex(-1)
                   }}
                   variant="ghost"
-                  className="cursor-pointer text-white/65 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                  className="w-full cursor-pointer px-2 text-xs text-white/65 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 sm:w-auto sm:px-4 sm:text-sm"
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Replay
                 </Button>
-                <Link href="/feed">
+                <Link href="/feed" className="w-full sm:w-auto">
                   <Button
                     variant="ghost"
-                    className="cursor-pointer text-white/65 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500"
+                    className="w-full cursor-pointer px-2 text-xs text-white/65 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-olive-500 sm:w-auto sm:px-4 sm:text-sm"
                   >
                     <Home className="h-4 w-4 mr-2" />
                     Back to Home
@@ -1215,7 +1215,7 @@ function WrappedExperience() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.5 }}
                 >
-                  Roamkeep
+                  Adventure Log
                 </motion.p>
               </motion.div>
             </div>
@@ -1255,10 +1255,10 @@ function StatCard({
   icon: React.ReactNode
 }) {
   return (
-    <div className="bg-white/[0.07] backdrop-blur-md rounded-xl p-2.5 sm:p-3 text-center border border-white/15 shadow-lg shadow-black/20">
+    <div className="min-w-0 overflow-hidden bg-white/[0.07] backdrop-blur-md rounded-xl p-2 sm:p-3 text-center border border-white/15 shadow-lg shadow-black/20">
       <div className="text-olive-400 mb-1 flex justify-center">{icon}</div>
-      <p className="al-stat-value text-2xl sm:text-3xl !text-white tabular-nums leading-none">{value}</p>
-      <p className="al-eyebrow !text-white/65 mt-1 text-[9px]">{label}</p>
+      <p className="al-stat-value truncate text-[clamp(1.2rem,6.5vw,1.875rem)] !text-white tabular-nums leading-none">{value}</p>
+      <p className="al-eyebrow !text-white/65 mt-1 text-[8px] sm:text-[9px]">{label}</p>
     </div>
   )
 }

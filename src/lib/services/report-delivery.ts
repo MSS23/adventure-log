@@ -49,7 +49,7 @@ export async function deliverReportToDiscord(r: ReportNotification): Promise<boo
 
   return postDiscordEmbed(
     url,
-    'Roamkeep Moderation',
+    'Adventure Log Moderation',
     {
       title: `🚨 New report: ${meta.label}`,
       description: (r.description || '_No description provided._').slice(0, 4000),

@@ -4,7 +4,7 @@
  * Reproducible Android build entry point.
  *
  * Builds the static mobile bundle, syncs Capacitor, regenerates native
- * Roamkeep artwork, and creates a debug APK. Pass --install to deploy it to a
+ * Adventure Log artwork, and creates a debug APK. Pass --install to deploy it to a
  * connected Android device with adb install -r.
  */
 
@@ -69,11 +69,11 @@ function readAndroidSdk() {
 
 const nativeOnly = process.argv.includes('--native-only')
 if (!nativeOnly) {
-  run(process.execPath, [join(ROOT, 'scripts', 'mobile-build.mjs')], { label: 'Build Roamkeep mobile web bundle' })
+  run(process.execPath, [join(ROOT, 'scripts', 'mobile-build.mjs')], { label: 'Build Adventure Log mobile web bundle' })
   run(process.execPath, [join(ROOT, 'node_modules', '@capacitor', 'cli', 'bin', 'capacitor'), 'sync', 'android'], {
     label: 'Sync Capacitor Android project',
   })
-  run(process.execPath, [join(ROOT, 'scripts', 'generate-android-assets.mjs')], { label: 'Generate native Roamkeep artwork' })
+  run(process.execPath, [join(ROOT, 'scripts', 'generate-android-assets.mjs')], { label: 'Generate native Adventure Log artwork' })
 }
 
 const javaHome = findJavaHome()
@@ -115,5 +115,5 @@ if (process.argv.includes('--install')) {
   if (!connected) {
     throw new Error('No authorised Android device was found. Enable USB debugging, connect the Pixel, and accept its RSA prompt.')
   }
-  run(adb, ['install', '-r', APK], { label: 'Install or upgrade Roamkeep on the connected device' })
+  run(adb, ['install', '-r', APK], { label: 'Install or upgrade Adventure Log on the connected device' })
 }

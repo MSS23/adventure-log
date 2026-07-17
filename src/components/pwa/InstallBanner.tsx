@@ -195,7 +195,7 @@ export function InstallBanner() {
       <AnimatePresence mode="wait">
         {showBanner && shouldShowBanner && (
           <motion.div
-            className="fixed left-0 right-0 z-[45] px-4 install-banner-position"
+            className="fixed left-0 right-0 z-[45] px-3 sm:px-4 install-banner-position"
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 100 }}
@@ -304,11 +304,11 @@ export function InstallBanner() {
                       initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={prefersReducedMotion ? {} : { opacity: 0, x: 20 }}
-                      className="flex items-start gap-4"
+                    className="relative flex items-start gap-3 pr-9 sm:gap-4 sm:pr-10"
                     >
                       {/* Icon */}
                       <motion.div
-                        className="p-3 bg-white/20 rounded-xl flex-shrink-0"
+                        className="hidden min-[380px]:block p-3 bg-white/20 rounded-xl flex-shrink-0"
                         initial={prefersReducedMotion ? {} : { scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: 'spring' as const, stiffness: 300, damping: 20, delay: 0.1 }}
@@ -321,13 +321,13 @@ export function InstallBanner() {
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg">Install Roamkeep</h3>
+                        <h3 className="font-bold text-lg">Install Adventure Log</h3>
                         <p className="text-sm text-white/80 mt-1">
                           Add to your home screen for quick access and offline support.
                         </p>
 
                         {/* Benefits */}
-                        <div className="flex flex-wrap gap-2 mt-3">
+                        <div className="hidden min-[360px]:flex flex-wrap gap-2 mt-3">
                           {['Works Offline', 'Fast & Native', 'No App Store'].map((benefit, i) => (
                             <motion.span
                               key={benefit}
@@ -342,11 +342,11 @@ export function InstallBanner() {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-3 mt-4">
+                        <div className="mt-4 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                           <Button
                             onClick={handleInstall}
                             disabled={isInstalling}
-                            className="bg-white text-[color:var(--color-forest-deep)] hover:bg-white/90 font-semibold px-4"
+                            className="w-full bg-white text-[color:var(--color-forest-deep)] hover:bg-white/90 font-semibold px-4"
                           >
                             {isInstalling ? (
                               <>
@@ -364,7 +364,7 @@ export function InstallBanner() {
                           <Button
                             onClick={handleDismiss}
                             variant="ghost"
-                            className="text-white hover:bg-white/20"
+                            className="w-full text-white hover:bg-white/20"
                           >
                             Not Now
                           </Button>
@@ -375,7 +375,7 @@ export function InstallBanner() {
                       <button
                         type="button"
                         onClick={handleDismiss}
-                        className="flex items-center justify-center min-h-11 min-w-11 hover:bg-white/20 rounded-lg transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent flex-shrink-0"
+                        className="absolute -right-1 -top-1 flex items-center justify-center min-h-11 min-w-11 hover:bg-white/20 rounded-lg transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                         aria-label="Close"
                       >
                         <X className="h-5 w-5" />

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Generate the native Android launcher and splash assets from the Roamkeep
+ * Generate the native Android launcher and splash assets from the Adventure Log
  * mark. Keeping this deterministic prevents the APK from drifting away from
  * the web/PWA brand whenever the Capacitor project is resynchronised.
  */
@@ -81,4 +81,4 @@ for (const splashPath of findSplashFiles(RES)) {
   writeFileSync(splashPath, splash)
 }
 
-console.log(`[android-assets] Generated Roamkeep launcher icons and ${findSplashFiles(RES).length} splash assets.`)
+console.log(`[android-assets] Generated Adventure Log launcher icons and ${findSplashFiles(RES).length} splash assets.`)

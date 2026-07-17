@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-interface RoamkeepMarkProps {
+interface AdventureLogMarkProps {
   className?: string
   markClassName?: string
   showWordmark?: boolean
@@ -8,13 +8,13 @@ interface RoamkeepMarkProps {
   inverted?: boolean
 }
 
-export function RoamkeepMark({
+export function AdventureLogMark({
   className,
   markClassName,
   showWordmark = true,
   showTagline = false,
   inverted = false,
-}: RoamkeepMarkProps) {
+}: AdventureLogMarkProps) {
   return (
     <span className={cn('inline-flex min-w-0 items-center gap-2.5', className)}>
       <span
@@ -47,7 +47,7 @@ export function RoamkeepMark({
               inverted ? 'text-white' : 'text-foreground',
             )}
           >
-            Roamkeep
+            Adventure Log
           </span>
           {showTagline && (
             <span
@@ -56,7 +56,7 @@ export function RoamkeepMark({
                 inverted ? 'text-white/55' : 'text-muted-foreground',
               )}
             >
-              Keep the places that made you
+              Your travel life, on a globe
             </span>
           )}
         </span>

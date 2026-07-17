@@ -1,4 +1,4 @@
-// Roamkeep design tokens and utility classes - Forest Explorer theme
+// Adventure Log design tokens and utility classes - Forest Explorer theme
 
 export const designTokens = {
   // Spacing (4px grid system)
@@ -190,7 +190,7 @@ export const designTokens = {
   }
 }
 
-// Roamkeep component utilities - Forest Explorer theme
+// Adventure Log component utilities - Forest Explorer theme
 export const appStyles = {
   // Photo grid
   photoGrid: 'aspect-square object-cover',

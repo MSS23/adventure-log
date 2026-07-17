@@ -64,13 +64,13 @@ export async function deliverToDiscord(p: FeedbackPayload): Promise<boolean> {
 
   return postDiscordEmbed(
     url,
-    'Roamkeep Feedback',
+    'Adventure Log Feedback',
     {
       title: `${meta.emoji} ${meta.label}`,
       description: p.message.slice(0, 4000),
       color: meta.color,
       fields,
-      footer: { text: `Roamkeep${p.appVersion ? ` · v${p.appVersion}` : ''}` },
+      footer: { text: `Adventure Log${p.appVersion ? ` · v${p.appVersion}` : ''}` },
     },
     { component: 'FeedbackDelivery', action: 'discord' }
   )

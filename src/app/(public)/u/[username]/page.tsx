@@ -60,9 +60,9 @@ export async function generateMetadata({
     const avatarUrl = getServerStorageUrl(user.avatar_url, 'avatars')
     const description =
       user.bio ||
-      `Explore ${displayName}'s travel adventures and destinations on Roamkeep`
+      `Explore ${displayName}'s travel adventures and destinations on Adventure Log`
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://roamkeep.net'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://adventure-log-azure.vercel.app'
 
     return {
       title,
@@ -87,7 +87,7 @@ export async function generateMetadata({
       },
     }
   } catch {
-    return { title: 'Traveler Profile | Roamkeep' }
+    return { title: 'Traveler Profile | Adventure Log' }
   }
 }
 
@@ -122,7 +122,7 @@ export default async function PublicProfilePage({
             href="/signup"
             className="al-btn-coral inline-flex items-center justify-center px-7 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)] focus-visible:ring-offset-2"
           >
-            Start your own Roamkeep
+            Start your own Adventure Log
           </Link>
         </div>
       </div>

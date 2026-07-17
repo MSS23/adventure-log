@@ -21,7 +21,12 @@ import { PassportWorldMap } from '@/components/passport/PassportWorldMap'
 import { PassportQrCode } from '@/components/passport/PassportQrCode'
 import { getCountryName } from '@/lib/utils/country'
 import { parseLocalDate } from '@/lib/utils/travel-date'
-import { CONTINENT_EMOJI, type Continent } from '@/lib/utils/continents'
+import {
+  CONTINENT_COLORS,
+  CONTINENT_EMOJI,
+  getContinent,
+  type Continent,
+} from '@/lib/utils/continents'
 import { useTravelPassport } from '@/lib/hooks/useTravelPassport'
 
 // Camera + QR-decode stack loads only when the user actually opens the
@@ -254,7 +259,7 @@ export default function TravelPassportPage() {
       try {
         await navigator.share({
           title: `${profile?.display_name || profile?.username || 'My'} Travel Passport`,
-          text: 'Check out my Travel Passport on Roamkeep!',
+          text: 'Check out my Travel Passport on Adventure Log!',
           url: shareUrl,
         })
       } catch { /* cancelled */ }
@@ -297,7 +302,7 @@ export default function TravelPassportPage() {
   const username = profile?.username || ''
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-24 pt-4 sm:pt-8">
+    <div className="max-w-2xl mx-auto pb-24 pt-2 sm:pt-4">
       {/* Editorial header — shared Back + Home navigation */}
       <PageHeader title="Passport" className="mb-6" />
 
@@ -464,6 +469,7 @@ export default function TravelPassportPage() {
           {data.continentProgress.map((cont, i) => {
             const pct = cont.total > 0 ? (cont.visited / cont.total) * 100 : 0
             const visited = cont.visited > 0
+            const theme = CONTINENT_COLORS[cont.name as Continent]
             return (
               <motion.div
                 key={cont.name}
@@ -476,6 +482,7 @@ export default function TravelPassportPage() {
                     ? 'hover:border-primary/30'
                     : 'opacity-50'
                 )}
+                style={visited && theme ? { borderColor: `${theme.ink}45`, backgroundColor: theme.tint } : undefined}
               >
                 <div className="flex items-center gap-2 mb-2.5">
                   <span className="text-lg">{CONTINENT_EMOJI[cont.name as Continent] || '🌍'}</span>
@@ -483,7 +490,8 @@ export default function TravelPassportPage() {
                 </div>
                 <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-primary rounded-full"
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: theme?.ink || 'var(--color-primary)' }}
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.max(pct, cont.visited > 0 ? 6 : 0)}%` }}
                     transition={{ duration: 0.8, delay: 0.4 + i * 0.05, ease: 'easeOut' }}
@@ -511,9 +519,13 @@ export default function TravelPassportPage() {
         const rotations = [-8, 5, -4, 7, -6, 3, -5, 6, -3, 4, -7, 2]
         const stamps = data.countryCodes.map((code, i) => {
           const date = earliestByCountry.get(code)
+          const continent = getContinent(code)
+          const theme = continent ? CONTINENT_COLORS[continent] : null
           return {
             code,
             name: getCountryName(code),
+            continent,
+            color: theme?.ink || 'var(--color-stamp)',
             rotation: rotations[i % rotations.length],
             dateLabel: date
               ? parseLocalDate(date)?.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).toUpperCase() ?? ''
@@ -538,13 +550,21 @@ export default function TravelPassportPage() {
               </span>
             </div>
             <div
-              className="rounded-2xl p-5 sm:p-6"
+              className="rounded-2xl p-4 sm:p-6"
               style={{
                 background: 'var(--color-ivory-alt)',
                 border: '1px solid var(--color-line-warm)',
               }}
             >
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+              <div className="mb-5 flex flex-wrap justify-center gap-x-3 gap-y-2" aria-label="Stamp colours by continent">
+                {([...new Set(stamps.map((stamp) => stamp.continent).filter(Boolean))] as Continent[]).map((continent) => (
+                  <span key={continent} className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: CONTINENT_COLORS[continent].ink }} aria-hidden />
+                    {continent}
+                  </span>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6">
                 {stamps.map((s, i) => (
                   <motion.div
                     key={s.code}
@@ -562,8 +582,8 @@ export default function TravelPassportPage() {
                     <div
                       className="absolute inset-0 rounded-full flex flex-col items-center justify-center text-center font-mono transition-transform group-hover:scale-[1.03]"
                       style={{
-                        border: '2.5px solid var(--color-stamp)',
-                        color: 'var(--color-stamp)',
+                        border: `2.5px solid ${s.color}`,
+                        color: s.color,
                         background:
                           'radial-gradient(circle, transparent 60%, var(--color-ivory-alt))',
                       }}

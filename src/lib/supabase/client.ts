@@ -1,5 +1,11 @@
 import { createBrowserClient } from '@supabase/ssr'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import {
+  createClient as createSupabaseClient,
+  type SupabaseClient,
+  type SupportedStorage,
+} from '@supabase/supabase-js'
+import { Capacitor } from '@capacitor/core'
+import { Preferences } from '@capacitor/preferences'
 
 // Auth is owned by Supabase. The browser client manages the session itself
 // (cookie/localStorage) and sends it on every request so RLS policies using
@@ -11,50 +17,27 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const MISSING_ENV_MESSAGE =
   'Supabase is not configured. Create a .env.local file with NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (see .env.example).'
 
-// Custom storage adapter that works on both web and native (Capacitor) platforms.
-const createStorageAdapter = () => {
+/**
+ * Durable auth storage for the native shell.
+ *
+ * This must be used with `@supabase/supabase-js` directly. The SSR package's
+ * `createBrowserClient()` always replaces `auth.storage` with its own cookie
+ * adapter, even when a custom adapter is supplied. Cookies are the right
+ * contract for the website, but they are not a durable session store for the
+ * `capacitor://localhost` WebView and caused the APK to appear to sign in and
+ * then immediately fall back to the login screen.
+ */
+export function createNativeStorageAdapter(): SupportedStorage {
   return {
-    getItem: async (key: string): Promise<string | null> => {
-      if (typeof window === 'undefined') return null
-      try {
-        const { Capacitor } = await import('@capacitor/core')
-        if (Capacitor.isNativePlatform()) {
-          const { Preferences } = await import('@capacitor/preferences')
-          const { value } = await Preferences.get({ key })
-          return value
-        }
-      } catch {
-        // Capacitor not available, fall back to localStorage
-      }
-      return localStorage.getItem(key)
+    async getItem(key: string): Promise<string | null> {
+      const { value } = await Preferences.get({ key })
+      return value
     },
-    setItem: async (key: string, value: string): Promise<void> => {
-      if (typeof window === 'undefined') return
-      try {
-        const { Capacitor } = await import('@capacitor/core')
-        if (Capacitor.isNativePlatform()) {
-          const { Preferences } = await import('@capacitor/preferences')
-          await Preferences.set({ key, value })
-          return
-        }
-      } catch {
-        // Capacitor not available, fall back to localStorage
-      }
-      localStorage.setItem(key, value)
+    async setItem(key: string, value: string): Promise<void> {
+      await Preferences.set({ key, value })
     },
-    removeItem: async (key: string): Promise<void> => {
-      if (typeof window === 'undefined') return
-      try {
-        const { Capacitor } = await import('@capacitor/core')
-        if (Capacitor.isNativePlatform()) {
-          const { Preferences } = await import('@capacitor/preferences')
-          await Preferences.remove({ key })
-          return
-        }
-      } catch {
-        // Capacitor not available, fall back to localStorage
-      }
-      localStorage.removeItem(key)
+    async removeItem(key: string): Promise<void> {
+      await Preferences.remove({ key })
     },
   }
 }
@@ -74,14 +57,25 @@ export function createClient(): SupabaseClient {
     return browserClient
   }
 
-  browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      storage: createStorageAdapter(),
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  })
+  if (Capacitor.isNativePlatform()) {
+    browserClient = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: createNativeStorageAdapter(),
+        autoRefreshToken: true,
+        persistSession: true,
+        // Native OAuth is completed explicitly by NativeAppShell from the
+        // custom-scheme appUrlOpen callback. Letting auth-js inspect the local
+        // WebView URL can incorrectly treat an ordinary app navigation as an
+        // auth callback.
+        detectSessionInUrl: false,
+        flowType: 'pkce',
+      },
+    })
+  } else {
+    // Website/PWA: @supabase/ssr owns the cookie contract used by middleware
+    // and Server Components. Do not share the native Preferences adapter here.
+    browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
+  }
 
   return browserClient
 }

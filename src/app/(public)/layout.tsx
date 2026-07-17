@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { TopNavigation } from '@/components/layout/TopNavigation'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
 import { useAuth } from '@/components/auth/AuthProvider'
-import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
+import { AdventureLogMark } from '@/components/brand/AdventureLogMark'
 
 /**
  * Public layout for routes that don't require authentication
@@ -30,7 +30,7 @@ export default function PublicLayout({
         <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6 lg:px-8 xl:px-12">
             <Link href="/" className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <RoamkeepMark />
+              <AdventureLogMark />
             </Link>
             <Link
               href="/login"

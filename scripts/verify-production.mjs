@@ -1,4 +1,4 @@
-const baseUrl = (process.argv[2] || process.env.NEXT_PUBLIC_APP_URL || 'https://roamkeep.net')
+const baseUrl = (process.argv[2] || process.env.NEXT_PUBLIC_APP_URL || 'https://adventure-log-azure.vercel.app')
   .replace(/\/$/, '')
 
 const checks = [
@@ -14,7 +14,7 @@ for (const check of checks) {
   try {
     const response = await fetch(`${baseUrl}${check.path}`, {
       redirect: 'follow',
-      headers: { 'User-Agent': 'RoamkeepProductionVerifier/1.0' },
+      headers: { 'User-Agent': 'Adventure LogProductionVerifier/1.0' },
     })
     const elapsed = Date.now() - started
     const passed = check.expect.includes(response.status)
@@ -35,4 +35,4 @@ for (const check of checks) {
 }
 
 if (failed) process.exit(1)
-console.log(`Roamkeep production smoke checks passed for ${baseUrl}`)
+console.log(`Adventure Log production smoke checks passed for ${baseUrl}`)

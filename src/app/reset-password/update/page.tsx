@@ -113,7 +113,7 @@ export default function ResetPasswordUpdatePage() {
           ) : (
             <>
               <header className="space-y-1">
-                <p className="al-eyebrow">Roamkeep</p>
+                <p className="al-eyebrow">Adventure Log</p>
                 <h1 className="al-display text-3xl">Set a new password</h1>
                 <p className="text-sm text-muted-foreground">
                   Choose a new password for your account.

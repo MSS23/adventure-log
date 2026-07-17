@@ -61,7 +61,7 @@ export function ShareButton({
       try {
         await navigator.share({
           title: albumTitle,
-          text: `Check out "${albumTitle}" on Roamkeep!`,
+          text: `Check out "${albumTitle}" on Adventure Log!`,
           url: currentUrl,
         })
         return

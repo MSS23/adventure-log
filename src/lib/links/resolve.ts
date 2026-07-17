@@ -12,7 +12,7 @@ import { log } from '@/lib/utils/logger'
 const NOMINATIM_UA = `AdventureLog/1.0 (+${
   process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
   process.env.NEXT_PUBLIC_APP_URL ||
-  'https://roamkeep.net'
+  'https://adventure-log-azure.vercel.app'
 })`
 
 export type LinkPlatform = 'tiktok' | 'google_maps' | 'instagram' | 'other'

@@ -96,6 +96,21 @@ export const CONTINENT_EMOJI: Record<Continent, string> = {
   'Oceania': '🏝️',
 }
 
+/**
+ * Passport ink palette. Each continent gets a recognisable stamp colour while
+ * the country code and name remain visible, so colour is never the only cue.
+ * Kept here with the continent metadata so passport cards, maps, and exports
+ * can share one stable visual language.
+ */
+export const CONTINENT_COLORS: Record<Continent, { ink: string; tint: string }> = {
+  'North America': { ink: '#2F6F73', tint: 'rgba(47, 111, 115, 0.10)' },
+  'South America': { ink: '#2F7D5A', tint: 'rgba(47, 125, 90, 0.10)' },
+  'Europe': { ink: '#3E63A3', tint: 'rgba(62, 99, 163, 0.10)' },
+  'Africa': { ink: '#A24C2F', tint: 'rgba(162, 76, 47, 0.10)' },
+  'Asia': { ink: '#A33A5B', tint: 'rgba(163, 58, 91, 0.10)' },
+  'Oceania': { ink: '#6D4C91', tint: 'rgba(109, 76, 145, 0.10)' },
+}
+
 /** Resolve a 2-letter country code to its continent (case-insensitive). */
 export function getContinent(countryCode: string | null | undefined): Continent | undefined {
   if (!countryCode) return undefined

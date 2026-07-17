@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
   return htmlPage(
     'Unsubscribe from emails?',
-    `<p>You will no longer receive email notifications from Roamkeep (likes, comments, new followers).</p>
+    `<p>You will no longer receive email notifications from Adventure Log (likes, comments, new followers).</p>
      <form method="POST" action="/api/email/unsubscribe?uid=${params.uid}&amp;sig=${params.sig}">
        <button type="submit">Unsubscribe</button>
      </form>`
@@ -85,6 +85,6 @@ export async function POST(request: NextRequest) {
   log.info('User unsubscribed from email notifications', { component: 'EmailUnsubscribe', action: 'unsubscribe', userId: params.uid })
   return htmlPage(
     'You are unsubscribed',
-    '<p>You will no longer receive email notifications from Roamkeep. You can re-enable them anytime from Settings → Notifications.</p>'
+    '<p>You will no longer receive email notifications from Adventure Log. You can re-enable them anytime from Settings → Notifications.</p>'
   )
 }

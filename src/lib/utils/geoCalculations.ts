@@ -1,5 +1,5 @@
 /**
- * Geospatial calculations and utilities for Roamkeep
+ * Geospatial calculations and utilities for Adventure Log
  * Handles coordinate transformations, distance calculations, and geographic data processing
  */
 

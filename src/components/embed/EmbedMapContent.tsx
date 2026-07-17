@@ -230,7 +230,7 @@ export function EmbedMapContent({
                 className="cursor-pointer shrink-0 flex items-center gap-1.5 text-[11px] text-white/30 hover:text-olive-400 transition-colors duration-200 font-medium focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:outline-none rounded-sm"
               >
                 <Globe className="h-3 w-3" />
-                Roamkeep
+                Adventure Log
                 <ExternalLink className="h-2.5 w-2.5" />
               </Link>
             </div>

@@ -27,7 +27,7 @@ import { log } from '@/lib/utils/logger'
 import { useUnreadCount } from '@/components/activity/UnreadCountProvider'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
-import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
+import { AdventureLogMark } from '@/components/brand/AdventureLogMark'
 
 interface NavItem {
   name: string
@@ -200,7 +200,7 @@ export function Sidebar() {
             transition={{ duration: 0.45, ease: EDITORIAL_EASE }}
           >
             <Link href="/feed" className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <RoamkeepMark showTagline />
+              <AdventureLogMark showTagline />
             </Link>
           </motion.div>
 

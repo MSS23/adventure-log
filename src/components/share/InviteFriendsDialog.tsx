@@ -24,7 +24,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
       `${getWebOrigin()}`
     : ''
 
-  const inviteMessage = `Join me on Roamkeep! 🌍✈️\n\nI'm using Roamkeep to track my travels and share adventures. Come check it out:\n\n${inviteUrl}\n\nLet's explore the world together!`
+  const inviteMessage = `Join me on Adventure Log! 🌍✈️\n\nI'm using Adventure Log to track my travels and share adventures. Come check it out:\n\n${inviteUrl}\n\nLet's explore the world together!`
 
   const trackInvite = () =>
     trackGrowthEvent('share_link_created', { meta: { surface: 'invite_dialog' } })
@@ -37,7 +37,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
   }
 
   const handleShareEmail = () => {
-    const subject = 'Join me on Roamkeep!'
+    const subject = 'Join me on Adventure Log!'
     const body = inviteMessage
     trackInvite()
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
@@ -53,7 +53,7 @@ export function InviteFriendsDialog({ isOpen, onClose }: InviteFriendsDialogProp
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join me on Roamkeep!',
+          title: 'Join me on Adventure Log!',
           text: inviteMessage,
           url: inviteUrl
         })

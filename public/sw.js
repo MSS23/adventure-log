@@ -1,5 +1,5 @@
 /**
- * Service Worker for Roamkeep PWA
+ * Service Worker for Adventure Log PWA
  * Provides offline functionality, caching, and background sync
  */
 

@@ -22,7 +22,7 @@ import {
 import { cn } from '@/lib/utils'
 import { getFlagEmoji } from '@/lib/utils/country'
 import { useReducedMotion } from '@/lib/hooks/useReducedMotion'
-import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
+import { AdventureLogMark } from '@/components/brand/AdventureLogMark'
 
 const GlobeGL = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -82,7 +82,7 @@ const FEATURES = [
   {
     icon: Upload,
     title: 'Smart Photo Import',
-    desc: 'Choose photos and Roamkeep groups dates and places into trips for your approval.',
+    desc: 'Choose photos and Adventure Log groups dates and places into trips for your approval.',
   },
   {
     icon: Stamp,
@@ -189,7 +189,7 @@ export default function HomePage() {
         )}>
           <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
             <Link href="/" className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-400">
-              <RoamkeepMark inverted />
+              <AdventureLogMark inverted />
             </Link>
             <nav className="flex items-center gap-1 sm:gap-2">
               <Link href="/discover" className="hidden sm:inline-flex">
@@ -276,7 +276,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
               <Link href="/signup">
                 <Button size="lg" className="cursor-pointer bg-olive-600 hover:bg-olive-500 !text-white font-semibold px-8 h-13 text-base rounded-2xl shadow-xl shadow-olive-900/40 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-olive-800/50 active:scale-[0.97] w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-olive-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0E14]">
-                  Start your Roamkeep
+                  Start your Adventure Log
                   <ArrowRight className="h-5 w-5 ml-1.5" />
                 </Button>
               </Link>
@@ -341,7 +341,7 @@ export default function HomePage() {
 
           <div className="max-w-6xl mx-auto relative">
             <div className="text-center mb-16">
-              <p className="text-olive-400 text-sm font-medium uppercase tracking-[0.15em] mb-4">Why Roamkeep</p>
+              <p className="text-olive-400 text-sm font-medium uppercase tracking-[0.15em] mb-4">Why Adventure Log</p>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold !text-white tracking-tight mb-5">
                 Not just another travel app
               </h2>
@@ -491,7 +491,7 @@ export default function HomePage() {
         {/* ── Footer ── */}
         <footer className="py-12 px-6 lg:px-10 border-t border-white/[0.04]">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <RoamkeepMark inverted showTagline markClassName="h-7 w-7 rounded-lg" />
+            <AdventureLogMark inverted showTagline markClassName="h-7 w-7 rounded-lg" />
             <nav className="flex gap-6 text-sm text-stone-500">
               <Link href="/discover" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Discover</Link>
               <Link href="/privacy" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Privacy</Link>
@@ -501,7 +501,7 @@ export default function HomePage() {
               <Link href="/contact" className="hover:text-white transition-colors duration-200 focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-olive-500 rounded-sm">Contact</Link>
             </nav>
             <div className="text-xs text-stone-600">
-              &copy; {new Date().getFullYear()} Roamkeep
+              &copy; {new Date().getFullYear()} Adventure Log
             </div>
           </div>
         </footer>

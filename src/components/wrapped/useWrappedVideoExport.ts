@@ -33,7 +33,7 @@ interface ActiveSession {
   startedAt: number
 }
 
-const FALLBACK_ORIGIN = 'https://roamkeep.net'
+const FALLBACK_ORIGIN = 'https://adventure-log-azure.vercel.app'
 
 export function useWrappedVideoExport({ year }: { year: number | 'all' }) {
   const [supported, setSupported] = useState(false)
@@ -95,7 +95,7 @@ export function useWrappedVideoExport({ year }: { year: number | 'all' }) {
       }
       const label = year === 'all' ? 'All-Time' : String(year)
       const compositor = mod.createWatermarkCompositor(canvas, {
-        title: 'Roamkeep',
+        title: 'Adventure Log',
         subtitle: `${host} · ${label} Wrapped`,
       })
       if (!compositor) return false

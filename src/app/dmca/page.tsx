@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { LegalBackLink } from '@/components/legal/LegalBackLink'
 
 export const metadata = {
-  title: 'Copyright & DMCA Policy — Roamkeep',
-  description: 'How to report copyright infringement on Roamkeep and how counter-notices work.',
+  title: 'Copyright & DMCA Policy — Adventure Log',
+  description: 'How to report copyright infringement on Adventure Log and how counter-notices work.',
 }
 
 export default function DmcaPage() {
@@ -15,15 +15,15 @@ export default function DmcaPage() {
         <p className="al-eyebrow mt-8 mb-1">Last updated · July 2026</p>
         <h1 className="al-display text-3xl md:text-4xl mb-4">Copyright &amp; DMCA Policy</h1>
         <p className="text-sm md:text-[15px] leading-relaxed text-muted-foreground mb-10">
-          Roamkeep hosts content uploaded by its users. We respect the intellectual property rights of others and respond to clear notices of alleged copyright infringement. This policy explains how to report content you believe infringes your copyright, and how the person who posted it can respond.
+          Adventure Log hosts content uploaded by its users. We respect the intellectual property rights of others and respond to clear notices of alleged copyright infringement. This policy explains how to report content you believe infringes your copyright, and how the person who posted it can respond.
         </p>
 
         <Section title="1. Reporting infringement">
-          <p>If you own (or are authorised to act for the owner of) a copyrighted work that appears on Roamkeep without permission, send us a written notice containing the following:</p>
+          <p>If you own (or are authorised to act for the owner of) a copyrighted work that appears on Adventure Log without permission, send us a written notice containing the following:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Your name, postal address, email address, and a statement of your authority to act.</li>
             <li>A description of the copyrighted work you say has been infringed.</li>
-            <li>The specific URL(s) or location on Roamkeep where the material appears, so we can find it.</li>
+            <li>The specific URL(s) or location on Adventure Log where the material appears, so we can find it.</li>
             <li>A statement that you have a good-faith belief the use is not authorised by the copyright owner, its agent, or the law.</li>
             <li>A statement, made under penalty of perjury, that the information in your notice is accurate and that you are the owner or authorised to act on the owner&apos;s behalf.</li>
             <li>Your physical or electronic signature.</li>

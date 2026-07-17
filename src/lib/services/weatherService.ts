@@ -1,5 +1,5 @@
 /**
- * Weather Service for Roamkeep
+ * Weather Service for Adventure Log
  * Provides historical, current, and forecast weather data
  *
  * All requests are proxied through /api/weather to keep the

@@ -192,7 +192,7 @@ export function PublicPassportContent({
   }
 
   const handleShare = async () => {
-    const text = `Check out ${displayName}'s travel profile on Roamkeep!`
+    const text = `Check out ${displayName}'s travel profile on Adventure Log!`
     try {
       if (navigator.share) {
         await navigator.share({ title: `${displayName}'s Travel Profile`, text, url: shareUrl })
@@ -678,7 +678,7 @@ export function PublicPassportContent({
           <p className="text-sm text-muted-foreground mb-4">
             Powered by{' '}
             <Link href="/" className="text-primary hover:text-primary/80 font-semibold transition-colors">
-              Roamkeep
+              Adventure Log
             </Link>
           </p>
           <Link href="/signup">

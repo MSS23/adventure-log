@@ -92,7 +92,7 @@ export async function GET(_request: NextRequest) {
   const healthData: HealthCheck = {
     status,
     timestamp: new Date().toISOString(),
-    platform: 'roamkeep',
+    platform: 'adventure-log',
     checks: {
       database: databaseHealthy,
       ...(process.env.UPSTASH_REDIS_REST_URL && { redis: redisHealthy }),

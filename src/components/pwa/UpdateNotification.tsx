@@ -30,13 +30,13 @@ export function UpdateNotification() {
     <AnimatePresence>
       {showNotification && updateAvailable && (
         <motion.div
-          className="fixed bottom-20 md:bottom-4 right-4 z-50"
+          className="fixed left-3 right-3 bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] z-50 sm:left-auto sm:right-4 sm:w-[min(24rem,calc(100vw-2rem))] md:bottom-4"
           initial={{ opacity: 0, x: 50, scale: 0.9 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           exit={{ opacity: 0, x: 50, scale: 0.9 }}
           transition={transitions.natural}
         >
-          <div className="al-card p-4 max-w-sm">
+          <div className="al-card w-full p-4">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-[color:var(--color-forest-tint)] rounded-lg flex-shrink-0">
                 <Sparkles className="h-5 w-5 text-[color:var(--color-forest)]" />
@@ -47,7 +47,7 @@ export function UpdateNotification() {
                   Update available
                 </h3>
                 <p className="text-xs text-[color:var(--color-muted-warm)] mt-1">
-                  A new version of Roamkeep is ready
+                  A new version of Adventure Log is ready
                 </p>
 
                 <div className="flex gap-2 mt-3">

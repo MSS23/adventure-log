@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Analytics - Roamkeep',
+  title: 'Analytics - Adventure Log',
   description: 'View your travel analytics, statistics, and insights about your adventures.',
 }
 

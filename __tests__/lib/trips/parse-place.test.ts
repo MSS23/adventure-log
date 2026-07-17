@@ -33,7 +33,7 @@ describe('trip place parsing', () => {
     })
     global.fetch = fetchMock as typeof fetch
 
-    const result = await parsePlaceInput('よみうりランド', 'https://roamkeep.net', {
+    const result = await parsePlaceInput('よみうりランド', 'https://adventure-log-azure.vercel.app', {
       cookie: 'sb-session=web-session',
       authorization: 'Bearer mobile-access-token',
       refreshToken: 'mobile-refresh-token',

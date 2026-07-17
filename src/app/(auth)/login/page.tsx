@@ -68,7 +68,7 @@ function LoginForm() {
     <div className="w-full max-w-md">
       <div className="rounded-[24px] border border-border bg-card p-6 shadow-sm sm:p-8">
         <header className="space-y-1">
-          <p className="al-eyebrow">Roamkeep</p>
+          <p className="al-eyebrow">Adventure Log</p>
           <h1 className="al-display text-3xl">Welcome back</h1>
           <p className="text-sm text-muted-foreground">
             Return to your memories, your people, and your world.

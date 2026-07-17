@@ -75,7 +75,7 @@ export default function AppLayout({
             ref={scrollRef}
             className="flex-1 min-h-0 overflow-y-auto overscroll-contain lg:ml-[240px] xl:ml-[260px] main-content-area transition-[margin] duration-300 ease-in-out"
           >
-            <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:pb-8 max-w-7xl">
+            <div className="app-shell-gutter mx-auto pt-4 sm:pt-6 lg:pt-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:pb-8 max-w-7xl">
               <PageTransition>
                 {children}
               </PageTransition>

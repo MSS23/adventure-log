@@ -413,6 +413,26 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* One predictable gutter for every authenticated page. `max()` keeps the
+     normal 4/8pt layout rhythm while also clearing landscape notches and
+     rounded Android display cut-outs. */
+  .app-shell-gutter {
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+  @media (min-width: 640px) {
+    .app-shell-gutter {
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
+    }
+  }
+  @media (min-width: 1024px) {
+    .app-shell-gutter {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
   /* App-shell scroll region (the locked middle). */
   .main-content-area {
     /* Clip anything that would push past the viewport edge so page content
@@ -598,11 +618,19 @@
     button,
     a,
     [role="button"],
-    input[type="checkbox"],
-    input[type="radio"],
     select {
       min-height: 44px;
       min-width: 44px;
+    }
+
+    /* Checkboxes and radios usually sit inside a clickable label. Enlarging
+       the glyph itself to 44px made forms and checklists balloon on Android;
+       keep the control compact while the surrounding label supplies the tap
+       target. */
+    input[type="checkbox"],
+    input[type="radio"] {
+      min-height: 1rem;
+      min-width: 1rem;
     }
   }
 

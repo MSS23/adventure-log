@@ -14,6 +14,8 @@ import {
   type RecommendationFilterState,
 } from '@/components/recommendations/RecommendationFilters'
 import { CreateRecommendationModal } from '@/components/recommendations/CreateRecommendationModal'
+import { countryCodeToFlag } from '@/lib/countries'
+import { getCountryName } from '@/lib/utils/country'
 
 function RecommendationSkeleton() {
   return (
@@ -52,7 +54,7 @@ export default function RecommendationsPage() {
   const { data: friendRecommendations } = useRecommendations({ scope: 'friends', limit: 100 })
 
   // A list is formed automatically from author + country. Friends only add a
-  // recommendation once; Roamkeep handles the collection and progress layer.
+  // recommendation once; Adventure Log handles the collection and progress layer.
   const friendLists = useMemo(() => {
     const groups = new Map<string, {
       ownerId: string
@@ -119,7 +121,7 @@ export default function RecommendationsPage() {
             <div>
               <p className="al-eyebrow text-[color:var(--color-forest)]">From people you trust</p>
               <h2 id="friend-lists-heading" className="font-heading text-lg font-semibold text-[color:var(--color-ink)] dark:text-stone-100">
-                Friends&apos; place lists
+                Friends&apos; country bucket lists
               </h2>
               <p className="mt-1 text-xs text-[color:var(--color-muted-warm)]">
                 Built automatically when friends recommend places. Check them off as you go.
@@ -134,6 +136,7 @@ export default function RecommendationsPage() {
                 <button
                   key={`${list.ownerId}:${list.countryCode}`}
                   type="button"
+                  aria-pressed={selected}
                   onClick={() => {
                     setListOwner(selected ? undefined : list.ownerId)
                     setFilters(current => ({
@@ -143,15 +146,24 @@ export default function RecommendationsPage() {
                     }))
                   }}
                   className={cn(
-                    'min-w-[180px] rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]/40',
+                    'min-w-[190px] rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-forest)]/40',
                     selected
                       ? 'border-[color:var(--color-forest)] bg-[color:var(--color-forest)] text-white'
                       : 'border-[color:var(--color-forest)]/15 bg-white/80 hover:border-[color:var(--color-forest)]/40 dark:bg-white/[0.04]'
                   )}
                 >
-                  <span className="block text-sm font-semibold">{list.ownerName}&apos;s {list.countryCode} list</span>
+                  <span className="flex items-center gap-1.5 text-sm font-semibold">
+                    <span aria-hidden>{countryCodeToFlag(list.countryCode)}</span>
+                    <span>{list.ownerName}&apos;s {getCountryName(list.countryCode)} list</span>
+                  </span>
                   <span className={cn('mt-1 block text-xs', selected ? 'text-white/75' : 'text-[color:var(--color-muted-warm)]')}>
                     {list.completed}/{list.count} tried
+                  </span>
+                  <span className={cn('mt-2 block h-1.5 overflow-hidden rounded-full', selected ? 'bg-white/20' : 'bg-[color:var(--color-line-warm)]')} aria-hidden>
+                    <span
+                      className={cn('block h-full rounded-full', selected ? 'bg-white' : 'bg-[color:var(--color-forest)]')}
+                      style={{ width: `${list.count ? Math.round((list.completed / list.count) * 100) : 0}%` }}
+                    />
                   </span>
                 </button>
               )

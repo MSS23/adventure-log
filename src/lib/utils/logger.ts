@@ -1,5 +1,5 @@
 /**
- * Centralized logging system for Roamkeep
+ * Centralized logging system for Adventure Log
  * Provides structured logging with different levels and context
  */
 

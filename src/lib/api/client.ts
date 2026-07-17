@@ -16,7 +16,7 @@
  *
  * Required env:
  *   - `NEXT_PUBLIC_API_BASE_URL` — fully-qualified origin of the deployed web
- *     app, e.g. `https://roamkeep.net`. Required on mobile builds.
+ *     app, e.g. `https://adventure-log-azure.vercel.app`. Required on mobile builds.
  *     Falls back to same-origin (relative path) if unset, which is correct for
  *     the web build and fails-loud on mobile (the request 404s against the
  *     local file:// origin) so the misconfiguration surfaces immediately.
@@ -46,7 +46,7 @@ export function isNativePlatform(): boolean {
  *
  * On Capacitor: returns the configured `NEXT_PUBLIC_API_BASE_URL` with any
  * trailing slash stripped, so `apiUrl('/api/foo')` produces
- * `https://roamkeep.net/api/foo`.
+ * `https://adventure-log-azure.vercel.app/api/foo`.
  *
  * If `NEXT_PUBLIC_API_BASE_URL` is missing on a native build, returns `''` —
  * the request will fail fast against `capacitor://localhost/api/foo`, making
@@ -63,7 +63,7 @@ export function getApiBaseUrl(): string {
 
 /**
  * Resolve `/api/foo` → either `/api/foo` (web) or
- * `https://roamkeep.net/api/foo` (mobile).
+ * `https://adventure-log-azure.vercel.app/api/foo` (mobile).
  *
  * Accepts either an absolute path starting with `/` or a path without the
  * leading slash. Anything that already looks like a fully-qualified URL is

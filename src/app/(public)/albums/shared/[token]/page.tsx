@@ -152,7 +152,7 @@ export default function SharedAlbumPage() {
           <div className="flex justify-center gap-3">
             <Link href="/signup">
               <Button className="cursor-pointer">
-                Join Roamkeep
+                Join Adventure Log
               </Button>
             </Link>
             <Link href="/discover">
@@ -418,7 +418,7 @@ export default function SharedAlbumPage() {
             transition={{ duration: 0.5 }}
           >
             <div className="px-6 py-10 md:px-10 md:py-12 text-center">
-              <span className="al-eyebrow mb-3 block">Roamkeep</span>
+              <span className="al-eyebrow mb-3 block">Adventure Log</span>
               <h2 className="al-display text-2xl md:text-3xl mb-3">
                 Make your travels unforgettable
               </h2>
@@ -428,7 +428,7 @@ export default function SharedAlbumPage() {
               </p>
               <Link href="/signup">
                 <Button variant="coral" className="cursor-pointer font-semibold px-8">
-                  Start your free Roamkeep
+                  Start your free Adventure Log
                 </Button>
               </Link>
             </div>

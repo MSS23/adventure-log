@@ -53,7 +53,7 @@ export function FirstRunGuide() {
     {
       icon: <Camera className="h-5 w-5" strokeWidth={1.8} />,
       title: 'Capture in a minute',
-      body: 'Choose photos. Roamkeep groups them by date and place for you to approve.',
+      body: 'Choose photos. Adventure Log groups them by date and place for you to approve.',
     },
     {
       icon: <GlobeIcon className="h-5 w-5" strokeWidth={1.8} />,
@@ -80,7 +80,7 @@ export function FirstRunGuide() {
         <MotionReveal>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="al-eyebrow mb-0.5">How Roamkeep works</p>
+              <p className="al-eyebrow mb-0.5">How Adventure Log works</p>
               <h3 id="how-it-works-heading" className="al-display text-xl md:text-2xl">
                 From camera roll to living memory
               </h3>

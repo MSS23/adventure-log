@@ -100,9 +100,9 @@ export default function TravelTwinsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="max-w-5xl mx-auto pb-24 pt-2 md:pb-8">
       <PageHeader
-        className="mb-8"
+        className="mb-6"
         title="Travel Twins"
         subtitle="Travelers whose destinations overlap with yours. Discover the places they’ve been that you haven’t."
       />
@@ -128,8 +128,9 @@ export default function TravelTwinsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 space-y-2">
+          <div className="min-w-0 lg:col-span-1">
             <p className="al-eyebrow mb-2">Your twins</p>
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide sm:mx-0 sm:px-0 lg:block lg:space-y-2 lg:overflow-visible lg:pb-0">
             {twins.map((twin) => {
               const isSelected = twin.user_id === selectedTwinId
               const overlapPct = twin.my_country_count
@@ -141,7 +142,7 @@ export default function TravelTwinsPage() {
                   key={twin.user_id}
                   onClick={() => setSelectedTwinId(twin.user_id)}
                   className={cn(
-                    'w-full text-left p-3 rounded-xl border transition-colors duration-200 cursor-pointer active:scale-[0.99]',
+                    'min-w-[210px] p-3 text-left rounded-xl border transition-colors duration-200 cursor-pointer active:scale-[0.99] lg:w-full lg:min-w-0',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                     isSelected
                       ? 'border-accent/40 bg-accent/10'
@@ -172,6 +173,7 @@ export default function TravelTwinsPage() {
                 </button>
               )
             })}
+            </div>
           </div>
 
           <div className="lg:col-span-2">
@@ -180,8 +182,8 @@ export default function TravelTwinsPage() {
                 const twin = twins.find((t) => t.user_id === selectedTwinId)
                 if (!twin) return null
                 return (
-                  <Card className="p-5 mb-4 gap-0">
-                    <div className="flex items-center gap-3">
+                  <Card className="p-4 sm:p-5 mb-4 gap-0">
+                    <div className="flex items-start gap-3">
                       <Avatar className="h-14 w-14">
                         <AvatarImage src={getAvatarUrl(twin.avatar_url, twin.username)} />
                         <AvatarFallback className="bg-accent text-accent-foreground">
@@ -191,7 +193,7 @@ export default function TravelTwinsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <Link
-                            href={`/profile/${twin.username}`}
+                            href={`/profile/${twin.user_id}`}
                             className="font-heading font-semibold text-lg text-foreground hover:text-accent transition-colors"
                           >
                             {getDisplayName(twin.display_name, twin.username)}
@@ -206,7 +208,19 @@ export default function TravelTwinsPage() {
                           You share a lot of ground — here&apos;s where your journeys overlap.
                         </p>
                       </div>
-                      <FollowButton userId={twin.user_id} />
+                    </div>
+                    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+                      <span className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary tabular-nums">
+                        {twin.my_country_count
+                          ? Math.round((twin.overlap_count / twin.my_country_count) * 100)
+                          : 0}% match
+                      </span>
+                      <span className="rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground tabular-nums">
+                        {twin.overlap_count} shared {twin.overlap_count === 1 ? 'country' : 'countries'}
+                      </span>
+                      <div className="ml-auto">
+                        <FollowButton userId={twin.user_id} />
+                      </div>
                     </div>
                   </Card>
                 )

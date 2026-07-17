@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Settings - Roamkeep',
+  title: 'Settings - Adventure Log',
   description: 'Manage your account settings and preferences.',
 }
 

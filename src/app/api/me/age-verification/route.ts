@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
     })
     return NextResponse.json(
-      { error: `You must be at least ${MIN_AGE} years old to use Roamkeep`, underage: true },
+      { error: `You must be at least ${MIN_AGE} years old to use Adventure Log`, underage: true },
       { status: 403 }
     )
   }

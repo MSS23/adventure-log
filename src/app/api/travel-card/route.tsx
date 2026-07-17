@@ -259,7 +259,7 @@ export async function GET(request: NextRequest) {
                 &#127757;
               </div>
               <span style={{ color: 'rgba(205,224,168,0.92)', fontSize: '14px', fontWeight: 600 }}>
-                Roamkeep
+                Adventure Log
               </span>
             </div>
             <span style={{ color: 'rgba(205,224,168,0.62)', fontSize: '13px' }}>

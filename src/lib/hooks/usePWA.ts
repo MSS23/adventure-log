@@ -1,5 +1,5 @@
 /**
- * React hooks for PWA functionality in Roamkeep
+ * React hooks for PWA functionality in Adventure Log
  * Provides easy-to-use hooks for PWA features
  */
 

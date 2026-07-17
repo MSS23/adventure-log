@@ -60,9 +60,9 @@ export default function ExplorePage() {
   const showDefaultContent = !searchQuery.trim()
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 pb-24 md:pb-8 pt-6 md:pt-8">
+    <div className="mx-auto w-full max-w-5xl pb-24 pt-2 md:pb-8 md:pt-0">
       {/* Editorial header */}
-      <header className="relative mb-5 overflow-hidden rounded-3xl border border-border bg-card px-5 pb-12 pt-7 shadow-[var(--shadow-resting)] sm:px-8 sm:pb-14 sm:pt-9">
+      <header className="relative mb-5 overflow-hidden rounded-3xl border border-border bg-card px-4 pb-11 pt-6 shadow-[var(--shadow-resting)] sm:px-8 sm:pb-14 sm:pt-9">
         <div aria-hidden className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
         <div className="relative">
           <p className="al-eyebrow">Discover</p>
@@ -76,24 +76,24 @@ export default function ExplorePage() {
             </p>
           {/* Places + Map moved out of the bottom tab bar (5-tab limit) —
               these are their mobile entry points now. */}
-          <span className="grid shrink-0 grid-cols-3 gap-1.5">
+          <span className="grid w-full shrink-0 grid-cols-3 gap-1.5 sm:w-auto">
             <Link
               href="/map"
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-background/65 px-3 text-xs font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-border bg-background/65 px-2 text-[11px] font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-1.5 sm:px-3 sm:text-xs"
             >
               <MapPinned className="h-4 w-4" />
               Your Map
             </Link>
             <Link
               href="/places"
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-background/65 px-3 text-xs font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-border bg-background/65 px-2 text-[11px] font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-1.5 sm:px-3 sm:text-xs"
             >
               Places
               <ChevronRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href="/travel-twins"
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-background/65 px-3 text-xs font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-border bg-background/65 px-2 text-[11px] font-semibold leading-tight text-foreground shadow-sm transition-colors hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:gap-1.5 sm:px-3 sm:text-xs"
             >
               <UsersRound className="h-4 w-4" />
               Travel twins
@@ -104,8 +104,8 @@ export default function ExplorePage() {
       </header>
 
       {/* Search pill */}
-      <div className="relative z-10 mx-3 -mt-11 mb-8 flex min-h-14 items-center gap-3 rounded-2xl border border-border bg-background/95 px-4 py-3 shadow-[var(--shadow-overlay)] backdrop-blur-xl transition-all duration-200 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background sm:mx-6">
-        <Search className="h-4 w-4 text-muted-foreground pointer-events-none flex-shrink-0" />
+      <div className="relative z-10 mx-2 -mt-10 mb-8 flex min-h-14 items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-[var(--shadow-overlay)] transition-all duration-200 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-offset-2 focus-within:ring-offset-background sm:mx-6 sm:-mt-11">
+        <Search className="h-4 w-4 text-primary pointer-events-none flex-shrink-0" />
         <input
           type="text"
           value={searchQuery}
@@ -126,7 +126,7 @@ export default function ExplorePage() {
             <X className="h-4 w-4" />
           </button>
         ) : (
-          <span className="al-badge">⌘K</span>
+          <kbd className="al-badge hidden sm:inline-flex">⌘K</kbd>
         )}
       </div>
 

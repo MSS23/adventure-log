@@ -10,7 +10,7 @@ import { NotificationCenter } from '@/components/notifications/NotificationCente
 import { NetworkStatusIndicator } from '@/components/pwa/NetworkStatusIndicator'
 import { cn } from '@/lib/utils'
 import { getAppScrollTop, onAppScroll } from '@/lib/utils/app-scroll'
-import { RoamkeepMark } from '@/components/brand/RoamkeepMark'
+import { AdventureLogMark } from '@/components/brand/AdventureLogMark'
 
 const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const
 
@@ -42,9 +42,9 @@ export function TopNavigation() {
         )}
       >
         <div className="flex items-center justify-between h-14 px-4 mx-auto">
-          {/* Roamkeep mark stays compact so the memory itself remains the hero. */}
+          {/* Adventure Log mark stays compact so the memory itself remains the hero. */}
           <Link href="/feed" className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            <RoamkeepMark markClassName="h-7 w-7 rounded-lg" />
+            <AdventureLogMark markClassName="h-7 w-7 rounded-lg" />
           </Link>
 
           {/* Right: Actions */}

@@ -29,13 +29,13 @@ export async function generateMetadata({
       .single()
 
     if (error || !album) {
-      return { title: 'Album Not Found | Roamkeep' }
+      return { title: 'Album Not Found | Adventure Log' }
     }
 
     const title = album.title || 'Travel Album'
     const coverUrl = getServerPhotoUrl(album.cover_photo_url || album.cover_image_url)
     const description = album.description
-      || (album.location_name ? `Travel album from ${album.location_name}` : 'A travel album on Roamkeep')
+      || (album.location_name ? `Travel album from ${album.location_name}` : 'A travel album on Adventure Log')
 
     return {
       title,
@@ -56,7 +56,7 @@ export async function generateMetadata({
       },
     }
   } catch {
-    return { title: 'Travel Album | Roamkeep' }
+    return { title: 'Travel Album | Adventure Log' }
   }
 }
 

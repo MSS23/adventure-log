@@ -1,11 +1,11 @@
 {
-  "name": "Roamkeep - Social Travel Memories",
-  "short_name": "Roamkeep",
-  "description": "Keep the places that made you. Capture trips, relive them on a living globe, and discover meaningful places through people you trust.",
+  "name": "Adventure Log - Social Travel Memories",
+  "short_name": "Adventure Log",
+  "description": "Capture your travels, relive them on a living globe, and discover meaningful places through people you trust.",
   "start_url": "/?source=pwa",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "background_color": "#0C1014",
+  "background_color": "#F8F7F3",
   "theme_color": "#1F6B57",
   "orientation": "any",
   "scope": "/",
@@ -72,14 +72,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Roamkeep home - desktop view"
+      "label": "Adventure Log home - desktop view"
     },
     {
       "src": "/screenshots/mobile-home.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Roamkeep home - mobile view"
+      "label": "Adventure Log home - mobile view"
     }
   ],
   "shortcuts": [

@@ -19,9 +19,10 @@ export default async function globalSetup() {
       console.log(`[e2e] fixture seeded: ${state.mainUsername} + ${state.friendUsername}`)
     } else {
       // eslint-disable-next-line no-console
-      console.log('[e2e] no service-role key — fixture specs will be skipped')
+      console.log('[e2e] fixture mutations disabled or unavailable; authenticated specs will be skipped')
     }
   } catch (err) {
     console.warn('[e2e] fixture seeding failed — fixture specs will be skipped:', err)
+    throw err
   }
 }

@@ -70,6 +70,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unsupported image type' }, { status: 400 })
   }
 
+  const moderationEnabled =
+    !!process.env.MODERATION_API_KEY && (process.env.MODERATION_PROVIDER || 'none') !== 'none'
+  if (process.env.MODERATION_REQUIRED === 'true' && !moderationEnabled) {
+    log.error('Upload blocked because required moderation is unavailable', {
+      component: 'api/photos/upload-url',
+      action: 'moderation-required',
+    })
+    return NextResponse.json(
+      { error: 'Uploads are temporarily unavailable while safety checks recover.' },
+      { status: 503 },
+    )
+  }
+
   // Verify the album belongs to this user (RLS-respecting read).
   const { data: album, error: albumError } = await supabase
     .from('albums')
@@ -143,9 +156,6 @@ export async function POST(request: NextRequest) {
     }, signError as Error)
     return NextResponse.json({ error: 'Could not start upload' }, { status: 500 })
   }
-
-  const moderationEnabled =
-    !!process.env.MODERATION_API_KEY && (process.env.MODERATION_PROVIDER || 'none') !== 'none'
 
   const res = NextResponse.json({ path: signed.path ?? path, token: signed.token, moderationEnabled })
   res.headers.set('X-RateLimit-Remaining', String(rl.remaining))

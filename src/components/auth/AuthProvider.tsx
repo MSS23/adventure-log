@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Profile } from '@/types/database'
 import { log } from '@/lib/utils/logger'
 import { resetNavigationState } from '@/lib/hooks/useSmartNavigation'
+import { clearPrivateDeviceData } from '@/lib/utils/private-device-data'
 
 // Minimal user shape consumers depend on. `id` is the Supabase auth UUID.
 //
@@ -316,6 +317,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
+      await clearPrivateDeviceData()
       await supabase.auth.signOut()
       setProfile(null)
       setProfileLoading(false)

@@ -323,12 +323,12 @@ export function InstallBanner() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-lg">Install Adventure Log</h3>
                         <p className="text-sm text-white/80 mt-1">
-                          Add to your home screen for quick access and offline support.
+                          Add to your home screen for quick access and a reliable offline fallback.
                         </p>
 
                         {/* Benefits */}
                         <div className="hidden min-[360px]:flex flex-wrap gap-2 mt-3">
-                          {['Works Offline', 'Fast & Native', 'No App Store'].map((benefit, i) => (
+                          {['Offline Fallback', 'Fast Launch', 'No App Store'].map((benefit, i) => (
                             <motion.span
                               key={benefit}
                               className="text-xs bg-white/20 px-2 py-1 rounded-full"

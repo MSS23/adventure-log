@@ -131,7 +131,11 @@ export function useAlbumCreation() {
   // wishlist→album conversion (`?notes=…`). Until this prefill existed
   // the user's typed wishlist notes were silently dropped during
   // conversion; now they land in the album description by default.
-  const initialPrefilledDescription: string = searchParams.get('notes') ?? ''
+  const sharedUrl = searchParams.get('sharedUrl')
+  const initialPrefilledDescription: string = [searchParams.get('notes'), sharedUrl]
+    .filter(Boolean)
+    .join('\n\n')
+  const initialPrefilledTitle = searchParams.get('title') ?? ''
 
   const [albumLocation, setAlbumLocation] = useState<LocationData | null>(
     initialPrefilledLocation,
@@ -148,7 +152,9 @@ export function useAlbumCreation() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null)
   const [fileErrors, setFileErrors] = useState<string[]>([])
-  const [mode, setMode] = useState<'quick' | 'full'>('quick')
+  const [mode, setMode] = useState<'quick' | 'full'>(
+    initialPrefilledTitle || initialPrefilledDescription ? 'full' : 'quick'
+  )
   const [suggestedTitle, setSuggestedTitle] = useState<string>('')
   const [locationAutoExtracted, setLocationAutoExtracted] = useState(false)
   // Journey connection ("spider's web", migration 75): optionally mark this
@@ -188,6 +194,7 @@ export function useAlbumCreation() {
   const fullForm = useForm<AlbumFormData>({
     resolver: zodResolver(albumSchema),
     defaultValues: {
+      title: initialPrefilledTitle || undefined,
       visibility: 'public',
       description: initialPrefilledDescription || undefined,
     }

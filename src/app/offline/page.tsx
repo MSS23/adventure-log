@@ -80,15 +80,15 @@ export default function OfflinePage() {
   const features = [
     {
       icon: Camera,
-      title: 'Browse Cached Photos',
-      description: 'View your previously loaded travel photos',
+      title: 'Private data stays private',
+      description: 'Travel photos and account responses are not retained in a shared browser cache',
       available: true
     },
     {
       icon: MapPin,
-      title: 'Offline Location Data',
-      description: 'Access cached location information',
-      available: true
+      title: 'Edits require a connection',
+      description: 'Reconnect before creating albums, uploading photos, or changing a trip',
+      available: false
     },
     {
       icon: Globe,

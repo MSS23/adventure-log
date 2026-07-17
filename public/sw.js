@@ -9,7 +9,7 @@
 // checked in here is only the local-dev fallback — no need to bump it by
 // hand. The activate handler deletes every cache whose name doesn't match
 // the current set, so any change to this string purges old content.
-const CACHE_VERSION = 'v-dev'
+const CACHE_VERSION = 'v-mrp4tbpt'
 const CACHE_NAME = `adventure-log-${CACHE_VERSION}`
 const STATIC_CACHE = `adventure-log-static-${CACHE_VERSION}`
 const DYNAMIC_CACHE = `adventure-log-dynamic-${CACHE_VERSION}`
@@ -27,23 +27,16 @@ const swLog = (...args) => {
 const STATIC_FILES = [
   '/',
   '/offline',
-  '/api/manifest',
   '/icon.svg',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
   '/manifest.json'
 ]
 
-// Routes to cache dynamically
-const DYNAMIC_ROUTES = [
-  '/dashboard',
-  '/albums',
-  '/globe',
-  '/feed',
-  '/search',
-  '/profile',
-  '/passport'
-]
+// Only these navigation responses are safe to retain between accounts.
+const PUBLIC_NAVIGATION_PATHS = new Set([
+  '/', '/login', '/signup', '/offline', '/privacy', '/terms', '/cookies', '/dmca', '/contact'
+])
 
 // Image file extensions to cache
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
@@ -52,8 +45,7 @@ const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
 const CACHE_DURATION = {
   STATIC: 30 * 24 * 60 * 60 * 1000, // 30 days (static assets rarely change)
   DYNAMIC: 6 * 60 * 60 * 1000,      // 6 hours (pages can be refreshed)
-  IMAGES: 90 * 24 * 60 * 60 * 1000, // 90 days (images don't change)
-  API: 2 * 60 * 1000                // 2 minutes (fresher data)
+  IMAGES: 90 * 24 * 60 * 60 * 1000 // 90 days (images don't change)
 }
 
 // Install event - cache static files
@@ -183,35 +175,17 @@ async function handleImageRequest(request) {
   }
 }
 
-// Handle API requests with short-term caching
+// API responses can contain account-private data. Cache Storage keys are
+// primarily URL-based, so every API request stays network-only.
 async function handleAPIRequest(request) {
   try {
-    // Try network first for API requests
-    const networkResponse = await fetch(request)
-
-    if (networkResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE)
-      await putWithDate(cache, request, networkResponse.clone())
-    }
-
-    return networkResponse
+    return await fetch(request)
   } catch (error) {
-    swLog('Service Worker: API request failed, checking cache')
-
-    const cache = await caches.open(DYNAMIC_CACHE)
-    const cachedResponse = await cache.match(request)
-
-    if (cachedResponse) {
-      // Check cache validity
-      const cacheDate = new Date(cachedResponse.headers.get('sw-cache-date') || 0)
-      const now = new Date()
-
-      if (now - cacheDate < CACHE_DURATION.API) {
-        return cachedResponse
-      }
-    }
-
-    throw error
+    swLog('Service Worker: network-only API request failed', error)
+    return new Response(JSON.stringify({ error: 'You are offline' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+    })
   }
 }
 
@@ -239,6 +213,8 @@ async function handleStaticRequest(request) {
 
 // Handle navigation requests (HTML pages)
 async function handleNavigationRequest(request) {
+  const requestUrl = new URL(request.url)
+  const isPublicNavigation = PUBLIC_NAVIGATION_PATHS.has(requestUrl.pathname)
   try {
     // Try network first
     const networkResponse = await fetch(request)
@@ -256,7 +232,7 @@ async function handleNavigationRequest(request) {
       )
     }
 
-    if (networkResponse.ok) {
+    if (networkResponse.ok && isPublicNavigation) {
       const cache = await caches.open(DYNAMIC_CACHE)
       cache.put(request, networkResponse.clone())
     }
@@ -265,17 +241,10 @@ async function handleNavigationRequest(request) {
   } catch (error) {
     swLog('Service Worker: Navigation request failed, checking cache')
 
-    // Try cache
-    const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      return cachedResponse
-    }
-
-    // Try to match dynamic routes
-    for (const route of DYNAMIC_ROUTES) {
-      const routeResponse = await caches.match(route)
-      if (routeResponse) {
-        return routeResponse
+    if (isPublicNavigation) {
+      const cachedResponse = await caches.match(request)
+      if (cachedResponse) {
+        return cachedResponse
       }
     }
 
@@ -296,7 +265,13 @@ async function handleNavigationRequest(request) {
 // Helper functions
 function isImageRequest(request) {
   const url = new URL(request.url)
-  return IMAGE_EXTENSIONS.some(ext => url.pathname.toLowerCase().includes(ext))
+  const publicImagePath = url.pathname.startsWith('/icons/') ||
+    url.pathname.startsWith('/screenshots/') ||
+    url.pathname.startsWith('/images/') ||
+    url.pathname === '/icon.svg' ||
+    url.pathname === '/apple-touch-icon.png' ||
+    url.pathname === '/twitter-image.png'
+  return publicImagePath && IMAGE_EXTENSIONS.some(ext => url.pathname.toLowerCase().endsWith(ext))
 }
 
 function isAPIRequest(request) {
@@ -306,7 +281,7 @@ function isAPIRequest(request) {
 
 function isStaticAsset(request) {
   const url = new URL(request.url)
-  return url.pathname.startsWith('/_next/') ||
+  return url.pathname.startsWith('/_next/static/') ||
          url.pathname.startsWith('/static/') ||
          url.pathname.includes('.js') ||
          url.pathname.includes('.css') ||
@@ -314,16 +289,15 @@ function isStaticAsset(request) {
          url.pathname.includes('.ttf')
 }
 
-// Background sync for offline actions
-self.addEventListener('sync', (event) => {
-  swLog('Service Worker: Background sync triggered', event.tag)
-
-  if (event.tag === 'background-sync-albums') {
-    event.waitUntil(syncOfflineAlbums())
-  } else if (event.tag === 'background-sync-photos') {
-    event.waitUntil(syncOfflinePhotos())
-  }
+self.addEventListener('message', (event) => {
+  if (event.data?.type !== 'CLEAR_PRIVATE_DATA') return
+  event.waitUntil(caches.delete(DYNAMIC_CACHE))
 })
+
+// Account writes are deliberately not replayed from the service worker. They
+// require a live, current Supabase session and the app has no generic album or
+// photo-upload endpoints. UI actions fail visibly while offline instead of
+// pretending they were queued to endpoints that do not exist.
 
 // Sync offline album creations
 async function syncOfflineAlbums() {

@@ -32,7 +32,8 @@ jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn().mockResolvedValue({
     from: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockResolvedValue({ error: null })
+    limit: jest.fn().mockResolvedValue({ error: null }),
+    rpc: jest.fn().mockResolvedValue({ data: 81, error: null })
   })
 }))
 
@@ -53,6 +54,7 @@ describe('/api/health', () => {
     expect(data.version).toBeDefined()
     expect(data.platform).toBe('adventure-log')
     expect(data.checks.database).toBe(true)
+    expect(data.checks.schemaCurrent).toBe(true)
     expect(data.checks.memory).toBeDefined()
     expect(data.uptime).toBeGreaterThanOrEqual(0)
   })
@@ -69,7 +71,8 @@ describe('/api/health', () => {
     mockCreateClient.mockResolvedValueOnce({
       from: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockResolvedValue({ error: new Error('Database error') })
+      limit: jest.fn().mockResolvedValue({ error: new Error('Database error') }),
+      rpc: jest.fn().mockResolvedValue({ data: 81, error: null })
     })
 
     const request = new NextRequest('http://localhost:3000/api/health')

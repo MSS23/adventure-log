@@ -1,4 +1,11 @@
 @import "tailwindcss";
+
+/* A previous cookie decision is detected by the pre-paint head script. The
+   banner remains in the server DOM until hydration, preserving an identical
+   React tree without flashing the prompt for returning visitors. */
+html.consent-decided #cookie-consent-banner {
+  display: none;
+}
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));

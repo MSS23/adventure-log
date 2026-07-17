@@ -138,10 +138,11 @@ export async function moderateImage(file: File): Promise<ModerationResult> {
 export async function moderateImageServer(imageUrl: string): Promise<ModerationResult> {
   const apiKey = process.env.MODERATION_API_KEY
   const provider = process.env.MODERATION_PROVIDER || 'none'
+  const failClosed = process.env.MODERATION_REQUIRED === 'true'
 
   if (!apiKey || provider === 'none') {
     // No server moderation configured - pass through
-    return { safe: true, confidence: 0.5, flags: ['no_server_moderation'] }
+    return { safe: !failClosed, confidence: 0.5, flags: ['no_server_moderation'] }
   }
 
   try {
@@ -150,11 +151,10 @@ export async function moderateImageServer(imageUrl: string): Promise<ModerationR
     }
 
     log.warn('Unknown moderation provider', { component: 'Moderation', provider })
-    return { safe: true, confidence: 0.5, flags: ['unknown_provider'] }
+    return { safe: !failClosed, confidence: 0.5, flags: ['unknown_provider'] }
   } catch (err) {
     log.error('Server moderation failed', { component: 'Moderation', provider }, err as Error)
-    // Fail open - don't block uploads if moderation service is down
-    return { safe: true, confidence: 0.3, flags: ['moderation_error'] }
+    return { safe: !failClosed, confidence: 0.3, flags: ['moderation_error'] }
   }
 }
 

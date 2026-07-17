@@ -20,14 +20,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run npm audit
         run: npm audit --audit-level=high
-        continue-on-error: true
 
       - name: Run npm audit (production only)
         run: npm audit --audit-level=critical --omit=dev
@@ -61,12 +60,6 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:javascript-typescript"
-        # CodeQL findings get uploaded to the Security tab regardless;
-        # don't block PR merges on them while the team triages the
-        # initial baseline. Flip this to false once the alert backlog
-        # is at zero / accepted.
-        continue-on-error: true
-
   secrets-scan:
     name: Secrets Scan
     runs-on: ubuntu-latest

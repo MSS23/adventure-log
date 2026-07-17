@@ -1,45 +1,41 @@
-# Adventure Log Database Migrations
+# Adventure Log database migrations
 
-This directory contains **consolidated, production-ready** database migrations for Adventure Log.
+Migrations are forward-only SQL files and must be applied in numeric order.
+Never edit a migration that has already reached staging or production; add a
+new migration instead.
 
-## Migration Files
+The current application schema contract is stored in `EXPECTED_VERSION`.
+`81_release_schema_version.sql` introduces the forward schema-version RPC used
+by `/api/health` and the release verifier. It also checks that critical tables
+from the existing migration history are present before marking a database
+current.
 
-### `02_ai_features.sql` - AI Usage Tracking & Trip Planner Caching
-- `ai_usage` table - Tracks monthly AI feature usage per user (3 free/month limit)
-- `trip_planner_cache` table - Caches generated trip itineraries to reduce API costs
-- Functions for usage tracking and cache management
-- RLS policies for user data privacy
+Run these checks before release:
 
-### `03_social_features.sql` - Social Features & Engagement
-- `mentions` table - Track @username mentions in comments
-- `hashtags` table - Store unique hashtags with trending rankings
-- `album_hashtags` table - Many-to-many album-hashtag relationships
-- `search_history` table - Track user searches for autocomplete
-- `activity_feed` table - Social activity stream (likes, comments, follows)
-- `two_factor_auth` table - 2FA TOTP secrets and backup codes
-- Functions for hashtag management and cleanup
-- Auto-create activity feed entries via triggers
-
-## How to Apply
-
-Go to Supabase Dashboard → SQL Editor → Copy contents of migration files in order → Run
-
-## Verification
-
-```sql
--- Check AI features tables exist
-SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'public'
-  AND table_name IN ('ai_usage', 'trip_planner_cache');
-
--- Check social features tables exist
-SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'public'
-  AND table_name IN ('mentions', 'hashtags', 'album_hashtags', 'search_history', 'activity_feed', 'two_factor_auth');
+```bash
+npm run check:migrations
+npm run check:migrations:remote
 ```
 
-## Backup
+The remote command reads `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` from `.env.local` and calls
+`get_app_schema_version()`.
 
-All 48 old migration files moved to `supabase/migrations_backup/` for reference.
+## Legacy numbering
 
-Last updated: 2025-02-01
+The historic migration set contains two version-60 files. They may already
+have been applied manually, so renaming them would create more ambiguity. The
+checker reports this known condition as a warning. All new migrations must use
+a unique integer greater than the value in `EXPECTED_VERSION` and update the
+schema-version row/function as their final step.
+
+## Release order
+
+1. Create and verify a database backup.
+2. Apply the candidate migration to staging.
+3. Run authenticated E2E journeys against staging.
+4. Apply the same migration to production.
+5. Verify the remote schema version before deploying application code that
+   requires it.
+
+See `docs/RELEASE_RUNBOOK.md` for rollback and environment requirements.

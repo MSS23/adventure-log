@@ -35,7 +35,7 @@ test.describe('API Health', () => {
     const res = await request.get('/api/health')
     expect(res.ok()).toBeTruthy()
     const data = await res.json()
-    expect(data.status).toBe('ok')
+    expect(['healthy', 'degraded']).toContain(data.status)
   })
 
   test('Manifest endpoint responds', async ({ request }) => {
@@ -53,8 +53,8 @@ test.describe('Landing Page', () => {
     // also contains "Every Trip"/"One Globe", so a loose text= locator matches
     // multiple elements and trips Playwright strict mode.
     const hero = page.getByRole('heading', { level: 1 })
-    await expect(hero).toContainText('Every Trip', { timeout: 10000 })
-    await expect(hero).toContainText('One Globe')
+    await expect(hero).toContainText('Keep the places', { timeout: 10000 })
+    await expect(hero).toContainText('that made you')
     // CTA buttons
     await expect(page.locator('text=Get Started').first()).toBeVisible()
     await expect(page.locator('text=Sign In').first()).toBeVisible()
@@ -66,8 +66,8 @@ test.describe('Landing Page', () => {
     // Target the feature-card <h3> titles by role+name. The same phrases also
     // appear in hero/body copy and eyebrows, so a substring text= locator would
     // resolve to multiple elements.
-    await expect(page.getByRole('heading', { name: 'Interactive 3D Globe' })).toBeVisible({ timeout: 5000 })
-    await expect(page.getByRole('heading', { name: 'Flyover Videos' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Living Memory Globe' })).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('heading', { name: 'Cinematic Trip Replays' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Travel Passport' })).toBeVisible()
   })
 
@@ -407,7 +407,7 @@ test.describe('Dark Mode', () => {
     await page.goto('/')
     await page.waitForTimeout(2000)
     // Landing page should still render
-    await expect(page.locator('text=Every Trip')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Keep the places', { timeout: 10000 })
   })
 })
 
@@ -419,7 +419,7 @@ test.describe('Mobile Layout', () => {
   test('landing page renders on mobile', async ({ page }) => {
     await page.goto('/')
     // Scope to the <h1> — loose text= matches descriptive copy too (strict mode).
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Every Trip', { timeout: 10000 })
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Keep the places', { timeout: 10000 })
     await expect(page.locator('text=Get Started').first()).toBeVisible()
   })
 

@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -40,7 +40,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -59,7 +59,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -81,7 +81,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -93,7 +93,7 @@ jobs:
       - name: Run public-route smoke tests
         # No seeded DB / auth needed — only static public pages and the
         # manifest endpoint. Playwright's webServer boots `npm run dev`.
-        run: npx playwright test --project=chromium --grep "Landing Page|Manifest endpoint|page renders"
+        run: npx playwright test --project=chromium --grep "API Health|Landing Page|Manifest endpoint|page renders"
         env:
           CI: 'true'
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
@@ -118,7 +118,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -129,3 +129,88 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key-for-ci-build
+
+  e2e-authenticated:
+    name: E2E Authenticated (staging)
+    if: ${{ vars.STAGING_E2E_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright (chromium)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run authenticated journeys against staging data
+        run: npx playwright test user-journeys --project=chromium
+        env:
+          CI: 'true'
+          E2E_ALLOW_MUTATIONS: 'true'
+          E2E_SUPABASE_PROJECT_REF: ${{ vars.E2E_SUPABASE_PROJECT_REF }}
+          PRODUCTION_SUPABASE_PROJECT_REF: ${{ vars.PRODUCTION_SUPABASE_PROJECT_REF }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Upload authenticated Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-authenticated-report
+          path: playwright-report/
+          retention-days: 7
+
+  mobile-build:
+    name: Mobile Static Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate migration files
+        run: npm run check:migrations
+
+      - name: Build Capacitor web bundle
+        run: npm run mobile:build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key-for-ci-build
+          NEXT_PUBLIC_API_BASE_URL: https://staging.example.com
+
+  release-gate:
+    name: Release Gate
+    if: ${{ always() }}
+    needs: [lint, type-check, test, e2e-smoke, build, e2e-authenticated, mobile-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every configured release check
+        run: |
+          test "${{ needs.lint.result }}" = "success"
+          test "${{ needs.type-check.result }}" = "success"
+          test "${{ needs.test.result }}" = "success"
+          test "${{ needs.e2e-smoke.result }}" = "success"
+          test "${{ needs.build.result }}" = "success"
+          test "${{ needs.mobile-build.result }}" = "success"
+          case "${{ needs.e2e-authenticated.result }}" in
+            success|skipped) ;;
+            *) exit 1 ;;
+          esac

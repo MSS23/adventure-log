@@ -21,6 +21,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import fs from 'node:fs'
 import path from 'node:path'
+import { assertSafeE2eMutationTarget } from './safety'
 
 export const FIXTURE_STATE_PATH = path.join(__dirname, '.fixture-state.json')
 
@@ -57,6 +58,8 @@ function adminClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) return null
+  if (process.env.E2E_ALLOW_MUTATIONS !== 'true') return null
+  assertSafeE2eMutationTarget()
   return createClient(url, key, { auth: { persistSession: false } })
 }
 

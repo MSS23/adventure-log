@@ -5,9 +5,9 @@
 // session immediately (email confirmation disabled) we push to `/dashboard`;
 // otherwise we show a "check your email" confirmation message.
 
-import { Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { safeInternalPath } from '@/lib/utils/safe-redirect'
 import { Loader2, MailCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -21,7 +21,7 @@ import { markFirstPinStart } from '@/lib/utils/growth-events'
 
 function SignupForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const [redirectTo, setRedirectTo] = useState<string | null>(null)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -39,6 +39,12 @@ function SignupForm() {
   // under-18 block; the value is also stored server-side for an audit record.
   const age = dob ? calculateAge(dob) : null
   const isUnderAge = age !== null && age < MIN_AGE
+
+  // Keep the complete form in the server HTML; only the optional safe
+  // post-auth destination depends on the browser URL.
+  useEffect(() => {
+    setRedirectTo(new URLSearchParams(window.location.search).get('redirectTo'))
+  }, [])
 
   // Tick the resend cooldown down once per second while it's active.
   useEffect(() => {
@@ -128,7 +134,7 @@ function SignupForm() {
       // If a session was returned, email confirmation is disabled and the user
       // is signed in immediately — send them straight into the app.
       if (data.session) {
-        const target = safeInternalPath(searchParams.get('redirectTo'), '/feed')
+        const target = safeInternalPath(redirectTo, '/feed')
         router.push(target)
         return
       }
@@ -212,7 +218,7 @@ function SignupForm() {
         </header>
 
         <div className="mt-6">
-          <GoogleSignInButton next={searchParams.get('redirectTo')} />
+          <GoogleSignInButton next={redirectTo} />
         </div>
 
         <div className="relative my-5">
@@ -344,15 +350,7 @@ export default function SignupPage() {
       <div className="mx-auto grid min-h-[calc(100dvh-3rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <AuthStoryPanel />
         <div className="flex items-center justify-center py-4">
-          <Suspense
-            fallback={
-              <div className="flex min-h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            }
-          >
-            <SignupForm />
-          </Suspense>
+          <SignupForm />
         </div>
       </div>
     </div>

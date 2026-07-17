@@ -182,6 +182,16 @@ export default function RootLayout({
                   root.classList.add('light');
                   root.setAttribute('data-theme', 'light');
                   localStorage.setItem('adventure-log-theme', 'light');
+                  // The first-visit consent prompt is server-rendered to avoid
+                  // a late LCP-changing overlay. Hide it before first paint
+                  // when this device already has a valid decision.
+                  var rawConsent = localStorage.getItem('adventure-log-consent');
+                  if (rawConsent) {
+                    var parsedConsent = JSON.parse(rawConsent);
+                    if (typeof parsedConsent.analytics === 'boolean') {
+                      root.classList.add('consent-decided');
+                    }
+                  }
                 } catch(e) {}
               })();
             `,

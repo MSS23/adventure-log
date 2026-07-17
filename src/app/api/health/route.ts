@@ -8,6 +8,8 @@ interface HealthCheck {
   platform: string
   checks: {
     database: boolean
+    schemaCurrent: boolean
+    schemaVersion?: number
     redis?: boolean
     memory?: {
       total: number
@@ -19,6 +21,8 @@ interface HealthCheck {
   uptime?: number
 }
 
+const EXPECTED_SCHEMA_VERSION = 81
+
 async function checkDatabase(): Promise<boolean> {
   try {
     const supabase = await createClient()
@@ -29,6 +33,16 @@ async function checkDatabase(): Promise<boolean> {
     return !error
   } catch {
     return false
+  }
+}
+
+async function checkSchemaVersion(): Promise<number | null> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase.rpc('get_app_schema_version')
+    return error || typeof data !== 'number' ? null : data
+  } catch {
+    return null
   }
 }
 
@@ -66,15 +80,17 @@ function getMemoryUsage() {
 export async function GET(_request: NextRequest) {
   const startTime = Date.now()
 
-  const [databaseHealthy, redisHealthy] = await Promise.all([
+  const [databaseHealthy, redisHealthy, schemaVersion] = await Promise.all([
     checkDatabase(),
-    checkRedis()
+    checkRedis(),
+    checkSchemaVersion(),
   ])
 
   const memory = getMemoryUsage()
   const uptime = process.uptime()
 
-  const allHealthy = databaseHealthy && (redisHealthy ?? true)
+  const schemaCurrent = schemaVersion === EXPECTED_SCHEMA_VERSION
+  const allHealthy = databaseHealthy && schemaCurrent && (redisHealthy ?? true)
   const status: 'healthy' | 'degraded' | 'unhealthy' =
     allHealthy ? 'healthy' :
     (databaseHealthy || redisHealthy) ? 'degraded' :
@@ -95,6 +111,8 @@ export async function GET(_request: NextRequest) {
     platform: 'adventure-log',
     checks: {
       database: databaseHealthy,
+      schemaCurrent,
+      ...(includeInternals && schemaVersion !== null && { schemaVersion }),
       ...(process.env.UPSTASH_REDIS_REST_URL && { redis: redisHealthy }),
       ...(includeInternals && { memory }),
     },

@@ -5,9 +5,9 @@
 // we navigate to the `redirectTo` query param (if it's a safe internal path)
 // or `/dashboard`. Errors from the returned AuthError are surfaced inline.
 
-import { Suspense, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { safeInternalPath } from '@/lib/utils/safe-redirect'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -28,15 +28,21 @@ const CALLBACK_ERROR_MESSAGES: Record<string, string> = {
 
 function LoginForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const [redirectTo, setRedirectTo] = useState<string | null>(null)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(() => {
-    const code = searchParams.get('error')
-    return code ? (CALLBACK_ERROR_MESSAGES[code] ?? null) : null
-  })
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  // Keep the complete form in the server HTML. Only the optional callback
+  // message and post-auth destination depend on the browser URL.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setRedirectTo(params.get('redirectTo'))
+    const code = params.get('error')
+    if (code) setError(CALLBACK_ERROR_MESSAGES[code] ?? null)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,7 +61,7 @@ function LoginForm() {
         return
       }
 
-      const target = safeInternalPath(searchParams.get('redirectTo'), '/feed')
+      const target = safeInternalPath(redirectTo, '/feed')
       router.push(target)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
@@ -149,7 +155,7 @@ function LoginForm() {
           </div>
         </div>
 
-        <GoogleSignInButton next={searchParams.get('redirectTo')} />
+        <GoogleSignInButton next={redirectTo} />
 
         <p className="mt-4 text-center text-[11px] leading-relaxed text-muted-foreground">
           By continuing you agree to our{' '}
@@ -177,15 +183,7 @@ export default function LoginPage() {
       <div className="mx-auto grid min-h-[calc(100dvh-3rem)] w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.08fr_0.92fr]">
         <AuthStoryPanel />
         <div className="flex items-center justify-center">
-          <Suspense
-            fallback={
-              <div className="flex min-h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            }
-          >
-            <LoginForm />
-          </Suspense>
+          <LoginForm />
         </div>
       </div>
     </div>

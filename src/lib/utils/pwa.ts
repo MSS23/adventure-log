@@ -529,19 +529,6 @@ export class PWAManager {
         platform: Platform.getPlatform()
       })
 
-      // Register background sync if service worker is available (web only)
-      if (Platform.isWeb() && this.registration && typeof window !== 'undefined' && 'sync' in window.ServiceWorkerRegistration.prototype) {
-        try {
-          await (this.registration as unknown as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register(`background-sync-${type}`)
-        } catch (error) {
-          log.warn('Background sync registration failed', {
-            component: 'PWAManager',
-            action: 'register-background-sync',
-            type
-          }, error)
-        }
-      }
-
       return true
     } catch (error) {
       log.error('Failed to save offline data', {

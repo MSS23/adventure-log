@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
  * stay off until the user accepts here.
  */
 export function ConsentBanner() {
-  const { needsDecision, accept, reject } = useConsent()
+  const { consent, needsDecision, accept, reject } = useConsent()
   const [reopened, setReopened] = useState(false)
 
   useEffect(() => {
@@ -25,23 +25,26 @@ export function ConsentBanner() {
     return () => window.removeEventListener(CONSENT_CHANGED_EVENT, onChange)
   }, [])
 
-  const visible = needsDecision || reopened
+  // Render the first-visit banner in the server HTML so it is present at the
+  // first paint. Returning null until React hydrates caused the late fixed
+  // overlay to invalidate LCP on every public entry page. Visitors who have
+  // already decided get the same DOM during hydration, but the tiny head
+  // script in app/layout.tsx hides it before paint via `consent-decided`.
+  const visible = consent === null || needsDecision || reopened
   if (!visible) return null
 
   return (
     <div
+      id="cookie-consent-banner"
       role="dialog"
       aria-label="Cookie consent"
       aria-live="polite"
       className="fixed inset-x-0 bottom-0 z-[90] p-3 sm:p-4"
     >
-      <div className="mx-auto flex max-w-3xl flex-col gap-3 rounded-2xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:gap-4">
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          We use essential cookies to keep you signed in. With your consent we also use
-          privacy-friendly, cookieless analytics and error monitoring to improve the app.
-          See our{' '}
-          <Link href="/cookies" className="text-primary underline">Cookie Policy</Link>{' '}and{' '}
-          <Link href="/privacy" className="text-primary underline">Privacy Policy</Link>.
+      <div className="mx-auto flex max-w-3xl flex-col gap-2 rounded-2xl border border-border bg-card p-3 shadow-lg sm:flex-row sm:items-center sm:gap-4">
+        <p className="text-xs leading-snug text-muted-foreground sm:text-sm">
+          Essential storage keeps you signed in. Optional analytics only runs with your consent.{' '}
+          <Link href="/cookies" className="text-primary underline">Cookie settings</Link>.
         </p>
         <div className="flex shrink-0 gap-2">
           <Button

@@ -33,6 +33,18 @@ test.describe('Main user journeys', () => {
   test.skip(!fixture, 'e2e fixture not seeded (SUPABASE_SERVICE_ROLE_KEY missing)')
   test.use({ storageState: MAIN_STORAGE_STATE })
 
+  test('session survives reload and a fresh tab', async ({ page }) => {
+    await page.goto('/feed')
+    await expect(page.getByRole('heading', { name: 'Travel Memories' })).toBeVisible({ timeout: 20000 })
+    await page.reload()
+    await expect(page.getByRole('heading', { name: 'Travel Memories' })).toBeVisible({ timeout: 20000 })
+
+    const freshTab = await page.context().newPage()
+    await freshTab.goto('/feed')
+    await expect(freshTab.getByRole('heading', { name: 'Travel Memories' })).toBeVisible({ timeout: 20000 })
+    await freshTab.close()
+  })
+
   // ── Feed (home) ───────────────────────────────────────────────────────
 
   test('feed shows one suggestions surface and the Your map pill', async ({ page }) => {

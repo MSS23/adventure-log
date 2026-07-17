@@ -44,6 +44,7 @@ export function setConsent(analytics: boolean): ConsentState {
   if (typeof window !== 'undefined') {
     try {
       window.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(state))
+      document.documentElement.classList.add('consent-decided')
       window.dispatchEvent(new CustomEvent(CONSENT_CHANGED_EVENT, { detail: state }))
     } catch {
       // Storage blocked (private mode etc.) — treat as not-consented; nothing to do.
@@ -55,5 +56,6 @@ export function setConsent(analytics: boolean): ConsentState {
 /** Re-open the banner so the user can change their mind. */
 export function openConsentManager(): void {
   if (typeof window === 'undefined') return
+  document.documentElement.classList.remove('consent-decided')
   window.dispatchEvent(new CustomEvent(CONSENT_CHANGED_EVENT, { detail: { reopen: true } }))
 }

@@ -4,8 +4,8 @@
  * Reproducible Android build entry point.
  *
  * Builds the static mobile bundle, syncs Capacitor, regenerates native
- * Adventure Log artwork, and creates a debug APK. Pass --install to deploy it to a
- * connected Android device with adb install -r.
+ * Adventure Log artwork, and creates either a debug APK or a signed release
+ * AAB. Pass --release for the Play upload artifact; --install is debug-only.
  */
 
 import { createHash } from 'node:crypto'
@@ -17,7 +17,14 @@ import { spawnSync } from 'node:child_process'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ANDROID = join(ROOT, 'android')
-const APK = join(ANDROID, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk')
+const release = process.argv.includes('--release')
+const install = process.argv.includes('--install')
+if (release && install) {
+  throw new Error('--install cannot be combined with --release; upload the AAB to a Play testing track')
+}
+const ARTIFACT = release
+  ? join(ANDROID, 'app', 'build', 'outputs', 'bundle', 'release', 'app-release.aab')
+  : join(ANDROID, 'app', 'build', 'outputs', 'apk', 'debug', 'app-debug.apk')
 const isWindows = process.platform === 'win32'
 
 function run(command, args, options = {}) {
@@ -93,19 +100,19 @@ run(javaExe, [
   '-classpath',
   wrapperJar,
   'org.gradle.wrapper.GradleWrapperMain',
-  'assembleDebug',
+  release ? 'bundleRelease' : 'assembleDebug',
 ], {
   cwd: ANDROID,
   env: gradleEnv,
-  label: `Build Android debug APK with ${javaHome}`,
+  label: `Build Android ${release ? 'signed release AAB' : 'debug APK'} with ${javaHome}`,
 })
 
-if (!existsSync(APK)) throw new Error(`Gradle completed but the APK was not found at ${APK}`)
-const checksum = createHash('sha256').update(readFileSync(APK)).digest('hex')
-console.log(`\n[android-apk] APK: ${APK}`)
+if (!existsSync(ARTIFACT)) throw new Error(`Gradle completed but the artifact was not found at ${ARTIFACT}`)
+const checksum = createHash('sha256').update(readFileSync(ARTIFACT)).digest('hex')
+console.log(`\n[android-apk] ${release ? 'AAB' : 'APK'}: ${ARTIFACT}`)
 console.log(`[android-apk] SHA-256: ${checksum}`)
 
-if (process.argv.includes('--install')) {
+if (install) {
   const sdk = readAndroidSdk()
   const adb = join(sdk, 'platform-tools', isWindows ? 'adb.exe' : 'adb')
   if (!existsSync(adb)) throw new Error(`adb was not found at ${adb}`)
@@ -115,5 +122,5 @@ if (process.argv.includes('--install')) {
   if (!connected) {
     throw new Error('No authorised Android device was found. Enable USB debugging, connect the Pixel, and accept its RSA prompt.')
   }
-  run(adb, ['install', '-r', APK], { label: 'Install or upgrade Adventure Log on the connected device' })
+  run(adb, ['install', '-r', ARTIFACT], { label: 'Install or upgrade Adventure Log on the connected device' })
 }

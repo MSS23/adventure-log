@@ -101,15 +101,31 @@ const FEATURES = [
   },
 ]
 
+/** Keep auth resolution isolated so it does not repaint the marketing hero. */
+function SignedInRedirect() {
+  const router = useRouter()
+  const { user, authLoading } = useAuth()
+
+  useEffect(() => {
+    if (!authLoading && user) router.replace('/feed')
+  }, [authLoading, user, router])
+
+  if (authLoading || !user) return null
+
+  return (
+    <div className="fixed inset-0 z-[100] flex min-h-[100dvh] items-center justify-center bg-[#0A0E14]">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-olive-400/40 border-t-olive-400" />
+    </div>
+  )
+}
+
 export default function HomePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null)
-  const router = useRouter()
-  const { user, authLoading } = useAuth()
   const prefersReducedMotion = useReducedMotion()
-  const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [globeSize, setGlobeSize] = useState({ w: 1200, h: 800 })
+  const globeReadyRef = useRef(false)
   // The hero globe is decorative and its chunk (Three.js + react-globe.gl)
   // is the largest JS payload on this page. Defer mounting it until the main
   // thread is idle so text/CTAs paint first — and never mount it for a
@@ -121,15 +137,12 @@ export default function HomePage() {
   // app, which boots into `/` (index.html) on every launch. Send them to the
   // dashboard. Logged-out visitors and crawlers see the landing unchanged.
   useEffect(() => {
-    if (!authLoading && user) router.replace('/feed')
-  }, [authLoading, user, router])
-
-  useEffect(() => {
-    setMounted(true)
-    setGlobeSize({ w: window.innerWidth, h: window.innerHeight })
-
     const handleScroll = () => setScrolled(window.scrollY > 20)
-    const handleResize = () => setGlobeSize({ w: window.innerWidth, h: window.innerHeight })
+    const handleResize = () => {
+      if (globeReadyRef.current) {
+        setGlobeSize({ w: window.innerWidth, h: window.innerHeight })
+      }
+    }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleResize, { passive: true })
@@ -140,14 +153,26 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
-    if (!mounted) return
-    if (typeof window.requestIdleCallback === 'function') {
-      const id = window.requestIdleCallback(() => setGlobeReady(true), { timeout: 2000 })
-      return () => window.cancelIdleCallback(id)
+    // The globe/Three.js chunk is decorative and expensive. Loading it during
+    // the first two seconds delayed LCP and kept the main thread busy on every
+    // first visit. Start it after genuine engagement, with a late fallback for
+    // people who pause on the hero without interacting.
+    const reveal = () => {
+      if (globeReadyRef.current) return
+      globeReadyRef.current = true
+      setGlobeSize({ w: window.innerWidth, h: window.innerHeight })
+      setGlobeReady(true)
     }
-    const timer = setTimeout(() => setGlobeReady(true), 300)
-    return () => clearTimeout(timer)
-  }, [mounted])
+    const timer = window.setTimeout(reveal, 8000)
+    const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'scroll']
+    for (const event of events) {
+      window.addEventListener(event, reveal, { once: true, passive: event !== 'keydown' })
+    }
+    return () => {
+      window.clearTimeout(timer)
+      for (const event of events) window.removeEventListener(event, reveal)
+    }
+  }, [])
 
   // Configure camera/controls once the globe engine reports ready (the old
   // fixed 300ms timer raced the dynamic chunk load and could silently skip
@@ -165,19 +190,10 @@ export default function HomePage() {
 
   // While redirecting a signed-in user to the dashboard, show a minimal dark
   // screen instead of a flash of the marketing page.
-  if (!authLoading && user) {
-    return (
-      <div className="dark">
-        <div className="min-h-[100dvh] bg-[#0A0E14] flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full border-2 border-olive-400/40 border-t-olive-400 animate-spin" />
-        </div>
-      </div>
-    )
-  }
-
   // Force dark context so heading colors resolve correctly
   return (
     <div className="dark">
+      <SignedInRedirect />
       <div className="min-h-screen bg-[#0A0E14] text-stone-100 overflow-x-hidden selection:bg-olive-500/30 selection:text-white">
 
         {/* ── Header ── */}
@@ -223,7 +239,7 @@ export default function HomePage() {
             />
             {/* Top/bottom fade */}
             <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E14] via-transparent to-[#0A0E14] z-10 pointer-events-none opacity-60" />
-            {mounted && globeReady && !authLoading && !user && (
+            {globeReady && (
               <GlobeGL
                 ref={globeRef}
                 onGlobeReady={handleGlobeReady}

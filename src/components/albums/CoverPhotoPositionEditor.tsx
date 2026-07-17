@@ -1,11 +1,15 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Move, RotateCcw, Check, Maximize2, Grip } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  getCoverCropFrame,
+  getCoverPositionFromFrameCenter,
+} from '@/lib/utils/cover-position'
 
 interface CoverPhotoPositionEditorProps {
   isOpen: boolean
@@ -33,22 +37,36 @@ export function CoverPhotoPositionEditor({
   isSaving = false
 }: CoverPhotoPositionEditorProps) {
   const [position, setPosition] = useState(currentPosition.position || 'center')
-  const [xOffset, setXOffset] = useState(currentPosition.xOffset || 50)
-  const [yOffset, setYOffset] = useState(currentPosition.yOffset || 50)
+  const [xOffset, setXOffset] = useState(currentPosition.xOffset ?? 50)
+  const [yOffset, setYOffset] = useState(currentPosition.yOffset ?? 50)
   const [isDragging, setIsDragging] = useState(false)
   const [capturedPointerId, setCapturedPointerId] = useState<number | null>(null)
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageDimensions, setImageDimensions] = useState({ width: 4, height: 3 })
   const imageContainerRef = useRef<HTMLDivElement>(null)
+
+  const cropFrame = useMemo(
+    () => getCoverCropFrame(
+      imageDimensions.width,
+      imageDimensions.height,
+      xOffset,
+      yOffset,
+    ),
+    [imageDimensions, xOffset, yOffset],
+  )
+  const hasHorizontalCrop = cropFrame.widthPercent < 99.99
+  const hasVerticalCrop = cropFrame.heightPercent < 99.99
 
   // Reset state when dialog opens
   useEffect(() => {
     if (isOpen) {
       setPosition(currentPosition.position || 'center')
-      setXOffset(currentPosition.xOffset || 50)
-      setYOffset(currentPosition.yOffset || 50)
+      setXOffset(currentPosition.xOffset ?? 50)
+      setYOffset(currentPosition.yOffset ?? 50)
       setImageLoaded(false)
+      setImageDimensions({ width: 4, height: 3 })
     }
-  }, [isOpen, currentPosition])
+  }, [isOpen, imageUrl, currentPosition])
 
   // Apply preset positions
   const applyPreset = (preset: 'center' | 'top' | 'bottom' | 'left' | 'right') => {
@@ -60,18 +78,18 @@ export function CoverPhotoPositionEditor({
         break
       case 'top':
         setXOffset(50)
-        setYOffset(25)
+        setYOffset(0)
         break
       case 'bottom':
         setXOffset(50)
-        setYOffset(75)
+        setYOffset(100)
         break
       case 'left':
-        setXOffset(25)
+        setXOffset(0)
         setYOffset(50)
         break
       case 'right':
-        setXOffset(75)
+        setXOffset(100)
         setYOffset(50)
         break
     }
@@ -130,16 +148,17 @@ export function CoverPhotoPositionEditor({
 
     const rect = imageContainerRef.current.getBoundingClientRect()
 
-    // Calculate position as percentage, ensuring it stays within bounds
-    let x = ((e.clientX - rect.left) / rect.width) * 100
-    let y = ((e.clientY - rect.top) / rect.height) * 100
+    const centerXPercent = ((e.clientX - rect.left) / rect.width) * 100
+    const centerYPercent = ((e.clientY - rect.top) / rect.height) * 100
+    const nextPosition = getCoverPositionFromFrameCenter(
+      imageDimensions.width,
+      imageDimensions.height,
+      centerXPercent,
+      centerYPercent,
+    )
 
-    // Clamp values between 0 and 100
-    x = Math.max(0, Math.min(100, x))
-    y = Math.max(0, Math.min(100, y))
-
-    setXOffset(x)
-    setYOffset(y)
+    setXOffset(nextPosition.xOffset)
+    setYOffset(nextPosition.yOffset)
   }
 
   const handleSave = () => {
@@ -158,7 +177,7 @@ export function CoverPhotoPositionEditor({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
       {/* sm: prefix preserves the base mobile gutter; dvh (not vh) so mobile
           browser chrome can't clip the bottom of the editor. */}
       <DialogContent className="sm:max-w-4xl max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6">
@@ -168,7 +187,7 @@ export function CoverPhotoPositionEditor({
             Adjust Cover Photo Position
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            Click and drag on the image to reposition the preview frame. The blue frame shows what will appear in your feed.
+            Drag the blue crop box across the full photo. The preview below exactly matches the 4:3 cover shown in your feed.
           </DialogDescription>
         </DialogHeader>
 
@@ -183,127 +202,78 @@ export function CoverPhotoPositionEditor({
               <div className="text-[10px] sm:text-xs text-olive-700 font-medium hidden sm:block">Click & drag to reposition</div>
             </div>
 
-            <div
-              ref={imageContainerRef}
-              className={cn(
-                "relative w-full bg-gradient-to-br from-stone-100 to-stone-200 dark:from-white/[0.06] dark:to-white/[0.08] rounded-lg sm:rounded-xl overflow-hidden select-none touch-none shadow-lg border-2 transition-all duration-200",
-                isDragging ? "cursor-grabbing border-olive-500 shadow-2xl scale-[0.99]" : "cursor-grab border-stone-300 dark:border-white/[0.14] hover:border-olive-400"
-              )}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              style={{ minHeight: '300px' }}
-            >
-              {/* Original Full Image */}
-              <div className="relative w-full" style={{ paddingBottom: '75%' }}>
-                <Image
+            <div className="flex min-h-[300px] items-center justify-center overflow-hidden rounded-lg border-2 border-stone-300 bg-stone-100 p-2 shadow-lg dark:border-white/[0.14] dark:bg-white/[0.06] sm:rounded-xl sm:p-3">
+              <div
+                ref={imageContainerRef}
+                className={cn(
+                  'relative inline-block max-w-full overflow-hidden rounded-md select-none touch-none transition-shadow duration-200',
+                  isDragging
+                    ? 'cursor-grabbing shadow-2xl ring-2 ring-sky-400'
+                    : 'cursor-grab shadow-md hover:ring-2 hover:ring-sky-300',
+                )}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+              >
+                {/* The editor needs the source image's real intrinsic dimensions
+                    to draw an exact crop box; the final feed preview below still
+                    uses Next Image for delivery parity. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={imageUrl}
-                  alt="Original photo"
-                  fill
+                  alt="Full cover photo"
                   className={cn(
-                    "object-cover transition-opacity duration-300",
-                    imageLoaded ? "opacity-100" : "opacity-0"
+                    'block max-h-[min(56dvh,580px)] h-auto w-auto max-w-full object-contain transition-opacity duration-200',
+                    imageLoaded ? 'opacity-100' : 'opacity-0',
                   )}
                   draggable={false}
-                  priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-                  onLoad={() => setImageLoaded(true)}
-                />
-                {!imageLoaded && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600"></div>
-                  </div>
-                )}
-              </div>
-
-              {/* Dimmed overlay outside preview area */}
-              <div className={cn(
-                "absolute inset-0 pointer-events-none transition-opacity duration-200",
-                isDragging ? "bg-black/50" : "bg-black/40"
-              )}>
-                {/* Clear area for the preview frame */}
-                <div
-                  className={cn(
-                    "absolute bg-white dark:bg-[#1B170E] transition-all duration-200",
-                    isDragging && "ring-4 ring-olive-400"
-                  )}
-                  style={{
-                    width: '50%',
-                    aspectRatio: '16/10',
-                    left: `${xOffset}%`,
-                    top: `${yOffset}%`,
-                    transform: 'translate(-50%, -50%)',
-                    borderRadius: '12px'
+                  fetchPriority="high"
+                  onLoad={(event) => {
+                    const image = event.currentTarget
+                    setImageDimensions({
+                      width: image.naturalWidth || 4,
+                      height: image.naturalHeight || 3,
+                    })
+                    setImageLoaded(true)
                   }}
                 />
-              </div>
 
-              {/* Preview Frame Overlay - Shows feed crop area */}
-              <div
-                className={cn(
-                  "absolute border-4 shadow-2xl pointer-events-none rounded-xl z-10 transition-all duration-200",
-                  isDragging ? "border-olive-400 shadow-olive-500/50" : "border-olive-500"
+                {!imageLoaded && (
+                  <div className="absolute inset-0 flex min-h-[300px] items-center justify-center">
+                    <div className="h-10 w-10 animate-spin rounded-full border-2 border-stone-300 border-t-sky-600" />
+                  </div>
                 )}
-                style={{
-                  width: '50%',
-                  aspectRatio: '16/10',
-                  left: `${xOffset}%`,
-                  top: `${yOffset}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                <div className="absolute inset-0 bg-olive-500/5 backdrop-blur-[1px]" />
 
-                {/* Corner indicators with pulse animation */}
-                <div className={cn(
-                  "absolute -top-2 -left-2 w-5 h-5 bg-olive-500 rounded-full shadow-lg transition-transform",
-                  isDragging && "scale-125"
-                )} />
-                <div className={cn(
-                  "absolute -top-2 -right-2 w-5 h-5 bg-olive-500 rounded-full shadow-lg transition-transform",
-                  isDragging && "scale-125"
-                )} />
-                <div className={cn(
-                  "absolute -bottom-2 -left-2 w-5 h-5 bg-olive-500 rounded-full shadow-lg transition-transform",
-                  isDragging && "scale-125"
-                )} />
-                <div className={cn(
-                  "absolute -bottom-2 -right-2 w-5 h-5 bg-olive-500 rounded-full shadow-lg transition-transform",
-                  isDragging && "scale-125"
-                )} />
-
-                {/* Center drag handle */}
-                <div className={cn(
-                  "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200",
-                  isDragging ? "scale-110" : "scale-100"
-                )}>
-                  <div className="relative w-10 h-10 bg-white dark:bg-[#1B170E] rounded-full border-2 border-olive-500 shadow-xl flex items-center justify-center">
-                    <Move className="h-5 w-5 text-olive-600" />
-                  </div>
-                </div>
-
-                {/* Label */}
-                <div className={cn(
-                  "absolute -top-11 left-1/2 -translate-x-1/2 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg whitespace-nowrap transition-all duration-200",
-                  isDragging ? "bg-olive-400" : "bg-olive-500"
-                )}>
-                  Feed Preview Area
-                </div>
-              </div>
-
-              {/* Instruction overlay - shows when not dragging */}
-              {!isDragging && imageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 z-20" style={{ pointerEvents: 'none' }}>
-                  <div className="text-white text-center px-6 bg-black/80 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
-                    <div className="relative mb-4">
-                      <Move className="h-12 w-12 mx-auto animate-pulse" />
+                {imageLoaded && (
+                  <div
+                    className={cn(
+                      'absolute z-10 overflow-hidden rounded-md border-[3px] pointer-events-none transition-[left,top,box-shadow] duration-150',
+                      isDragging
+                        ? 'border-sky-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.48)]'
+                        : 'border-sky-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.38)]',
+                    )}
+                    style={{
+                      left: `${cropFrame.leftPercent}%`,
+                      top: `${cropFrame.topPercent}%`,
+                      width: `${cropFrame.widthPercent}%`,
+                      height: `${cropFrame.heightPercent}%`,
+                    }}
+                  >
+                    <div className="absolute left-2 top-2 rounded-full bg-sky-600/95 px-2.5 py-1 text-[11px] font-semibold text-white shadow-md">
+                      Feed crop · 4:3
                     </div>
-                    <p className="text-lg font-bold mb-2">Click & Drag to Reposition</p>
-                    <p className="text-sm opacity-90">Move the blue frame to adjust what appears in your feed</p>
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                      <div className={cn(
+                        'flex h-10 w-10 items-center justify-center rounded-full border-2 border-sky-500 bg-white/95 shadow-xl transition-transform dark:bg-[#1B170E]/95',
+                        isDragging && 'scale-110',
+                      )}>
+                        <Move className="h-5 w-5 text-sky-600" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
@@ -312,11 +282,11 @@ export function CoverPhotoPositionEditor({
             <div className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 p-2 sm:p-3 rounded-lg border border-green-200 dark:border-green-900/40">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                <div className="text-xs sm:text-sm font-semibold text-green-900 dark:text-stone-100">Final Feed Preview</div>
+                <div className="text-xs sm:text-sm font-semibold text-green-900 dark:text-stone-100">Final Feed Preview · 4:3</div>
               </div>
               <div className="text-[10px] sm:text-xs text-green-700 font-medium">How it will appear</div>
             </div>
-            <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-stone-100 to-stone-200 dark:from-white/[0.06] dark:to-white/[0.08] rounded-lg sm:rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
+            <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-stone-100 to-stone-200 dark:from-white/[0.06] dark:to-white/[0.08] rounded-lg sm:rounded-xl overflow-hidden border-2 border-green-500 shadow-xl">
               {/* Container that simulates the crop from the blue frame */}
               <div className="absolute inset-0">
                 {/* Use object-position to simulate the crop without complex transforms */}
@@ -359,6 +329,7 @@ export function CoverPhotoPositionEditor({
                 variant={position === 'top' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('top')}
+                disabled={!hasVerticalCrop}
                 className="transition-all duration-200"
               >
                 Top
@@ -368,6 +339,7 @@ export function CoverPhotoPositionEditor({
                 variant={position === 'bottom' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('bottom')}
+                disabled={!hasVerticalCrop}
                 className="transition-all duration-200"
               >
                 Bottom
@@ -377,6 +349,7 @@ export function CoverPhotoPositionEditor({
                 variant={position === 'left' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('left')}
+                disabled={!hasHorizontalCrop}
                 className="transition-all duration-200"
               >
                 Left
@@ -386,6 +359,7 @@ export function CoverPhotoPositionEditor({
                 variant={position === 'right' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => applyPreset('right')}
+                disabled={!hasHorizontalCrop}
                 className="transition-all duration-200"
               >
                 Right
